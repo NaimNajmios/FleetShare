@@ -1,43 +1,43 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar" th:fragment="sidebar">
   <ul class="nav">
     <li class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active'">
-      <a class="nav-link" th:href="@{/}">
+      <a class="nav-link" th:href="@{/admin/dashboard}">
         <i class="icon-grid menu-icon"></i>
         <span class="menu-title">Dashboard</span>
       </a>
     </li>
     <li class="nav-item" th:classappend="${activePage == 'user-management'} ? 'active'">
-      <a class="nav-link" th:href="@{/users}">
+      <a class="nav-link" th:href="@{/admin/users}">
         <i class="icon-head menu-icon"></i>
         <span class="menu-title">User Management</span>
       </a>
     </li>
     <li class="nav-item" th:classappend="${activePage == 'vehicle-management'} ? 'active'">
-      <a class="nav-link" th:href="@{/vehicles}">
+      <a class="nav-link" th:href="@{/admin/vehicles}">
         <i class="mdi mdi-car menu-icon"></i>
         <span class="menu-title">Vehicle Management</span>
       </a>
     </li>
     <li class="nav-item" th:classappend="${activePage == 'maintenance-management'} ? 'active'">
-      <a class="nav-link" th:href="@{/maintenance}">
+      <a class="nav-link" th:href="@{/admin/maintenance}">
         <i class="mdi mdi-wrench menu-icon"></i>
         <span class="menu-title">Maintenance Mgmt</span>
       </a>
     </li>
     <li class="nav-item" th:classappend="${activePage == 'booking-management'} ? 'active'">
-      <a class="nav-link" th:href="@{/bookings}">
+      <a class="nav-link" th:href="@{/admin/bookings}">
         <i class="mdi mdi-calendar-check menu-icon"></i>
         <span class="menu-title">Booking Management</span>
       </a>
     </li>
     <li class="nav-item" th:classappend="${activePage == 'payment'} ? 'active'">
-      <a class="nav-link" th:href="@{/payment}">
+      <a class="nav-link" th:href="@{/admin/payment}">
         <i class="mdi mdi-currency-usd menu-icon"></i>
         <span class="menu-title">Payment</span>
       </a>
     </li>
     <li class="nav-item" th:classappend="${activePage == 'report'} ? 'active'">
-      <a class="nav-link" th:href="@{/reports}">
+      <a class="nav-link" th:href="@{/admin/reports}">
         <i class="icon-paper menu-icon"></i>
         <span class="menu-title">Report</span>
       </a>
