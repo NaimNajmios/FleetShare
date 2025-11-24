@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='reports', pageTitle='Reports'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <!-- Custom styles for this page if needed -->
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">Reports</h3>
+                        <h6 class="font-weight-normal mb-0">Analyze your fleet performance.</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Monthly Revenue</h4>
+                        <canvas id="revenueChart"></canvas>
+                        <!-- Placeholder for chart -->
+                        <div class="mt-4 text-center text-muted">
+                            [Chart Placeholder]
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Vehicle Utilization</h4>
+                        <canvas id="utilizationChart"></canvas>
+                        <!-- Placeholder for chart -->
+                        <div class="mt-4 text-center text-muted">
+                            [Chart Placeholder]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <!-- Extra JS for this page -->
+    </th:block>
+</body>
+
+</html>

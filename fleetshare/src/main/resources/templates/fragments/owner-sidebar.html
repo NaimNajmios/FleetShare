@@ -1,0 +1,46 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar" th:fragment="sidebar">
+    <ul class="nav">
+        <li class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/dashboard}">
+                <i class="icon-grid menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'customers'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/customers}">
+                <i class="icon-head menu-icon"></i>
+                <span class="menu-title">My Customers</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'vehicles'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/vehicles}">
+                <i class="mdi mdi-car menu-icon"></i>
+                <span class="menu-title">My Vehicles</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'maintenance'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/maintenance}">
+                <i class="mdi mdi-wrench menu-icon"></i>
+                <span class="menu-title">Maintenance</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'bookings'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/bookings}">
+                <i class="mdi mdi-calendar-check menu-icon"></i>
+                <span class="menu-title">My Bookings</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'payments'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/payments}">
+                <i class="mdi mdi-currency-usd menu-icon"></i>
+                <span class="menu-title">Payment</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'reports'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/reports}">
+                <i class="icon-paper menu-icon"></i>
+                <span class="menu-title">Report</span>
+            </a>
+        </li>
+    </ul>
+</nav>

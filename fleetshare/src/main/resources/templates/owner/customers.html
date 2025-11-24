@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='customers', pageTitle='My Customers'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <!-- Custom styles for this page if needed -->
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">My Customers</h3>
+                        <h6 class="font-weight-normal mb-0">Manage your customer interactions and history.</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Customer List</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Name</th>
+                                        <th>Total Rentals</th>
+                                        <th>Last Rental</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face1.jpg}" alt="image" />
+                                        </td>
+                                        <td>Herman Beck</td>
+                                        <td>12</td>
+                                        <td>May 15, 2023</td>
+                                        <td><label class="badge badge-success">Active</label></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face2.jpg}" alt="image" />
+                                        </td>
+                                        <td>Messsy Adam</td>
+                                        <td>5</td>
+                                        <td>July 01, 2023</td>
+                                        <td><label class="badge badge-warning">Pending</label></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <!-- Extra JS for this page -->
+    </th:block>
+</body>
+
+</html>

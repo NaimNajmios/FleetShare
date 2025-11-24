@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='vehicles', pageTitle='My Vehicles'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <!-- Custom styles for this page if needed -->
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">My Vehicles</h3>
+                        <h6 class="font-weight-normal mb-0">Manage your fleet inventory and status.</h6>
+                    </div>
+                    <div class="col-12 col-xl-4">
+                        <div class="justify-content-end d-flex">
+                            <button type="button" class="btn btn-primary">Add New Vehicle</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Vehicle Inventory</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Plate No.</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Daily Rate</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Toyota Camry</td>
+                                        <td>WXY 1234</td>
+                                        <td>Sedan</td>
+                                        <td><label class="badge badge-success">Available</label></td>
+                                        <td>RM 150</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Honda CR-V</td>
+                                        <td>VAB 5678</td>
+                                        <td>SUV</td>
+                                        <td><label class="badge badge-info">Rented</label></td>
+                                        <td>RM 250</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <!-- Extra JS for this page -->
+    </th:block>
+</body>
+
+</html>
