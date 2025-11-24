@@ -19,4 +19,29 @@ public class AdminController {
     public String dashboard(Model model) {
         return "dashboard";
     }
+
+    @GetMapping("/users")
+    public String users(Model model) {
+        return "user-management";
+    }
+
+    @GetMapping("/maintenance")
+    public String maintenance(Model model) {
+        return "maintenance-management";
+    }
+
+    @GetMapping("/bookings")
+    public String bookings(Model model) {
+        return "booking-management";
+    }
+
+    @GetMapping("/payment")
+    public String payment(Model model) {
+        return "payment";
+    }
+
+    @GetMapping("/reports")
+    public String reports(Model model) {
+        return "report";
+    }
 }
