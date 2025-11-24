@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/renter-layout}" th:with="activePage='bookings', pageTitle='My Bookings'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <!-- Extra styles -->
+    </th:block>
+</head>
+
+<body>
+    <main layout:fragment="content">
+        <div class="vehicle-grid-container">
+            <h2 class="section-title">My Bookings</h2>
+
+            <div
+                style="background: white; padding: 3rem; border-radius: 1rem; text-align: center; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none"
+                    stroke="#9ca3af" stroke-width="1.5" style="margin: 0 auto 1.5rem;">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <h3 style="color: #374151; margin-bottom: 0.5rem;">No Bookings Yet</h3>
+                <p style="color: #6b7280; margin-bottom: 2rem;">You haven't made any bookings. Start exploring our
+                    vehicles!</p>
+                <a href="/renter/vehicles" class="book-now-btn"
+                    style="display: inline-block; text-decoration: none; max-width: 300px;">Browse Vehicles</a>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

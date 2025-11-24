@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/renter-layout}" th:with="activePage='profile', pageTitle='Profile'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <!-- Extra styles -->
+    </th:block>
+</head>
+
+<body>
+    <main layout:fragment="content">
+        <div class="vehicle-grid-container">
+            <h2 class="section-title">My Profile</h2>
+
+            <div
+                style="background: white; padding: 3rem; border-radius: 1rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+                <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem;">
+                    <div class="nav-profile" style="width: 5rem; height: 5rem; font-size: 2rem;">JD</div>
+                    <div>
+                        <h3 style="color: #111827; margin-bottom: 0.5rem;">John Doe</h3>
+                        <p style="color: #6b7280;">john.doe@example.com</p>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 2rem;">
+                    <h4 style="color: #374151; margin-bottom: 1rem;">Account Information</h4>
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 1rem;">
+                            <strong style="color: #6b7280;">Phone:</strong>
+                            <span style="color: #111827;">+60 12-345 6789</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 1rem;">
+                            <strong style="color: #6b7280;">Member Since:</strong>
+                            <span style="color: #111827;">November 2025</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 1rem;">
+                            <strong style="color: #6b7280;">Total Bookings:</strong>
+                            <span style="color: #111827;">0</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <button class="book-now-btn" style="max-width: 200px;">Edit Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

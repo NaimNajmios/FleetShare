@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - FleetShare'">FleetShare</title>
+
+    <!-- Custom Renter CSS -->
+    <link rel="stylesheet" th:href="@{/css/renter.css}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Extra CSS fragment -->
+    <th:block layout:fragment="extra-css"></th:block>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <div th:replace="~{fragments/renter-nav :: renter-nav}"></div>
+
+    <!-- Main Content -->
+    <main layout:fragment="content">
+        <!-- Page content goes here -->
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/renter-footer :: renter-footer}"></div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
+
+    <!-- Scripts -->
+    <script>
+        // Back to top button visibility
+        window.addEventListener('scroll', function () {
+            const backToTop = document.getElementById('backToTop');
+            if (window.pageYOffset > 300) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+
+        // Hide button initially
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('backToTop').style.display = 'none';
+        });
+    </script>
+
+    <!-- Extra JS fragment -->
+    <th:block layout:fragment="extra-js"></th:block>
+</body>
+
+</html>

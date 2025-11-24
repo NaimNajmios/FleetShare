@@ -1,0 +1,29 @@
+<nav class="renter-nav" th:fragment="renter-nav">
+    <div class="nav-container">
+        <a href="/renter/vehicles" class="nav-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path
+                    d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
+                <circle cx="6.5" cy="16.5" r="2.5" />
+                <circle cx="16.5" cy="16.5" r="2.5" />
+            </svg>
+            FleetShare
+        </a>
+
+        <ul class="nav-menu">
+            <li><a href="/renter/home" class="nav-link" th:classappend="${activePage == 'home'} ? 'active'">Home</a>
+            </li>
+            <li><a href="/renter/vehicles" class="nav-link"
+                    th:classappend="${activePage == 'vehicles'} ? 'active'">Vehicles</a></li>
+            <li><a href="/renter/bookings" class="nav-link" th:classappend="${activePage == 'bookings'} ? 'active'">My
+                    Bookings</a></li>
+            <li><a href="/renter/profile" class="nav-link"
+                    th:classappend="${activePage == 'profile'} ? 'active'">Profile</a></li>
+        </ul>
+
+        <div class="nav-profile" title="User Profile">
+            JD
+        </div>
+    </div>
+</nav>
