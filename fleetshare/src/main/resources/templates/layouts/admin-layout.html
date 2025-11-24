@@ -24,29 +24,28 @@
   <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
 
   <!-- Extra CSS fragment -->
-  <th:block th:fragment="extra-css"></th:block>
+  <th:block layout:fragment="extra-css"></th:block>
 </head>
 
 <body>
   <div class="container-scroller">
-    <!-- partial:partials/_navbar.html -->
-    <div th:replace="~{partials/_navbar :: navbar}"></div>
+    <!-- partial:fragments/nav.html -->
+    <div th:replace="~{fragments/nav :: navbar}"></div>
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
-      <!-- partial:partials/_sidebar.html -->
-      <div th:replace="~{partials/_sidebar :: sidebar}"></div>
+      <!-- partial:fragments/header.html -->
+      <div th:replace="~{fragments/header :: sidebar}"></div>
       <!-- partial -->
       <div class="main-panel">
         <div class="content-wrapper">
-          <!-- Main Content -->
           <!-- Main Content -->
           <div layout:fragment="content">
             <!-- Default content can go here -->
           </div>
         </div>
         <!-- content-wrapper ends -->
-        <!-- partial:partials/_footer.html -->
-        <div th:replace="~{partials/_footer :: footer}"></div>
+        <!-- partial:fragments/footer.html -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
         <!-- partial -->
       </div>
       <!-- main-panel ends -->
@@ -75,7 +74,7 @@
   <!-- End custom js for this page-->
 
   <!-- Extra JS fragment -->
-  <th:block th:fragment="extra-js"></th:block>
+  <th:block layout:fragment="extra-js"></th:block>
 </body>
 
 </html>

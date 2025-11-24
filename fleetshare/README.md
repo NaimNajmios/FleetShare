@@ -402,8 +402,8 @@ src/test/java/ # Test classes
 │ │
 │ └── integration/ # Integration tests
 │ └── BookingFlowIntegrationTest.java
+| ___________
 
------
 
 ## 📋 Additional Requirements
 

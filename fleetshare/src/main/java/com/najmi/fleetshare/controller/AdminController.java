@@ -11,37 +11,42 @@ public class AdminController {
     public String index() {
         // Best Practice: Redirect to dashboard so the layout logic
         // isn't duplicated. Otherwise, this returns "dashboard.html"
-        // without the "layouts/base" wrapper.
+        // without the "layouts/admin-layout" wrapper.
         return "redirect:/dashboard";
     }
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        return "dashboard";
+        return "admin/dashboard";
     }
 
     @GetMapping("/users")
     public String users(Model model) {
-        return "user-management";
+        return "admin/users";
     }
 
     @GetMapping("/maintenance")
     public String maintenance(Model model) {
-        return "maintenance-management";
+        return "admin/maintenance";
     }
 
     @GetMapping("/bookings")
     public String bookings(Model model) {
-        return "booking-management";
+        return "admin/bookings";
     }
 
     @GetMapping("/payment")
     public String payment(Model model) {
-        return "payment";
+        return "admin/payments";
     }
 
     @GetMapping("/reports")
     public String reports(Model model) {
-        return "report";
+        return "admin/reports";
+    }
+
+    @GetMapping("/vehicles")
+    public String vehicles(Model model) {
+        return "admin/vehicles";
     }
 }
