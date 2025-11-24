@@ -15,19 +15,72 @@
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                         <h3 class="font-weight-bold">User Management</h3>
-                        <h6 class="font-weight-normal mb-0">Manage system users</h6>
+                        <h6 class="font-weight-normal mb-0">Manage system users and their roles.</h6>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Blank content area -->
         <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
+            <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title">User Management Content</p>
-                        <p>This is a blank user management page.</p>
+                        <h4 class="card-title">All Users</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Full Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face1.jpg}" alt="image" />
+                                        </td>
+                                        <td>Herman Beck</td>
+                                        <td>herman@example.com</td>
+                                        <td>Renter</td>
+                                        <td><label class="badge badge-success">Active</label></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face2.jpg}" alt="image" />
+                                        </td>
+                                        <td>Messsy Adam</td>
+                                        <td>messsy@example.com</td>
+                                        <td>Owner</td>
+                                        <td><label class="badge badge-warning">Pending</label></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face3.jpg}" alt="image" />
+                                        </td>
+                                        <td>John Doe</td>
+                                        <td>john@example.com</td>
+                                        <td>Admin</td>
+                                        <td><label class="badge badge-info">Active</label></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

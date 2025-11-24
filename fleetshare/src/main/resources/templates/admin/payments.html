@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/admin-layout}" th:with="activePage='payment', pageTitle='Payment'">
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='payment', pageTitle='Payment Management'">
 
 <head>
     <th:block layout:fragment="extra-css">
@@ -14,20 +14,58 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Payment</h3>
-                        <h6 class="font-weight-normal mb-0">Manage payments and transactions</h6>
+                        <h3 class="font-weight-bold">Payment Management</h3>
+                        <h6 class="font-weight-normal mb-0">Monitor all financial transactions.</h6>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Blank content area -->
         <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
+            <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title">Payment Content</p>
-                        <p>This is a blank payment page.</p>
+                        <h4 class="card-title">Transaction History</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Transaction ID</th>
+                                        <th>User</th>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#TRX987</td>
+                                        <td>Herman Beck</td>
+                                        <td>15 May 2023</td>
+                                        <td>Rental Payment - #BK001</td>
+                                        <td class="text-success">+ RM 450.00</td>
+                                        <td>Completed</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#TRX988</td>
+                                        <td>Messsy Adam</td>
+                                        <td>10 May 2023</td>
+                                        <td>Payout - #BK001</td>
+                                        <td class="text-danger">- RM 405.00</td>
+                                        <td>Completed</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#TRX989</td>
+                                        <td>John Doe</td>
+                                        <td>20 May 2023</td>
+                                        <td>Rental Deposit - #BK002</td>
+                                        <td class="text-success">+ RM 200.00</td>
+                                        <td>Pending</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

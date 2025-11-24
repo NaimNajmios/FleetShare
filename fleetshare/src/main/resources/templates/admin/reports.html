@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/admin-layout}" th:with="activePage='report', pageTitle='Report'">
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='report', pageTitle='Reports'">
 
 <head>
     <th:block layout:fragment="extra-css">
@@ -14,20 +14,73 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Report</h3>
-                        <h6 class="font-weight-normal mb-0">View and generate reports</h6>
+                        <h3 class="font-weight-bold">System Reports</h3>
+                        <h6 class="font-weight-normal mb-0">Analyze system-wide performance and metrics.</h6>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Blank content area -->
+        <div class="row">
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Total Revenue Trend</h4>
+                        <canvas id="revenueChart"></canvas>
+                        <!-- Placeholder for chart -->
+                        <div class="mt-4 text-center text-muted">
+                            [Chart Placeholder]
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">User Growth</h4>
+                        <canvas id="userGrowthChart"></canvas>
+                        <!-- Placeholder for chart -->
+                        <div class="mt-4 text-center text-muted">
+                            [Chart Placeholder]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title">Report Content</p>
-                        <p>This is a blank report page.</p>
+                        <h4 class="card-title">Top Performing Vehicles</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Total Rentals</th>
+                                        <th>Total Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Toyota Camry</td>
+                                        <td>45</td>
+                                        <td>RM 12,500</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Honda CR-V</td>
+                                        <td>38</td>
+                                        <td>RM 15,200</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Perodua Myvi</td>
+                                        <td>62</td>
+                                        <td>RM 6,200</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -83,7 +83,9 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
+                                        <th>Image</th>
                                         <th>ID</th>
+                                        <th>Plate No.</th>
                                         <th>Model</th>
                                         <th>Brand</th>
                                         <th>Year</th>
@@ -95,60 +97,140 @@
                                 <tbody>
                                     <!-- Dummy Data Row 1 -->
                                     <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face1.jpg}" alt="image"
+                                                style="width: 50px; height: 50px; border-radius: 0;" />
+                                        </td>
                                         <td>001</td>
+                                        <td>WXY 1234</td>
                                         <td class="font-weight-bold">Model S</td>
                                         <td>Tesla</td>
                                         <td>2023</td>
                                         <td>500</td>
-                                        <td><label class="badge badge-available">Available</label></td>
+                                        <td><label class="badge badge-success">Available</label></td>
                                         <td>
-                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm"
+                                                title="View">
                                                 <i class="ti-eye"></i>
                                             </button>
-                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm"
+                                                title="Edit">
                                                 <i class="ti-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm"
+                                                title="Delete">
                                                 <i class="ti-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
                                     <!-- Dummy Data Row 2 -->
                                     <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face2.jpg}" alt="image"
+                                                style="width: 50px; height: 50px; border-radius: 0;" />
+                                        </td>
                                         <td>002</td>
+                                        <td>VAB 5678</td>
                                         <td class="font-weight-bold">Camry</td>
                                         <td>Toyota</td>
                                         <td>2022</td>
                                         <td>250</td>
-                                        <td><label class="badge badge-available">Available</label></td>
+                                        <td><label class="badge badge-info">Rented</label></td>
                                         <td>
-                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm"
+                                                title="View">
                                                 <i class="ti-eye"></i>
                                             </button>
-                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm"
+                                                title="Edit">
                                                 <i class="ti-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm"
+                                                title="Delete">
                                                 <i class="ti-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
                                     <!-- Dummy Data Row 3 -->
                                     <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face3.jpg}" alt="image"
+                                                style="width: 50px; height: 50px; border-radius: 0;" />
+                                        </td>
                                         <td>003</td>
+                                        <td>JJU 9988</td>
                                         <td class="font-weight-bold">Civic</td>
                                         <td>Honda</td>
                                         <td>2021</td>
                                         <td>200</td>
-                                        <td><label class="badge badge-available">Available</label></td>
+                                        <td><label class="badge badge-danger">Maintenance</label></td>
                                         <td>
-                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm"
+                                                title="View">
                                                 <i class="ti-eye"></i>
                                             </button>
-                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm"
+                                                title="Edit">
                                                 <i class="ti-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm">
+                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm"
+                                                title="Delete">
+                                                <i class="ti-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <!-- Dummy Data Row 4 -->
+                                    <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face4.jpg}" alt="image"
+                                                style="width: 50px; height: 50px; border-radius: 0;" />
+                                        </td>
+                                        <td>004</td>
+                                        <td>BGT 4455</td>
+                                        <td class="font-weight-bold">Myvi</td>
+                                        <td>Perodua</td>
+                                        <td>2020</td>
+                                        <td>100</td>
+                                        <td><label class="badge badge-success">Available</label></td>
+                                        <td>
+                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm"
+                                                title="View">
+                                                <i class="ti-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm"
+                                                title="Edit">
+                                                <i class="ti-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm"
+                                                title="Delete">
+                                                <i class="ti-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <!-- Dummy Data Row 5 -->
+                                    <tr>
+                                        <td class="py-1">
+                                            <img th:src="@{/assets/images/faces/face5.jpg}" alt="image"
+                                                style="width: 50px; height: 50px; border-radius: 0;" />
+                                        </td>
+                                        <td>005</td>
+                                        <td>KLL 1122</td>
+                                        <td class="font-weight-bold">X70</td>
+                                        <td>Proton</td>
+                                        <td>2023</td>
+                                        <td>300</td>
+                                        <td><label class="badge badge-warning">Reserved</label></td>
+                                        <td>
+                                            <button type="button" class="btn btn-inverse-info btn-icon btn-sm"
+                                                title="View">
+                                                <i class="ti-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-inverse-warning btn-icon btn-sm"
+                                                title="Edit">
+                                                <i class="ti-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-inverse-danger btn-icon btn-sm"
+                                                title="Delete">
                                                 <i class="ti-trash"></i>
                                             </button>
                                         </td>
