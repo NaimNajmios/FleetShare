@@ -13,9 +13,8 @@
       </a>
     </li>
     <li class="nav-item" th:classappend="${activePage == 'vehicle-management'} ? 'active'">
-      <a class="nav-link" th:href="@{/vehicles}"
-        th:style="${activePage == 'vehicle-management'} ? 'background-color: #ffeef0; color: #ff4747;' : ''">
-        <i class="mdi mdi-car menu-icon" th:style="${activePage == 'vehicle-management'} ? 'color: #ff4747;' : ''"></i>
+      <a class="nav-link" th:href="@{/vehicles}">
+        <i class="mdi mdi-car menu-icon"></i>
         <span class="menu-title">Vehicle Management</span>
       </a>
     </li>
