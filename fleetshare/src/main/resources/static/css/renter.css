@@ -371,22 +371,22 @@ body {
     .nav-menu {
         gap: 1rem;
     }
-    
+
     .nav-link {
         font-size: 0.875rem;
     }
-    
+
     .vehicle-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-    
+
     .filter-pills {
         overflow-x: auto;
         flex-wrap: nowrap;
         padding-bottom: 0.5rem;
     }
-    
+
     .back-to-top {
         width: 3rem;
         height: 3rem;
