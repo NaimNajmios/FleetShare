@@ -11,7 +11,7 @@
 	<groupId>com.najmi</groupId>
 	<artifactId>fleetshare</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>fleetshare</name>
+	<name>FleetShare</name>
 	<description>FleetShare, centralized vehicle rental management system</description>
 	<url/>
 	<licenses>
@@ -50,6 +50,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>nz.net.ultraq.thymeleaf</groupId>
+			<artifactId>thymeleaf-layout-dialect</artifactId>
 		</dependency>
 	</dependencies>
 
