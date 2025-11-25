@@ -1,5 +1,8 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.SessionUser;
+import com.najmi.fleetshare.util.SessionHelper;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RenterController {
 
     @GetMapping("/vehicles")
-    public String browseVehicles(Model model) {
+    public String browseVehicles(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null) {
+            model.addAttribute("user", user);
+            if (user.getRenterDetails() != null) {
+                model.addAttribute("renterName", user.getRenterDetails().getFullName());
+            }
+        }
         // TODO: Add vehicle list from service
         return "renter/browse-vehicles";
     }

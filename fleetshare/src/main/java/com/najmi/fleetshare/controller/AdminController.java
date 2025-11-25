@@ -1,5 +1,8 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.SessionUser;
+import com.najmi.fleetshare.util.SessionHelper;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +21,14 @@ public class AdminController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null) {
+            model.addAttribute("user", user);
+            if (user.getAdminDetails() != null) {
+                model.addAttribute("adminName", user.getAdminDetails().getFullName());
+            }
+        }
         return "admin/dashboard";
     }
 
