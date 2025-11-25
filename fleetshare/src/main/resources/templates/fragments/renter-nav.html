@@ -23,7 +23,12 @@
         </ul>
 
         <div class="nav-profile" title="User Profile">
-            JD
+            <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                <button type="submit"
+                    style="background: none; border: none; color: inherit; cursor: pointer; font: inherit; padding: 0;">
+                    Logout
+                </button>
+            </form>
         </div>
     </div>
 </nav>
