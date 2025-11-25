@@ -31,7 +31,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 redirectUrl = "/owner/dashboard";
                 break;
             } else if (role.equals("ROLE_RENTER")) {
-                redirectUrl = "/renter/dashboard";
+                redirectUrl = "/renter/vehicles";
                 break;
             }
         }
