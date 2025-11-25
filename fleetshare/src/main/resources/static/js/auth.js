@@ -1,0 +1,261 @@
+/**
+ * FleetShare Authentication Pages JavaScript
+ * Handles interactive features for login and registration
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // ============================================
+    // Password Toggle Functionality
+    // ============================================
+    
+    const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+    
+    togglePasswordButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('mdi-eye-outline');
+                icon.classList.add('mdi-eye-off-outline');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('mdi-eye-off-outline');
+                icon.classList.add('mdi-eye-outline');
+            }
+        });
+    });
+    
+    // ============================================
+    // Email Validation
+    // ============================================
+    
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    function showError(inputElement, message) {
+        inputElement.classList.add('error');
+        
+        // Remove existing error message if any
+        const existingError = inputElement.parentElement.querySelector('.form-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Create and insert error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-error';
+        errorDiv.innerHTML = `<i class="mdi mdi-alert-circle"></i> ${message}`;
+        inputElement.parentElement.appendChild(errorDiv);
+    }
+    
+    function clearError(inputElement) {
+        inputElement.classList.remove('error');
+        const errorMessage = inputElement.parentElement.querySelector('.form-error');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    }
+    
+    // Email validation on blur
+    const emailInputs = document.querySelectorAll('input[type="email"]');
+    emailInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !validateEmail(this.value)) {
+                showError(this, 'Please enter a valid email address');
+            } else if (this.value) {
+                clearError(this);
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('error') && validateEmail(this.value)) {
+                clearError(this);
+            }
+        });
+    });
+    
+    // ============================================
+    // Password Strength Validation
+    // ============================================
+    
+    function validatePassword(password) {
+        return password.length >= 8;
+    }
+    
+    const passwordInputs = document.querySelectorAll('input[type="password"][data-validate="true"]');
+    passwordInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !validatePassword(this.value)) {
+                showError(this, 'Password must be at least 8 characters long');
+            } else if (this.value) {
+                clearError(this);
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('error') && validatePassword(this.value)) {
+                clearError(this);
+            }
+        });
+    });
+    
+    // ============================================
+    // Required Field Validation
+    // ============================================
+    
+    function validateRequired(inputElement) {
+        if (!inputElement.value.trim()) {
+            showError(inputElement, 'This field is required');
+            return false;
+        } else {
+            clearError(inputElement);
+            return true;
+        }
+    }
+    
+    // ============================================
+    // Form Submission Validation
+    // ============================================
+    
+    const authForms = document.querySelectorAll('.auth-form');
+    
+    authForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let isValid = true;
+            const requiredInputs = form.querySelectorAll('[required]');
+            
+            // Validate all required fields
+            requiredInputs.forEach(input => {
+                if (!validateRequired(input)) {
+                    isValid = false;
+                }
+                
+                // Additional validation for email
+                if (input.type === 'email' && input.value && !validateEmail(input.value)) {
+                    showError(input, 'Please enter a valid email address');
+                    isValid = false;
+                }
+                
+                // Additional validation for password
+                if (input.type === 'password' && input.hasAttribute('data-validate') && input.value && !validatePassword(input.value)) {
+                    showError(input, 'Password must be at least 8 characters long');
+                    isValid = false;
+                }
+            });
+            
+            if (isValid) {
+                // Show loading state
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.classList.add('btn-loading');
+                    submitButton.disabled = true;
+                }
+                
+                // Submit the form (in real implementation, this would be an AJAX call or form.submit())
+                console.log('Form is valid, submitting...');
+                
+                // For demo purposes, uncomment the line below to actually submit
+                // form.submit();
+                
+                // Remove loading state after 2 seconds (for demo)
+                setTimeout(() => {
+                    if (submitButton) {
+                        submitButton.classList.remove('btn-loading');
+                        submitButton.disabled = false;
+                    }
+                }, 2000);
+            } else {
+                // Scroll to first error
+                const firstError = form.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+    });
+    
+    // ============================================
+    // Real-time Input Formatting
+    // ============================================
+    
+    // Postal code formatting (for US zip codes)
+    const postalCodeInputs = document.querySelectorAll('input[name="postalCode"]');
+    postalCodeInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            // Remove non-numeric characters
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Limit to 5 or 9 digits (ZIP or ZIP+4)
+            if (this.value.length > 5 && this.value.length < 9) {
+                this.value = this.value.slice(0, 5);
+            } else if (this.value.length > 9) {
+                this.value = this.value.slice(0, 9);
+            }
+        });
+    });
+    
+    // ============================================
+    // Smart Form Field Focus
+    // ============================================
+    
+    // Auto-focus first input field
+    const firstInput = document.querySelector('.auth-form input:not([type="hidden"])');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // ============================================
+    // Dropdown Enhancement
+    // ============================================
+    
+    const selectElements = document.querySelectorAll('.form-select');
+    selectElements.forEach(select => {
+        // Add change event to clear any errors when user makes a selection
+        select.addEventListener('change', function() {
+            if (this.value) {
+                clearError(this);
+            }
+        });
+    });
+    
+});
+
+// ============================================
+// Utility Functions
+// ============================================
+
+/**
+ * Display a toast notification
+ * @param {string} message - The message to display
+ * @param {string} type - 'success' or 'error'
+ */
+function showToast(message, type = 'success') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="mdi ${type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Add to body
+    document.body.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}

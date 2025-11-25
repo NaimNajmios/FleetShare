@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login - FleetShare</title>
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+
+    <!-- Custom Auth CSS -->
+    <link rel="stylesheet" href="/css/auth.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Brand Logo -->
+            <div class="auth-brand">
+                <div class="auth-brand-logo">🚗 FleetShare</div>
+            </div>
+
+            <!-- Header -->
+            <div class="auth-header">
+                <h1 class="auth-title">Welcome Back to FleetShare</h1>
+                <p class="auth-subtitle">Please sign in to continue to your account</p>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form" id="loginForm">
+                <!-- Email or Username -->
+                <div class="form-group">
+                    <label class="form-label" for="emailOrUsername">Email or Username</label>
+                    <input type="text" class="form-input" id="emailOrUsername" name="emailOrUsername"
+                        placeholder="Enter your email or username" required autocomplete="username">
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" class="form-input form-input-with-icon" id="password" name="password"
+                            placeholder="Enter your password" required autocomplete="current-password">
+                        <span class="input-icon-right toggle-password" data-target="password">
+                            <i class="mdi mdi-eye-outline"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="auth-link forgot-password-link">Forgot Password?</a>
+                </div>
+
+                <!-- Keep me signed in -->
+                <div class="form-group">
+                    <div class="form-checkbox-wrapper">
+                        <input type="checkbox" class="form-checkbox" id="rememberMe" name="rememberMe">
+                        <label class="form-checkbox-label" for="rememberMe">
+                            Keep me signed in
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Login Button -->
+                <div class="form-group mb-0">
+                    <button type="submit" class="btn btn-primary">
+                        Login
+                    </button>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p class="auth-footer-text">
+                    Don't have an account?
+                    <a href="/register" class="auth-link">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth JavaScript -->
+    <script src="/js/auth.js"></script>
+</body>
+
+</html>

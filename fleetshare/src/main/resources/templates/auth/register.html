@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Register - FleetShare</title>
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+
+    <!-- Custom Auth CSS -->
+    <link rel="stylesheet" href="/css/auth.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Brand Logo -->
+            <div class="auth-brand">
+                <div class="auth-brand-logo">🚗 FleetShare</div>
+            </div>
+
+            <!-- Header -->
+            <div class="auth-header">
+                <h1 class="auth-title">Create Your Account</h1>
+                <p class="auth-subtitle">Join FleetShare to start renting or sharing vehicles</p>
+            </div>
+
+            <!-- Registration Form -->
+            <form class="auth-form" id="registerForm">
+                <!-- Personal Information -->
+                <div class="form-group">
+                    <label class="form-label" for="fullName">Full Name</label>
+                    <input type="text" class="form-input" id="fullName" name="fullName"
+                        placeholder="Enter your full name" required autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" class="form-input" id="email" name="email"
+                        placeholder="Enter your email address" required autocomplete="email">
+                    <small class="form-helper">We'll never share your email with anyone else.</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="registerPassword">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" class="form-input form-input-with-icon" id="registerPassword"
+                            name="password" placeholder="Create a strong password" required data-validate="true"
+                            autocomplete="new-password">
+                        <span class="input-icon-right toggle-password" data-target="registerPassword">
+                            <i class="mdi mdi-eye-outline"></i>
+                        </span>
+                    </div>
+                    <small class="form-helper">Password must be at least 8 characters long</small>
+                </div>
+
+                <!-- Address Section -->
+                <div class="address-section">
+                    <h3 class="address-section-title">Address Information</h3>
+
+                    <div class="form-group">
+                        <label class="form-label" for="addressLine1">Address Line 1</label>
+                        <input type="text" class="form-input" id="addressLine1" name="addressLine1"
+                            placeholder="Street address, P.O. box" required autocomplete="address-line1">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="addressLine2">
+                            Address Line 2
+                            <span class="form-label-optional">(Optional)</span>
+                        </label>
+                        <input type="text" class="form-input" id="addressLine2" name="addressLine2"
+                            placeholder="Apartment, suite, unit, building, floor, etc." autocomplete="address-line2">
+                    </div>
+
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label" for="city">City</label>
+                            <input type="text" class="form-input" id="city" name="city" placeholder="City" required
+                                autocomplete="address-level2">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="state">State</label>
+                            <input type="text" class="form-input" id="state" name="state" placeholder="State" required
+                                autocomplete="address-level1">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="postalCode">Postal Code</label>
+                            <input type="text" class="form-input" id="postalCode" name="postalCode" placeholder="ZIP"
+                                required autocomplete="postal-code">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Selection -->
+                <div class="form-group mt-4">
+                    <label class="form-label" for="userRole">User Role</label>
+                    <select class="form-select" id="userRole" name="userRole" required>
+                        <option value="">Select your role</option>
+                        <option value="renter">Renter - I want to rent vehicles</option>
+                        <option value="owner">Vehicle Owner - I want to share my vehicles</option>
+                    </select>
+                    <small class="form-helper">Choose how you plan to use FleetShare</small>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="form-group">
+                    <div class="form-checkbox-wrapper">
+                        <input type="checkbox" class="form-checkbox" id="agreeTerms" name="agreeTerms" required>
+                        <label class="form-checkbox-label" for="agreeTerms">
+                            I agree to all <a href="#" class="auth-link">Terms & Conditions</a>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Create Account Button -->
+                <div class="form-group mb-0">
+                    <button type="submit" class="btn btn-primary">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p class="auth-footer-text">
+                    Already have an account?
+                    <a href="/login" class="auth-link">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth JavaScript -->
+    <script src="/js/auth.js"></script>
+</body>
+
+</html>
