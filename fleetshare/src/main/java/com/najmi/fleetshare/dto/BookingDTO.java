@@ -1,5 +1,6 @@
 package com.najmi.fleetshare.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class BookingDTO {
@@ -13,26 +14,44 @@ public class BookingDTO {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String status;
+    private Long vehicleId;
+    private Long renterId;
+    private BigDecimal totalCost;
+    private String vehicleImageUrl;
+    private String paymentMethod;
+    private String paymentStatus;
+    private String invoiceNumber;
+    private String proofOfPaymentUrl;
     private LocalDateTime createdAt;
 
     // Constructors
     public BookingDTO() {
     }
 
-    public BookingDTO(Long bookingId, String renterName, String renterEmail,
-            String vehicleModel, String vehicleBrand, String vehicleRegistrationNo,
+    public BookingDTO(Long bookingId, Long renterId, String renterName, String renterEmail,
+            Long vehicleId, String vehicleModel, String vehicleBrand, String vehicleRegistrationNo,
+            String vehicleImageUrl,
             String ownerBusinessName, LocalDateTime startDate, LocalDateTime endDate,
-            String status, LocalDateTime createdAt) {
+            String status, BigDecimal totalCost, String paymentMethod, String paymentStatus,
+            String invoiceNumber, String proofOfPaymentUrl, LocalDateTime createdAt) {
         this.bookingId = bookingId;
+        this.renterId = renterId;
         this.renterName = renterName;
         this.renterEmail = renterEmail;
+        this.vehicleId = vehicleId;
         this.vehicleModel = vehicleModel;
         this.vehicleBrand = vehicleBrand;
         this.vehicleRegistrationNo = vehicleRegistrationNo;
+        this.vehicleImageUrl = vehicleImageUrl;
         this.ownerBusinessName = ownerBusinessName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
+        this.totalCost = totalCost;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+        this.invoiceNumber = invoiceNumber;
+        this.proofOfPaymentUrl = proofOfPaymentUrl;
         this.createdAt = createdAt;
     }
 
@@ -123,5 +142,69 @@ public class BookingDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public Long getRenterId() {
+        return renterId;
+    }
+
+    public void setRenterId(Long renterId) {
+        this.renterId = renterId;
+    }
+
+    public BigDecimal getTotalCost() {
+        return totalCost;
+    }
+
+    public void setTotalCost(BigDecimal totalCost) {
+        this.totalCost = totalCost;
+    }
+
+    public String getVehicleImageUrl() {
+        return vehicleImageUrl;
+    }
+
+    public void setVehicleImageUrl(String vehicleImageUrl) {
+        this.vehicleImageUrl = vehicleImageUrl;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
+
+    public String getProofOfPaymentUrl() {
+        return proofOfPaymentUrl;
+    }
+
+    public void setProofOfPaymentUrl(String proofOfPaymentUrl) {
+        this.proofOfPaymentUrl = proofOfPaymentUrl;
     }
 }

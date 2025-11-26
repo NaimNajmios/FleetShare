@@ -149,7 +149,8 @@
                                                 class="badge badge-dark">Disputed</span>
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-info">View</button>
+                                            <a th:href="@{/admin/bookings/view/{id}(id=${booking.bookingId})}"
+                                                class="btn btn-sm btn-outline-info">View</a>
                                         </td>
                                     </tr>
                                 </tbody>

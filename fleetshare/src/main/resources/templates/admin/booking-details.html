@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='booking-management', pageTitle='Booking Details'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .booking-header {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .booking-title h3 {
+                margin-bottom: 0.25rem;
+                font-weight: bold;
+            }
+
+            .booking-title p {
+                margin-bottom: 0;
+                color: #6c757d;
+            }
+
+            .info-card {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+                margin-bottom: 1.5rem;
+            }
+
+            .card-header-custom {
+                border-bottom: 1px solid #f3f3f3;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+                font-weight: bold;
+                font-size: 1.1rem;
+                color: #333;
+            }
+
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.75rem;
+                border-bottom: 1px solid #f8f9fa;
+                padding-bottom: 0.5rem;
+            }
+
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+
+            .detail-label {
+                color: #6c757d;
+                font-weight: 500;
+            }
+
+            .detail-value {
+                font-weight: 600;
+                color: #333;
+                text-align: right;
+            }
+
+            .vehicle-thumbnail {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                border-radius: 0.5rem;
+                margin-bottom: 1rem;
+                background-color: #f8f9fa;
+            }
+
+            .action-panel {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .status-badge {
+                padding: 0.5em 1em;
+                border-radius: 0.25rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+            }
+
+            .status-confirmed {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .status-pending {
+                background-color: #fff3cd;
+                color: #856404;
+            }
+
+            .status-active {
+                background-color: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .status-completed {
+                background-color: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .status-cancelled {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="booking-header">
+                    <div class="booking-title">
+                        <h3>Booking Details</h3>
+                        <p>Panoramic view of Booking ID: <span th:text="${booking.bookingId}">24</span></p>
+                    </div>
+                    <div>
+                        <span th:text="${booking.status}" th:class="'status-badge ' + 
+                              (${booking.status == 'CONFIRMED'} ? 'status-confirmed' : 
+                              (${booking.status == 'PENDING'} ? 'status-pending' : 
+                              (${booking.status == 'ACTIVE'} ? 'status-active' : 
+                              (${booking.status == 'COMPLETED'} ? 'status-completed' : 
+                              (${booking.status == 'CANCELLED'} ? 'status-cancelled' : '')))))">
+                            CONFIRMED
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Info Cards -->
+            <div class="col-lg-8">
+                <!-- Booking Information -->
+                <div class="info-card">
+                    <div class="card-header-custom">Booking Information</div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img th:src="${booking.vehicleImageUrl != null ? booking.vehicleImageUrl : '/assets/images/car-placeholder.png'}"
+                                alt="Vehicle Thumbnail" class="vehicle-thumbnail">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="detail-row">
+                                <span class="detail-label">Booking Date</span>
+                                <span class="detail-value"
+                                    th:text="${#temporals.format(booking.createdAt, 'MMMM dd, yyyy')}">June 20,
+                                    2025</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Duration</span>
+                                <span class="detail-value">
+                                    <span th:text="${#temporals.format(booking.startDate, 'MMM dd')}">Jun 23</span> -
+                                    <span th:text="${#temporals.format(booking.endDate, 'MMM dd, yyyy')}">Jun 25,
+                                        2025</span>
+                                </span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Total Cost</span>
+                                <span class="detail-value"
+                                    th:text="${booking.totalCost != null ? 'RM ' + #numbers.formatDecimal(booking.totalCost, 1, 'COMMA', 2, 'POINT') : 'N/A'}">RM
+                                    360.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="info-card">
+                    <div class="card-header-custom">Payment Information</div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value"
+                            th:text="${booking.paymentStatus != null ? booking.paymentStatus : 'PENDING'}">CONFIRMED</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Method</span>
+                        <span class="detail-value"
+                            th:text="${booking.paymentMethod != null ? booking.paymentMethod : 'N/A'}">Bank
+                            Transfer</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Invoice Number</span>
+                        <span class="detail-value"
+                            th:text="${booking.invoiceNumber != null ? booking.invoiceNumber : 'N/A'}">INV-2025-06-24</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Verification</span>
+                        <span class="detail-value">
+                            <a th:if="${booking.proofOfPaymentUrl != null}" th:href="${booking.proofOfPaymentUrl}"
+                                target="_blank" class="text-primary">View Proof</a>
+                            <span th:unless="${booking.proofOfPaymentUrl != null}" class="text-muted">No proof
+                                uploaded</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Entity References -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card h-100">
+                            <div class="card-header-custom">Client Information</div>
+                            <div class="detail-row">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-value" th:text="${booking.renterName}">Ahmad Zulkifli</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value" th:text="${booking.renterEmail}">email@example.com</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Client ID</span>
+                                <span class="detail-value" th:text="${booking.renterId}">2000</span>
+                            </div>
+                            <div class="mt-3 text-right">
+                                <a th:href="@{/admin/users/view/{id}(id=${booking.renterId}, type='renter')}"
+                                    class="btn btn-sm btn-outline-primary">View Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card h-100">
+                            <div class="card-header-custom">Vehicle Information</div>
+                            <div class="detail-row">
+                                <span class="detail-label">Vehicle</span>
+                                <span class="detail-value"
+                                    th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">Perodua Myvi</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Reg No.</span>
+                                <span class="detail-value" th:text="${booking.vehicleRegistrationNo}">WUX 5815</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Vehicle ID</span>
+                                <span class="detail-value" th:text="${booking.vehicleId}">1</span>
+                            </div>
+                            <div class="mt-3 text-right">
+                                <a th:href="@{/admin/vehicles/view/{id}(id=${booking.vehicleId})}"
+                                    class="btn btn-sm btn-outline-primary">View Vehicle</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Action Panel -->
+            <div class="col-lg-4">
+                <div class="action-panel">
+                    <div class="card-header-custom">Actions</div>
+
+                    <div class="form-group">
+                        <label>Workflow State</label>
+                        <select class="form-control mb-2">
+                            <option th:selected="${booking.status == 'PENDING'}">Pending</option>
+                            <option th:selected="${booking.status == 'CONFIRMED'}">Confirmed</option>
+                            <option th:selected="${booking.status == 'ACTIVE'}">Active</option>
+                            <option th:selected="${booking.status == 'COMPLETED'}">Completed</option>
+                            <option th:selected="${booking.status == 'CANCELLED'}">Cancelled</option>
+                        </select>
+                        <button class="btn btn-primary btn-block">Update Status</button>
+                    </div>
+
+                    <hr>
+
+                    <button class="btn btn-success btn-block mb-3">Mark as Completed</button>
+
+                    <button class="btn btn-warning btn-block mb-2">Edit Booking Details</button>
+                    <button class="btn btn-secondary btn-block">Print Booking Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

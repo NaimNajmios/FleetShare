@@ -1,5 +1,6 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
@@ -116,6 +117,13 @@ public class AdminController {
     public String bookings(Model model) {
         model.addAttribute("bookings", bookingService.getAllBookings());
         return "admin/bookings";
+    }
+
+    @GetMapping("/bookings/view/{bookingId}")
+    public String viewBooking(@PathVariable Long bookingId, Model model) {
+        BookingDTO booking = bookingService.getBookingDetails(bookingId);
+        model.addAttribute("booking", booking);
+        return "admin/booking-details";
     }
 
     @GetMapping("/payment")
