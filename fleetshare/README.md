@@ -6,13 +6,51 @@
 
 ## 🏗️ Project Architecture (Spring Boot)
 
-The application follows a standard **Layered Architecture**:
+The application follows a standard **Layered Architecture**, leveraging the full power of the Spring ecosystem.
 
-1.  **Presentation Layer (`*.controller`)**: REST Controllers exposing API endpoints (or MVC Controllers serving Thymeleaf views).
-2.  **Service Layer (`*.service`)**: Contains all business logic (e.g., `checkActiveBookings`, transaction management).
-3.  **Data Access Layer (`*.repository`)**: Interfaces extending `JpaRepository` for database interactions.
-4.  **Domain Layer (`*.entity`)**: JPA Entities mapped to the MySQL tables defined in `fleetsharedb.sql`.
-5.  **Security Layer (`*.security`)**: Spring Security configurations for RBAC.
+### 1. Core Framework & Configuration
+*   **Spring Boot**: Auto-configuration and dependency management.
+*   **Maven**: Build automation and dependency resolution.
+*   **Properties**: `application.properties` for environment-specific configurations (Dev/Prod).
+
+### 2. Implemented Architecture (Current State)
+These elements are currently present in the codebase:
+
+*   **Domain Layer (Entities)**:
+    *   **Inheritance Strategy**: Uses `@Inheritance(strategy = InheritanceType.JOINED)` for the `User` hierarchy (`Renter`, `FleetOwner`, `PlatformAdmin`). This maps to a normalized database schema where shared attributes are in a base table and specific attributes in joined tables.
+    *   **JPA Annotations**: `@Entity`, `@Table`, `@Id`, `@GeneratedValue`, `@Column` for ORM mapping.
+*   **Data Access Layer (Repositories)**:
+    *   **Spring Data JPA**: Interfaces extend `JpaRepository<T, ID>` to provide CRUD operations out-of-the-box without boilerplate code.
+    *   **Query Methods**: Automatic query generation based on method names (e.g., `findByUsername`).
+*   **Security Layer**:
+    *   **Configuration**: `@EnableWebSecurity` and `SecurityFilterChain` bean to define access rules.
+    *   **Authentication**: `CustomUserDetailsService` implements `UserDetailsService` to load user data from the database.
+    *   **Encryption**: `BCryptPasswordEncoder` bean for secure password hashing.
+    *   **Context**: `SecurityContextHolder` to access the currently authenticated user.
+*   **Web Layer (Controllers)**:
+    *   **MVC Controllers**: `@Controller` for serving Thymeleaf templates (`.html`).
+    *   **Model**: Used to pass data from controllers to views.
+
+### 3. Planned / Future Architecture
+These elements are planned for upcoming modules to enhance functionality and robustness:
+
+*   **Advanced Data Modeling**:
+    *   **Relationships**: `@OneToMany` (Owner -> Vehicles), `@ManyToOne` (Booking -> Vehicle), `@OneToOne` (Booking -> Payment) to model complex data associations.
+    *   **Auditing**: `@EnableJpaAuditing` and `@EntityListeners(AuditingEntityListener.class)` to automatically track `createdAt` and `updatedAt` timestamps.
+*   **Business Logic & Transaction Management**:
+    *   **Transactions**: `@Transactional` on Service methods to ensure data consistency (ACID properties), especially for Booking creation and Payment processing.
+    *   **Scheduling**: `@EnableScheduling` and `@Scheduled` (cron jobs) for automated tasks like expiring pending bookings or generating monthly reports.
+    *   **Async Processing**: `@EnableAsync` and `@Async` for non-blocking operations like sending email notifications (`JavaMailSender`) to improve response times.
+*   **Validation & Error Handling**:
+    *   **Bean Validation**: `@Valid`, `@NotNull`, `@Email`, `@Size` on DTOs to ensure data integrity before it reaches the service layer.
+    *   **Global Exception Handling**: `@ControllerAdvice` and `@ExceptionHandler` to provide consistent error responses (JSON/HTML) across the application.
+    *   **Custom Exceptions**: `@ResponseStatus` on custom exception classes (e.g., `ResourceNotFoundException`) to control HTTP status codes.
+*   **API & Integration**:
+    *   **REST API**: `@RestController` (combines `@Controller` and `@ResponseBody`) for exposing JSON endpoints for mobile apps or SPA frontends.
+    *   **External Calls**: `RestTemplate` or `WebClient` for integrating with third-party services (e.g., Payment Gateways, SMS providers).
+*   **Testing Strategy**:
+    *   **Integration Tests**: `@SpringBootTest` to load the full application context.
+    *   **Slice Tests**: `@WebMvcTest` for controllers and `@DataJpaTest` for repositories to test layers in isolation.
 
 -----
 
@@ -229,181 +267,67 @@ The application follows a standard **Layered Architecture**:
 
 ## 📂 Project Directory Structure
 src/main/java/
-├── com.fleetshare/
-│ ├── FleetShareApplication.java # Main entry point
-│ │
-│ ├── config/ # Configuration classes
-│ │ ├── SecurityConfig.java
-│ │ ├── DatabaseConfig.java
-│ │ ├── WebConfig.java
-│ │ └── OpenApiConfig.java # Swagger/SwaggerUI Config
-│ │
-│ ├── controller/ # Web layer
-│ │ ├── web/ # HTML/MVC controllers (Thymeleaf)
-│ │ │ ├── HomeController.java
-│ │ │ ├── AuthWebController.java
-│ │ │ ├── DashboardController.java # Routing for Owner/Renter dashboards
-│ │ │ └── AdminWebController.java
-│ │ │
-│ │ ├── api/ # REST API controllers
-│ │ │ ├── AuthApiController.java
-│ │ │ ├── UserApiController.java
-│ │ │ ├── VehicleApiController.java # Fleet Management
-│ │ │ └── BookingApiController.java # Reservations
-│ │ │
-│ │ └── dto/ # Data Transfer Objects
-│ │ ├── request/
-│ │ │ ├── RegisterUserRequest.java
-│ │ │ ├── LoginRequest.java
-│ │ │ ├── CreateVehicleRequest.java
-│ │ │ └── CreateBookingRequest.java
-│ │ │
-│ │ └── response/
-│ │ ├── UserResponse.java
-│ │ ├── VehicleResponse.java
-│ │ ├── BookingSummaryResponse.java
-│ │ ├── ApiResponse.java
-│ │ └── ErrorResponse.java
-│ │
-│ ├── service/ # Business logic layer
-│ │ ├── UserService.java
-│ │ ├── VehicleService.java
-│ │ ├── BookingService.java
-│ │ ├── AuthService.java
-│ │ ├── EmailService.java
-│ │ │
-│ │ └── impl/ # Service implementations
-│ │ ├── UserServiceImpl.java
-│ │ ├── VehicleServiceImpl.java
-│ │ └── BookingServiceImpl.java
-│ │
-│ ├── repository/ # Data access layer
-│ │ ├── UserRepository.java
-│ │ ├── VehicleRepository.java
-│ │ ├── BookingRepository.java
-│ │ │
-│ │ └── custom/ # Custom repository implementations
-│ │ ├── BookingRepositoryCustom.java # For complex overlaps/stats
-│ │ └── BookingRepositoryImpl.java
-│ │
-│ ├── entity/ # JPA entities
-│ │ ├── User.java
-│ │ ├── Vehicle.java
-│ │ ├── Booking.java
-│ │ ├── Invoice.java
-│ │ ├── Payment.java
-│ │ │
-│ │ └── enums/ # Enums used in entities
-│ │ ├── UserRole.java
-│ │ ├── VehicleStatus.java
-│ │ ├── BookingStatus.java
-│ │ └── PaymentMethod.java
-│ │
-│ ├── security/ # Security related classes
-│ │ ├── JwtUtil.java
-│ │ ├── CustomUserDetailsService.java
-│ │ ├── JwtAuthenticationFilter.java
-│ │ └── SecurityUtils.java
-│ │
-│ ├── exception/ # Exception handling
-│ │ ├── GlobalExceptionHandler.java
-│ │ ├── ResourceNotFoundException.java
-│ │ ├── BookingConflictException.java # Domain specific exception
-│ │ │
-│ │ └── handler/ # Exception handlers
-│ │ ├── UserExceptionHandler.java
-│ │ └── BookingExceptionHandler.java
-│ │
-│ ├── aspect/ # AOP aspects
-│ │ ├── LoggingAspect.java
-│ │ ├── PerformanceAspect.java
-│ │ └── AuditLogAspect.java # For R23 (Audit Logs)
-│ │
-│ ├── util/ # Utility classes
-│ │ ├── DateUtils.java
-│ │ ├── ValidationUtils.java
-│ │ └── FileUploadUtils.java # For vehicle/profile images
-│ │
-│ └── event/ # Application events
-│ ├── UserRegistrationEvent.java
-│ ├── BookingStatusEvent.java
-│ │
-│ └── listener/
-│ ├── UserRegistrationListener.java
-│ └── BookingStatusListener.java # e.g., Sends email on confirmation
+├── com.najmi.fleetshare/
+│   ├── FleetshareApplication.java      # Main entry point
+│   ├── TestPasswordEncoder.java        # Utility for generating BCrypt passwords
+│   │
+│   ├── config/                         # Configuration classes
+│   │   └── SecurityConfig.java         # Spring Security configuration
+│   │
+│   ├── controller/                     # Web layer (MVC Controllers)
+│   │   ├── AdminController.java        # Admin dashboard routes
+│   │   ├── AuthController.java         # Authentication routes
+│   │   ├── OwnerController.java        # Fleet Owner routes
+│   │   └── RenterController.java       # Renter routes
+│   │
+│   ├── dto/                            # Data Transfer Objects
+│   │   ├── AdminDetails.java
+│   │   ├── OwnerDetails.java
+│   │   ├── RenterDetails.java
+│   │   └── SessionUser.java            # Session-scoped user data
+│   │
+│   ├── entity/                         # JPA Entities
+│   │   ├── User.java                   # Base user entity
+│   │   ├── FleetOwner.java             # Owner specific attributes
+│   │   ├── Renter.java                 # Renter specific attributes
+│   │   ├── PlatformAdmin.java          # Admin specific attributes
+│   │   └── UserRole.java               # Role enumeration
+│   │
+│   ├── repository/                     # Data Access Layer
+│   │   ├── UserRepository.java
+│   │   ├── FleetOwnerRepository.java
+│   │   ├── RenterRepository.java
+│   │   └── PlatformAdminRepository.java
+│   │
+│   ├── security/                       # Security Components
+│   │   ├── CustomUserDetailsService.java
+│   │   ├── CustomUserDetails.java
+│   │   └── CustomAuthenticationSuccessHandler.java
+│   │
+│   ├── service/                        # Business Logic
+│   │   └── UserSessionService.java     # Session management service
+│   │
+│   └── util/                           # Utilities
+│       └── SessionHelper.java
 │
 src/main/resources/
-├── application.properties # Main configuration
-├── application-dev.properties # Development profile
-├── application-prod.properties # Production profile
-│
-├── static/ # Static files (CSS, JS, images)
-│ ├── css/
-│ │ ├── style.css
-│ │ └── admin.css
-│ │
-│ ├── js/
-│ │ ├── app.js
-│ │ └── dashboard.js
-│ │
-│ ├── images/
-│ │ └── logo.png
-│ │
-│ └── uploads/ # File upload directory
-│
-├── templates/ # Thymeleaf/HTML templates
-│ ├── fragments/ # Reusable template fragments
-│ │ ├── header.html
-│ │ ├── footer.html
-│ │ └── nav.html
-│ │
-│ ├── layouts/ # Page layouts
-│ │ ├── base-layout.html
-│ │ ├── admin-layout.html
-│ │ └── dashboard-layout.html
-│ │
-│ ├── home/ # Public pages
-│ │ ├── index.html
-│ │ └── about.html
-│ │
-│ ├── auth/
-│ │ ├── login.html
-│ │ └── register.html
-│ │
-│ ├── owner/ # Fleet Owner views
-│ │ ├── dashboard.html
-│ │ ├── my-vehicles.html
-│ │ └── booking-requests.html
-│ │
-│ ├── renter/ # Renter views
-│ │ ├── search.html
-│ │ └── my-trips.html
-│ │
-│ ├── admin/ # Admin views
-│ │ ├── dashboard.html
-│ │ └── users.html
-│ │
-│ └── error/ # Error pages
-│ ├── 404.html
-│ ├── 500.html
-│ └── access-denied.html
-│
-└── logback-spring.xml # Logging configuration
+├── application.properties              # Main configuration
+├── static/                             # Static assets (CSS, JS, Images)
+└── templates/                          # Thymeleaf templates
+    ├── admin/                          # Admin views
+    ├── auth/                           # Login/Register views
+    ├── fragments/                      # Reusable UI fragments
+    ├── layouts/                        # Base layouts
+    ├── owner/                          # Owner views
+    ├── pages/                          # Miscellaneous pages
+    ├── renter/                         # Renter views
+    └── index.html                      # Landing page
 
-src/test/java/ # Test classes
-├── com.fleetshare/
-│ ├── controller/
-│ │ ├── VehicleApiControllerTest.java
-│ │ └── BookingApiControllerTest.java
-│ │
-│ ├── service/
-│ │ ├── VehicleServiceTest.java
-│ │ └── BookingServiceTest.java
-│ │
-│ └── integration/ # Integration tests
-│ └── BookingFlowIntegrationTest.java
-| ___________
+src/test/java/
+└── com.najmi.fleetshare/
+    └── FleetshareApplicationTests.java # Context load tests
 
+-----
 
 ## 📋 Additional Requirements
 

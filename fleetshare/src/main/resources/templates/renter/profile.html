@@ -13,35 +13,46 @@
         <div class="vehicle-grid-container">
             <h2 class="section-title">My Profile</h2>
 
-            <div
-                style="background: white; padding: 3rem; border-radius: 1rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
-                <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem;">
-                    <div class="nav-profile" style="width: 5rem; height: 5rem; font-size: 2rem;">JD</div>
-                    <div>
-                        <h3 style="color: #111827; margin-bottom: 0.5rem;">John Doe</h3>
-                        <p style="color: #6b7280;">john.doe@example.com</p>
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h3>John Doe</h3>
+                        <p><i class="fas fa-envelope"></i> john.doe@example.com</p>
                     </div>
                 </div>
 
-                <div style="border-top: 1px solid #e5e7eb; padding-top: 2rem;">
-                    <h4 style="color: #374151; margin-bottom: 1rem;">Account Information</h4>
-                    <div style="display: grid; gap: 1rem;">
-                        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 1rem;">
-                            <strong style="color: #6b7280;">Phone:</strong>
-                            <span style="color: #111827;">+60 12-345 6789</span>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 1rem;">
-                            <strong style="color: #6b7280;">Member Since:</strong>
-                            <span style="color: #111827;">November 2025</span>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 1rem;">
-                            <strong style="color: #6b7280;">Total Bookings:</strong>
-                            <span style="color: #111827;">0</span>
-                        </div>
+                <div class="profile-details">
+                    <h4 style="margin-bottom: 1rem; color: var(--gray-700); font-size: 1.125rem;">
+                        <i class="fas fa-info-circle"></i> Account Information
+                    </h4>
+
+                    <div class="profile-detail-row">
+                        <strong><i class="fas fa-phone"></i> Phone:</strong>
+                        <span>+60 12-345 6789</span>
                     </div>
 
-                    <div style="margin-top: 2rem;">
-                        <button class="book-now-btn" style="max-width: 200px;">Edit Profile</button>
+                    <div class="profile-detail-row">
+                        <strong><i class="fas fa-calendar-check"></i> Member Since:</strong>
+                        <span>November 2025</span>
+                    </div>
+
+                    <div class="profile-detail-row">
+                        <strong><i class="fas fa-shopping-bag"></i> Total Bookings:</strong>
+                        <span>0</span>
+                    </div>
+
+                    <div class="profile-detail-row">
+                        <strong><i class="fas fa-star"></i> Member Status:</strong>
+                        <span>Silver</span>
+                    </div>
+
+                    <div class="mt-2">
+                        <button class="book-now-btn max-w-sm">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
                     </div>
                 </div>
             </div>

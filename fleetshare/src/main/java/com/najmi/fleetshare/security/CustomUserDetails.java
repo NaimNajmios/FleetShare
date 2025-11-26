@@ -11,9 +11,15 @@ import java.util.Collections;
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
+    private String fullName; // Add full name field
 
     public CustomUserDetails(User user) {
         this.user = user;
+    }
+
+    public CustomUserDetails(User user, String fullName) {
+        this.user = user;
+        this.fullName = fullName;
     }
 
     @Override
@@ -56,5 +62,10 @@ public class CustomUserDetails implements UserDetails {
     // Getter for the wrapped User entity
     public User getUser() {
         return user;
+    }
+
+    // Getter for full name
+    public String getFullName() {
+        return fullName != null ? fullName : user.getEmail();
     }
 }

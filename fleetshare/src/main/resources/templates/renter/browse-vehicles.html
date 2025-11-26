@@ -13,13 +13,13 @@
         <!-- Search & Filter Section -->
         <section class="search-filter-section">
             <div class="search-filter-container">
-                <input type="text" class="search-bar" placeholder="Search by model, brand..." id="vehicleSearch">
+                <input type="text" class="search-bar" placeholder="🔍 Search by model, brand, or type..."
+                    id="vehicleSearch">
 
-                <label class="filter-label">Filter by category:</label>
+                <label class="filter-label">Filter by category</label>
                 <div class="filter-pills">
-                    <button class="filter-pill" data-category="all" onclick="filterVehicles('all')">All</button>
-                    <button class="filter-pill active" data-category="sedan"
-                        onclick="filterVehicles('sedan')">Sedan</button>
+                    <button class="filter-pill active" data-category="all" onclick="filterVehicles('all')">All</button>
+                    <button class="filter-pill" data-category="sedan" onclick="filterVehicles('sedan')">Sedan</button>
                     <button class="filter-pill" data-category="suv" onclick="filterVehicles('suv')">SUV</button>
                     <button class="filter-pill" data-category="hatchback"
                         onclick="filterVehicles('hatchback')">Hatchback</button>
@@ -37,35 +37,23 @@
                 <!-- Vehicle Card 1: Luxury Sedan -->
                 <div class="vehicle-card" data-category="sedan">
                     <div class="vehicle-image-container">
-                        <svg class="vehicle-placeholder-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
-                            <circle cx="6.5" cy="16.5" r="2.5" />
-                            <circle cx="16.5" cy="16.5" r="2.5" />
-                        </svg>
+                        <i class="fas fa-car vehicle-placeholder-icon"></i>
                         <div class="price-badge">RM55/day</div>
                     </div>
                     <div class="vehicle-details">
                         <h3 class="vehicle-title">Luxury Sedan</h3>
                         <div class="vehicle-specs">
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                                <i class="fas fa-tachometer-alt spec-icon"></i>
                                 <span>15k mi</span>
                             </div>
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <i class="fas fa-cog spec-icon"></i>
                                 <span>Auto</span>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-users spec-icon"></i>
+                                <span>5 Seats</span>
                             </div>
                         </div>
                         <button class="book-now-btn">Book Now</button>
@@ -75,35 +63,23 @@
                 <!-- Vehicle Card 2: Modern SUV -->
                 <div class="vehicle-card" data-category="suv">
                     <div class="vehicle-image-container">
-                        <svg class="vehicle-placeholder-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
-                            <circle cx="6.5" cy="16.5" r="2.5" />
-                            <circle cx="16.5" cy="16.5" r="2.5" />
-                        </svg>
+                        <i class="fas fa-car vehicle-placeholder-icon"></i>
                         <div class="price-badge">RM75/day</div>
                     </div>
                     <div class="vehicle-details">
                         <h3 class="vehicle-title">Modern SUV</h3>
                         <div class="vehicle-specs">
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                                <i class="fas fa-tachometer-alt spec-icon"></i>
                                 <span>8k mi</span>
                             </div>
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <i class="fas fa-cog spec-icon"></i>
                                 <span>Auto</span>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-users spec-icon"></i>
+                                <span>7 Seats</span>
                             </div>
                         </div>
                         <button class="book-now-btn">Book Now</button>
@@ -113,35 +89,23 @@
                 <!-- Vehicle Card 3: Compact Sedan -->
                 <div class="vehicle-card" data-category="sedan">
                     <div class="vehicle-image-container">
-                        <svg class="vehicle-placeholder-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
-                            <circle cx="6.5" cy="16.5" r="2.5" />
-                            <circle cx="16.5" cy="16.5" r="2.5" />
-                        </svg>
+                        <i class="fas fa-car vehicle-placeholder-icon"></i>
                         <div class="price-badge">RM35/day</div>
                     </div>
                     <div class="vehicle-details">
                         <h3 class="vehicle-title">Compact Sedan</h3>
                         <div class="vehicle-specs">
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                                <i class="fas fa-tachometer-alt spec-icon"></i>
                                 <span>22k mi</span>
                             </div>
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <i class="fas fa-cog spec-icon"></i>
                                 <span>Manual</span>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-users spec-icon"></i>
+                                <span>5 Seats</span>
                             </div>
                         </div>
                         <button class="book-now-btn">Book Now</button>
@@ -151,35 +115,23 @@
                 <!-- Vehicle Card 4: City Hatchback -->
                 <div class="vehicle-card" data-category="hatchback">
                     <div class="vehicle-image-container">
-                        <svg class="vehicle-placeholder-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
-                            <circle cx="6.5" cy="16.5" r="2.5" />
-                            <circle cx="16.5" cy="16.5" r="2.5" />
-                        </svg>
+                        <i class="fas fa-car vehicle-placeholder-icon"></i>
                         <div class="price-badge">RM28/day</div>
                     </div>
                     <div class="vehicle-details">
                         <h3 class="vehicle-title">City Hatchback</h3>
                         <div class="vehicle-specs">
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                                <i class="fas fa-tachometer-alt spec-icon"></i>
                                 <span>18k mi</span>
                             </div>
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <i class="fas fa-cog spec-icon"></i>
                                 <span>Auto</span>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-users spec-icon"></i>
+                                <span>4 Seats</span>
                             </div>
                         </div>
                         <button class="book-now-btn">Book Now</button>
@@ -189,35 +141,23 @@
                 <!-- Vehicle Card 5: Sport Convertible -->
                 <div class="vehicle-card" data-category="convertible">
                     <div class="vehicle-image-container">
-                        <svg class="vehicle-placeholder-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
-                            <circle cx="6.5" cy="16.5" r="2.5" />
-                            <circle cx="16.5" cy="16.5" r="2.5" />
-                        </svg>
+                        <i class="fas fa-car vehicle-placeholder-icon"></i>
                         <div class="price-badge">RM95/day</div>
                     </div>
                     <div class="vehicle-details">
                         <h3 class="vehicle-title">Sport Convertible</h3>
                         <div class="vehicle-specs">
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                                <i class="fas fa-tachometer-alt spec-icon"></i>
                                 <span>5k mi</span>
                             </div>
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <i class="fas fa-cog spec-icon"></i>
                                 <span>Manual</span>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-users spec-icon"></i>
+                                <span>2 Seats</span>
                             </div>
                         </div>
                         <button class="book-now-btn">Book Now</button>
@@ -227,35 +167,23 @@
                 <!-- Vehicle Card 6: Family SUV -->
                 <div class="vehicle-card" data-category="suv">
                     <div class="vehicle-image-container">
-                        <svg class="vehicle-placeholder-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
-                            <circle cx="6.5" cy="16.5" r="2.5" />
-                            <circle cx="16.5" cy="16.5" r="2.5" />
-                        </svg>
+                        <i class="fas fa-car vehicle-placeholder-icon"></i>
                         <div class="price-badge">RM65/day</div>
                     </div>
                     <div class="vehicle-details">
                         <h3 class="vehicle-title">Family SUV</h3>
                         <div class="vehicle-specs">
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                                <i class="fas fa-tachometer-alt spec-icon"></i>
                                 <span>12k mi</span>
                             </div>
                             <div class="spec-item">
-                                <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                <i class="fas fa-cog spec-icon"></i>
                                 <span>Auto</span>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-users spec-icon"></i>
+                                <span>7 Seats</span>
                             </div>
                         </div>
                         <button class="book-now-btn">Book Now</button>

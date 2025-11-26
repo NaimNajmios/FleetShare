@@ -1,13 +1,8 @@
-<nav class="renter-nav" th:fragment="renter-nav">
+<nav class="renter-nav" th:fragment="renter-nav" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <div class="nav-container">
         <a href="/renter/vehicles" class="nav-brand">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                    d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
-                <circle cx="6.5" cy="16.5" r="2.5" />
-                <circle cx="16.5" cy="16.5" r="2.5" />
-            </svg>
+            <i class="fas fa-car"></i>
             FleetShare
         </a>
 
@@ -22,11 +17,11 @@
                     th:classappend="${activePage == 'profile'} ? 'active'">Profile</a></li>
         </ul>
 
-        <div class="nav-profile" title="User Profile">
-            <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
-                <button type="submit"
-                    style="background: none; border: none; color: inherit; cursor: pointer; font: inherit; padding: 0;">
-                    Logout
+        <div class="nav-profile">
+            <span class="nav-username" sec:authentication="principal.fullName">User</span>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="logout-btn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
             </form>
         </div>
