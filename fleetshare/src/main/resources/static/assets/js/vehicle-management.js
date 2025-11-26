@@ -1,35 +1,19 @@
-// Vehicle Management - Tab Switching and Filtering
+// Vehicle Management - Filtering
 (function () {
     'use strict';
 
-    // Tab Switching
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const tabId = this.getAttribute('data-tab');
-
-            // Remove active class from all tabs and buttons
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-
-            // Add active class to clicked button and corresponding content
-            this.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-
     // Vehicle Filtering
-    const searchInput = document.getElementById('all-search');
-    const yearFilter = document.getElementById('all-year-filter');
+    const searchInput = document.getElementById('vehicle-search');
+    const yearFilter = document.getElementById('year-filter');
+    const categoryFilter = document.getElementById('category-filter');
     const vehicleRows = document.querySelectorAll('.vehicle-row');
 
     function filterVehicles() {
-        if (!searchInput || !yearFilter) return;
+        if (!searchInput || !yearFilter || !categoryFilter) return;
 
         const searchTerm = searchInput.value.toLowerCase();
         const selectedYear = yearFilter.value;
+        const selectedCategory = categoryFilter.value;
 
         vehicleRows.forEach(row => {
             const searchableText = Array.from(row.querySelectorAll('.searchable'))
@@ -37,23 +21,26 @@
                 .join(' ');
 
             const year = row.getAttribute('data-year');
+            const category = row.getAttribute('data-category');
 
             const matchesSearch = searchableText.includes(searchTerm);
             const matchesYear = !selectedYear || year === selectedYear;
+            const matchesCategory = !selectedCategory || category === selectedCategory;
 
-            if (matchesSearch && matchesYear) {
+            if (matchesSearch && matchesYear && matchesCategory) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
             }
         });
 
-        updateNoDataMessage('all-vehicles-table', vehicleRows);
+        updateNoDataMessage('vehicles-table', vehicleRows);
     }
 
     if (searchInput) {
         searchInput.addEventListener('input', filterVehicles);
         yearFilter.addEventListener('change', filterVehicles);
+        categoryFilter.addEventListener('change', filterVehicles);
     }
 
     // Update "No data" message based on visible rows

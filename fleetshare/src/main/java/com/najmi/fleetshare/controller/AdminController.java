@@ -2,6 +2,7 @@ package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.service.UserManagementService;
+import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ public class AdminController {
 
     @Autowired
     private UserManagementService userManagementService;
+
+    @Autowired
+    private VehicleManagementService vehicleManagementService;
 
     @GetMapping("/")
     public String index() {
@@ -66,6 +70,7 @@ public class AdminController {
 
     @GetMapping("/vehicles")
     public String vehicles(Model model) {
+        model.addAttribute("vehicles", vehicleManagementService.getAllVehicles());
         return "admin/vehicles";
     }
 }

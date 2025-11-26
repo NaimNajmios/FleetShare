@@ -75,21 +75,6 @@
                 color: #155724;
             }
 
-            .badge-info {
-                background-color: #d1ecf1;
-                color: #0c5460;
-            }
-
-            .badge-danger {
-                background-color: #f8d7da;
-                color: #721c24;
-            }
-
-            .badge-warning {
-                background-color: #fff3cd;
-                color: #856404;
-            }
-
             .badge-secondary {
                 background-color: #e2e3e5;
                 color: #383d41;
@@ -139,148 +124,66 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <!-- Tabs Navigation -->
-                        <div class="user-tabs">
-                            <button class="tab-btn active" data-tab="all-vehicles">
-                                All Vehicles <span class="badge badge-secondary">5</span>
-                            </button>
-                            <button class="tab-btn" data-tab="available">
-                                Available <span class="badge badge-success">2</span>
-                            </button>
-                            <button class="tab-btn" data-tab="rented">
-                                Rented <span class="badge badge-info">1</span>
-                            </button>
-                            <button class="tab-btn" data-tab="maintenance">
-                                Maintenance <span class="badge badge-danger">1</span>
-                            </button>
-                            <button class="tab-btn" data-tab="reserved">
-                                Reserved <span class="badge badge-warning">1</span>
-                            </button>
+                        <!-- Search and Filters -->
+                        <div class="search-filter-bar">
+                            <input type="text" class="search-input" id="vehicle-search"
+                                placeholder="Search by plate number, model, or brand...">
+                            <select class="filter-select" id="year-filter">
+                                <option value="">All Years</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                            </select>
+                            <select class="filter-select" id="category-filter">
+                                <option value="">All Categories</option>
+                                <option value="Hatchback">Hatchback</option>
+                                <option value="Sedan">Sedan</option>
+                                <option value="SUV">SUV</option>
+                                <option value="Pickup 4x4">Pickup 4x4</option>
+                                <option value="Luxury MPV">Luxury MPV</option>
+                                <option value="Luxury Sedan">Luxury Sedan</option>
+                            </select>
                         </div>
 
-                        <!-- All Vehicles Tab -->
-                        <div id="all-vehicles" class="tab-content active">
-                            <div class="search-filter-bar">
-                                <input type="text" class="search-input" id="all-search"
-                                    placeholder="Search by plate number, model, or brand...">
-                                <select class="filter-select" id="all-year-filter">
-                                    <option value="">All Years</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2020">2020</option>
-                                </select>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="vehicles-table">
+                                <thead>
+                                    <tr>
+                                        <th>Plate No.</th>
+                                        <th>Model</th>
+                                        <th>Brand</th>
+                                        <th>Year</th>
+                                        <th>Category</th>
+                                        <th>Rate/Day (RM)</th>
+                                        <th>Owner</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="vehicle : ${vehicles}"
+                                        th:attr="data-year=${vehicle.manufacturingYear}, data-category=${vehicle.category}"
+                                        class="vehicle-row">
+                                        <td th:text="${vehicle.registrationNo}" class="searchable font-weight-bold">VHJ
+                                            8821</td>
+                                        <td th:text="${vehicle.model}" class="searchable">Myvi 1.5 AV</td>
+                                        <td th:text="${vehicle.brand}" class="searchable">Perodua</td>
+                                        <td th:text="${vehicle.manufacturingYear}">2023</td>
+                                        <td th:text="${vehicle.category}">Hatchback</td>
+                                        <td th:text="${vehicle.ratePerDay}">120.00</td>
+                                        <td th:text="${vehicle.ownerBusinessName}">MetroCity Car Rental Sdn Bhd</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-info">View</button>
+                                            <button class="btn btn-sm btn-outline-warning">Edit</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div th:if="${#lists.isEmpty(vehicles)}" class="no-data">
+                                <i class="mdi mdi-car-off mdi-48px"></i>
+                                <p>No vehicles found</p>
                             </div>
-
-                            <div class="table-responsive">
-                                <table class="table table-striped" id="all-vehicles-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Image</th>
-                                            <th>Plate No.</th>
-                                            <th>Model</th>
-                                            <th>Brand</th>
-                                            <th>Year</th>
-                                            <th>Rate/Day (RM)</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Sample data - will be replaced with Thymeleaf when backend is ready -->
-                                        <tr class="vehicle-row" data-status="available" data-year="2023">
-                                            <td><img th:src="@{/assets/images/faces/face1.jpg}"
-                                                    class="vehicle-image searchable" /></td>
-                                            <td class="searchable">WXY 1234</td>
-                                            <td class="searchable">Model S</td>
-                                            <td class="searchable">Tesla</td>
-                                            <td>2023</td>
-                                            <td>500</td>
-                                            <td><span class="badge badge-success">Available</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-info">View</button>
-                                                <button class="btn btn-sm btn-outline-warning">Edit</button>
-                                            </td>
-                                        </tr>
-                                        <tr class="vehicle-row" data-status="rented" data-year="2022">
-                                            <td><img th:src="@{/assets/images/faces/face2.jpg}" class="vehicle-image" />
-                                            </td>
-                                            <td class="searchable">VAB 5678</td>
-                                            <td class="searchable">Camry</td>
-                                            <td class="searchable">Toyota</td>
-                                            <td>2022</td>
-                                            <td>250</td>
-                                            <td><span class="badge badge-info">Rented</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-info">View</button>
-                                                <button class="btn btn-sm btn-outline-warning">Edit</button>
-                                            </td>
-                                        </tr>
-                                        <tr class="vehicle-row" data-status="maintenance" data-year="2021">
-                                            <td><img th:src="@{/assets/images/faces/face3.jpg}" class="vehicle-image" />
-                                            </td>
-                                            <td class="searchable">JJU 9988</td>
-                                            <td class="searchable">Civic</td>
-                                            <td class="searchable">Honda</td>
-                                            <td>2021</td>
-                                            <td>200</td>
-                                            <td><span class="badge badge-danger">Maintenance</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-info">View</button>
-                                                <button class="btn btn-sm btn-outline-warning">Edit</button>
-                                            </td>
-                                        </tr>
-                                        <tr class="vehicle-row" data-status="available" data-year="2020">
-                                            <td><img th:src="@{/assets/images/faces/face4.jpg}" class="vehicle-image" />
-                                            </td>
-                                            <td class="searchable">BGT 4455</td>
-                                            <td class="searchable">Myvi</td>
-                                            <td class="searchable">Perodua</td>
-                                            <td>2020</td>
-                                            <td>100</td>
-                                            <td><span class="badge badge-success">Available</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-info">View</button>
-                                                <button class="btn btn-sm btn-outline-warning">Edit</button>
-                                            </td>
-                                        </tr>
-                                        <tr class="vehicle-row" data-status="reserved" data-year="2023">
-                                            <td><img th:src="@{/assets/images/faces/face5.jpg}" class="vehicle-image" />
-                                            </td>
-                                            <td class="searchable">KLL 1122</td>
-                                            <td class="searchable">X70</td>
-                                            <td class="searchable">Proton</td>
-                                            <td>2023</td>
-                                            <td>300</td>
-                                            <td><span class="badge badge-warning">Reserved</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-info">View</button>
-                                                <button class="btn btn-sm btn-outline-warning">Edit</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Available Tab -->
-                        <div id="available" class="tab-content">
-                            <p class="text-muted">Showing vehicles that are currently available for rent</p>
-                        </div>
-
-                        <!-- Rented Tab -->
-                        <div id="rented" class="tab-content">
-                            <p class="text-muted">Showing vehicles that are currently rented out</p>
-                        </div>
-
-                        <!-- Maintenance Tab -->
-                        <div id="maintenance" class="tab-content">
-                            <p class="text-muted">Showing vehicles that are under maintenance</p>
-                        </div>
-
-                        <!-- Reserved Tab -->
-                        <div id="reserved" class="tab-content">
-                            <p class="text-muted">Showing vehicles that are reserved</p>
                         </div>
                     </div>
                 </div>
