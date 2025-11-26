@@ -3,6 +3,7 @@ package com.najmi.fleetshare.controller;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
+import com.najmi.fleetshare.service.PaymentService;
 import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
@@ -28,6 +29,9 @@ public class AdminController {
 
     @Autowired
     private BookingService bookingService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     @GetMapping("/")
     public String index() {
@@ -67,6 +71,7 @@ public class AdminController {
 
     @GetMapping("/payment")
     public String payment(Model model) {
+        model.addAttribute("payments", paymentService.getAllPayments());
         return "admin/payments";
     }
 
