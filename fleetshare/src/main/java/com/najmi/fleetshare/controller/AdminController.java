@@ -1,6 +1,8 @@
 package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.SessionUser;
+import com.najmi.fleetshare.service.BookingService;
+import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
@@ -21,11 +23,14 @@ public class AdminController {
     @Autowired
     private VehicleManagementService vehicleManagementService;
 
+    @Autowired
+    private MaintenanceService maintenanceService;
+
+    @Autowired
+    private BookingService bookingService;
+
     @GetMapping("/")
     public String index() {
-        // Best Practice: Redirect to dashboard so the layout logic
-        // isn't duplicated. Otherwise, this returns "dashboard.html"
-        // without the "layouts/admin-layout" wrapper.
         return "redirect:/admin/dashboard";
     }
 
@@ -50,11 +55,13 @@ public class AdminController {
 
     @GetMapping("/maintenance")
     public String maintenance(Model model) {
+        model.addAttribute("maintenanceRecords", maintenanceService.getAllMaintenance());
         return "admin/maintenance";
     }
 
     @GetMapping("/bookings")
     public String bookings(Model model) {
+        model.addAttribute("bookings", bookingService.getAllBookings());
         return "admin/bookings";
     }
 
