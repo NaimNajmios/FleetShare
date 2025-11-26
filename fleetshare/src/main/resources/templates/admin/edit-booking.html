@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='booking-management', pageTitle='Edit Booking'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .booking-header {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .booking-title h3 {
+                margin-bottom: 0.25rem;
+                font-weight: bold;
+            }
+
+            .booking-title p {
+                margin-bottom: 0;
+                color: #6c757d;
+            }
+
+            .info-card {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+                margin-bottom: 1.5rem;
+            }
+
+            .card-header-custom {
+                border-bottom: 1px solid #f3f3f3;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+                font-weight: bold;
+                font-size: 1.1rem;
+                color: #333;
+            }
+
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.75rem;
+                border-bottom: 1px solid #f8f9fa;
+                padding-bottom: 0.5rem;
+                align-items: center;
+            }
+
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+
+            .detail-label {
+                color: #6c757d;
+                font-weight: 500;
+            }
+
+            .detail-value {
+                font-weight: 600;
+                color: #333;
+                text-align: right;
+            }
+
+            .vehicle-thumbnail {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                border-radius: 0.5rem;
+                margin-bottom: 1rem;
+                background-color: #f8f9fa;
+            }
+
+            .action-panel {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .status-badge {
+                padding: 0.5em 1em;
+                border-radius: 0.25rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <form th:action="@{/admin/bookings/update}" th:object="${booking}" method="post">
+            <input type="hidden" th:field="*{bookingId}" />
+
+            <!-- Header -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="booking-header">
+                        <div class="booking-title">
+                            <h3>Edit Booking</h3>
+                            <p>Editing Booking ID: <span th:text="*{bookingId}">24</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Left Column: Info Cards -->
+                <div class="col-lg-8">
+                    <!-- Booking Information -->
+                    <div class="info-card">
+                        <div class="card-header-custom">Booking Information</div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img th:src="*{vehicleImageUrl != null ? vehicleImageUrl : '/assets/images/car-placeholder.png'}"
+                                    alt="Vehicle Thumbnail" class="vehicle-thumbnail">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="detail-row">
+                                    <span class="detail-label">Booking Date</span>
+                                    <span class="detail-value"
+                                        th:text="${#temporals.format(booking.createdAt, 'MMMM dd, yyyy')}">June 20,
+                                        2025</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Start Date</span>
+                                    <input type="datetime-local" class="form-control form-control-sm w-50"
+                                        th:field="*{startDate}" required>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">End Date</span>
+                                    <input type="datetime-local" class="form-control form-control-sm w-50"
+                                        th:field="*{endDate}" required>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Total Cost (RM)</span>
+                                    <input type="number" step="0.01" class="form-control form-control-sm w-50"
+                                        th:field="*{totalCost}" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Information (Read Only) -->
+                    <div class="info-card">
+                        <div class="card-header-custom">Payment Information (Read Only)</div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value"
+                                th:text="*{paymentStatus != null ? paymentStatus : 'PENDING'}">CONFIRMED</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Method</span>
+                            <span class="detail-value" th:text="*{paymentMethod != null ? paymentMethod : 'N/A'}">Bank
+                                Transfer</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Invoice Number</span>
+                            <span class="detail-value"
+                                th:text="*{invoiceNumber != null ? invoiceNumber : 'N/A'}">INV-2025-06-24</span>
+                        </div>
+                    </div>
+
+                    <!-- Entity References (Read Only) -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card h-100">
+                                <div class="card-header-custom">Client Information</div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Name</span>
+                                    <span class="detail-value" th:text="*{renterName}">Ahmad Zulkifli</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Email</span>
+                                    <span class="detail-value" th:text="*{renterEmail}">email@example.com</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card h-100">
+                                <div class="card-header-custom">Vehicle Information</div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Vehicle</span>
+                                    <span class="detail-value" th:text="*{vehicleBrand + ' ' + vehicleModel}">Perodua
+                                        Myvi</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Reg No.</span>
+                                    <span class="detail-value" th:text="*{vehicleRegistrationNo}">WUX 5815</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Action Panel -->
+                <div class="col-lg-4">
+                    <div class="action-panel">
+                        <div class="card-header-custom">Actions</div>
+
+                        <button type="submit" class="btn btn-primary btn-block mb-3">Save Changes</button>
+                        <a th:href="@{/admin/bookings/view/{id}(id=*{bookingId})}"
+                            class="btn btn-secondary btn-block">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

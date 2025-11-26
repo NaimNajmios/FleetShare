@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -162,5 +163,18 @@ public class AdminController {
     public String addVehicle(Model model) {
         model.addAttribute("vehicle", new VehicleDTO());
         return "admin/add-vehicle";
+    }
+
+    @GetMapping("/bookings/edit/{bookingId}")
+    public String editBooking(@PathVariable Long bookingId, Model model) {
+        BookingDTO booking = bookingService.getBookingDetails(bookingId);
+        model.addAttribute("booking", booking);
+        return "admin/edit-booking";
+    }
+
+    @PostMapping("/bookings/update")
+    public String updateBooking(BookingDTO bookingDTO) {
+        bookingService.updateBooking(bookingDTO);
+        return "redirect:/admin/bookings/view/" + bookingDTO.getBookingId();
     }
 }

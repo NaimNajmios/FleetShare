@@ -277,7 +277,8 @@
 
                     <button class="btn btn-success btn-block mb-3">Mark as Completed</button>
 
-                    <button class="btn btn-warning btn-block mb-2">Edit Booking Details</button>
+                    <a th:href="@{/admin/bookings/edit/{id}(id=${booking.bookingId})}"
+                        class="btn btn-warning btn-block mb-2">Edit Booking Details</a>
                     <button class="btn btn-secondary btn-block">Print Booking Details</button>
                 </div>
             </div>

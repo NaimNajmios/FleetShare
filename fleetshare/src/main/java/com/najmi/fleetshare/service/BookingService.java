@@ -135,4 +135,21 @@ public class BookingService {
                 payment != null ? payment.getVerificationProofUrl() : null,
                 booking.getCreatedAt());
     }
+
+    public void updateBooking(BookingDTO bookingDTO) {
+        Booking booking = bookingRepository.findById(bookingDTO.getBookingId()).orElse(null);
+        if (booking != null) {
+            booking.setStartDate(bookingDTO.getStartDate());
+            booking.setEndDate(bookingDTO.getEndDate());
+            bookingRepository.save(booking);
+
+            // Update invoice if exists
+            List<Invoice> invoices = invoiceRepository.findByBookingId(booking.getBookingId());
+            if (!invoices.isEmpty()) {
+                Invoice invoice = invoices.get(0);
+                invoice.setTotalAmount(bookingDTO.getTotalCost());
+                invoiceRepository.save(invoice);
+            }
+        }
+    }
 }
