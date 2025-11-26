@@ -104,4 +104,10 @@ public class AdminController {
         model.addAttribute("vehicle", vehicle);
         return "admin/view-vehicle";
     }
+
+    @GetMapping("/vehicles/add")
+    public String addVehicle(Model model) {
+        model.addAttribute("vehicle", new VehicleDTO());
+        return "admin/add-vehicle";
+    }
 }
