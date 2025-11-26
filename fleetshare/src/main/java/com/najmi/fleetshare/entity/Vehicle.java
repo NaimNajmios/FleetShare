@@ -42,6 +42,14 @@ public class Vehicle {
     @Column(name = "vehicle_image_url", length = 1024)
     private String vehicleImageUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private VehicleStatus status;
+
+    public enum VehicleStatus {
+        AVAILABLE, RENTED, MAINTENANCE, UNAVAILABLE
+    }
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -139,6 +147,14 @@ public class Vehicle {
 
     public void setVehicleImageUrl(String vehicleImageUrl) {
         this.vehicleImageUrl = vehicleImageUrl;
+    }
+
+    public VehicleStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(VehicleStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

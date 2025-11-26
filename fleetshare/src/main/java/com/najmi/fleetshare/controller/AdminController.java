@@ -2,6 +2,7 @@ package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
+import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.PaymentService;
@@ -95,5 +96,12 @@ public class AdminController {
         model.addAttribute("userDetail", userDetail);
         model.addAttribute("userType", type);
         return "admin/view-user";
+    }
+
+    @GetMapping("/vehicles/view/{vehicleId}")
+    public String viewVehicle(@PathVariable Long vehicleId, Model model) {
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+        model.addAttribute("vehicle", vehicle);
+        return "admin/view-vehicle";
     }
 }

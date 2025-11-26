@@ -13,13 +13,20 @@ public class VehicleDTO {
     private String vehicleImageUrl;
     private String ownerBusinessName;
 
+    // New fields
+    private String fuelType;
+    private String transmissionType;
+    private Integer mileage;
+    private String status;
+
     // Constructors
     public VehicleDTO() {
     }
 
     public VehicleDTO(Long vehicleId, String registrationNo, String model, String brand,
             Integer manufacturingYear, String category, BigDecimal ratePerDay,
-            String vehicleImageUrl, String ownerBusinessName) {
+            String vehicleImageUrl, String ownerBusinessName,
+            String fuelType, String transmissionType, Integer mileage, String status) {
         this.vehicleId = vehicleId;
         this.registrationNo = registrationNo;
         this.model = model;
@@ -29,6 +36,10 @@ public class VehicleDTO {
         this.ratePerDay = ratePerDay;
         this.vehicleImageUrl = vehicleImageUrl;
         this.ownerBusinessName = ownerBusinessName;
+        this.fuelType = fuelType;
+        this.transmissionType = transmissionType;
+        this.mileage = mileage;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -102,5 +113,37 @@ public class VehicleDTO {
 
     public void setOwnerBusinessName(String ownerBusinessName) {
         this.ownerBusinessName = ownerBusinessName;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public String getTransmissionType() {
+        return transmissionType;
+    }
+
+    public void setTransmissionType(String transmissionType) {
+        this.transmissionType = transmissionType;
+    }
+
+    public Integer getMileage() {
+        return mileage;
+    }
+
+    public void setMileage(Integer mileage) {
+        this.mileage = mileage;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

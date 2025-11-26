@@ -174,7 +174,8 @@
                                         <td th:text="${vehicle.ratePerDay}">120.00</td>
                                         <td th:text="${vehicle.ownerBusinessName}">MetroCity Car Rental Sdn Bhd</td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-info">View</button>
+                                            <a th:href="@{/admin/vehicles/view/{id}(id=${vehicle.vehicleId})}"
+                                                class="btn btn-sm btn-outline-primary">View</a>
                                             <button class="btn btn-sm btn-outline-warning">Edit</button>
                                         </td>
                                     </tr>

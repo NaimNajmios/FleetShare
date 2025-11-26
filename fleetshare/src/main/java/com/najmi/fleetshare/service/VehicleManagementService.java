@@ -55,10 +55,52 @@ public class VehicleManagementService {
                     vehicle.getCategory(),
                     ratePerDay,
                     vehicle.getVehicleImageUrl(),
-                    ownerBusinessName);
+                    ownerBusinessName,
+                    vehicle.getFuelType(),
+                    vehicle.getTransmissionType(),
+                    vehicle.getMileage(),
+                    vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE");
             vehicleDTOs.add(dto);
         }
 
         return vehicleDTOs;
+    }
+
+    /**
+     * Fetches detailed information for a specific vehicle
+     * 
+     * @param vehicleId Vehicle ID
+     * @return VehicleDTO with full details
+     */
+    public VehicleDTO getVehicleDetails(Long vehicleId) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+        if (vehicle == null) {
+            return null;
+        }
+
+        // Get latest price
+        BigDecimal ratePerDay = priceHistoryRepository.findLatestPriceByVehicleId(vehicleId)
+                .map(VehiclePriceHistory::getRatePerDay)
+                .orElse(BigDecimal.ZERO);
+
+        // Get owner name
+        String ownerBusinessName = fleetOwnerRepository.findById(vehicle.getFleetOwnerId())
+                .map(FleetOwner::getBusinessName)
+                .orElse("Unknown Owner");
+
+        return new VehicleDTO(
+                vehicle.getVehicleId(),
+                vehicle.getRegistrationNo(),
+                vehicle.getModel(),
+                vehicle.getBrand(),
+                vehicle.getManufacturingYear(),
+                vehicle.getCategory(),
+                ratePerDay,
+                vehicle.getVehicleImageUrl(),
+                ownerBusinessName,
+                vehicle.getFuelType(),
+                vehicle.getTransmissionType(),
+                vehicle.getMileage(),
+                vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE");
     }
 }
