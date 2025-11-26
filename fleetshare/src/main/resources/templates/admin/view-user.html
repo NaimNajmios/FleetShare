@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='user-management', pageTitle='User Profile'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .profile-container {
+                background: white;
+                border-radius: 8px;
+                padding: 2rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .profile-header {
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+                padding-bottom: 2rem;
+                border-bottom: 2px solid #e8ecef;
+                margin-bottom: 2rem;
+            }
+
+            .profile-avatar {
+                position: relative;
+            }
+
+            .avatar-circle {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 3rem;
+                font-weight: bold;
+            }
+
+            .avatar-controls {
+                margin-top: 1rem;
+                display: none;
+                /* Hidden in view mode */
+            }
+
+            #editMode .avatar-controls {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .profile-info h2 {
+                margin: 0 0 0.5rem 0;
+                font-size: 1.75rem;
+            }
+
+            .profile-info .user-email {
+                color: #6c757d;
+                font-size: 1rem;
+            }
+
+            .mode-toggle {
+                margin-left: auto;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .status-badge {
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.875rem;
+            }
+
+            .status-active {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .status-inactive {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .form-section {
+                margin-bottom: 2rem;
+            }
+
+            .form-section h4 {
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid #e8ecef;
+                color: #2c2e30;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-group label {
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #495057;
+            }
+
+            .form-control {
+                padding: 0.75rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+                font-size: 1rem;
+            }
+
+            .form-control-plaintext {
+                padding: 0.75rem;
+                background: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 0.25rem;
+                color: #495057;
+            }
+
+            .form-control:disabled,
+            .form-control [readonly] {
+                background-color: #e9ecef;
+                opacity: 1;
+            }
+
+            .action-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1rem;
+                padding-top: 2rem;
+                border-top: 2px solid #e8ecef;
+            }
+
+            /* View Mode: Hide edit controls */
+            #viewMode .form-control {
+                background: #f8f9fa;
+                border-color: #e9ecef;
+                pointer-events: none;
+            }
+
+            #viewMode .edit-actions {
+                display: none;
+            }
+
+            #viewMode .view-actions {
+                display: flex;
+            }
+
+            /* Edit Mode: Show editable fields */
+            #editMode .form-control {
+                background: white;
+                border-color: #ced4da;
+            }
+
+            #editMode .edit-actions {
+                display: flex;
+            }
+
+            #editMode .view-actions {
+                display: none;
+            }
+
+            @media (max-width: 768px) {
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .profile-header {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .mode-toggle {
+                    margin-left: 0;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="font-weight-bold">User Profile</h3>
+                        <h6 class="font-weight-normal mb-0">View and manage user details</h6>
+                    </div>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary">
+                        <i class="mdi mdi-arrow-left"></i> Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="profile-container" id="viewMode">
+                            <!-- Profile Header -->
+                            <div class="profile-header">
+                                <div class="profile-avatar">
+                                    <div class="avatar-circle"
+                                        th:text="${#strings.substring(userDetail.fullName ?: 'U', 0, 1)}">
+                                        U
+                                    </div>
+                                    <div class="avatar-controls">
+                                        <button class="btn btn-sm btn-danger">Change Picture</button>
+                                        <button class="btn btn-sm btn-secondary">Reset</button>
+                                    </div>
+                                </div>
+                                <div class="profile-info">
+                                    <h2 th:text="${userDetail.fullName ?: 'N/A'}">User Name</h2>
+                                    <p class="user-email" th:text="${userDetail.email}">user@example.com</p>
+                                    <span class="status-badge"
+                                        th:classappend="${userDetail.isActive} ? 'status-active' : 'status-inactive'"
+                                        th:text="${userDetail.isActive} ? 'Active' : 'Inactive'">
+                                        Active
+                                    </span>
+                                </div>
+                                <div class="mode-toggle">
+                                    <button id="editBtn" class="btn btn-primary view-actions">
+                                        <i class="mdi mdi-pencil"></i> Edit Profile
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Personal Information -->
+                            <div class="form-section">
+                                <h4>Personal Information</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Client ID</label>
+                                        <input type="text" class="form-control-plaintext"
+                                            th:value="${userDetail.userId}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <span th:if="${userType == 'owner'}">Business Name</span>
+                                            <span th:if="${userType == 'renter'}">Full Name</span>
+                                        </label>
+                                        <input type="text" class="form-control" th:value="${userDetail.fullName}"
+                                            readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" th:value="${userDetail.email}"
+                                            readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone Number</label>
+                                        <input type="tel" class="form-control"
+                                            th:value="${userDetail.phoneNumber ?: 'N/A'}" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row" th:if="${userType == 'owner'}">
+                                    <div class="form-group">
+                                        <label>User Role</label>
+                                        <input type="text" class="form-control-plaintext"
+                                            th:value="${userDetail.userRole}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Verification Status</label>
+                                        <input type="text" class="form-control-plaintext"
+                                            th:value="${userDetail.isVerified} ? 'Verified' : 'Not Verified'" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Address Details -->
+                            <div class="form-section" th:if="${userDetail.addressLine1}">
+                                <h4>Address Details</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Address Line 1</label>
+                                        <input type="text" class="form-control" th:value="${userDetail.addressLine1}"
+                                            readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Address Line 2</label>
+                                        <input type="text" class="form-control"
+                                            th:value="${userDetail.addressLine2 ?: ''}" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>City</label>
+                                        <input type="text" class="form-control" th:value="${userDetail.city}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>State</label>
+                                        <input type="text" class="form-control" th:value="${userDetail.state}" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Postal Code</label>
+                                        <input type="text" class="form-control" th:value="${userDetail.postalCode}"
+                                            readonly style="width: 50%;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <div class="edit-actions">
+                                    <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                                    <button id="saveBtn" class="btn btn-success">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script th:src="@{/assets/js/user-profile.js}"></script>
+    </th:block>
+</body>
+
+</html>

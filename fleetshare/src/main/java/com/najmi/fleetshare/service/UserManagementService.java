@@ -2,12 +2,9 @@ package com.najmi.fleetshare.service;
 
 import com.najmi.fleetshare.dto.FleetOwnerDTO;
 import com.najmi.fleetshare.dto.RenterDTO;
-import com.najmi.fleetshare.entity.FleetOwner;
-import com.najmi.fleetshare.entity.Renter;
-import com.najmi.fleetshare.entity.User;
-import com.najmi.fleetshare.repository.FleetOwnerRepository;
-import com.najmi.fleetshare.repository.RenterRepository;
-import com.najmi.fleetshare.repository.UserRepository;
+import com.najmi.fleetshare.dto.UserDetailDTO;
+import com.najmi.fleetshare.entity.*;
+import com.najmi.fleetshare.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +22,9 @@ public class UserManagementService {
 
     @Autowired
     private RenterRepository renterRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     /**
      * Fetches all fleet owners with their associated user details
@@ -77,5 +77,56 @@ public class UserManagementService {
         }
 
         return renterDTOs;
+    }
+
+    /**
+     * Fetches complete user details including address
+     * 
+     * @param userId   User ID
+     * @param userType "owner" or "renter"
+     * @return UserDetailDTO with all user information
+     */
+    public UserDetailDTO getUserDetails(Long userId, String userType) {
+        UserDetailDTO dto = new UserDetailDTO();
+
+        // Get user basic info
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        dto.setUserId(user.getUserId());
+        dto.setEmail(user.getEmail());
+        dto.setUserRole(user.getUserRole().name());
+        dto.setIsActive(user.getIsActive());
+
+        // Get role-specific info
+        if ("owner".equalsIgnoreCase(userType)) {
+            FleetOwner owner = fleetOwnerRepository.findByUserId(userId).orElse(null);
+            if (owner != null) {
+                dto.setBusinessName(owner.getBusinessName());
+                dto.setPhoneNumber(owner.getContactPhone());
+                dto.setIsVerified(owner.getIsVerified());
+                dto.setFullName(owner.getBusinessName()); // Use business name as display name
+            }
+        } else if ("renter".equalsIgnoreCase(userType)) {
+            Renter renter = renterRepository.findByUserId(userId).orElse(null);
+            if (renter != null) {
+                dto.setFullName(renter.getFullName());
+                dto.setPhoneNumber(renter.getPhoneNumber());
+            }
+        }
+
+        // Get address info
+        Address address = addressRepository.findLatestAddressByUserId(userId).orElse(null);
+        if (address != null) {
+            dto.setAddressLine1(address.getAddressLine1());
+            dto.setAddressLine2(address.getAddressLine2());
+            dto.setCity(address.getCity());
+            dto.setState(address.getState());
+            dto.setPostalCode(address.getPostalCode());
+        }
+
+        return dto;
     }
 }

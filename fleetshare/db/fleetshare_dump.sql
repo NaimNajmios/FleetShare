@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Nov 25, 2025 at 03:43 AM
+-- Generation Time: Nov 26, 2025 at 06:50 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -68,6 +68,17 @@ CREATE TABLE `bookingpricesnapshot` (
   `total_calculated_cost` decimal(10,2) NOT NULL
 ) ;
 
+--
+-- Dumping data for table `bookingpricesnapshot`
+--
+
+INSERT INTO `bookingpricesnapshot` (`booking_id`, `rate_per_day`, `days_rented`, `total_calculated_cost`) VALUES
+(101, 220.00, 8, 1760.00),
+(102, 350.00, 3, 1350.00),
+(103, 115.00, 14, 1610.00),
+(104, 120.00, 1, 120.00),
+(105, 450.00, 2, 900.00);
+
 -- --------------------------------------------------------
 
 --
@@ -84,6 +95,17 @@ CREATE TABLE `bookings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ;
 
+--
+-- Dumping data for table `bookings`
+--
+
+INSERT INTO `bookings` (`booking_id`, `renter_id`, `vehicle_id`, `fleet_owner_id`, `start_date`, `end_date`, `created_at`) VALUES
+(101, 3, 7, 3, '2025-03-29 10:00:00', '2025-04-05 18:00:00', '2025-03-01 01:00:00'),
+(102, 2, 4, 2, '2025-06-06 08:00:00', '2025-06-09 20:00:00', '2025-05-20 06:00:00'),
+(103, 4, 2, 1, '2025-01-05 12:00:00', '2025-01-19 12:00:00', '2024-12-20 02:00:00'),
+(104, 1, 1, 1, '2025-05-15 09:00:00', '2025-05-16 09:00:00', '2025-05-10 00:00:00'),
+(105, 5, 5, 2, '2025-08-30 14:00:00', '2025-09-01 12:00:00', '2025-08-15 03:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -98,6 +120,30 @@ CREATE TABLE `bookingstatuslog` (
   `status_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
   `remarks` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bookingstatuslog`
+--
+
+INSERT INTO `bookingstatuslog` (`booking_log_id`, `booking_id`, `status_value`, `actor_user_id`, `status_timestamp`, `remarks`) VALUES
+(1, 101, 'PENDING', 7, '2025-03-01 01:00:00', 'Booking initiated'),
+(2, 101, 'CONFIRMED', 1, '2025-03-01 01:06:00', 'Payment received'),
+(3, 101, 'ACTIVE', 4, '2025-03-29 02:15:00', 'Vehicle handed over'),
+(4, 101, 'COMPLETED', 4, '2025-04-05 10:30:00', 'Vehicle returned safely'),
+(5, 102, 'PENDING', 6, '2025-05-20 06:00:00', 'Booking initiated'),
+(6, 102, 'CONFIRMED', 1, '2025-05-20 06:10:00', 'Payment received'),
+(7, 102, 'ACTIVE', 3, '2025-06-06 00:15:00', 'Vehicle pickup completed'),
+(8, 102, 'COMPLETED', 3, '2025-06-09 12:45:00', 'Returned after Sabah adventure'),
+(9, 103, 'PENDING', 8, '2024-12-20 02:00:00', 'Booking initiated'),
+(10, 103, 'CONFIRMED', 1, '2024-12-20 02:06:00', 'Payment verified by admin'),
+(11, 103, 'ACTIVE', 2, '2025-01-05 04:15:00', 'Vehicle handed over to renter'),
+(12, 103, 'COMPLETED', 2, '2025-01-19 04:30:00', 'Vehicle returned in good condition'),
+(13, 104, 'PENDING', 5, '2025-05-10 00:00:00', 'Booking initiated'),
+(14, 104, 'CONFIRMED', 1, '2025-05-10 00:05:00', 'Payment received'),
+(15, 104, 'ACTIVE', 2, '2025-05-15 01:10:00', 'Vehicle collected'),
+(16, 104, 'COMPLETED', 2, '2025-05-16 01:20:00', 'Returned on time'),
+(17, 105, 'PENDING', 9, '2025-08-15 03:00:00', 'Booking initiated'),
+(18, 105, 'PENDING', 9, '2025-08-15 03:01:00', 'Waiting for transfer');
 
 -- --------------------------------------------------------
 
@@ -142,6 +188,17 @@ CREATE TABLE `invoices` (
   `status` enum('DRAFT','ISSUED','PAID','OVERDUE','VOID') DEFAULT 'ISSUED'
 ) ;
 
+--
+-- Dumping data for table `invoices`
+--
+
+INSERT INTO `invoices` (`invoice_id`, `booking_id`, `fleet_owner_id`, `renter_id`, `invoice_number`, `issue_date`, `due_date`, `total_amount`, `remarks`, `status`) VALUES
+(1, 101, 3, 3, 'INV-2025-001', '2025-03-01', '2025-03-01', 1760.00, 'Hari Raya Rental', 'PAID'),
+(2, 102, 2, 2, 'INV-2025-002', '2025-05-20', '2025-05-20', 1350.00, 'Sabah Trip', 'PAID'),
+(3, 103, 1, 4, 'INV-2024-099', '2024-12-20', '2024-12-20', 1610.00, 'January Holiday', 'PAID'),
+(4, 104, 1, 1, 'INV-2025-045', '2025-05-10', '2025-05-10', 120.00, 'Student Rental', 'PAID'),
+(5, 105, 2, 5, 'INV-2025-088', '2025-08-15', '2025-08-20', 900.00, 'Merdeka Weekend', 'ISSUED');
+
 -- --------------------------------------------------------
 
 --
@@ -160,6 +217,16 @@ CREATE TABLE `payments` (
   `verified_by_user_id` int(11) DEFAULT NULL
 ) ;
 
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`payment_id`, `invoice_id`, `payment_date`, `amount`, `payment_method`, `payment_status`, `transaction_reference`, `verification_proof_url`, `verified_by_user_id`) VALUES
+(1, 1, '2025-03-01 01:05:00', 1760.00, 'BANK_TRANSFER', 'VERIFIED', 'FPX_99887711', 'https://receipts/1.pdf', 1),
+(2, 2, '2025-05-20 06:05:00', 1350.00, 'CREDIT_CARD', 'VERIFIED', 'ch_3Lz9922aa', 'https://receipts/2.pdf', 1),
+(3, 3, '2024-12-20 02:05:00', 1610.00, 'CREDIT_CARD', 'VERIFIED', 'tx_int_8877', 'https://receipts/3.pdf', 1),
+(4, 4, '2025-05-10 00:05:00', 120.00, 'QR_PAYMENT', 'VERIFIED', 'tng_223344', 'https://receipts/4.pdf', 1);
+
 -- --------------------------------------------------------
 
 --
@@ -173,6 +240,20 @@ CREATE TABLE `paymentstatuslog` (
   `actor_user_id` int(11) DEFAULT NULL,
   `status_timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `paymentstatuslog`
+--
+
+INSERT INTO `paymentstatuslog` (`payment_log_id`, `payment_id`, `status_value`, `actor_user_id`, `status_timestamp`) VALUES
+(1, 1, 'PENDING', 7, '2025-03-01 01:05:00'),
+(2, 1, 'VERIFIED', 1, '2025-03-01 01:06:00'),
+(3, 2, 'PENDING', 6, '2025-05-20 06:05:00'),
+(4, 2, 'VERIFIED', 1, '2025-05-20 06:10:00'),
+(5, 3, 'PENDING', 8, '2024-12-20 02:05:00'),
+(6, 3, 'VERIFIED', 1, '2024-12-20 02:06:00'),
+(7, 4, 'PENDING', 5, '2025-05-10 00:05:00'),
+(8, 4, 'VERIFIED', 1, '2025-05-10 00:05:30');
 
 -- --------------------------------------------------------
 
@@ -240,15 +321,15 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `email`, `hashed_password`, `user_role`, `profile_image_url`, `created_at`, `is_active`) VALUES
-(1, 'admin@rentmy.com.my', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'PLATFORM_ADMIN', NULL, '2023-01-01 00:00:00', 1),
-(2, 'ops@metrocity.com.my', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'FLEET_OWNER', NULL, '2023-02-15 01:30:00', 1),
-(3, 'josephine@borneo4x4.my', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'FLEET_OWNER', NULL, '2023-03-10 06:20:00', 1),
-(4, 'manager@prestigelimo.com', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'FLEET_OWNER', NULL, '2023-04-05 03:00:00', 1),
-(5, 'nurul.izzah@student.um.edu.my', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'RENTER', NULL, '2024-01-10 02:00:00', 1),
-(6, 'jason.lee@corp.my', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'RENTER', NULL, '2024-01-12 08:30:00', 1),
-(7, 'muthu.kumar@gmail.com', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'RENTER', NULL, '2024-02-01 01:15:00', 1),
-(8, 'sarah.jenkins@ukmail.co.uk', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'RENTER', NULL, '2024-03-15 05:45:00', 1),
-(9, 'awang.damit@sabah.gov.my', '$2a$12$23a1K6vRlzZJWOejUT5K2OVp3gEz1C6X8E3eaFVYgXHsZWjP636eO', 'RENTER', NULL, '2024-04-20 00:30:00', 1);
+(1, 'admin@rentmy.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'PLATFORM_ADMIN', NULL, '2023-01-01 00:00:00', 1),
+(2, 'ops@metrocity.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', NULL, '2023-02-15 01:30:00', 1),
+(3, 'josephine@borneo4x4.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', NULL, '2023-03-10 06:20:00', 1),
+(4, 'manager@prestigelimo.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', NULL, '2023-04-05 03:00:00', 1),
+(5, 'nurul.izzah@student.um.edu.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-01-10 02:00:00', 1),
+(6, 'jason.lee@corp.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-01-12 08:30:00', 1),
+(7, 'muthu.kumar@gmail.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-02-01 01:15:00', 1),
+(8, 'sarah.jenkins@ukmail.co.uk', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-03-15 05:45:00', 1),
+(9, 'awang.damit@sabah.gov.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-04-20 00:30:00', 1);
 
 -- --------------------------------------------------------
 
@@ -266,6 +347,24 @@ CREATE TABLE `vehiclemaintenance` (
   `status` enum('PENDING','IN_PROGRESS','COMPLETED') DEFAULT 'PENDING',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `vehiclemaintenance`
+--
+
+INSERT INTO `vehiclemaintenance` (`maintenance_id`, `vehicle_id`, `fleet_owner_id`, `description`, `maintenance_date`, `cost`, `status`, `created_at`) VALUES
+(1, 3, 1, 'Regular Service 20k KM (Oil Change)', '2024-12-01', 250.00, 'COMPLETED', '2024-12-01 02:00:00'),
+(2, 1, 1, 'Replace front brake pads', '2024-11-15', 180.00, 'COMPLETED', '2024-11-15 01:00:00'),
+(3, 2, 1, '5000km service - Oil and filter change', '2024-10-20', 150.00, 'COMPLETED', '2024-10-20 02:30:00'),
+(4, 1, 1, 'Scheduled 30k service', '2025-06-01', 350.00, 'PENDING', '2025-05-25 06:00:00'),
+(5, 4, 2, 'Replace air filter and spark plugs', '2024-09-10', 280.00, 'COMPLETED', '2024-09-10 03:00:00'),
+(6, 5, 2, 'Major service 30k km - Engine oil, filters, brake check', '2025-02-14', 650.00, 'COMPLETED', '2025-02-14 00:30:00'),
+(7, 6, 2, 'Tire rotation and wheel alignment', '2024-12-05', 220.00, 'COMPLETED', '2024-12-05 05:00:00'),
+(8, 5, 2, 'Replace rear brake discs', '2025-07-10', 850.00, 'IN_PROGRESS', '2025-07-10 01:00:00'),
+(9, 7, 3, '10k service package', '2025-03-20', 380.00, 'COMPLETED', '2025-03-20 02:00:00'),
+(10, 8, 3, 'Premium detailing and interior cleaning', '2025-01-25', 450.00, 'COMPLETED', '2025-01-25 06:30:00'),
+(11, 9, 3, 'BMW comprehensive inspection', '2024-11-30', 550.00, 'COMPLETED', '2024-11-30 03:00:00'),
+(12, 8, 3, 'Air conditioning system service', '2025-05-15', 420.00, 'COMPLETED', '2025-05-15 07:00:00');
 
 -- --------------------------------------------------------
 
@@ -463,7 +562,7 @@ ALTER TABLE `bookings`
 -- AUTO_INCREMENT for table `bookingstatuslog`
 --
 ALTER TABLE `bookingstatuslog`
-  MODIFY `booking_log_id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `booking_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `fleetowners`
@@ -487,7 +586,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `paymentstatuslog`
 --
 ALTER TABLE `paymentstatuslog`
-  MODIFY `payment_log_id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `payment_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `platformadmins`
@@ -511,7 +610,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `vehiclemaintenance`
 --
 ALTER TABLE `vehiclemaintenance`
-  MODIFY `maintenance_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `maintenance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `vehiclepricehistory`

@@ -1,6 +1,7 @@
 package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.SessionUser;
+import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.PaymentService;
@@ -12,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin")
@@ -84,5 +87,13 @@ public class AdminController {
     public String vehicles(Model model) {
         model.addAttribute("vehicles", vehicleManagementService.getAllVehicles());
         return "admin/vehicles";
+    }
+
+    @GetMapping("/users/view/{userId}")
+    public String viewUser(@PathVariable Long userId, @RequestParam String type, Model model) {
+        UserDetailDTO userDetail = userManagementService.getUserDetails(userId, type);
+        model.addAttribute("userDetail", userDetail);
+        model.addAttribute("userType", type);
+        return "admin/view-user";
     }
 }

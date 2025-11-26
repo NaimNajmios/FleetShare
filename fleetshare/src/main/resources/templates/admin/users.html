@@ -163,7 +163,8 @@
                                                     class="badge badge-danger">Inactive</span>
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-primary">View</button>
+                                                <a th:href="@{/admin/users/view/{id}(id=${owner.userId}, type='owner')}"
+                                                    class="btn btn-sm btn-outline-primary">View</a>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -212,7 +213,8 @@
                                                     class="badge badge-danger">Inactive</span>
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-primary">View</button>
+                                                <a th:href="@{/admin/users/view/{id}(id=${renter.userId}, type='renter')}"
+                                                    class="btn btn-sm btn-outline-primary">View</a>
                                             </td>
                                         </tr>
                                     </tbody>
