@@ -32,6 +32,15 @@ public class MaintenanceService {
      */
     public List<MaintenanceDTO> getAllMaintenance() {
         List<VehicleMaintenance> maintenanceList = maintenanceRepository.findAll();
+        return mapToDTOs(maintenanceList);
+    }
+
+    public List<MaintenanceDTO> getMaintenanceByVehicleId(Long vehicleId) {
+        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByVehicleId(vehicleId);
+        return mapToDTOs(maintenanceList);
+    }
+
+    private List<MaintenanceDTO> mapToDTOs(List<VehicleMaintenance> maintenanceList) {
         List<MaintenanceDTO> maintenanceDTOs = new ArrayList<>();
 
         for (VehicleMaintenance maintenance : maintenanceList) {
@@ -46,6 +55,7 @@ public class MaintenanceService {
             if (vehicle != null) {
                 MaintenanceDTO dto = new MaintenanceDTO(
                         maintenance.getMaintenanceId(),
+                        vehicle.getVehicleId(),
                         vehicle.getRegistrationNo(),
                         vehicle.getModel(),
                         vehicle.getBrand(),

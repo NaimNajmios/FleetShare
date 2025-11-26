@@ -1,5 +1,6 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
@@ -17,6 +18,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -65,6 +71,45 @@ public class AdminController {
     public String maintenance(Model model) {
         model.addAttribute("maintenanceRecords", maintenanceService.getAllMaintenance());
         return "admin/maintenance";
+    }
+
+    @GetMapping("/maintenance/vehicle/{vehicleId}")
+    public String vehicleMaintenanceDetails(@PathVariable Long vehicleId, Model model) {
+        // Get vehicle details
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+        model.addAttribute("vehicle", vehicle);
+
+        // Get maintenance records
+        List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByVehicleId(vehicleId);
+
+        // Sort by date descending
+        maintenanceRecords.sort(Comparator.comparing(MaintenanceDTO::getMaintenanceDate).reversed());
+
+        model.addAttribute("maintenanceRecords", maintenanceRecords);
+
+        // Calculate KPI metrics
+        int totalRecords = maintenanceRecords.size();
+        BigDecimal totalCost = maintenanceRecords.stream()
+                .map(MaintenanceDTO::getCost)
+                .filter(cost -> cost != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LocalDate lastMaintenanceDate = maintenanceRecords.stream()
+                .map(MaintenanceDTO::getMaintenanceDate)
+                .findFirst()
+                .orElse(null);
+
+        model.addAttribute("totalRecords", totalRecords);
+        model.addAttribute("totalCost", totalCost);
+        model.addAttribute("lastMaintenanceDate", lastMaintenanceDate);
+
+        // Get owner name
+        String ownerName = "Unknown Owner";
+        if (!maintenanceRecords.isEmpty()) {
+            ownerName = maintenanceRecords.get(0).getOwnerBusinessName();
+        }
+        model.addAttribute("ownerName", ownerName);
+
+        return "admin/vehicle-maintenance-details";
     }
 
     @GetMapping("/bookings")

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 public class MaintenanceDTO {
     private Long maintenanceId;
+    private Long vehicleId;
     private String vehicleRegistrationNo;
     private String vehicleModel;
     private String vehicleBrand;
@@ -18,10 +19,11 @@ public class MaintenanceDTO {
     public MaintenanceDTO() {
     }
 
-    public MaintenanceDTO(Long maintenanceId, String vehicleRegistrationNo, String vehicleModel,
+    public MaintenanceDTO(Long maintenanceId, Long vehicleId, String vehicleRegistrationNo, String vehicleModel,
             String vehicleBrand, String description, LocalDate maintenanceDate,
             BigDecimal cost, String status, String ownerBusinessName) {
         this.maintenanceId = maintenanceId;
+        this.vehicleId = vehicleId;
         this.vehicleRegistrationNo = vehicleRegistrationNo;
         this.vehicleModel = vehicleModel;
         this.vehicleBrand = vehicleBrand;
@@ -39,6 +41,14 @@ public class MaintenanceDTO {
 
     public void setMaintenanceId(Long maintenanceId) {
         this.maintenanceId = maintenanceId;
+    }
+
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
     }
 
     public String getVehicleRegistrationNo() {

@@ -87,7 +87,7 @@
                         <!-- Search and Filters -->
                         <div class="search-filter-bar">
                             <input type="text" class="search-input" id="maintenance-search"
-                                placeholder="Search by vehicle, description...">
+                                placeholder="Search by vehicle...">
                             <select class="filter-select" id="status-filter">
                                 <option value="">All Status</option>
                                 <option value="PENDING">Pending</option>
@@ -103,9 +103,7 @@
                                         <th>Vehicle</th>
                                         <th>Plate No.</th>
                                         <th>Owner</th>
-                                        <th>Description</th>
                                         <th>Date</th>
-                                        <th>Cost (RM)</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -117,11 +115,8 @@
                                             class="searchable">Toyota Camry</td>
                                         <td th:text="${record.vehicleRegistrationNo}" class="searchable">WXY 1234</td>
                                         <td th:text="${record.ownerBusinessName}">MetroCity Car Rental</td>
-                                        <td th:text="${record.description}" class="searchable">Oil change and filter
-                                            replacement</td>
                                         <td th:text="${#temporals.format(record.maintenanceDate, 'yyyy-MM-dd')}">
                                             2024-11-20</td>
-                                        <td th:text="${record.cost != null ? record.cost : 'N/A'}">150.00</td>
                                         <td>
                                             <span th:if="${record.status == 'PENDING'}"
                                                 class="badge badge-warning">Pending</span>
@@ -131,7 +126,8 @@
                                                 class="badge badge-success">Completed</span>
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-info">View</button>
+                                            <a th:href="@{/admin/maintenance/vehicle/{id}(id=${record.vehicleId})}"
+                                                class="btn btn-sm btn-outline-info">View</a>
                                             <button class="btn btn-sm btn-outline-warning">Edit</button>
                                         </td>
                                     </tr>
