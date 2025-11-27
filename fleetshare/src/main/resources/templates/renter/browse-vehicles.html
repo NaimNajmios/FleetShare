@@ -34,161 +34,50 @@
             <h2 class="section-title">Available Vehicles</h2>
 
             <div class="vehicle-grid">
-                <!-- Vehicle Card 1: Luxury Sedan -->
-                <div class="vehicle-card" data-category="sedan">
+                <!-- Dynamic Vehicle Cards from Database -->
+                <div class="vehicle-card" th:each="vehicle : ${vehicles}"
+                    th:attr="data-category=${vehicle.category != null ? vehicle.category.toLowerCase() : 'sedan'}">
                     <div class="vehicle-image-container">
-                        <i class="fas fa-car vehicle-placeholder-icon"></i>
-                        <div class="price-badge">RM55/day</div>
+                        <!-- Display vehicle image if available, otherwise show placeholder icon -->
+                        <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                            th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                        <i th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                            class="fas fa-car vehicle-placeholder-icon"></i>
+                        <div class="price-badge" th:text="'RM' + ${vehicle.ratePerDay} + '/day'">RM55/day</div>
                     </div>
                     <div class="vehicle-details">
-                        <h3 class="vehicle-title">Luxury Sedan</h3>
+                        <h3 class="vehicle-title" th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h3>
                         <div class="vehicle-specs">
                             <div class="spec-item">
                                 <i class="fas fa-tachometer-alt spec-icon"></i>
-                                <span>15k mi</span>
+                                <span th:text="${vehicle.mileage != null ? vehicle.mileage + ' km' : 'N/A'}">15k
+                                    mi</span>
                             </div>
                             <div class="spec-item">
                                 <i class="fas fa-cog spec-icon"></i>
-                                <span>Auto</span>
+                                <span
+                                    th:text="${vehicle.transmissionType != null ? vehicle.transmissionType : 'Auto'}">Auto</span>
                             </div>
                             <div class="spec-item">
                                 <i class="fas fa-users spec-icon"></i>
                                 <span>5 Seats</span>
                             </div>
                         </div>
-                        <button class="book-now-btn">Book Now</button>
+                        <!-- Fixed: Using data attributes instead of th:onclick to avoid XSS protection issues -->
+                        <button class="book-now-btn"
+                            th:attr="data-vehicle-brand=${vehicle.brand}, data-vehicle-model=${vehicle.model}, data-vehicle-id=${vehicle.vehicleId}">
+                            Book Now
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Vehicle Card 2: Modern SUV -->
-                <div class="vehicle-card" data-category="suv">
-                    <div class="vehicle-image-container">
-                        <i class="fas fa-car vehicle-placeholder-icon"></i>
-                        <div class="price-badge">RM75/day</div>
-                    </div>
-                    <div class="vehicle-details">
-                        <h3 class="vehicle-title">Modern SUV</h3>
-                        <div class="vehicle-specs">
-                            <div class="spec-item">
-                                <i class="fas fa-tachometer-alt spec-icon"></i>
-                                <span>8k mi</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-cog spec-icon"></i>
-                                <span>Auto</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-users spec-icon"></i>
-                                <span>7 Seats</span>
-                            </div>
-                        </div>
-                        <button class="book-now-btn">Book Now</button>
-                    </div>
-                </div>
-
-                <!-- Vehicle Card 3: Compact Sedan -->
-                <div class="vehicle-card" data-category="sedan">
-                    <div class="vehicle-image-container">
-                        <i class="fas fa-car vehicle-placeholder-icon"></i>
-                        <div class="price-badge">RM35/day</div>
-                    </div>
-                    <div class="vehicle-details">
-                        <h3 class="vehicle-title">Compact Sedan</h3>
-                        <div class="vehicle-specs">
-                            <div class="spec-item">
-                                <i class="fas fa-tachometer-alt spec-icon"></i>
-                                <span>22k mi</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-cog spec-icon"></i>
-                                <span>Manual</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-users spec-icon"></i>
-                                <span>5 Seats</span>
-                            </div>
-                        </div>
-                        <button class="book-now-btn">Book Now</button>
-                    </div>
-                </div>
-
-                <!-- Vehicle Card 4: City Hatchback -->
-                <div class="vehicle-card" data-category="hatchback">
-                    <div class="vehicle-image-container">
-                        <i class="fas fa-car vehicle-placeholder-icon"></i>
-                        <div class="price-badge">RM28/day</div>
-                    </div>
-                    <div class="vehicle-details">
-                        <h3 class="vehicle-title">City Hatchback</h3>
-                        <div class="vehicle-specs">
-                            <div class="spec-item">
-                                <i class="fas fa-tachometer-alt spec-icon"></i>
-                                <span>18k mi</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-cog spec-icon"></i>
-                                <span>Auto</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-users spec-icon"></i>
-                                <span>4 Seats</span>
-                            </div>
-                        </div>
-                        <button class="book-now-btn">Book Now</button>
-                    </div>
-                </div>
-
-                <!-- Vehicle Card 5: Sport Convertible -->
-                <div class="vehicle-card" data-category="convertible">
-                    <div class="vehicle-image-container">
-                        <i class="fas fa-car vehicle-placeholder-icon"></i>
-                        <div class="price-badge">RM95/day</div>
-                    </div>
-                    <div class="vehicle-details">
-                        <h3 class="vehicle-title">Sport Convertible</h3>
-                        <div class="vehicle-specs">
-                            <div class="spec-item">
-                                <i class="fas fa-tachometer-alt spec-icon"></i>
-                                <span>5k mi</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-cog spec-icon"></i>
-                                <span>Manual</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-users spec-icon"></i>
-                                <span>2 Seats</span>
-                            </div>
-                        </div>
-                        <button class="book-now-btn">Book Now</button>
-                    </div>
-                </div>
-
-                <!-- Vehicle Card 6: Family SUV -->
-                <div class="vehicle-card" data-category="suv">
-                    <div class="vehicle-image-container">
-                        <i class="fas fa-car vehicle-placeholder-icon"></i>
-                        <div class="price-badge">RM65/day</div>
-                    </div>
-                    <div class="vehicle-details">
-                        <h3 class="vehicle-title">Family SUV</h3>
-                        <div class="vehicle-specs">
-                            <div class="spec-item">
-                                <i class="fas fa-tachometer-alt spec-icon"></i>
-                                <span>12k mi</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-cog spec-icon"></i>
-                                <span>Auto</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-users spec-icon"></i>
-                                <span>7 Seats</span>
-                            </div>
-                        </div>
-                        <button class="book-now-btn">Book Now</button>
-                    </div>
-                </div>
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(vehicles)}" style="text-align: center; padding: 4rem 2rem; color: #6c757d;">
+                <i class="fas fa-car" style="font-size: 4rem; margin-bottom: 1rem; color: #ced4da;"></i>
+                <h3 style="margin-bottom: 0.5rem;">No Vehicles Available</h3>
+                <p>There are currently no vehicles available for rent. Please check back later.</p>
             </div>
         </div>
     </main>
@@ -231,6 +120,23 @@
                     } else {
                         card.style.display = 'none';
                     }
+                });
+            });
+
+            // Book Now button functionality - using event delegation to avoid XSS issues
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.book-now-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const brand = this.getAttribute('data-vehicle-brand');
+                        const model = this.getAttribute('data-vehicle-model');
+                        const vehicleId = this.getAttribute('data-vehicle-id');
+
+                        // Placeholder alert - replace with actual booking logic later
+                        alert('Booking feature coming soon for vehicle: ' + brand + ' ' + model + ' (ID: ' + vehicleId + ')');
+
+                        // Future: redirect to booking page
+                        // window.location.href = '/renter/book/' + vehicleId;
+                    });
                 });
             });
         </script>

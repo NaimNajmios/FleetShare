@@ -1,10 +1,153 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/admin-layout}" th:with="activePage='report', pageTitle='Reports'">
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='report', pageTitle='Standard Report Builder'">
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Custom styles for this page if needed -->
+        <style>
+            /* Tab Navigation */
+            .report-tabs {
+                display: flex;
+                gap: 0.5rem;
+                margin-bottom: 2rem;
+                border-bottom: 2px solid #e9ecef;
+                flex-wrap: wrap;
+            }
+
+            .report-tab {
+                padding: 0.75rem 1.5rem;
+                background: transparent;
+                border: none;
+                border-bottom: 3px solid transparent;
+                color: #6c757d;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .report-tab:hover {
+                color: #495057;
+                background: #f8f9fa;
+            }
+
+            .report-tab.active {
+                color: #dc3545;
+                border-bottom-color: #dc3545;
+            }
+
+            /* Report Configuration */
+            .config-section {
+                background: #f8f9fa;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .config-row {
+                display: flex;
+                gap: 1.5rem;
+                margin-bottom: 1.5rem;
+                flex-wrap: wrap;
+            }
+
+            .config-group {
+                flex: 1;
+                min-width: 250px;
+            }
+
+            .config-label {
+                display: block;
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 0.5rem;
+                font-size: 0.875rem;
+            }
+
+            .config-select,
+            .config-input {
+                width: 100%;
+                padding: 0.5rem 1rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+                background: white;
+                font-size: 0.875rem;
+            }
+
+            /* Duration Radio Buttons */
+            .duration-options {
+                display: flex;
+                gap: 1rem;
+                flex-wrap: wrap;
+                margin-bottom: 1rem;
+            }
+
+            .duration-radio {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .duration-radio input[type="radio"] {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+            }
+
+            .duration-radio label {
+                margin: 0;
+                cursor: pointer;
+                font-size: 0.875rem;
+            }
+
+            /* Date Range */
+            .date-range {
+                display: flex;
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            /* Generate Button */
+            .btn-generate {
+                background: #dc3545;
+                color: white;
+                padding: 0.75rem 2rem;
+                border: none;
+                border-radius: 0.25rem;
+                font-weight: 600;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: background 0.3s ease;
+            }
+
+            .btn-generate:hover {
+                background: #c82333;
+            }
+
+            .btn-generate i {
+                font-size: 1.25rem;
+            }
+
+            /* Switch to AI Assistant */
+            .switch-mode {
+                text-align: right;
+                margin-bottom: 1rem;
+            }
+
+            .switch-mode a {
+                color: #007bff;
+                text-decoration: none;
+                font-size: 0.875rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .switch-mode a:hover {
+                text-decoration: underline;
+            }
+        </style>
     </th:block>
 </head>
 
@@ -14,34 +157,15 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">System Reports</h3>
-                        <h6 class="font-weight-normal mb-0">Analyze system-wide performance and metrics.</h6>
+                        <h3 class="font-weight-bold">Standard Report Builder</h3>
+                        <h6 class="font-weight-normal mb-0">Generate structured, parameter-based reports</h6>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Total Revenue Trend</h4>
-                        <canvas id="revenueChart"></canvas>
-                        <!-- Placeholder for chart -->
-                        <div class="mt-4 text-center text-muted">
-                            [Chart Placeholder]
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">User Growth</h4>
-                        <canvas id="userGrowthChart"></canvas>
-                        <!-- Placeholder for chart -->
-                        <div class="mt-4 text-center text-muted">
-                            [Chart Placeholder]
+                    <div class="col-12 col-xl-4">
+                        <div class="switch-mode">
+                            <a th:href="@{/admin/reports/ai}">
+                                <i class="mdi mdi-sparkles"></i>
+                                Try AI Data Assistant
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -49,37 +173,119 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
+            <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Top Performing Vehicles</h4>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Vehicle</th>
-                                        <th>Total Rentals</th>
-                                        <th>Total Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Toyota Camry</td>
-                                        <td>45</td>
-                                        <td>RM 12,500</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Honda CR-V</td>
-                                        <td>38</td>
-                                        <td>RM 15,200</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Perodua Myvi</td>
-                                        <td>62</td>
-                                        <td>RM 6,200</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <!-- Report Category Tabs -->
+                        <div class="report-tabs">
+                            <button class="report-tab active" data-tab="booking">
+                                <i class="mdi mdi-calendar-check"></i> Booking Reports
+                            </button>
+                            <button class="report-tab" data-tab="vehicle">
+                                <i class="mdi mdi-car"></i> Vehicle Reports
+                            </button>
+                            <button class="report-tab" data-tab="payment">
+                                <i class="mdi mdi-currency-usd"></i> Payment Reports
+                            </button>
+                            <button class="report-tab" data-tab="maintenance">
+                                <i class="mdi mdi-wrench"></i> Maintenance Reports
+                            </button>
+                            <button class="report-tab" data-tab="user">
+                                <i class="mdi mdi-account-group"></i> User Reports
+                            </button>
+                        </div>
+
+                        <!-- Report Configuration -->
+                        <div class="config-section">
+                            <div class="config-row">
+                                <div class="config-group">
+                                    <label class="config-label">Report Type</label>
+                                    <select class="config-select" id="report-type">
+                                        <option value="">Select Report Template</option>
+                                        <option value="monthly-revenue">Monthly Revenue</option>
+                                        <option value="utilization-rate">Utilization Rate</option>
+                                        <option value="booking-summary">Booking Summary</option>
+                                        <option value="vehicle-performance">Vehicle Performance</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="config-row">
+                                <div class="config-group" style="flex: 2;">
+                                    <label class="config-label">Duration</label>
+                                    <div class="duration-options">
+                                        <div class="duration-radio">
+                                            <input type="radio" name="duration" id="today" value="today">
+                                            <label for="today">Today</label>
+                                        </div>
+                                        <div class="duration-radio">
+                                            <input type="radio" name="duration" id="last7" value="last7" checked>
+                                            <label for="last7">Last 7 Days</label>
+                                        </div>
+                                        <div class="duration-radio">
+                                            <input type="radio" name="duration" id="thisMonth" value="thisMonth">
+                                            <label for="thisMonth">This Month</label>
+                                        </div>
+                                        <div class="duration-radio">
+                                            <input type="radio" name="duration" id="lastMonth" value="lastMonth">
+                                            <label for="lastMonth">Last Month</label>
+                                        </div>
+                                        <div class="duration-radio">
+                                            <input type="radio" name="duration" id="custom" value="custom">
+                                            <label for="custom">Custom Range</label>
+                                        </div>
+                                    </div>
+                                    <div class="date-range">
+                                        <div style="flex: 1;">
+                                            <label class="config-label">Start Date</label>
+                                            <input type="date" class="config-input" id="start-date">
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label class="config-label">End Date</label>
+                                            <input type="date" class="config-input" id="end-date">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="config-row">
+                                <div class="config-group">
+                                    <label class="config-label">Booking Status</label>
+                                    <select class="config-select" id="booking-status">
+                                        <option value="">All Status</option>
+                                        <option value="confirmed">Confirmed</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="config-group">
+                                    <label class="config-label">Vehicle</label>
+                                    <select class="config-select" id="vehicle-filter">
+                                        <option value="">All Vehicles</option>
+                                        <option value="perodua-myvi">Perodua Myvi</option>
+                                        <option value="toyota-camry">Toyota Camry</option>
+                                        <option value="honda-civic">Honda Civic</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="text-align: right; margin-top: 1rem;">
+                                <button class="btn-generate">
+                                    <i class="mdi mdi-file-document"></i>
+                                    Generate Report
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div
+                            style="background: #e7f3ff; border-left: 4px solid #007bff; padding: 1rem; border-radius: 0.25rem;">
+                            <p style="margin: 0; color: #004085; font-size: 0.875rem;">
+                                <i class="mdi mdi-information"></i>
+                                <strong>Tip:</strong> Reports will be generated as PDF or Excel files. For quick data
+                                exploration without parameters, try our <a th:href="@{/admin/reports/ai}"
+                                    style="color: #007bff; text-decoration: underline;">AI Data Assistant</a>.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -88,7 +294,75 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <!-- Extra JS for this page -->
+        <script>
+            // Tab switching functionality
+            document.querySelectorAll('.report-tab').forEach(tab => {
+                tab.addEventListener('click', function () {
+                    document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Update report type options based on selected tab
+                    const reportType = document.getElementById('report-type');
+                    const tabName = this.dataset.tab;
+
+                    // Clear and update options (placeholder functionality)
+                    reportType.innerHTML = '<option value="">Select Report Template</option>';
+
+                    // Add tab-specific options
+                    if (tabName === 'booking') {
+                        reportType.innerHTML += `
+                            <option value="monthly-revenue">Monthly Revenue</option>
+                            <option value="utilization-rate">Utilization Rate</option>
+                            <option value="booking-summary">Booking Summary</option>
+                        `;
+                    } else if (tabName === 'vehicle') {
+                        reportType.innerHTML += `
+                            <option value="vehicle-performance">Vehicle Performance</option>
+                            <option value="fleet-status">Fleet Status</option>
+                            <option value="maintenance-due">Maintenance Due</option>
+                        `;
+                    } else if (tabName === 'payment') {
+                        reportType.innerHTML += `
+                            <option value="payment-summary">Payment Summary</option>
+                            <option value="outstanding-payments">Outstanding Payments</option>
+                            <option value="revenue-analysis">Revenue Analysis</option>
+                        `;
+                    } else if (tabName === 'maintenance') {
+                        reportType.innerHTML += `
+                            <option value="maintenance-history">Maintenance History</option>
+                            <option value="cost-analysis">Cost Analysis</option>
+                            <option value="upcoming-maintenance">Upcoming Maintenance</option>
+                        `;
+                    } else if (tabName === 'user') {
+                        reportType.innerHTML += `
+                            <option value="user-activity">User Activity</option>
+                            <option value="top-customers">Top Customers</option>
+                            <option value="user-demographics">User Demographics</option>
+                        `;
+                    }
+                });
+            });
+
+            // Date range visibility based on duration selection
+            document.querySelectorAll('input[name="duration"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const dateRange = document.querySelector('.date-range');
+                    if (this.value === 'custom') {
+                        dateRange.style.display = 'flex';
+                    } else {
+                        dateRange.style.display = 'none';
+                    }
+                });
+            });
+
+            // Initialize date range visibility
+            document.querySelector('.date-range').style.display = 'none';
+
+            // Generate Report button
+            document.querySelector('.btn-generate').addEventListener('click', function () {
+                alert('Report generation functionality will be implemented. This is UI only.');
+            });
+        </script>
     </th:block>
 </body>
 

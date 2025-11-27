@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='report', pageTitle='AI Data Assistant'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            /* Layout */
+            .ai-container {
+                display: grid;
+                grid-template-columns: 1fr 1.2fr;
+                gap: 1.5rem;
+                min-height: 70vh;
+            }
+
+            @media (max-width: 992px) {
+                .ai-container {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* Left Panel - Query Input */
+            .query-panel {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .query-header {
+                margin-bottom: 1rem;
+            }
+
+            .query-header h5 {
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 0.5rem;
+            }
+
+            .query-header p {
+                color: #6c757d;
+                font-size: 0.875rem;
+                margin: 0;
+            }
+
+            .query-input-area {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .query-textarea {
+                flex: 1;
+                min-height: 200px;
+                padding: 1rem;
+                border: 2px solid #ced4da;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+                resize: vertical;
+                font-family: inherit;
+            }
+
+            .query-textarea:focus {
+                outline: none;
+                border-color: #007bff;
+            }
+
+            /* Suggestion Chips */
+            .suggestions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .suggestion-label {
+                font-size: 0.75rem;
+                color: #6c757d;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+
+            .suggestion-chip {
+                padding: 0.5rem 1rem;
+                background: #e7f3ff;
+                border: 1px solid #b3d9ff;
+                border-radius: 1.5rem;
+                color: #004085;
+                font-size: 0.75rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .suggestion-chip:hover {
+                background: #cce5ff;
+                transform: translateY(-2px);
+            }
+
+            /* Generate Button with AI Sparkles */
+            .btn-ai-generate {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 0.875rem 2rem;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+            }
+
+            .btn-ai-generate:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn-ai-generate i {
+                font-size: 1.25rem;
+            }
+
+            /* Right Panel - Results */
+            .results-panel {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .results-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+            }
+
+            .results-header h5 {
+                font-weight: 600;
+                color: #495057;
+                margin: 0;
+            }
+
+            .export-options {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .export-btn {
+                padding: 0.375rem 0.75rem;
+                background: white;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+                color: #495057;
+                font-size: 0.75rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+                transition: all 0.2s ease;
+            }
+
+            .export-btn:hover {
+                background: #f8f9fa;
+                border-color: #6c757d;
+            }
+
+            .export-btn i {
+                font-size: 0.875rem;
+            }
+
+            /* Results Table */
+            .results-table-container {
+                flex: 1;
+                background: #f8f9fa;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                overflow: auto;
+            }
+
+            .results-table {
+                width: 100%;
+                background: white;
+                border-radius: 0.25rem;
+                overflow: hidden;
+            }
+
+            .results-table thead {
+                background: #e9ecef;
+            }
+
+            .results-table th {
+                padding: 0.75rem;
+                font-weight: 600;
+                font-size: 0.875rem;
+                color: #495057;
+                text-align: left;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            .results-table td {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+                color: #212529;
+                border-bottom: 1px solid #dee2e6;
+            }
+
+            .results-table tbody tr:hover {
+                background: #f8f9fa;
+            }
+
+            /* Empty State */
+            .empty-state {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #6c757d;
+                text-align: center;
+                padding: 3rem;
+            }
+
+            .empty-state i {
+                font-size: 4rem;
+                margin-bottom: 1rem;
+                color: #ced4da;
+            }
+
+            .empty-state p {
+                margin: 0;
+                font-size: 0.875rem;
+            }
+
+            /* Switch Link */
+            .switch-mode {
+                text-align: right;
+                margin-bottom: 1rem;
+            }
+
+            .switch-mode a {
+                color: #007bff;
+                text-decoration: none;
+                font-size: 0.875rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .switch-mode a:hover {
+                text-decoration: underline;
+            }
+
+            /* Badge for vehicle color */
+            .color-badge {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                border: 2px solid #fff;
+                box-shadow: 0 0 0 1px #dee2e6;
+            }
+
+            .color-red {
+                background-color: #dc3545;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">AI Data Assistant</h3>
+                        <h6 class="font-weight-normal mb-0">Ask questions in natural language to explore your data</h6>
+                    </div>
+                    <div class="col-12 col-xl-4">
+                        <div class="switch-mode">
+                            <a th:href="@{/admin/reports}">
+                                <i class="mdi mdi-file-document"></i>
+                                Switch to Standard Report Builder
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="ai-container">
+                            <!-- Left Panel: Query Input -->
+                            <div class="query-panel">
+                                <div class="query-header">
+                                    <h5><i class="mdi mdi-message-question"></i> Ask a Question</h5>
+                                    <p>Type your question in plain English</p>
+                                </div>
+
+                                <div class="query-input-area">
+                                    <textarea class="query-textarea" id="ai-query"
+                                        placeholder="Type your question here, e.g., 'Show me all red cars rented last month...'"></textarea>
+
+                                    <div>
+                                        <span class="suggestion-label">QUICK START SUGGESTIONS:</span>
+                                        <div class="suggestions">
+                                            <button class="suggestion-chip" data-query="Total revenue today">
+                                                💰 Total revenue today
+                                            </button>
+                                            <button class="suggestion-chip" data-query="List overdue returns">
+                                                ⚠️ List overdue returns
+                                            </button>
+                                            <button class="suggestion-chip" data-query="Top spending customers">
+                                                👥 Top spending customers
+                                            </button>
+                                            <button class="suggestion-chip"
+                                                data-query="Show me all red cars rented last month">
+                                                🚗 Red cars rented last month
+                                            </button>
+                                            <button class="suggestion-chip" data-query="Vehicles due for maintenance">
+                                                🔧 Vehicles due for maintenance
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-ai-generate" id="generate-ai-report">
+                                        <i class="mdi mdi-sparkles"></i>
+                                        Generate Report
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Right Panel: Results -->
+                            <div class="results-panel">
+                                <div class="results-header">
+                                    <h5><i class="mdi mdi-table"></i> Results</h5>
+                                    <div class="export-options" id="export-options" style="display: none;">
+                                        <button class="export-btn" title="Export to CSV">
+                                            <i class="mdi mdi-file-delimited"></i>
+                                            CSV
+                                        </button>
+                                        <button class="export-btn" title="Copy to Clipboard">
+                                            <i class="mdi mdi-content-copy"></i>
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="results-table-container">
+                                    <!-- Empty State (shown initially) -->
+                                    <div class="empty-state" id="empty-state">
+                                        <i class="mdi mdi-robot"></i>
+                                        <p><strong>No query yet</strong></p>
+                                        <p>Ask a question or select a suggestion to get started</p>
+                                    </div>
+
+                                    <!-- Results Table (hidden initially) -->
+                                    <table class="results-table" id="results-table" style="display: none;">
+                                        <thead>
+                                            <tr>
+                                                <th>Vehicle</th>
+                                                <th>Model</th>
+                                                <th>Color</th>
+                                                <th>Registration</th>
+                                                <th>Last Rented</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Toyota Camry</td>
+                                                <td>2022</td>
+                                                <td><span class="color-badge color-red"></span> Red</td>
+                                                <td>WXY 1234</td>
+                                                <td>2024-10-15</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Ford Focus</td>
+                                                <td>2021</td>
+                                                <td><span class="color-badge color-red"></span> Red</td>
+                                                <td>ABC 5678</td>
+                                                <td>2024-10-08</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Honda Civic</td>
+                                                <td>2023</td>
+                                                <td><span class="color-badge color-red"></span> Red</td>
+                                                <td>DEF 9012</td>
+                                                <td>2024-10-22</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div
+                    style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 0.25rem;">
+                    <p style="margin: 0; color: #856404; font-size: 0.875rem;">
+                        <i class="mdi mdi-lightbulb"></i>
+                        <strong>Pro Tip:</strong> The AI Assistant understands natural language. Try questions like "How
+                        many bookings were cancelled this week?" or "Which vehicle generated the most revenue?"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            // Suggestion chip click handler
+            document.querySelectorAll('.suggestion-chip').forEach(chip => {
+                chip.addEventListener('click', function () {
+                    const query = this.dataset.query;
+                    document.getElementById('ai-query').value = query;
+                });
+            });
+
+            // Generate report button
+            document.getElementById('generate-ai-report').addEventListener('click', function () {
+                const query = document.getElementById('ai-query').value.trim();
+
+                if (!query) {
+                    alert('Please enter a question or select a suggestion.');
+                    return;
+                }
+
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Generating...';
+
+                // Simulate AI processing (in real implementation, this would call backend)
+                setTimeout(() => {
+                    // Hide empty state
+                    document.getElementById('empty-state').style.display = 'none';
+
+                    // Show results table
+                    document.getElementById('results-table').style.display = 'table';
+
+                    // Show export options
+                    document.getElementById('export-options').style.display = 'flex';
+
+                    // Reset button
+                    this.disabled = false;
+                    this.innerHTML = '<i class="mdi mdi-sparkles"></i> Generate Report';
+
+                    // Alert (for UI demo)
+                    alert('AI query processed! This is a UI demo. In production, this would fetch real data based on your query: "' + query + '"');
+                }, 1500);
+            });
+
+            // Export to CSV
+            document.querySelector('.export-btn[title="Export to CSV"]').addEventListener('click', function () {
+                alert('Export to CSV functionality will be implemented.');
+            });
+
+            // Copy to Clipboard
+            document.querySelector('.export-btn[title="Copy to Clipboard"]').addEventListener('click', function () {
+                alert('Copy to clipboard functionality will be implemented.');
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>
