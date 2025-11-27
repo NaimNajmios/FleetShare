@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/renter-layout}" th:with="activePage='vehicles', pageTitle='Confirm Booking'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .confirmation-container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+            }
+
+            .page-header {
+                text-align: center;
+                margin-bottom: 2.5rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #212529;
+                margin-bottom: 0.5rem;
+            }
+
+            .page-subtitle {
+                color: #6c757d;
+                font-size: 1rem;
+            }
+
+            .info-card {
+                background: white;
+                border-radius: 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                overflow: hidden;
+            }
+
+            .card-header {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: #212529;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #e9ecef;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .card-header i {
+                color: #0d6efd;
+            }
+
+            /* Vehicle Summary */
+            .vehicle-summary {
+                display: flex;
+                gap: 2rem;
+                align-items: center;
+            }
+
+            .vehicle-thumb {
+                width: 150px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 0.5rem;
+                background: #f8f9fa;
+            }
+
+            .vehicle-details h3 {
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+            }
+
+            .vehicle-brand {
+                color: #6c757d;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 0.5rem;
+            }
+
+            .vehicle-rate {
+                color: #0d6efd;
+                font-weight: 600;
+            }
+
+            /* Details Grid */
+            .details-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .detail-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .detail-label {
+                font-size: 0.875rem;
+                color: #6c757d;
+            }
+
+            .detail-value {
+                font-weight: 600;
+                color: #212529;
+                font-size: 1rem;
+            }
+
+            /* Financials */
+            .total-cost-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px dashed #dee2e6;
+            }
+
+            .total-label {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #212529;
+            }
+
+            .total-amount {
+                font-size: 1.5rem;
+                font-weight: 800;
+                color: #0d6efd;
+            }
+
+            /* Action Buttons */
+            .action-buttons {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+                margin-top: 2rem;
+            }
+
+            .btn-confirm {
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 1rem;
+                font-size: 1rem;
+                font-weight: 600;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-align: center;
+                text-decoration: none;
+            }
+
+            .btn-confirm:hover {
+                background: #bb2d3b;
+                color: white;
+                transform: translateY(-1px);
+            }
+
+            .btn-cancel {
+                background: #212529;
+                color: white;
+                border: none;
+                padding: 1rem;
+                font-size: 1rem;
+                font-weight: 600;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-align: center;
+                text-decoration: none;
+            }
+
+            .btn-cancel:hover {
+                background: #000000;
+                color: white;
+                transform: translateY(-1px);
+            }
+
+            @media (max-width: 768px) {
+                .vehicle-summary {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .details-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <main layout:fragment="content">
+        <div class="confirmation-container">
+            <div class="page-header">
+                <h1 class="page-title">Booking Confirmation</h1>
+                <p class="page-subtitle">Please review your booking and client details below before confirming.</p>
+            </div>
+
+            <!-- A. Vehicle Summary -->
+            <div class="info-card">
+                <div class="card-header">
+                    <i class="fas fa-car"></i> Vehicle Summary
+                </div>
+                <div class="vehicle-summary">
+                    <img th:if="${vehicle.vehicleImageUrl != null}" th:src="${vehicle.vehicleImageUrl}"
+                        alt="Vehicle Image" class="vehicle-thumb">
+                    <div th:unless="${vehicle.vehicleImageUrl != null}" class="vehicle-thumb"
+                        style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-car fa-2x text-muted"></i>
+                    </div>
+
+                    <div class="vehicle-details">
+                        <div class="vehicle-brand" th:text="${vehicle.brand}">PERODUA</div>
+                        <h3 th:text="${vehicle.model}">Myvi 1.5 AV</h3>
+                        <div class="vehicle-rate" th:text="${'RM ' + vehicle.ratePerDay + '/day'}">RM 120.0/day</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B. Client Details -->
+            <div class="info-card">
+                <div class="card-header">
+                    <i class="fas fa-user"></i> Client Details
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value" th:text="${renterName}">Muhammad Naim Najmi</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Client ID</span>
+                        <span class="detail-value" th:text="${renterId}">2019</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value" th:text="${user.email}">najmi_n@gmail.com</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone</span>
+                        <span class="detail-value" th:text="${renterPhone}">01125696678</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C. Booking Details -->
+            <div class="info-card">
+                <div class="card-header">
+                    <i class="fas fa-calendar-alt"></i> Booking Details
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Pickup Date</span>
+                        <span class="detail-value" th:text="${pickupDate}">2025-06-23</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Return Date</span>
+                        <span class="detail-value" th:text="${returnDate}">2025-06-23</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duration</span>
+                        <span class="detail-value" th:text="${duration + ' Day(s)'}">1 day</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Confirmation Date</span>
+                        <span class="detail-value"
+                            th:text="${#temporals.format(confirmationDate, 'dd MMM yyyy, hh:mm a')}">27 Nov 2025, 03:22
+                            pm</span>
+                    </div>
+                </div>
+
+                <div class="total-cost-row">
+                    <span class="total-label">Total Cost</span>
+                    <span class="total-amount"
+                        th:text="${'RM ' + #numbers.formatDecimal(totalCost, 1, 'COMMA', 2, 'POINT')}">RM 120.00</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}" class="btn-cancel">CANCEL</a>
+                <!-- Placeholder form for confirmation action -->
+                <form action="#" method="POST" style="display: contents;">
+                    <button type="button" class="btn-confirm"
+                        onclick="alert('Booking functionality coming soon!')">CONFIRM BOOKING</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

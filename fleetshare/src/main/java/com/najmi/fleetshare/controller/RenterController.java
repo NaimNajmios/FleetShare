@@ -86,6 +86,52 @@ public class RenterController {
         return "renter/booking-form";
     }
 
+    @org.springframework.web.bind.annotation.PostMapping("/vehicles/{id}/book/review")
+    public String reviewBooking(@PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestParam("pickupDate") String pickupDateStr,
+            @org.springframework.web.bind.annotation.RequestParam("returnDate") String returnDateStr,
+            HttpSession session, Model model) {
+
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(id);
+        if (vehicle == null) {
+            return "redirect:/renter/vehicles";
+        }
+
+        try {
+            java.time.LocalDate pickupDate = java.time.LocalDate.parse(pickupDateStr);
+            java.time.LocalDate returnDate = java.time.LocalDate.parse(returnDateStr);
+
+            long days = java.time.temporal.ChronoUnit.DAYS.between(pickupDate, returnDate);
+            if (days == 0)
+                days = 1; // Minimum 1 day
+
+            java.math.BigDecimal totalCost = vehicle.getRatePerDay().multiply(java.math.BigDecimal.valueOf(days));
+
+            model.addAttribute("user", user);
+            model.addAttribute("renterName", user.getRenterDetails().getFullName());
+            model.addAttribute("renterId", user.getRenterDetails().getRenterId());
+            model.addAttribute("renterPhone", user.getRenterDetails().getPhoneNumber()); // Assuming phone number is
+                                                                                         // available in RenterDetails
+
+            model.addAttribute("vehicle", vehicle);
+            model.addAttribute("pickupDate", pickupDate);
+            model.addAttribute("returnDate", returnDate);
+            model.addAttribute("duration", days);
+            model.addAttribute("totalCost", totalCost);
+            model.addAttribute("confirmationDate", java.time.LocalDateTime.now());
+
+            return "renter/booking-confirmation";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/renter/vehicles/" + id + "/book";
+        }
+    }
+
     @GetMapping("/bookings")
     public String myBookings(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
