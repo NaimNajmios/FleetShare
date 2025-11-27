@@ -197,7 +197,7 @@
             <div class="booking-form-card">
                 <h1 class="form-title">Select Rental Dates</h1>
 
-                <form id="bookingForm" action="#" method="POST">
+                <form id="bookingForm" action="#" method="POST" th:data-rate="${vehicle.ratePerDay}">
                     <div class="form-group">
                         <label class="form-label">Pickup Date</label>
                         <input type="date" id="pickupDate" name="pickupDate" class="form-control" required>
@@ -212,6 +212,12 @@
                     <div class="form-group">
                         <label class="form-label">Duration (Days)</label>
                         <input type="text" id="duration" class="form-control" value="0" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Total Cost</label>
+                        <input type="text" id="totalCost" class="form-control" value="RM 0.00" readonly
+                            style="font-weight: 700; color: #0d6efd; font-size: 1.25rem;">
                     </div>
 
                     <button type="submit" id="btnProceed" class="btn-proceed" disabled>
@@ -236,6 +242,10 @@
                 pickupInput.min = today;
                 returnInput.min = today;
 
+                // Get rate per day from data attribute
+                const ratePerDay = parseFloat(document.getElementById('bookingForm').dataset.rate);
+                const totalCostInput = document.getElementById('totalCost');
+
                 function updateDuration() {
                     const pickup = new Date(pickupInput.value);
                     const returnDate = new Date(returnInput.value);
@@ -252,15 +262,22 @@
                             }
 
                             durationInput.value = diffDays;
+
+                            // Calculate total cost
+                            const totalCost = diffDays * ratePerDay;
+                            totalCostInput.value = 'RM ' + totalCost.toFixed(2);
+
                             proceedBtn.disabled = false;
                             dateError.style.display = 'none';
                         } else {
                             durationInput.value = '0';
+                            totalCostInput.value = 'RM 0.00';
                             proceedBtn.disabled = true;
                             dateError.style.display = 'block';
                         }
                     } else {
                         durationInput.value = '0';
+                        totalCostInput.value = 'RM 0.00';
                         proceedBtn.disabled = true;
                         dateError.style.display = 'none';
                     }
@@ -277,7 +294,7 @@
                 // Handle form submission (placeholder for now)
                 document.getElementById('bookingForm').addEventListener('submit', function (e) {
                     e.preventDefault();
-                    alert('Proceeding to confirmation with duration: ' + durationInput.value + ' days');
+                    alert('Proceeding to confirmation\nDuration: ' + durationInput.value + ' days\nTotal Cost: ' + totalCostInput.value);
                     // Future: Submit to backend or redirect to confirmation page
                 });
             });
