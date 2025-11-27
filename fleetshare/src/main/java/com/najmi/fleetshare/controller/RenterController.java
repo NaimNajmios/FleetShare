@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -66,6 +67,23 @@ public class RenterController {
             model.addAttribute("renterDetails", user.getRenterDetails());
         }
         return "renter/profile";
+    }
+
+    @GetMapping("/bookings/{id}")
+    public String bookingDetails(@PathVariable Long id, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getRenterDetails() != null) {
+            // Fetch booking details
+            BookingDTO booking = bookingService.getBookingDetails(id);
+
+            // Verify booking belongs to logged-in renter
+            if (booking != null && booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
+                model.addAttribute("booking", booking);
+                return "renter/booking-details";
+            }
+        }
+        // If booking not found or doesn't belong to user, redirect to bookings list
+        return "redirect:/renter/bookings";
     }
 
     @GetMapping("/home")

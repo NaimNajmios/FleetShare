@@ -24,6 +24,10 @@
                 margin-bottom: 1.5rem;
                 padding: 1.5rem;
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
+                cursor: pointer;
+                text-decoration: none;
+                display: block;
+                color: inherit;
             }
 
             .booking-card:hover {
@@ -190,7 +194,8 @@
 
             <!-- Booking Cards -->
             <div th:if="${!#lists.isEmpty(bookings)}">
-                <div class="booking-card" th:each="booking : ${bookings}">
+                <a th:each="booking : ${bookings}" th:href="@{/renter/bookings/{id}(id=${booking.bookingId})}"
+                    class="booking-card">
                     <!-- Booking Header -->
                     <div class="booking-header">
                         <span class="booking-id" th:text="'Booking #' + ${booking.bookingId}">Booking #1</span>
@@ -275,7 +280,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Empty State -->

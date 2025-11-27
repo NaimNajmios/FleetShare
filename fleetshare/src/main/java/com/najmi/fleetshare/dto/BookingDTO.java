@@ -24,6 +24,12 @@ public class BookingDTO {
     private String proofOfPaymentUrl;
     private LocalDateTime createdAt;
 
+    // Vehicle details
+    private String vehicleFuelType;
+    private String vehicleTransmissionType;
+    private String vehicleCategory;
+    private BigDecimal vehicleRatePerDay;
+
     // Constructors
     public BookingDTO() {
     }
@@ -33,7 +39,9 @@ public class BookingDTO {
             String vehicleImageUrl,
             String ownerBusinessName, LocalDateTime startDate, LocalDateTime endDate,
             String status, BigDecimal totalCost, String paymentMethod, String paymentStatus,
-            String invoiceNumber, String proofOfPaymentUrl, LocalDateTime createdAt) {
+            String invoiceNumber, String proofOfPaymentUrl, LocalDateTime createdAt,
+            String vehicleFuelType, String vehicleTransmissionType, String vehicleCategory,
+            BigDecimal vehicleRatePerDay) {
         this.bookingId = bookingId;
         this.renterId = renterId;
         this.renterName = renterName;
@@ -53,6 +61,10 @@ public class BookingDTO {
         this.invoiceNumber = invoiceNumber;
         this.proofOfPaymentUrl = proofOfPaymentUrl;
         this.createdAt = createdAt;
+        this.vehicleFuelType = vehicleFuelType;
+        this.vehicleTransmissionType = vehicleTransmissionType;
+        this.vehicleCategory = vehicleCategory;
+        this.vehicleRatePerDay = vehicleRatePerDay;
     }
 
     // Getters and Setters
@@ -140,18 +152,6 @@ public class BookingDTO {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Long getVehicleId() {
-        return vehicleId;
-    }
-
-    public void setVehicleId(Long vehicleId) {
-        this.vehicleId = vehicleId;
-    }
-
     public Long getRenterId() {
         return renterId;
     }
@@ -206,5 +206,50 @@ public class BookingDTO {
 
     public void setProofOfPaymentUrl(String proofOfPaymentUrl) {
         this.proofOfPaymentUrl = proofOfPaymentUrl;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    // Vehicle detail getters and setters
+    public String getVehicleFuelType() {
+        return vehicleFuelType;
+    }
+
+    public void setVehicleFuelType(String vehicleFuelType) {
+        this.vehicleFuelType = vehicleFuelType;
+    }
+
+    public String getVehicleTransmissionType() {
+        return vehicleTransmissionType;
+    }
+
+    public void setVehicleTransmissionType(String vehicleTransmissionType) {
+        this.vehicleTransmissionType = vehicleTransmissionType;
+    }
+
+    public String getVehicleCategory() {
+        return vehicleCategory;
+    }
+
+    public void setVehicleCategory(String vehicleCategory) {
+        this.vehicleCategory = vehicleCategory;
+    }
+
+    public BigDecimal getVehicleRatePerDay() {
+        return vehicleRatePerDay;
+    }
+
+    public void setVehicleRatePerDay(BigDecimal vehicleRatePerDay) {
+        this.vehicleRatePerDay = vehicleRatePerDay;
     }
 }

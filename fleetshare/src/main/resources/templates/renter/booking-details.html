@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/renter-layout}" th:with="activePage='bookings', pageTitle='Booking Details'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .booking-details-container {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+            }
+
+            @media (max-width: 768px) {
+                .booking-details-container {
+                    padding: 1.5rem 1rem;
+                }
+            }
+
+            .page-header {
+                margin-bottom: 2rem;
+            }
+
+            .back-link {
+                color: #dc3545;
+                text-decoration: none;
+                font-size: 0.875rem;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+                transition: color 0.2s ease;
+            }
+
+            .back-link:hover {
+                color: #c82333;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+                font-weight: 600;
+                color: #212529;
+                margin: 0 0 0.25rem 0;
+            }
+
+            .page-subtitle {
+                font-size: 0.875rem;
+                color: #6c757d;
+                font-weight: 500;
+                letter-spacing: 1px;
+            }
+
+            .details-card {
+                background: white;
+                border-radius: 0.75rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: #212529;
+                margin: 0 0 1.5rem 0;
+                padding-bottom: 0.75rem;
+                border-bottom: 2px solid #e9ecef;
+            }
+
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .info-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .info-label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #6c757d;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .info-value {
+                font-size: 1rem;
+                color: #212529;
+                font-weight: 500;
+            }
+
+            .status-badge {
+                padding: 0.375rem 0.75rem;
+                border-radius: 1rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                display: inline-block;
+            }
+
+            .status-confirmed {
+                background: #cfe2ff;
+                color: #084298;
+            }
+
+            .status-pending {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .status-active {
+                background: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .status-completed {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .status-cancelled {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            .vehicle-specs {
+                display: flex;
+                gap: 1.5rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .spec-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                background: #f8f9fa;
+                border-radius: 0.375rem;
+                font-size: 0.875rem;
+                color: #495057;
+            }
+
+            .spec-chip i {
+                color: #6c757d;
+            }
+
+            .payment-breakdown {
+                background: #f8f9fa;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-top: 1rem;
+            }
+
+            .breakdown-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+                font-size: 0.875rem;
+            }
+
+            .breakdown-row.total {
+                border-top: 2px solid #dee2e6;
+                margin-top: 0.5rem;
+                padding-top: 1rem;
+                font-weight: 600;
+                font-size: 1rem;
+                color: #212529;
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 1rem;
+                margin-top: 2rem;
+                flex-wrap: wrap;
+            }
+
+            .btn-manage {
+                background: #6c757d;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 0.375rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background 0.2s ease;
+                flex: 1;
+                min-width: 150px;
+            }
+
+            .btn-manage:hover {
+                background: #5a6268;
+            }
+
+            .btn-cancel {
+                background: #dc3545;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 0.375rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background 0.2s ease;
+                flex: 1;
+                min-width: 150px;
+            }
+
+            .btn-cancel:hover {
+                background: #c82333;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <main layout:fragment="content">
+        <div class="booking-details-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <a href="/renter/bookings" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Bookings
+                </a>
+                <h1 class="page-title">View Your Booking</h1>
+                <p class="page-subtitle">// BOOKING DETAILS //</p>
+            </div>
+
+            <!-- Booking Information Card -->
+            <div class="details-card">
+                <h2 class="card-title">Booking Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Booking ID</span>
+                        <span class="info-value" th:text="${booking != null ? booking.bookingId : '21'}">21</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Renter ID</span>
+                        <span class="info-value" th:text="${booking != null ? booking.renterId : '2019'}">2019</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Start Date</span>
+                        <span class="info-value"
+                            th:text="${booking != null ? #temporals.format(booking.startDate, 'dd MMM yyyy, HH:mm') : 'June 15, 2025, 10:00'}">
+                            June 15, 2025, 10:00
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">End Date</span>
+                        <span class="info-value"
+                            th:text="${booking != null ? #temporals.format(booking.endDate, 'dd MMM yyyy, HH:mm') : 'June 16, 2025, 10:00'}">
+                            June 16, 2025, 10:00
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Duration</span>
+                        <span class="info-value">2 Days</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="status-badge"
+                            th:classappend="${booking != null ? 'status-' + booking.status.toLowerCase() : 'status-confirmed'}"
+                            th:text="${booking != null ? booking.status : 'CONFIRMED'}">
+                            CONFIRMED
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Information Card -->
+            <div class="details-card">
+                <h2 class="card-title">Vehicle Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Model</span>
+                        <span class="info-value"
+                            th:text="${booking != null ? (booking.vehicleBrand + ' ' + booking.vehicleModel) : 'Perodua Aruz'}">
+                            Perodua Aruz
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Registration No</span>
+                        <span class="info-value"
+                            th:text="${booking != null ? booking.vehicleRegistrationNo : 'WXY 1234'}">
+                            WXY 1234
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Owner</span>
+                        <span class="info-value"
+                            th:text="${booking != null ? booking.ownerBusinessName : 'FleetCo Rentals'}">
+                            FleetCo Rentals
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item">
+                            <span class="info-label">Payment Method</span>
+                            <span class="info-value"
+                                th:text="${booking != null and booking.paymentMethod != null ? booking.paymentMethod : 'Bank Transfer'}">
+                                Bank Transfer
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Payment Status</span>
+                            <span class="status-badge status-confirmed"
+                                th:text="${booking != null and booking.paymentStatus != null ? booking.paymentStatus : 'CONFIRMED'}">
+                                CONFIRMED
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="payment-breakdown">
+                        <div class="breakdown-row">
+                            <span>Rate per Day</span>
+                            <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 220.00'}">RM
+                                220.00</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span>Number of Days</span>
+                            <span>× 2</span>
+                        </div>
+                        <div class="breakdown-row total">
+                            <span>Total Amount</span>
+                            <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 440.00'}">RM
+                                440.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn-manage" id="btn-manage-payment">
+                        <i class="fas fa-credit-card"></i> Manage Payment
+                    </button>
+                    <button class="btn-cancel" id="btn-cancel-booking">
+                        <i class="fas fa-times-circle"></i> Cancel Booking
+                    </button>
+                </div>
+            </div>
+    </main>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            // Manage Payment button
+            document.getElementById('btn-manage-payment').addEventListener('click', function () {
+                alert('Manage Payment functionality will be implemented.\nThis will allow you to upload payment receipts or view invoice history.');
+            });
+
+            // Cancel Booking button
+            document.getElementById('btn-cancel-booking').addEventListener('click', function () {
+                if (confirm('Are you sure you want to cancel this booking?\n\nThis action cannot be undone.')) {
+                    alert('Cancel booking functionality will be implemented.');
+                    // Future: Send cancel request to backend
+                    // window.location.href = '/renter/bookings/' + bookingId + '/cancel';
+                }
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>

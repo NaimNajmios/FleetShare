@@ -81,7 +81,11 @@ public class BookingService {
                         null,
                         null,
                         null,
-                        booking.getCreatedAt());
+                        booking.getCreatedAt(),
+                        vehicle.getFuelType(),
+                        vehicle.getTransmissionType(),
+                        vehicle.getCategory(),
+                        null);
                 bookingDTOs.add(dto);
             }
         }
@@ -133,7 +137,11 @@ public class BookingService {
                 payment != null ? payment.getPaymentStatus().name() : null,
                 invoice != null ? invoice.getInvoiceNumber() : null,
                 payment != null ? payment.getVerificationProofUrl() : null,
-                booking.getCreatedAt());
+                booking.getCreatedAt(),
+                vehicle != null ? vehicle.getFuelType() : null,
+                vehicle != null ? vehicle.getTransmissionType() : null,
+                vehicle != null ? vehicle.getCategory() : null,
+                null); // Rate is stored in VehiclePriceHistory, not directly on Vehicle
     }
 
     /**
@@ -194,7 +202,11 @@ public class BookingService {
                         payment != null ? payment.getPaymentStatus().name() : null,
                         invoice != null ? invoice.getInvoiceNumber() : null,
                         payment != null ? payment.getVerificationProofUrl() : null,
-                        booking.getCreatedAt());
+                        booking.getCreatedAt(),
+                        vehicle.getFuelType(),
+                        vehicle.getTransmissionType(),
+                        vehicle.getCategory(),
+                        null);
                 bookingDTOs.add(dto);
             }
         }
