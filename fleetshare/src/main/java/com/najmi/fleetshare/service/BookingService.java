@@ -136,6 +136,72 @@ public class BookingService {
                 booking.getCreatedAt());
     }
 
+    /**
+     * Fetches all bookings for a specific renter
+     * 
+     * @param renterId Renter ID
+     * @return List of BookingDTO objects for the renter
+     */
+    public List<BookingDTO> getBookingsByRenterId(Long renterId) {
+        List<Booking> bookings = bookingRepository.findByRenterId(renterId);
+        List<BookingDTO> bookingDTOs = new ArrayList<>();
+
+        for (Booking booking : bookings) {
+            // Get renter information
+            Renter renter = renterRepository.findById(booking.getRenterId()).orElse(null);
+            User renterUser = renter != null ? userRepository.findById(renter.getUserId()).orElse(null) : null;
+
+            // Get vehicle information
+            Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+
+            // Get fleet owner information
+            FleetOwner owner = fleetOwnerRepository.findById(booking.getFleetOwnerId()).orElse(null);
+
+            // Get latest status
+            String status = statusLogRepository.findLatestStatusByBookingId(booking.getBookingId())
+                    .map(log -> log.getStatusValue().name())
+                    .orElse("PENDING");
+
+            // Get invoice and payment information
+            List<Invoice> invoices = invoiceRepository.findByBookingId(booking.getBookingId());
+            Invoice invoice = invoices.isEmpty() ? null : invoices.get(0);
+
+            Payment payment = null;
+            if (invoice != null) {
+                List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+                if (!payments.isEmpty()) {
+                    payment = payments.get(0);
+                }
+            }
+
+            if (renter != null && vehicle != null) {
+                BookingDTO dto = new BookingDTO(
+                        booking.getBookingId(),
+                        renter.getRenterId(),
+                        renter.getFullName(),
+                        renterUser != null ? renterUser.getEmail() : "N/A",
+                        vehicle.getVehicleId(),
+                        vehicle.getModel(),
+                        vehicle.getBrand(),
+                        vehicle.getRegistrationNo(),
+                        vehicle.getVehicleImageUrl(),
+                        owner != null ? owner.getBusinessName() : "Unknown Owner",
+                        booking.getStartDate(),
+                        booking.getEndDate(),
+                        status,
+                        invoice != null ? invoice.getTotalAmount() : null,
+                        payment != null ? payment.getPaymentMethod().name() : null,
+                        payment != null ? payment.getPaymentStatus().name() : null,
+                        invoice != null ? invoice.getInvoiceNumber() : null,
+                        payment != null ? payment.getVerificationProofUrl() : null,
+                        booking.getCreatedAt());
+                bookingDTOs.add(dto);
+            }
+        }
+
+        return bookingDTOs;
+    }
+
     public void updateBooking(BookingDTO bookingDTO) {
         Booking booking = bookingRepository.findById(bookingDTO.getBookingId()).orElse(null);
         if (booking != null) {

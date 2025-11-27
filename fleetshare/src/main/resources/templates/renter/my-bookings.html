@@ -4,17 +4,283 @@
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Extra styles -->
+        <style>
+            .booking-list-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+            }
+
+            @media (max-width: 768px) {
+                .booking-list-container {
+                    padding: 1.5rem 1rem;
+                }
+            }
+
+            .booking-card {
+                background: white;
+                border-radius: 0.75rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+                margin-bottom: 1.5rem;
+                padding: 1.5rem;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .booking-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            }
+
+            .booking-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .booking-id {
+                font-size: 0.875rem;
+                color: #6c757d;
+                font-weight: 600;
+            }
+
+            .status-badge {
+                padding: 0.375rem 0.75rem;
+                border-radius: 1rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .status-pending {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .status-confirmed {
+                background: #cfe2ff;
+                color: #084298;
+            }
+
+            .status-active {
+                background: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .status-completed {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .status-cancelled {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            .booking-content {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                gap: 1.5rem;
+                align-items: start;
+            }
+
+            @media (max-width: 768px) {
+                .booking-content {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .vehicle-image-box {
+                width: 120px;
+                height: 120px;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                background: #f8f9fa;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .vehicle-image-box img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .vehicle-image-box i {
+                font-size: 3rem;
+                color: #ced4da;
+            }
+
+            .booking-info {
+                flex: 1;
+            }
+
+            .vehicle-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: #212529;
+                margin-bottom: 0.5rem;
+            }
+
+            .booking-details {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+
+            .detail-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.875rem;
+                color: #495057;
+            }
+
+            .detail-item i {
+                color: #6c757d;
+                width: 18px;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: #6c757d;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 4rem 2rem;
+                color: #6c757d;
+            }
+
+            .empty-state i {
+                font-size: 5rem;
+                margin-bottom: 1rem;
+                color: #ced4da;
+            }
+
+            .empty-state h3 {
+                margin-bottom: 0.5rem;
+                color: #495057;
+            }
+
+            .empty-state p {
+                color: #6c757d;
+                margin-bottom: 1.5rem;
+            }
+
+            .inline-block {
+                display: inline-block;
+            }
+
+            .max-w-sm {
+                max-width: 200px;
+            }
+        </style>
     </th:block>
 </head>
 
 <body>
     <main layout:fragment="content">
-        <div class="vehicle-grid-container">
+        <div class="vehicle-grid-container booking-list-container">
             <h2 class="section-title">My Bookings</h2>
 
-            <div class="empty-state">
-                <i class="fas fa-calendar-alt" style="font-size: 5rem;"></i>
+            <!-- Booking Cards -->
+            <div th:if="${!#lists.isEmpty(bookings)}">
+                <div class="booking-card" th:each="booking : ${bookings}">
+                    <!-- Booking Header -->
+                    <div class="booking-header">
+                        <span class="booking-id" th:text="'Booking #' + ${booking.bookingId}">Booking #1</span>
+                        <span class="status-badge" th:classappend="${'status-' + booking.status.toLowerCase()}"
+                            th:text="${booking.status}">CONFIRMED</span>
+                    </div>
+
+                    <!-- Booking Content -->
+                    <div class="booking-content">
+                        <!-- Vehicle Image -->
+                        <div class="vehicle-image-box">
+                            <img th:if="${booking.vehicleImageUrl != null and !booking.vehicleImageUrl.isEmpty()}"
+                                th:src="${booking.vehicleImageUrl}" alt="Vehicle">
+                            <i th:unless="${booking.vehicleImageUrl != null and !booking.vehicleImageUrl.isEmpty()}"
+                                class="fas fa-car"></i>
+                        </div>
+
+                        <!-- Booking Info -->
+                        <div class="booking-info">
+                            <h3 class="vehicle-title" th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">
+                                Toyota Camry
+                            </h3>
+                            <div class="detail-item">
+                                <i class="fas fa-hashtag"></i>
+                                <span th:text="${booking.vehicleRegistrationNo}">WXY 1234</span>
+                            </div>
+
+                            <div class="booking-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <div>
+                                        <span class="detail-label">Start:</span>
+                                        <span th:text="${#temporals.format(booking.startDate, 'dd MMM yyyy, HH:mm')}">
+                                            12 May 2024, 10:00
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <div>
+                                        <span class="detail-label">End:</span>
+                                        <span th:text="${#temporals.format(booking.endDate, 'dd MMM yyyy, HH:mm')}">
+                                            15 May 2024, 10:00
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item" th:if="${booking.totalCost != null}">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <div>
+                                        <span class="detail-label">Total:</span>
+                                        <span th:text="'RM ' + ${booking.totalCost}">RM 300.00</span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item" th:if="${booking.paymentStatus != null}">
+                                    <i class="fas fa-credit-card"></i>
+                                    <div>
+                                        <span class="detail-label">Payment:</span>
+                                        <span th:text="${booking.paymentStatus}">COMPLETED</span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <i class="fas fa-building"></i>
+                                    <div>
+                                        <span class="detail-label">Owner:</span>
+                                        <span th:text="${booking.ownerBusinessName}">FleetCo</span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <div>
+                                        <span class="detail-label">Booked:</span>
+                                        <span th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy')}">
+                                            10 May 2024
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+                <i class="fas fa-calendar-alt"></i>
                 <h3>No Bookings Yet</h3>
                 <p>You haven't made any bookings. Start exploring our vehicles!</p>
                 <a href="/renter/vehicles" class="book-now-btn inline-block max-w-sm" style="text-decoration: none;">

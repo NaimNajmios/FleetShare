@@ -1,7 +1,9 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
 import jakarta.servlet.http.HttpSession;
@@ -20,6 +22,9 @@ public class RenterController {
 
     @Autowired
     private VehicleManagementService vehicleManagementService;
+
+    @Autowired
+    private BookingService bookingService;
 
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
@@ -42,14 +47,24 @@ public class RenterController {
     }
 
     @GetMapping("/bookings")
-    public String myBookings(Model model) {
-        // TODO: Add booking list from service
+    public String myBookings(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getRenterDetails() != null) {
+            // Fetch bookings for the current renter
+            Long renterId = user.getRenterDetails().getRenterId();
+            List<BookingDTO> bookings = bookingService.getBookingsByRenterId(renterId);
+            model.addAttribute("bookings", bookings);
+        }
         return "renter/my-bookings";
     }
 
     @GetMapping("/profile")
-    public String profile(Model model) {
-        // TODO: Add user profile from service
+    public String profile(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getRenterDetails() != null) {
+            model.addAttribute("user", user);
+            model.addAttribute("renterDetails", user.getRenterDetails());
+        }
         return "renter/profile";
     }
 
