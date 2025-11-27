@@ -316,7 +316,7 @@
                                 <span class="price-amount" th:text="${'RM ' + vehicle.ratePerDay}">RM 120.00</span>
                             </div>
                         </div>
-                        <a href="#" class="btn-book-now" onclick="alert('Booking functionality coming soon!')">
+                        <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}" class="btn-book-now">
                             BOOK NOW
                         </a>
                     </div>

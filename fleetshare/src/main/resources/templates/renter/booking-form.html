@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/renter-layout}" th:with="activePage='vehicles', pageTitle='Book Vehicle'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .booking-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+                display: grid;
+                grid-template-columns: 1fr 1.5fr;
+                gap: 2rem;
+            }
+
+            @media (max-width: 992px) {
+                .booking-container {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* Vehicle Summary Card (Left) */
+            .vehicle-summary-card {
+                background: white;
+                border-radius: 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                padding: 1.5rem;
+                position: sticky;
+                top: 2rem;
+                height: fit-content;
+            }
+
+            .summary-image {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+                background: #f8f9fa;
+            }
+
+            .summary-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #212529;
+                margin-bottom: 0.25rem;
+            }
+
+            .summary-brand {
+                font-size: 0.875rem;
+                color: #6c757d;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 1.5rem;
+            }
+
+            .summary-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.75rem 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .summary-row:last-child {
+                border-bottom: none;
+            }
+
+            .summary-label {
+                color: #6c757d;
+                font-size: 0.9rem;
+            }
+
+            .summary-value {
+                font-weight: 600;
+                color: #212529;
+            }
+
+            .price-highlight {
+                color: #0d6efd;
+                font-size: 1.25rem;
+                font-weight: 700;
+            }
+
+            /* Booking Form (Right) */
+            .booking-form-card {
+                background: white;
+                border-radius: 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                padding: 2rem;
+            }
+
+            .form-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #212529;
+                margin-bottom: 2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-label {
+                display: block;
+                font-weight: 500;
+                color: #212529;
+                margin-bottom: 0.5rem;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.5rem;
+                transition: border-color 0.2s ease;
+            }
+
+            .form-control:focus {
+                border-color: #0d6efd;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+            }
+
+            .form-control[readonly] {
+                background-color: #e9ecef;
+                cursor: not-allowed;
+            }
+
+            .btn-proceed {
+                width: 100%;
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 1rem;
+                font-size: 1.125rem;
+                font-weight: 600;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-top: 1rem;
+            }
+
+            .btn-proceed:hover {
+                background: #bb2d3b;
+                transform: translateY(-1px);
+            }
+
+            .btn-proceed:disabled {
+                background: #e9ecef;
+                color: #adb5bd;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .date-error {
+                color: #dc3545;
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+                display: none;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <main layout:fragment="content">
+        <div class="booking-container">
+            <!-- Left: Vehicle Summary -->
+            <div class="vehicle-summary-card">
+                <img th:if="${vehicle.vehicleImageUrl != null}" th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image"
+                    class="summary-image">
+                <div th:unless="${vehicle.vehicleImageUrl != null}" class="summary-image"
+                    style="display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-car fa-3x text-muted"></i>
+                </div>
+
+                <h2 class="summary-title" th:text="${vehicle.model}">Myvi 1.5 AV</h2>
+                <div class="summary-brand" th:text="${vehicle.brand}">PERODUA</div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Registration No</span>
+                    <span class="summary-value" th:text="${vehicle.registrationNo}">WUX 5815</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Category</span>
+                    <span class="summary-value" th:text="${vehicle.category}">Hatchback</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Rate per Day</span>
+                    <span class="summary-value price-highlight" th:text="${'RM ' + vehicle.ratePerDay}">RM 120.00</span>
+                </div>
+            </div>
+
+            <!-- Right: Booking Form -->
+            <div class="booking-form-card">
+                <h1 class="form-title">Select Rental Dates</h1>
+
+                <form id="bookingForm" action="#" method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Pickup Date</label>
+                        <input type="date" id="pickupDate" name="pickupDate" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Return Date</label>
+                        <input type="date" id="returnDate" name="returnDate" class="form-control" required>
+                        <div id="dateError" class="date-error">Return date must be equal to or after pickup date.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Duration (Days)</label>
+                        <input type="text" id="duration" class="form-control" value="0" readonly>
+                    </div>
+
+                    <button type="submit" id="btnProceed" class="btn-proceed" disabled>
+                        PROCEED TO CONFIRMATION
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const pickupInput = document.getElementById('pickupDate');
+                const returnInput = document.getElementById('returnDate');
+                const durationInput = document.getElementById('duration');
+                const proceedBtn = document.getElementById('btnProceed');
+                const dateError = document.getElementById('dateError');
+
+                // Set min date to today
+                const today = new Date().toISOString().split('T')[0];
+                pickupInput.min = today;
+                returnInput.min = today;
+
+                function updateDuration() {
+                    const pickup = new Date(pickupInput.value);
+                    const returnDate = new Date(returnInput.value);
+
+                    if (pickupInput.value && returnInput.value) {
+                        if (returnDate >= pickup) {
+                            // Calculate difference in days
+                            const diffTime = Math.abs(returnDate - pickup);
+                            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                            // If same day, count as 1 day
+                            if (diffDays === 0) {
+                                diffDays = 1;
+                            }
+
+                            durationInput.value = diffDays;
+                            proceedBtn.disabled = false;
+                            dateError.style.display = 'none';
+                        } else {
+                            durationInput.value = '0';
+                            proceedBtn.disabled = true;
+                            dateError.style.display = 'block';
+                        }
+                    } else {
+                        durationInput.value = '0';
+                        proceedBtn.disabled = true;
+                        dateError.style.display = 'none';
+                    }
+                }
+
+                pickupInput.addEventListener('change', function () {
+                    // Update return date min value when pickup changes
+                    returnInput.min = this.value;
+                    updateDuration();
+                });
+
+                returnInput.addEventListener('change', updateDuration);
+
+                // Handle form submission (placeholder for now)
+                document.getElementById('bookingForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    alert('Proceeding to confirmation with duration: ' + durationInput.value + ' days');
+                    // Future: Submit to backend or redirect to confirmation page
+                });
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>
