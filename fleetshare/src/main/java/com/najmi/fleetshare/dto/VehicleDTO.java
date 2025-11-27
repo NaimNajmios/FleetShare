@@ -18,6 +18,8 @@ public class VehicleDTO {
     private String transmissionType;
     private Integer mileage;
     private String status;
+    private String ownerContactPhone;
+    private Boolean ownerIsVerified;
 
     // Constructors
     public VehicleDTO() {
@@ -26,7 +28,8 @@ public class VehicleDTO {
     public VehicleDTO(Long vehicleId, String registrationNo, String model, String brand,
             Integer manufacturingYear, String category, BigDecimal ratePerDay,
             String vehicleImageUrl, String ownerBusinessName,
-            String fuelType, String transmissionType, Integer mileage, String status) {
+            String fuelType, String transmissionType, Integer mileage, String status,
+            String ownerContactPhone, Boolean ownerIsVerified) {
         this.vehicleId = vehicleId;
         this.registrationNo = registrationNo;
         this.model = model;
@@ -40,6 +43,8 @@ public class VehicleDTO {
         this.transmissionType = transmissionType;
         this.mileage = mileage;
         this.status = status;
+        this.ownerContactPhone = ownerContactPhone;
+        this.ownerIsVerified = ownerIsVerified;
     }
 
     // Getters and Setters
@@ -145,5 +150,21 @@ public class VehicleDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getOwnerContactPhone() {
+        return ownerContactPhone;
+    }
+
+    public void setOwnerContactPhone(String ownerContactPhone) {
+        this.ownerContactPhone = ownerContactPhone;
+    }
+
+    public Boolean getOwnerIsVerified() {
+        return ownerIsVerified;
+    }
+
+    public void setOwnerIsVerified(Boolean ownerIsVerified) {
+        this.ownerIsVerified = ownerIsVerified;
     }
 }

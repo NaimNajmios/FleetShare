@@ -48,6 +48,25 @@ public class RenterController {
         return "renter/browse-vehicles";
     }
 
+    @GetMapping("/vehicles/{id}")
+    public String vehicleDetails(@PathVariable Long id, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null) {
+            model.addAttribute("user", user);
+            if (user.getRenterDetails() != null) {
+                model.addAttribute("renterName", user.getRenterDetails().getFullName());
+            }
+        }
+
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(id);
+        if (vehicle == null) {
+            return "redirect:/renter/vehicles";
+        }
+
+        model.addAttribute("vehicle", vehicle);
+        return "renter/vehicle-details";
+    }
+
     @GetMapping("/bookings")
     public String myBookings(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);

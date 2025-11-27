@@ -38,12 +38,15 @@
                 <div class="vehicle-card" th:each="vehicle : ${vehicles}"
                     th:attr="data-category=${vehicle.category != null ? vehicle.category.toLowerCase() : 'sedan'}">
                     <div class="vehicle-image-container">
-                        <!-- Display vehicle image if available, otherwise show placeholder icon -->
-                        <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
-                            th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image"
-                            style="width: 100%; height: 100%; object-fit: cover;">
-                        <i th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
-                            class="fas fa-car vehicle-placeholder-icon"></i>
+                        <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}"
+                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                            <!-- Display vehicle image if available, otherwise show placeholder icon -->
+                            <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                                th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                            <i th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                                class="fas fa-car vehicle-placeholder-icon"></i>
+                        </a>
                         <div class="price-badge" th:text="'RM' + ${vehicle.ratePerDay} + '/day'">RM55/day</div>
                     </div>
                     <div class="vehicle-details">
@@ -123,19 +126,12 @@
                 });
             });
 
-            // Book Now button functionality - using event delegation to avoid XSS issues
+            // Book Now button functionality
             document.addEventListener('DOMContentLoaded', function () {
                 document.querySelectorAll('.book-now-btn').forEach(button => {
                     button.addEventListener('click', function () {
-                        const brand = this.getAttribute('data-vehicle-brand');
-                        const model = this.getAttribute('data-vehicle-model');
                         const vehicleId = this.getAttribute('data-vehicle-id');
-
-                        // Placeholder alert - replace with actual booking logic later
-                        alert('Booking feature coming soon for vehicle: ' + brand + ' ' + model + ' (ID: ' + vehicleId + ')');
-
-                        // Future: redirect to booking page
-                        // window.location.href = '/renter/book/' + vehicleId;
+                        window.location.href = '/renter/vehicles/' + vehicleId;
                     });
                 });
             });

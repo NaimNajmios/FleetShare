@@ -17,90 +17,97 @@ import java.util.List;
 @Service
 public class VehicleManagementService {
 
-    @Autowired
-    private VehicleRepository vehicleRepository;
+        @Autowired
+        private VehicleRepository vehicleRepository;
 
-    @Autowired
-    private VehiclePriceHistoryRepository priceHistoryRepository;
+        @Autowired
+        private VehiclePriceHistoryRepository priceHistoryRepository;
 
-    @Autowired
-    private FleetOwnerRepository fleetOwnerRepository;
+        @Autowired
+        private FleetOwnerRepository fleetOwnerRepository;
 
-    /**
-     * Fetches all vehicles with their pricing and owner information
-     * 
-     * @return List of VehicleDTO objects
-     */
-    public List<VehicleDTO> getAllVehicles() {
-        List<Vehicle> vehicles = vehicleRepository.findAll();
-        List<VehicleDTO> vehicleDTOs = new ArrayList<>();
+        /**
+         * Fetches all vehicles with their pricing and owner information
+         * 
+         * @return List of VehicleDTO objects
+         */
+        public List<VehicleDTO> getAllVehicles() {
+                List<Vehicle> vehicles = vehicleRepository.findAll();
+                List<VehicleDTO> vehicleDTOs = new ArrayList<>();
 
-        for (Vehicle vehicle : vehicles) {
-            // Get latest price for this vehicle
-            BigDecimal ratePerDay = priceHistoryRepository.findLatestPriceByVehicleId(vehicle.getVehicleId())
-                    .map(VehiclePriceHistory::getRatePerDay)
-                    .orElse(BigDecimal.ZERO);
+                for (Vehicle vehicle : vehicles) {
+                        // Get latest price for this vehicle
+                        BigDecimal ratePerDay = priceHistoryRepository
+                                        .findLatestPriceByVehicleId(vehicle.getVehicleId())
+                                        .map(VehiclePriceHistory::getRatePerDay)
+                                        .orElse(BigDecimal.ZERO);
 
-            // Get fleet owner business name
-            String ownerBusinessName = fleetOwnerRepository.findById(vehicle.getFleetOwnerId())
-                    .map(FleetOwner::getBusinessName)
-                    .orElse("Unknown Owner");
+                        // Get fleet owner information
+                        FleetOwner owner = fleetOwnerRepository.findById(vehicle.getFleetOwnerId()).orElse(null);
+                        String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
+                        String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
+                        Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
 
-            VehicleDTO dto = new VehicleDTO(
-                    vehicle.getVehicleId(),
-                    vehicle.getRegistrationNo(),
-                    vehicle.getModel(),
-                    vehicle.getBrand(),
-                    vehicle.getManufacturingYear(),
-                    vehicle.getCategory(),
-                    ratePerDay,
-                    vehicle.getVehicleImageUrl(),
-                    ownerBusinessName,
-                    vehicle.getFuelType(),
-                    vehicle.getTransmissionType(),
-                    vehicle.getMileage(),
-                    vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE");
-            vehicleDTOs.add(dto);
+                        VehicleDTO dto = new VehicleDTO(
+                                        vehicle.getVehicleId(),
+                                        vehicle.getRegistrationNo(),
+                                        vehicle.getModel(),
+                                        vehicle.getBrand(),
+                                        vehicle.getManufacturingYear(),
+                                        vehicle.getCategory(),
+                                        ratePerDay,
+                                        vehicle.getVehicleImageUrl(),
+                                        ownerBusinessName,
+                                        vehicle.getFuelType(),
+                                        vehicle.getTransmissionType(),
+                                        vehicle.getMileage(),
+                                        vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE",
+                                        ownerContactPhone,
+                                        ownerIsVerified);
+                        vehicleDTOs.add(dto);
+                }
+
+                return vehicleDTOs;
         }
 
-        return vehicleDTOs;
-    }
+        /**
+         * Fetches detailed information for a specific vehicle
+         * 
+         * @param vehicleId Vehicle ID
+         * @return VehicleDTO with full details
+         */
+        public VehicleDTO getVehicleDetails(Long vehicleId) {
+                Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+                if (vehicle == null) {
+                        return null;
+                }
 
-    /**
-     * Fetches detailed information for a specific vehicle
-     * 
-     * @param vehicleId Vehicle ID
-     * @return VehicleDTO with full details
-     */
-    public VehicleDTO getVehicleDetails(Long vehicleId) {
-        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
-        if (vehicle == null) {
-            return null;
+                // Get latest price
+                BigDecimal ratePerDay = priceHistoryRepository.findLatestPriceByVehicleId(vehicleId)
+                                .map(VehiclePriceHistory::getRatePerDay)
+                                .orElse(BigDecimal.ZERO);
+
+                // Get owner information
+                FleetOwner owner = fleetOwnerRepository.findById(vehicle.getFleetOwnerId()).orElse(null);
+                String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
+                String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
+                Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
+
+                return new VehicleDTO(
+                                vehicle.getVehicleId(),
+                                vehicle.getRegistrationNo(),
+                                vehicle.getModel(),
+                                vehicle.getBrand(),
+                                vehicle.getManufacturingYear(),
+                                vehicle.getCategory(),
+                                ratePerDay,
+                                vehicle.getVehicleImageUrl(),
+                                ownerBusinessName,
+                                vehicle.getFuelType(),
+                                vehicle.getTransmissionType(),
+                                vehicle.getMileage(),
+                                vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE",
+                                ownerContactPhone,
+                                ownerIsVerified);
         }
-
-        // Get latest price
-        BigDecimal ratePerDay = priceHistoryRepository.findLatestPriceByVehicleId(vehicleId)
-                .map(VehiclePriceHistory::getRatePerDay)
-                .orElse(BigDecimal.ZERO);
-
-        // Get owner name
-        String ownerBusinessName = fleetOwnerRepository.findById(vehicle.getFleetOwnerId())
-                .map(FleetOwner::getBusinessName)
-                .orElse("Unknown Owner");
-
-        return new VehicleDTO(
-                vehicle.getVehicleId(),
-                vehicle.getRegistrationNo(),
-                vehicle.getModel(),
-                vehicle.getBrand(),
-                vehicle.getManufacturingYear(),
-                vehicle.getCategory(),
-                ratePerDay,
-                vehicle.getVehicleImageUrl(),
-                ownerBusinessName,
-                vehicle.getFuelType(),
-                vehicle.getTransmissionType(),
-                vehicle.getMileage(),
-                vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE");
-    }
 }

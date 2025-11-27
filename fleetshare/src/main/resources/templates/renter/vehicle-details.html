@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/renter-layout}" th:with="activePage='vehicles', pageTitle='Vehicle Details'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .vehicle-details-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+            }
+
+            .back-link {
+                color: #0d6efd;
+                text-decoration: none;
+                font-size: 0.875rem;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+                transition: color 0.2s ease;
+            }
+
+            .back-link:hover {
+                color: #0a58ca;
+            }
+
+            /* Hero Card */
+            .hero-card {
+                background: white;
+                border-radius: 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                display: grid;
+                grid-template-columns: 1.2fr 1fr;
+                margin-bottom: 2rem;
+            }
+
+            @media (max-width: 992px) {
+                .hero-card {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .vehicle-image-container {
+                background: #f8f9fa;
+                position: relative;
+                min-height: 400px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+
+            .vehicle-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.3s ease;
+            }
+
+            .vehicle-image:hover {
+                transform: scale(1.02);
+            }
+
+            .vehicle-info-container {
+                padding: 2.5rem;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .vehicle-title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #212529;
+                margin-bottom: 0.5rem;
+                line-height: 1.2;
+            }
+
+            .vehicle-brand {
+                font-size: 1rem;
+                color: #6c757d;
+                font-weight: 500;
+                margin-bottom: 2rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .specs-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem 2rem;
+                margin-bottom: 2.5rem;
+            }
+
+            .spec-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .spec-label {
+                font-size: 0.875rem;
+                color: #6c757d;
+                font-weight: 500;
+            }
+
+            .spec-value {
+                font-size: 1.125rem;
+                color: #0d6efd;
+                font-weight: 700;
+            }
+
+            .price-section {
+                margin-top: auto;
+                padding-top: 2rem;
+                border-top: 1px solid #e9ecef;
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .price-display {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .price-label {
+                font-size: 0.875rem;
+                color: #6c757d;
+                margin-bottom: 0.25rem;
+            }
+
+            .price-amount {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #212529;
+            }
+
+            .price-period {
+                font-size: 1rem;
+                color: #6c757d;
+                font-weight: 400;
+            }
+
+            .btn-book-now {
+                background: #0d6efd;
+                color: white;
+                border: none;
+                padding: 1rem 2.5rem;
+                font-size: 1rem;
+                font-weight: 600;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 200px;
+            }
+
+            .btn-book-now:hover {
+                background: #0b5ed7;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+            }
+
+            /* Fleet Owner Section */
+            .owner-card {
+                background: white;
+                border-radius: 1rem;
+                padding: 2rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                display: flex;
+                align-items: center;
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+
+            .owner-icon {
+                width: 60px;
+                height: 60px;
+                background: #e9ecef;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: #6c757d;
+            }
+
+            .owner-info {
+                flex: 1;
+            }
+
+            .owner-name {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: #212529;
+                margin-bottom: 0.25rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .verified-badge {
+                font-size: 0.75rem;
+                background: #d1e7dd;
+                color: #0f5132;
+                padding: 0.25rem 0.5rem;
+                border-radius: 1rem;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+            .owner-contact {
+                color: #6c757d;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .status-badge {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                border-radius: 2rem;
+                font-weight: 600;
+                font-size: 0.875rem;
+                z-index: 10;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .status-available {
+                background: #d1e7dd;
+                color: #0f5132;
+            }
+
+            .status-unavailable {
+                background: #f8d7da;
+                color: #842029;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <main layout:fragment="content">
+        <div class="vehicle-details-container">
+            <!-- Back Link -->
+            <a href="/renter/vehicles" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Browse
+            </a>
+
+            <!-- Hero Card -->
+            <div class="hero-card">
+                <!-- Left: Image -->
+                <div class="vehicle-image-container">
+                    <span class="status-badge"
+                        th:classappend="${vehicle.status == 'AVAILABLE' ? 'status-available' : 'status-unavailable'}"
+                        th:text="${vehicle.status}">
+                        AVAILABLE
+                    </span>
+                    <img th:if="${vehicle.vehicleImageUrl != null}" th:src="${vehicle.vehicleImageUrl}"
+                        alt="Vehicle Image" class="vehicle-image">
+                    <div th:unless="${vehicle.vehicleImageUrl != null}" class="text-muted">
+                        <i class="fas fa-car fa-4x"></i>
+                    </div>
+                </div>
+
+                <!-- Right: Details -->
+                <div class="vehicle-info-container">
+                    <div class="vehicle-brand" th:text="${vehicle.brand}">PERODUA</div>
+                    <h1 class="vehicle-title" th:text="${vehicle.model}">Myvi 1.5 AV</h1>
+
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Category</span>
+                            <span class="spec-value" th:text="${vehicle.category}">Hatchback</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Fuel Type</span>
+                            <span class="spec-value" th:text="${vehicle.fuelType}">Petrol</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Transmission</span>
+                            <span class="spec-value" th:text="${vehicle.transmissionType}">Automatic</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Year</span>
+                            <span class="spec-value" th:text="${vehicle.manufacturingYear}">2023</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Mileage</span>
+                            <span class="spec-value" th:text="${vehicle.mileage + ' km'}">15,000 km</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Registration No</span>
+                            <span class="spec-value" th:text="${vehicle.registrationNo}">WUX 5815</span>
+                        </div>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-display">
+                            <span class="price-label">Rate per Day</span>
+                            <div>
+                                <span class="price-amount" th:text="${'RM ' + vehicle.ratePerDay}">RM 120.00</span>
+                            </div>
+                        </div>
+                        <a href="#" class="btn-book-now" onclick="alert('Booking functionality coming soon!')">
+                            BOOK NOW
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fleet Owner Section -->
+            <div class="owner-card">
+                <div class="owner-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="owner-info">
+                    <div class="owner-name">
+                        <span th:text="${vehicle.ownerBusinessName}">FleetCo Rentals</span>
+                        <span class="verified-badge" th:if="${vehicle.ownerIsVerified}">
+                            <i class="fas fa-check-circle"></i> Verified
+                        </span>
+                    </div>
+                    <div class="owner-contact">
+                        <i class="fas fa-phone-alt"></i>
+                        <span th:text="${vehicle.ownerContactPhone}">+60 12-345 6789</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
