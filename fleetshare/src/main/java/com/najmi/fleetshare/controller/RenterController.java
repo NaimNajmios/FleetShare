@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.najmi.fleetshare.entity.BookingStatusLog;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,11 @@ public class RenterController {
             // Verify booking belongs to logged-in renter
             if (booking != null && booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
                 model.addAttribute("booking", booking);
+
+                // Fetch booking status logs
+                List<BookingStatusLog> statusLogs = bookingService.getBookingStatusLogs(id);
+                model.addAttribute("statusLogs", statusLogs);
+
                 return "renter/booking-details";
             }
         }

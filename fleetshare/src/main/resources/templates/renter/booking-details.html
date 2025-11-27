@@ -6,7 +6,7 @@
     <th:block layout:fragment="extra-css">
         <style>
             .booking-details-container {
-                max-width: 900px;
+                max-width: 1200px;
                 margin: 0 auto;
                 padding: 2rem 1.5rem;
             }
@@ -49,6 +49,18 @@
                 color: #6c757d;
                 font-weight: 500;
                 letter-spacing: 1px;
+            }
+
+            .booking-layout {
+                display: grid;
+                grid-template-columns: 1fr 350px;
+                gap: 1.5rem;
+            }
+
+            @media (max-width: 992px) {
+                .booking-layout {
+                    grid-template-columns: 1fr;
+                }
             }
 
             .details-card {
@@ -215,6 +227,77 @@
             .btn-cancel:hover {
                 background: #c82333;
             }
+
+            /* Timeline Styles */
+            .timeline-card {
+                background: white;
+                border-radius: 0.75rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+                padding: 1.5rem;
+                height: fit-content;
+            }
+
+            .timeline {
+                position: relative;
+                padding-left: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 6px;
+                top: 5px;
+                bottom: 5px;
+                width: 2px;
+                background: #e9ecef;
+            }
+
+            .timeline-item {
+                position: relative;
+                padding-bottom: 2rem;
+            }
+
+            .timeline-item:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline-dot {
+                position: absolute;
+                left: -1.5rem;
+                top: 0.25rem;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background: #fff;
+                border: 2px solid #6c757d;
+                z-index: 1;
+            }
+
+            .timeline-item.active .timeline-dot {
+                background: #0d6efd;
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+            }
+
+            .timeline-date {
+                font-size: 0.75rem;
+                color: #6c757d;
+                margin-bottom: 0.25rem;
+                font-weight: 500;
+            }
+
+            .timeline-status {
+                font-weight: 600;
+                color: #212529;
+                margin-bottom: 0.25rem;
+            }
+
+            .timeline-remarks {
+                font-size: 0.875rem;
+                color: #6c757d;
+                line-height: 1.4;
+            }
         </style>
     </th:block>
 </head>
@@ -231,117 +314,175 @@
                 <p class="page-subtitle">// BOOKING DETAILS //</p>
             </div>
 
-            <!-- Booking Information Card -->
-            <div class="details-card">
-                <h2 class="card-title">Booking Information</h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Booking ID</span>
-                        <span class="info-value" th:text="${booking != null ? booking.bookingId : '21'}">21</span>
+            <div class="booking-layout">
+                <!-- Left Column: Booking Info -->
+                <div class="booking-main">
+                    <!-- Booking Information Card -->
+                    <div class="details-card">
+                        <h2 class="card-title">Booking Information</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Booking ID</span>
+                                <span class="info-value"
+                                    th:text="${booking != null ? booking.bookingId : '21'}">21</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Renter ID</span>
+                                <span class="info-value"
+                                    th:text="${booking != null ? booking.renterId : '2019'}">2019</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Start Date</span>
+                                <span class="info-value"
+                                    th:text="${booking != null ? #temporals.format(booking.startDate, 'dd MMM yyyy, HH:mm') : 'June 15, 2025, 10:00'}">
+                                    June 15, 2025, 10:00
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">End Date</span>
+                                <span class="info-value"
+                                    th:text="${booking != null ? #temporals.format(booking.endDate, 'dd MMM yyyy, HH:mm') : 'June 16, 2025, 10:00'}">
+                                    June 16, 2025, 10:00
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Duration</span>
+                                <span class="info-value">2 Days</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Status</span>
+                                <span class="status-badge"
+                                    th:classappend="${booking != null ? 'status-' + booking.status.toLowerCase() : 'status-confirmed'}"
+                                    th:text="${booking != null ? booking.status : 'CONFIRMED'}">
+                                    CONFIRMED
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">Renter ID</span>
-                        <span class="info-value" th:text="${booking != null ? booking.renterId : '2019'}">2019</span>
+
+                    <!-- Vehicle Information Card -->
+                    <div class="details-card">
+                        <h2 class="card-title">Vehicle Information</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Model</span>
+                                <span class="info-value"
+                                    th:text="${booking != null ? (booking.vehicleBrand + ' ' + booking.vehicleModel) : 'Perodua Aruz'}">
+                                    Perodua Aruz
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Registration No</span>
+                                <span class="info-value"
+                                    th:text="${booking != null ? booking.vehicleRegistrationNo : 'WXY 1234'}">
+                                    WXY 1234
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Owner</span>
+                                <span class="info-value"
+                                    th:text="${booking != null ? booking.ownerBusinessName : 'FleetCo Rentals'}">
+                                    FleetCo Rentals
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-item">
+                                    <span class="info-label">Payment Method</span>
+                                    <span class="info-value"
+                                        th:text="${booking != null and booking.paymentMethod != null ? booking.paymentMethod : 'Bank Transfer'}">
+                                        Bank Transfer
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Payment Status</span>
+                                    <span class="status-badge status-confirmed"
+                                        th:text="${booking != null and booking.paymentStatus != null ? booking.paymentStatus : 'CONFIRMED'}">
+                                        CONFIRMED
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="payment-breakdown">
+                                <div class="breakdown-row">
+                                    <span>Rate per Day</span>
+                                    <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 220.00'}">RM
+                                        220.00</span>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Number of Days</span>
+                                    <span>× 2</span>
+                                </div>
+                                <div class="breakdown-row total">
+                                    <span>Total Amount</span>
+                                    <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 440.00'}">RM
+                                        440.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vehicle-specs">
+                            <div class="spec-chip" th:if="${booking != null and booking.vehicleFuelType != null}">
+                                <i class="fas fa-gas-pump"></i>
+                                <span th:text="${booking.vehicleFuelType}">Petrol</span>
+                            </div>
+                            <div class="spec-chip"
+                                th:if="${booking != null and booking.vehicleTransmissionType != null}">
+                                <i class="fas fa-cog"></i>
+                                <span th:text="${booking.vehicleTransmissionType}">Automatic</span>
+                            </div>
+                            <div class="spec-chip" th:if="${booking != null and booking.vehicleCategory != null}">
+                                <i class="fas fa-car"></i>
+                                <span th:text="${booking.vehicleCategory}">SUV</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">Start Date</span>
-                        <span class="info-value"
-                            th:text="${booking != null ? #temporals.format(booking.startDate, 'dd MMM yyyy, HH:mm') : 'June 15, 2025, 10:00'}">
-                            June 15, 2025, 10:00
-                        </span>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn-manage" id="btn-manage-payment">
+                            <i class="fas fa-credit-card"></i> Manage Payment
+                        </button>
+                        <button class="btn-cancel" id="btn-cancel-booking">
+                            <i class="fas fa-times-circle"></i> Cancel Booking
+                        </button>
                     </div>
-                    <div class="info-item">
-                        <span class="info-label">End Date</span>
-                        <span class="info-value"
-                            th:text="${booking != null ? #temporals.format(booking.endDate, 'dd MMM yyyy, HH:mm') : 'June 16, 2025, 10:00'}">
-                            June 16, 2025, 10:00
-                        </span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Duration</span>
-                        <span class="info-value">2 Days</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Status</span>
-                        <span class="status-badge"
-                            th:classappend="${booking != null ? 'status-' + booking.status.toLowerCase() : 'status-confirmed'}"
-                            th:text="${booking != null ? booking.status : 'CONFIRMED'}">
-                            CONFIRMED
-                        </span>
+                </div>
+
+                <!-- Right Column: Timeline -->
+                <div class="booking-sidebar">
+                    <div class="timeline-card">
+                        <h2 class="card-title">Booking Timeline</h2>
+                        <div class="timeline">
+                            <div class="timeline-item" th:each="log, iterStat : ${statusLogs}"
+                                th:classappend="${iterStat.index == 0} ? 'active'">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date"
+                                    th:text="${#temporals.format(log.statusTimestamp, 'dd MMM yyyy, HH:mm')}">
+                                    15 May 2025, 10:30
+                                </div>
+                                <div class="timeline-status" th:text="${log.statusValue}">
+                                    CONFIRMED
+                                </div>
+                                <div class="timeline-remarks" th:text="${log.remarks}">
+                                    Booking confirmed by owner.
+                                </div>
+                            </div>
+
+                            <!-- Fallback if no logs -->
+                            <div class="timeline-item active" th:if="${#lists.isEmpty(statusLogs)}">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date"
+                                    th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy, HH:mm')}">
+                                    10 May 2025, 09:00
+                                </div>
+                                <div class="timeline-status">CREATED</div>
+                                <div class="timeline-remarks">Booking request submitted.</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Vehicle Information Card -->
-            <div class="details-card">
-                <h2 class="card-title">Vehicle Information</h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Model</span>
-                        <span class="info-value"
-                            th:text="${booking != null ? (booking.vehicleBrand + ' ' + booking.vehicleModel) : 'Perodua Aruz'}">
-                            Perodua Aruz
-                        </span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Registration No</span>
-                        <span class="info-value"
-                            th:text="${booking != null ? booking.vehicleRegistrationNo : 'WXY 1234'}">
-                            WXY 1234
-                        </span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Owner</span>
-                        <span class="info-value"
-                            th:text="${booking != null ? booking.ownerBusinessName : 'FleetCo Rentals'}">
-                            FleetCo Rentals
-                        </span>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-item">
-                            <span class="info-label">Payment Method</span>
-                            <span class="info-value"
-                                th:text="${booking != null and booking.paymentMethod != null ? booking.paymentMethod : 'Bank Transfer'}">
-                                Bank Transfer
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Payment Status</span>
-                            <span class="status-badge status-confirmed"
-                                th:text="${booking != null and booking.paymentStatus != null ? booking.paymentStatus : 'CONFIRMED'}">
-                                CONFIRMED
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="payment-breakdown">
-                        <div class="breakdown-row">
-                            <span>Rate per Day</span>
-                            <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 220.00'}">RM
-                                220.00</span>
-                        </div>
-                        <div class="breakdown-row">
-                            <span>Number of Days</span>
-                            <span>× 2</span>
-                        </div>
-                        <div class="breakdown-row total">
-                            <span>Total Amount</span>
-                            <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 440.00'}">RM
-                                440.00</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button class="btn-manage" id="btn-manage-payment">
-                        <i class="fas fa-credit-card"></i> Manage Payment
-                    </button>
-                    <button class="btn-cancel" id="btn-cancel-booking">
-                        <i class="fas fa-times-circle"></i> Cancel Booking
-                    </button>
-                </div>
-            </div>
+        </div>
     </main>
 
     <th:block layout:fragment="extra-js">

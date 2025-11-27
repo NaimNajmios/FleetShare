@@ -230,4 +230,8 @@ public class BookingService {
             }
         }
     }
+
+    public List<BookingStatusLog> getBookingStatusLogs(Long bookingId) {
+        return statusLogRepository.findByBookingIdOrderByStatusTimestampDesc(bookingId);
+    }
 }

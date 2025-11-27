@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -12,4 +13,6 @@ public interface BookingStatusLogRepository extends JpaRepository<BookingStatusL
 
     @Query("SELECT bsl FROM BookingStatusLog bsl WHERE bsl.bookingId = :bookingId ORDER BY bsl.statusTimestamp DESC LIMIT 1")
     Optional<BookingStatusLog> findLatestStatusByBookingId(Long bookingId);
+
+    List<BookingStatusLog> findByBookingIdOrderByStatusTimestampDesc(Long bookingId);
 }
