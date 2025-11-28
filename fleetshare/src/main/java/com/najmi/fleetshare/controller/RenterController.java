@@ -28,6 +28,9 @@ public class RenterController {
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private com.najmi.fleetshare.service.PaymentService paymentService;
+
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -168,6 +171,15 @@ public class RenterController {
                 // Fetch booking status logs
                 List<BookingStatusLog> statusLogs = bookingService.getBookingStatusLogs(id);
                 model.addAttribute("statusLogs", statusLogs);
+
+                // Fetch payment details and logs
+                com.najmi.fleetshare.entity.Payment payment = paymentService.getPaymentByBookingId(id);
+                if (payment != null) {
+                    model.addAttribute("payment", payment);
+                    List<com.najmi.fleetshare.entity.PaymentStatusLog> paymentLogs = paymentService
+                            .getPaymentStatusLogs(payment.getPaymentId());
+                    model.addAttribute("paymentLogs", paymentLogs);
+                }
 
                 return "renter/booking-details";
             }

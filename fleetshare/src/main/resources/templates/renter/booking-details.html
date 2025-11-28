@@ -453,6 +453,35 @@
                             <i class="fas fa-times-circle"></i> Cancel Booking
                         </button>
                     </div>
+
+                    <!-- Payment History Timeline -->
+                    <div class="details-card" style="margin-top: 1.5rem;">
+                        <h2 class="card-title">Payment History</h2>
+                        <div class="timeline">
+                            <div class="timeline-item" th:each="log, iterStat : ${paymentLogs}"
+                                th:classappend="${iterStat.index == 0} ? 'active'">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date"
+                                    th:text="${#temporals.format(log.statusTimestamp, 'dd MMM yyyy, HH:mm')}">
+                                    15 May 2025, 10:30
+                                </div>
+                                <div class="timeline-status" th:text="${log.statusValue}">
+                                    PENDING
+                                </div>
+                            </div>
+
+                            <!-- Fallback if no logs -->
+                            <div class="timeline-item active" th:if="${#lists.isEmpty(paymentLogs)}">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date"
+                                    th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy, HH:mm')}">
+                                    10 May 2025, 09:00
+                                </div>
+                                <div class="timeline-status">PENDING</div>
+                                <div class="timeline-remarks">Waiting for payment.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Right Column: Timeline -->

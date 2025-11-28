@@ -24,6 +24,9 @@ public class PaymentService {
     @Autowired
     private FleetOwnerRepository fleetOwnerRepository;
 
+    @Autowired
+    private PaymentStatusLogRepository paymentStatusLogRepository;
+
     /**
      * Fetches all payments with related information
      * 
@@ -59,5 +62,24 @@ public class PaymentService {
         }
 
         return paymentDTOs;
+    }
+
+    public List<PaymentStatusLog> getPaymentStatusLogs(Long paymentId) {
+        return paymentStatusLogRepository.findByPaymentIdOrderByStatusTimestampDesc(paymentId);
+    }
+
+    public Payment getPaymentByBookingId(Long bookingId) {
+        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
+        if (invoices.isEmpty()) {
+            return null;
+        }
+        // Assuming one active invoice per booking for now, or take the latest
+        Invoice invoice = invoices.get(0);
+        List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+        if (payments.isEmpty()) {
+            return null;
+        }
+        // Assuming one payment record per invoice for now
+        return payments.get(0);
     }
 }
