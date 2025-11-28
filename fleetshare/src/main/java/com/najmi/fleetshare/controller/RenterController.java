@@ -176,6 +176,22 @@ public class RenterController {
         return "redirect:/renter/bookings";
     }
 
+    @GetMapping("/bookings/{id}/payment")
+    public String managePayment(@PathVariable Long id, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getRenterDetails() != null) {
+            // Fetch booking details
+            BookingDTO booking = bookingService.getBookingDetails(id);
+
+            // Verify booking belongs to logged-in renter
+            if (booking != null && booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
+                model.addAttribute("booking", booking);
+                return "renter/manage-payment";
+            }
+        }
+        return "redirect:/renter/bookings";
+    }
+
     @GetMapping("/home")
     public String home() {
         // Redirect to vehicles page for now

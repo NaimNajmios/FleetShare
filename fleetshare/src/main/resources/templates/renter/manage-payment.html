@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/renter-layout}" th:with="activePage='bookings', pageTitle='Manage Payment'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .payment-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem 1.5rem;
+                padding-bottom: 6rem;
+                /* Space for sticky footer */
+            }
+
+            .payment-layout {
+                display: grid;
+                grid-template-columns: 65% 35%;
+                gap: 2rem;
+            }
+
+            @media (max-width: 992px) {
+                .payment-layout {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* --- Left Column: Action Zone --- */
+            .action-zone {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            /* Context Card */
+            .context-card {
+                background: white;
+                border-radius: 1rem;
+                padding: 1.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                display: flex;
+                gap: 1.5rem;
+                align-items: center;
+            }
+
+            .vehicle-thumbnail {
+                width: 120px;
+                height: 80px;
+                object-fit: cover;
+                border-radius: 0.5rem;
+                background: #f8f9fa;
+            }
+
+            .context-details {
+                flex: 1;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .context-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .context-label {
+                font-size: 0.75rem;
+                color: #6c757d;
+                text-transform: uppercase;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+
+            .context-value {
+                font-weight: 600;
+                color: #212529;
+            }
+
+            .total-payable {
+                color: #0d6efd;
+                font-size: 1.25rem;
+                font-weight: 700;
+            }
+
+            .status-badge {
+                display: inline-block;
+                padding: 0.25rem 0.75rem;
+                border-radius: 1rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                background: #fff3cd;
+                color: #856404;
+                width: fit-content;
+            }
+
+            /* Method Selection */
+            .method-selection-card {
+                background: white;
+                border-radius: 1rem;
+                padding: 2rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1.5rem;
+                color: #212529;
+            }
+
+            .payment-method-select {
+                width: 100%;
+                padding: 1rem;
+                font-size: 1rem;
+                border: 1px solid #dee2e6;
+                border-radius: 0.5rem;
+                background-color: #fff;
+                cursor: pointer;
+                transition: border-color 0.2s;
+            }
+
+            .payment-method-select:focus {
+                border-color: #0d6efd;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+            }
+
+            /* Dynamic Input Area */
+            .dynamic-input-area {
+                background: white;
+                border-radius: 1rem;
+                padding: 2rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                min-height: 300px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+            }
+
+            /* Scenario 1: Card/FPX */
+            .gateway-logos {
+                display: flex;
+                gap: 1.5rem;
+                margin-bottom: 1.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .gateway-logo {
+                height: 40px;
+                opacity: 0.8;
+            }
+
+            /* Scenario 2: Bank Transfer */
+            .qr-code-container {
+                margin-bottom: 1.5rem;
+            }
+
+            .qr-image {
+                width: 200px;
+                height: 200px;
+                object-fit: contain;
+            }
+
+            .bank-details {
+                background: #f8f9fa;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+                text-align: left;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .upload-zone {
+                border: 2px dashed #dee2e6;
+                border-radius: 0.5rem;
+                padding: 2rem;
+                width: 100%;
+                max-width: 400px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .upload-zone:hover {
+                border-color: #0d6efd;
+                background: #f8f9fa;
+            }
+
+            /* Scenario 3: Cash */
+            .cash-icon {
+                font-size: 4rem;
+                color: #198754;
+                margin-bottom: 1.5rem;
+            }
+
+            /* --- Right Column: Guide Zone --- */
+            .guide-zone {
+                position: sticky;
+                top: 2rem;
+                height: fit-content;
+            }
+
+            .guide-card {
+                background: #f8f9fa;
+                border-radius: 1rem;
+                padding: 1.5rem;
+                border: 1px solid #dee2e6;
+            }
+
+            .guide-title {
+                font-size: 1.125rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                color: #212529;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .guide-content {
+                font-size: 0.95rem;
+                color: #495057;
+                line-height: 1.6;
+            }
+
+            /* Timeline for Manual Transfer */
+            .guide-timeline {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                position: relative;
+            }
+
+            .guide-timeline::before {
+                content: '';
+                position: absolute;
+                left: 10px;
+                top: 5px;
+                bottom: 5px;
+                width: 2px;
+                background: #dee2e6;
+            }
+
+            .guide-step {
+                position: relative;
+                padding-left: 2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .guide-step:last-child {
+                margin-bottom: 0;
+            }
+
+            .step-dot {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 22px;
+                height: 22px;
+                background: white;
+                border: 2px solid #0d6efd;
+                border-radius: 50%;
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                font-weight: 700;
+                color: #0d6efd;
+            }
+
+            .step-title {
+                font-weight: 600;
+                color: #212529;
+                margin-bottom: 0.25rem;
+                display: block;
+            }
+
+            /* --- Sticky Footer --- */
+            .sticky-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: white;
+                padding: 1rem 2rem;
+                box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .footer-container {
+                max-width: 1200px;
+                width: 100%;
+                margin: 0 auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .btn-cancel {
+                color: #6c757d;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+            .btn-cancel:hover {
+                color: #343a40;
+            }
+
+            .btn-primary-action {
+                padding: 0.75rem 2rem;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-size: 1rem;
+            }
+
+            .btn-gateway {
+                background: #0d6efd;
+                color: white;
+            }
+
+            .btn-gateway:hover {
+                background: #0b5ed7;
+            }
+
+            .btn-submit-receipt {
+                background: #dc3545;
+                color: white;
+            }
+
+            .btn-submit-receipt:hover {
+                background: #bb2d3b;
+            }
+
+            .btn-submit-receipt:disabled {
+                background: #e9ecef;
+                color: #adb5bd;
+                cursor: not-allowed;
+            }
+
+            .btn-pay-later {
+                background: #198754;
+                color: white;
+            }
+
+            .btn-pay-later:hover {
+                background: #157347;
+            }
+
+            /* Utility to hide sections */
+            .hidden {
+                display: none !important;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <main layout:fragment="content">
+        <div class="payment-container">
+            <div class="payment-layout">
+                <!-- Left Column: Action Zone -->
+                <div class="action-zone">
+                    <!-- A. Context Card -->
+                    <div class="context-card">
+                        <img th:if="${booking.vehicleImageUrl != null}" th:src="${booking.vehicleImageUrl}"
+                            alt="Vehicle Thumbnail" class="vehicle-thumbnail">
+                        <div th:unless="${booking.vehicleImageUrl != null}" class="vehicle-thumbnail"
+                            style="display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-car fa-2x text-muted"></i>
+                        </div>
+
+                        <div class="context-details">
+                            <div class="context-item">
+                                <span class="context-label">Booking ID</span>
+                                <span class="context-value" th:text="'#' + ${booking.bookingId}">#24</span>
+                            </div>
+                            <div class="context-item">
+                                <span class="context-label">Dates</span>
+                                <span class="context-value">
+                                    <span th:text="${#temporals.format(booking.startDate, 'dd MMM')}">23 June</span> -
+                                    <span th:text="${#temporals.format(booking.endDate, 'dd MMM')}">24 June</span>
+                                </span>
+                            </div>
+                            <div class="context-item">
+                                <span class="context-label">Total Payable</span>
+                                <span class="context-value total-payable" th:text="'RM ' + ${booking.totalCost}">RM
+                                    360.00</span>
+                            </div>
+                            <div class="context-item">
+                                <span class="context-label">Status</span>
+                                <span class="status-badge">Pending</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- B. Method Selection -->
+                    <div class="method-selection-card">
+                        <h2 class="section-title">How would you like to pay?</h2>
+                        <select id="paymentMethod" class="payment-method-select">
+                            <option value="card">Credit/Debit Card & FPX</option>
+                            <option value="transfer">Bank Transfer / DuitNow QR</option>
+                            <option value="cash">Cash at Counter</option>
+                        </select>
+                    </div>
+
+                    <!-- C. Dynamic Input Area -->
+                    <div class="dynamic-input-area">
+                        <!-- Scenario 1: Card / FPX -->
+                        <div id="content-card" class="payment-content">
+                            <div class="gateway-logos">
+                                <i class="fab fa-cc-visa fa-3x text-primary"></i>
+                                <i class="fab fa-cc-mastercard fa-3x text-warning"></i>
+                                <i class="fas fa-university fa-3x text-info"></i>
+                            </div>
+                            <p class="text-muted">You will be redirected to a secure payment gateway to complete this
+                                transaction.</p>
+                        </div>
+
+                        <!-- Scenario 2: Bank Transfer / QR -->
+                        <div id="content-transfer" class="payment-content hidden">
+                            <div class="qr-code-container">
+                                <!-- Placeholder for QR Code -->
+                                <div
+                                    style="width: 200px; height: 200px; background: #f8f9fa; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                    <i class="fas fa-qrcode fa-4x text-muted"></i>
+                                </div>
+                            </div>
+                            <div class="bank-details">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span class="text-muted">Bank Name:</span>
+                                    <span style="font-weight: 600;">Maybank</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="text-muted">Acc No:</span>
+                                    <span style="font-weight: 600;">555-123-456</span>
+                                </div>
+                            </div>
+                            <div class="upload-zone" id="uploadZone">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                <p class="mb-0">Click to upload payment receipt</p>
+                                <input type="file" id="receiptUpload" hidden accept="image/*,.pdf">
+                            </div>
+                            <p id="fileName" class="mt-2 text-success hidden" style="font-size: 0.9rem;"></p>
+                        </div>
+
+                        <!-- Scenario 3: Cash -->
+                        <div id="content-cash" class="payment-content hidden">
+                            <div class="cash-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <p class="text-muted" style="font-size: 1.1rem;">Please pay the full amount at the counter
+                                upon vehicle pickup.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Guide Zone -->
+                <div class="guide-zone">
+                    <!-- Guide: Card/FPX -->
+                    <div id="guide-card" class="guide-card">
+                        <h3 class="guide-title"><i class="fas fa-lock text-success"></i> Secure Payment</h3>
+                        <div class="guide-content">
+                            <p class="mb-3">Your transaction is secured by SSL encryption. We do not store your card
+                                details.</p>
+                            <p class="mb-0 text-muted" style="font-size: 0.85rem;">
+                                Need help? Contact Support at <br>
+                                <a href="#" class="text-decoration-none">support@fleetshare.com</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Guide: Bank Transfer -->
+                    <div id="guide-transfer" class="guide-card hidden">
+                        <h3 class="guide-title"><i class="fas fa-info-circle text-primary"></i> How to Pay Manually</h3>
+                        <div class="guide-content">
+                            <ul class="guide-timeline">
+                                <li class="guide-step">
+                                    <div class="step-dot">1</div>
+                                    <span class="step-title">Scan</span>
+                                    Use your bank app to scan the QR code.
+                                </li>
+                                <li class="guide-step">
+                                    <div class="step-dot">2</div>
+                                    <span class="step-title">Transfer</span>
+                                    Enter amount <strong th:text="'RM ' + ${booking.totalCost}">RM 360.00</strong>.
+                                </li>
+                                <li class="guide-step">
+                                    <div class="step-dot">3</div>
+                                    <span class="step-title">Upload</span>
+                                    Screenshot the receipt.
+                                </li>
+                                <li class="guide-step">
+                                    <div class="step-dot">4</div>
+                                    <span class="step-title">Attach</span>
+                                    Upload proof in the box on the left.
+                                </li>
+                                <li class="guide-step">
+                                    <div class="step-dot">5</div>
+                                    <span class="step-title">Verify</span>
+                                    We will confirm within 24 hours.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Guide: Cash -->
+                    <div id="guide-cash" class="guide-card hidden">
+                        <h3 class="guide-title"><i class="fas fa-exclamation-triangle text-warning"></i> Important
+                            Policy</h3>
+                        <div class="guide-content">
+                            <p>Cash bookings are held for 24 hours only.</p>
+                            <p>Please arrive on time. Failure to show up will result in a ban from the platform.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Footer -->
+        <div class="sticky-footer">
+            <div class="footer-container">
+                <a th:href="@{/renter/bookings/{id}(id=${booking.bookingId})}" class="btn-cancel">Cancel Transaction</a>
+
+                <!-- Button: Card/FPX -->
+                <button id="btn-card" class="btn-primary-action btn-gateway">
+                    PROCEED TO GATEWAY <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+
+                <!-- Button: Bank Transfer -->
+                <button id="btn-transfer" class="btn-primary-action btn-submit-receipt hidden" disabled>
+                    SUBMIT RECEIPT
+                </button>
+
+                <!-- Button: Cash -->
+                <button id="btn-cash" class="btn-primary-action btn-pay-later hidden">
+                    CONFIRM PAY LATER
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const methodSelect = document.getElementById('paymentMethod');
+
+                // Content Areas
+                const contentCard = document.getElementById('content-card');
+                const contentTransfer = document.getElementById('content-transfer');
+                const contentCash = document.getElementById('content-cash');
+
+                // Guide Areas
+                const guideCard = document.getElementById('guide-card');
+                const guideTransfer = document.getElementById('guide-transfer');
+                const guideCash = document.getElementById('guide-cash');
+
+                // Buttons
+                const btnCard = document.getElementById('btn-card');
+                const btnTransfer = document.getElementById('btn-transfer');
+                const btnCash = document.getElementById('btn-cash');
+
+                // Upload Logic
+                const uploadZone = document.getElementById('uploadZone');
+                const receiptUpload = document.getElementById('receiptUpload');
+                const fileName = document.getElementById('fileName');
+
+                // Method Change Handler
+                methodSelect.addEventListener('change', function () {
+                    const selected = this.value;
+
+                    // Reset all visibility
+                    [contentCard, contentTransfer, contentCash].forEach(el => el.classList.add('hidden'));
+                    [guideCard, guideTransfer, guideCash].forEach(el => el.classList.add('hidden'));
+                    [btnCard, btnTransfer, btnCash].forEach(el => el.classList.add('hidden'));
+
+                    // Show selected
+                    if (selected === 'card') {
+                        contentCard.classList.remove('hidden');
+                        guideCard.classList.remove('hidden');
+                        btnCard.classList.remove('hidden');
+                    } else if (selected === 'transfer') {
+                        contentTransfer.classList.remove('hidden');
+                        guideTransfer.classList.remove('hidden');
+                        btnTransfer.classList.remove('hidden');
+                    } else if (selected === 'cash') {
+                        contentCash.classList.remove('hidden');
+                        guideCash.classList.remove('hidden');
+                        btnCash.classList.remove('hidden');
+                    }
+                });
+
+                // Upload Zone Click
+                uploadZone.addEventListener('click', function () {
+                    receiptUpload.click();
+                });
+
+                // File Selected
+                receiptUpload.addEventListener('change', function () {
+                    if (this.files && this.files[0]) {
+                        fileName.textContent = 'Selected: ' + this.files[0].name;
+                        fileName.classList.remove('hidden');
+                        btnTransfer.disabled = false;
+                        uploadZone.style.borderColor = '#198754';
+                        uploadZone.style.background = '#f8f9fa';
+                    }
+                });
+
+                // Button Actions (Mock)
+                btnCard.addEventListener('click', () => alert('Redirecting to Payment Gateway...'));
+                btnTransfer.addEventListener('click', () => alert('Submitting Receipt...'));
+                btnCash.addEventListener('click', () => alert('Confirming Pay Later...'));
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>
