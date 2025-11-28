@@ -23,7 +23,7 @@ public class SecurityConfig {
                         // Public resources
                         .requestMatchers("/css/**", "/js/**", "/assets/**", "/images/**").permitAll()
                         // Public pages
-                        .requestMatchers("/register").permitAll()
+                        .requestMatchers("/", "/register").permitAll()
                         .requestMatchers("/login").permitAll()
                         // Role-based URL protection
                         .requestMatchers("/admin/**").hasRole("PLATFORM_ADMIN")
