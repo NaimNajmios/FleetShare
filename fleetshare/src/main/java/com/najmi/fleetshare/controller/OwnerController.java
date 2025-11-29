@@ -107,8 +107,27 @@ public class OwnerController {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
             List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByOwnerId(ownerId);
             model.addAttribute("maintenanceRecords", maintenanceRecords);
+
+            // Add vehicles for the dropdown
+            List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
+            model.addAttribute("vehicles", vehicles);
+
+            // Add empty DTO for the form
+            model.addAttribute("maintenanceDTO", new MaintenanceDTO());
         }
         return "owner/maintenance";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/maintenance/add")
+    public String addMaintenance(@org.springframework.web.bind.annotation.ModelAttribute MaintenanceDTO maintenanceDTO,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            maintenanceService.addMaintenance(maintenanceDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Maintenance record added successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding maintenance record: " + e.getMessage());
+        }
+        return "redirect:/owner/maintenance";
     }
 
     @GetMapping("/maintenance/vehicle/{vehicleId}")

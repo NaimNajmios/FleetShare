@@ -81,4 +81,31 @@ public class MaintenanceService {
         List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByFleetOwnerId(ownerId);
         return mapToDTOs(maintenanceList);
     }
+
+    public void addMaintenance(MaintenanceDTO dto) {
+        VehicleMaintenance maintenance = new VehicleMaintenance();
+        maintenance.setVehicleId(dto.getVehicleId());
+        maintenance.setDescription(dto.getDescription());
+        maintenance.setMaintenanceDate(dto.getMaintenanceDate());
+        maintenance.setCost(dto.getCost());
+
+        // Set status, default to PENDING if null
+        if (dto.getStatus() != null) {
+            try {
+                maintenance.setStatus(
+                        com.najmi.fleetshare.entity.VehicleMaintenance.MaintenanceStatus.valueOf(dto.getStatus()));
+            } catch (IllegalArgumentException e) {
+                maintenance.setStatus(com.najmi.fleetshare.entity.VehicleMaintenance.MaintenanceStatus.PENDING);
+            }
+        } else {
+            maintenance.setStatus(com.najmi.fleetshare.entity.VehicleMaintenance.MaintenanceStatus.PENDING);
+        }
+
+        // Set fleet owner ID from vehicle
+        vehicleRepository.findById(dto.getVehicleId()).ifPresent(vehicle -> {
+            maintenance.setFleetOwnerId(vehicle.getFleetOwnerId());
+        });
+
+        maintenanceRepository.save(maintenance);
+    }
 }
