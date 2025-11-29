@@ -176,4 +176,9 @@ public class OwnerController {
     public String reports(Model model) {
         return "owner/reports";
     }
+
+    @GetMapping("/ai-reports")
+    public String aiReports(Model model) {
+        return "owner/ai-reports";
+    }
 }
