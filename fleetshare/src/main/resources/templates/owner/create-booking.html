@@ -5,22 +5,44 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
-            .card-title {
-                font-size: 1.1rem;
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 1.5rem;
-                border-bottom: 1px solid #eee;
-                padding-bottom: 0.5rem;
+            .section-divider {
+                border-top: 1px solid #eee;
+                margin: 1.5rem 0;
+                padding-top: 1.5rem;
             }
 
-            .form-section {
-                margin-bottom: 2rem;
+            .section-title {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: #6c757d;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 1rem;
             }
 
             .readonly-input {
                 background-color: #e9ecef;
                 cursor: not-allowed;
+            }
+
+            .cost-display {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                text-align: center;
+                margin-top: 1.5rem;
+            }
+
+            .cost-display .label {
+                font-size: 0.875rem;
+                opacity: 0.9;
+                margin-bottom: 0.5rem;
+            }
+
+            .cost-display .amount {
+                font-size: 2rem;
+                font-weight: 700;
             }
         </style>
     </th:block>
@@ -28,112 +50,129 @@
 
 <body>
     <div layout:fragment="content">
+        <!-- Header -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="font-weight-bold">Create New Booking</h3>
-                    <a th:href="@{/owner/bookings}" class="btn btn-secondary">Cancel</a>
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Create New Booking</h3>
+                        <p class="text-muted mb-0">Fill in the details below to create a manual booking</p>
+                    </div>
+                    <a th:href="@{/owner/bookings}" class="btn btn-outline-secondary">
+                        <i class="mdi mdi-arrow-left"></i> Back
+                    </a>
                 </div>
             </div>
         </div>
 
-        <form>
-            <!-- Card 1: Client Information -->
-            <div class="row">
-                <div class="col-12 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Client Information</h4>
-                            <div class="form-group">
-                                <label for="renterSelect">Select Client</label>
-                                <select class="form-control form-select" id="renterSelect" name="renterId">
-                                    <option value="" selected disabled>Select a client...</option>
-                                    <option th:each="renter : ${renters}" th:value="${renter.renterId}"
-                                        th:text="${renter.fullName + ' (' + renter.email + ')'}">
-                                    </option>
-                                </select>
-                                <small class="text-muted">Select an existing registered user.</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 2: Booking Details -->
-            <div class="row">
-                <div class="col-12 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Booking Details</h4>
+        <!-- Main Form Card -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form>
+                            <!-- Row 1: Client & Vehicle -->
                             <div class="row">
                                 <div class="col-md-6">
+                                    <div class="section-title">
+                                        <i class="mdi mdi-account-circle"></i> Client Information
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="renterSelect">Select Client</label>
+                                        <select class="form-control" id="renterSelect" name="renterId">
+                                            <option value="" selected disabled>Choose a client...</option>
+                                            <option th:each="renter : ${renters}" th:value="${renter.renterId}"
+                                                th:text="${renter.fullName + ' (' + renter.email + ')'}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="section-title">
+                                        <i class="mdi mdi-car"></i> Vehicle Selection
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="vehicleSelect">Select Vehicle</label>
+                                        <select class="form-control" id="vehicleSelect" name="vehicleId">
+                                            <option value="" selected disabled>Choose a vehicle...</option>
+                                            <option th:each="vehicle : ${vehicles}" th:value="${vehicle.vehicleId}"
+                                                th:data-rate="${vehicle.ratePerDay != null ? vehicle.ratePerDay : 0}"
+                                                th:text="${vehicle.brand + ' ' + vehicle.model + ' (' + vehicle.registrationNo + ')'}">
+                                            </option>
+                                        </select>
+                                        <small class="text-muted">Daily Rate: <span id="vehicleRate">RM
+                                                0.00</span></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section-divider"></div>
+
+                            <!-- Row 2: Booking Details -->
+                            <div class="section-title">
+                                <i class="mdi mdi-calendar-clock"></i> Booking Details
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="startDate">Start Date</label>
                                         <input type="date" class="form-control" id="startDate" name="startDate">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="endDate">End Date</label>
                                         <input type="date" class="form-control" id="endDate" name="endDate">
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="totalCost">Total Cost (RM)</label>
-                                        <input type="text" class="form-control readonly-input" id="totalCost"
-                                            name="totalCost" readonly placeholder="0.00">
-                                        <small class="text-muted">Calculated automatically based on vehicle rate and
-                                            duration.</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="paymentMethod">Payment Method</label>
-                                        <select class="form-control form-select" id="paymentMethod"
-                                            name="paymentMethod">
+                                        <select class="form-control" id="paymentMethod" name="paymentMethod">
                                             <option value="CASH">Cash</option>
                                             <option value="BANK_TRANSFER">Bank Transfer</option>
                                             <option value="CREDIT_CARD">Credit Card</option>
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="duration">Duration</label>
+                                        <input type="text" class="form-control readonly-input" id="duration" readonly
+                                            placeholder="0 days">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+
+                            <!-- Cost Display -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="cost-display">
+                                        <div class="label">Total Booking Cost</div>
+                                        <div class="amount">RM <span id="totalCost">0.00</span></div>
+                                        <small style="opacity: 0.8;">Calculated automatically based on daily rate and
+                                            duration</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a th:href="@{/owner/bookings}" class="btn btn-light px-4">Cancel</a>
+                                        <button type="button" class="btn btn-primary px-5" id="createBookingBtn">
+                                            <i class="mdi mdi-check"></i> Create Booking
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-
-            <!-- Card 3: Vehicle Information -->
-            <div class="row">
-                <div class="col-12 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Vehicle Information</h4>
-                            <div class="form-group">
-                                <label for="vehicleSelect">Select Vehicle</label>
-                                <select class="form-control form-select" id="vehicleSelect" name="vehicleId">
-                                    <option value="" selected disabled>Select a vehicle...</option>
-                                    <option th:each="vehicle : ${vehicles}" th:value="${vehicle.vehicleId}"
-                                        th:data-rate="${vehicle.ratePerDay != null ? vehicle.ratePerDay : 0}"
-                                        th:text="${vehicle.brand + ' ' + vehicle.model + ' - [' + vehicle.registrationNo + ']'}">
-                                    </option>
-                                </select>
-                                <small class="text-muted">Select a vehicle based on booking dates.</small>
-                            </div>
-
-                            <div class="mt-4 d-flex justify-content-end">
-                                <button type="button" class="btn btn-primary btn-lg" id="createBookingBtn">Create
-                                    Booking</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
 
     <th:block layout:fragment="extra-js">
@@ -142,7 +181,17 @@
                 const vehicleSelect = document.getElementById('vehicleSelect');
                 const startDateInput = document.getElementById('startDate');
                 const endDateInput = document.getElementById('endDate');
-                const totalCostInput = document.getElementById('totalCost');
+                const totalCostDisplay = document.getElementById('totalCost');
+                const durationDisplay = document.getElementById('duration');
+                const vehicleRateDisplay = document.getElementById('vehicleRate');
+
+                // Update vehicle rate display when vehicle is selected
+                vehicleSelect.addEventListener('change', function () {
+                    const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+                    const rate = parseFloat(selectedOption.getAttribute('data-rate')) || 0;
+                    vehicleRateDisplay.textContent = 'RM ' + rate.toFixed(2) + '/day';
+                    calculateTotalCost();
+                });
 
                 function calculateTotalCost() {
                     const vehicleOption = vehicleSelect.options[vehicleSelect.selectedIndex];
@@ -156,25 +205,29 @@
                         const diffTime = Math.abs(endDate - startDate);
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                        // Ensure at least 1 day if start and end are same
+                        // Ensure at least 1 day
                         const days = diffDays === 0 ? 1 : diffDays;
+
+                        // Update duration display
+                        durationDisplay.value = days + ' day' + (days > 1 ? 's' : '');
 
                         if (days > 0) {
                             const total = days * rate;
-                            totalCostInput.value = total.toFixed(2);
+                            totalCostDisplay.textContent = total.toFixed(2);
                         } else {
-                            totalCostInput.value = '0.00';
+                            totalCostDisplay.textContent = '0.00';
+                            durationDisplay.value = '0 days';
                         }
                     } else {
-                        totalCostInput.value = '0.00';
+                        totalCostDisplay.textContent = '0.00';
+                        durationDisplay.value = '0 days';
                     }
                 }
 
-                vehicleSelect.addEventListener('change', calculateTotalCost);
                 startDateInput.addEventListener('change', calculateTotalCost);
                 endDateInput.addEventListener('change', calculateTotalCost);
 
-                // Button click handler (just for UI demo since no backend logic yet)
+                // Button click handler
                 document.getElementById('createBookingBtn').addEventListener('click', function () {
                     alert('Booking creation logic will be implemented in the next phase.');
                 });
