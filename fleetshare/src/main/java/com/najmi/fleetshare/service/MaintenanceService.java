@@ -70,4 +70,15 @@ public class MaintenanceService {
 
         return maintenanceDTOs;
     }
+
+    /**
+     * Fetches all maintenance records for a specific fleet owner
+     * 
+     * @param ownerId Fleet owner ID
+     * @return List of MaintenanceDTO objects for owner's vehicles
+     */
+    public List<MaintenanceDTO> getMaintenanceByOwnerId(Long ownerId) {
+        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByFleetOwnerId(ownerId);
+        return mapToDTOs(maintenanceList);
+    }
 }

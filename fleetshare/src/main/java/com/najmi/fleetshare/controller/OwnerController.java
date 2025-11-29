@@ -1,9 +1,11 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
@@ -15,7 +17,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/owner")
@@ -26,6 +32,9 @@ public class OwnerController {
 
     @Autowired
     private VehicleManagementService vehicleManagementService;
+
+    @Autowired
+    private MaintenanceService maintenanceService;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -76,8 +85,45 @@ public class OwnerController {
     }
 
     @GetMapping("/maintenance")
-    public String maintenance(Model model) {
+    public String maintenance(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getOwnerDetails() != null) {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByOwnerId(ownerId);
+            model.addAttribute("maintenanceRecords", maintenanceRecords);
+        }
         return "owner/maintenance";
+    }
+
+    @GetMapping("/maintenance/vehicle/{vehicleId}")
+    public String vehicleMaintenance(@PathVariable Long vehicleId, Model model) {
+        // Get vehicle details
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+        model.addAttribute("vehicle", vehicle);
+
+        // Get maintenance records
+        List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByVehicleId(vehicleId);
+
+        // Sort by date descending
+        maintenanceRecords.sort(Comparator.comparing(MaintenanceDTO::getMaintenanceDate).reversed());
+
+        model.addAttribute("maintenanceRecords", maintenanceRecords);
+
+        // Calculate KPI metrics
+        int totalRecords = maintenanceRecords.size();
+        BigDecimal totalCost = maintenanceRecords.stream()
+                .map(MaintenanceDTO::getCost)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LocalDate lastMaintenanceDate = maintenanceRecords.isEmpty() ? null
+                : maintenanceRecords.get(0).getMaintenanceDate();
+
+        model.addAttribute("totalRecords", totalRecords);
+        model.addAttribute("totalCost", totalCost);
+        model.addAttribute("lastMaintenanceDate", lastMaintenanceDate);
+        model.addAttribute("ownerName", vehicle.getOwnerBusinessName());
+
+        return "owner/vehicle-maintenance-details";
     }
 
     @GetMapping("/bookings")
