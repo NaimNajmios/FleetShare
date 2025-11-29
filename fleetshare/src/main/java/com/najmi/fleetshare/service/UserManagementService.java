@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserManagementService {
@@ -25,6 +28,9 @@ public class UserManagementService {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     /**
      * Fetches all fleet owners with their associated user details
@@ -128,5 +134,42 @@ public class UserManagementService {
         }
 
         return dto;
+    }
+
+    /**
+     * Fetches all customers (renters) who have booked with a specific fleet owner
+     * 
+     * @param ownerId Fleet owner ID
+     * @return List of RenterDTO objects representing the owner's customers
+     */
+    public List<RenterDTO> getCustomersByOwnerId(Long ownerId) {
+        // 1. Get all bookings for this owner
+        List<Booking> ownerBookings = bookingRepository.findByFleetOwnerId(ownerId);
+
+        // 2. Extract distinct renter IDs
+        Set<Long> renterIds = ownerBookings.stream()
+                .map(Booking::getRenterId)
+                .collect(Collectors.toSet());
+
+        // 3. Fetch renter details and convert to DTOs
+        List<RenterDTO> customers = new ArrayList<>();
+        for (Long renterId : renterIds) {
+            Renter renter = renterRepository.findById(renterId).orElse(null);
+            if (renter != null) {
+                User user = userRepository.findById(renter.getUserId()).orElse(null);
+                if (user != null) {
+                    RenterDTO dto = new RenterDTO(
+                            user.getUserId(),
+                            user.getEmail(),
+                            renter.getFullName(),
+                            renter.getPhoneNumber(),
+                            user.getIsActive(),
+                            user.getCreatedAt());
+                    customers.add(dto);
+                }
+            }
+        }
+
+        return customers;
     }
 }
