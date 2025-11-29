@@ -80,9 +80,14 @@
                     </div>
                     <div class="col-12 col-xl-4">
                         <div class="vehicle-count justify-content-xl-end">
-                            <i class="mdi mdi-car"></i>
-                            <span>Total Vehicles: <span class="badge badge-secondary"
-                                    th:text="${#lists.size(vehicles)}">0</span></span>
+                            <a th:href="@{/owner/vehicles/add}" class="btn btn-primary mr-3">
+                                <i class="mdi mdi-plus"></i> Add New Vehicle
+                            </a>
+                            <div class="d-flex align-items-center">
+                                <i class="mdi mdi-car mr-2" style="font-size: 1.2rem;"></i>
+                                <span>Total: <span class="badge badge-secondary"
+                                        th:text="${#lists.size(vehicles)}">0</span></span>
+                            </div>
                         </div>
                     </div>
                 </div>

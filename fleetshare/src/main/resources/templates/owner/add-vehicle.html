@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='vehicles', pageTitle='Add New Vehicle'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .profile-container {
+                background: white;
+                border-radius: 8px;
+                padding: 2rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .profile-header {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                padding-bottom: 2rem;
+                border-bottom: 2px solid #e8ecef;
+                margin-bottom: 2rem;
+            }
+
+            .image-dropzone {
+                width: 100%;
+                height: 250px;
+                border: 2px dashed #ced4da;
+                border-radius: 8px;
+                background-color: #f8f9fa;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .image-dropzone:hover {
+                border-color: #007bff;
+                background-color: #e9ecef;
+            }
+
+            .dropzone-icon {
+                font-size: 3rem;
+                color: #6c757d;
+                margin-bottom: 1rem;
+            }
+
+            .dropzone-text {
+                font-size: 1.1rem;
+                font-weight: 500;
+                color: #495057;
+                margin-bottom: 0.5rem;
+            }
+
+            .dropzone-hint {
+                font-size: 0.875rem;
+                color: #6c757d;
+            }
+
+            .form-section {
+                margin-bottom: 2rem;
+            }
+
+            .form-section h4 {
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid #e8ecef;
+                color: #2c2e30;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-group label {
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #495057;
+            }
+
+            .form-control {
+                padding: 0.75rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+                font-size: 1rem;
+                background: white;
+            }
+
+            .form-control:focus {
+                border-color: #80bdff;
+                box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+            }
+
+            .manage-rate-btn {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                text-align: left;
+                background-color: white;
+                border: 1px solid #ced4da;
+                color: #495057;
+                padding: 0.75rem;
+                border-radius: 0.25rem;
+                cursor: pointer;
+            }
+
+            .manage-rate-btn:hover {
+                background-color: #f8f9fa;
+                border-color: #b3b7bb;
+            }
+
+            .action-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1rem;
+                padding-top: 2rem;
+                border-top: 2px solid #e8ecef;
+            }
+
+            @media (max-width: 768px) {
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="font-weight-bold">Add New Vehicle</h3>
+                        <h6 class="font-weight-normal mb-0">Onboard a new vehicle to your fleet</h6>
+                    </div>
+                    <a th:href="@{/owner/vehicles}" class="btn btn-outline-secondary">
+                        <i class="mdi mdi-arrow-left"></i> Back to Vehicles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="profile-container">
+                            <!-- Image Upload Section -->
+                            <div class="profile-header">
+                                <div class="image-dropzone"
+                                    onclick="document.getElementById('vehicleImageInput').click()">
+                                    <i class="mdi mdi-cloud-upload dropzone-icon"></i>
+                                    <p class="dropzone-text">Click to upload or drag and drop</p>
+                                    <p class="dropzone-hint">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                                    <input type="file" id="vehicleImageInput" style="display: none;" accept="image/*">
+                                </div>
+                            </div>
+
+                            <!-- Vehicle Specifications -->
+                            <div class="form-section">
+                                <h4>Vehicle Specifications</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Brand</label>
+                                        <input type="text" class="form-control" placeholder="e.g., Toyota">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Model</label>
+                                        <input type="text" class="form-control" placeholder="e.g., Camry">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Manufacturing Year</label>
+                                        <input type="number" class="form-control" placeholder="e.g., 2023">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Registration No.</label>
+                                        <input type="text" class="form-control" placeholder="e.g., VBE 1234">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Category</label>
+                                        <select class="form-control form-select">
+                                            <option value="Hatchback" selected>Hatchback</option>
+                                            <option value="Sedan">Sedan</option>
+                                            <option value="SUV">SUV</option>
+                                            <option value="MPV">MPV</option>
+                                            <option value="Luxury">Luxury</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Mileage (km)</label>
+                                        <input type="number" class="form-control" placeholder="e.g., 50000">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Fuel Type</label>
+                                        <select class="form-control form-select">
+                                            <option value="Petrol" selected>Petrol</option>
+                                            <option value="Diesel">Diesel</option>
+                                            <option value="Hybrid">Hybrid</option>
+                                            <option value="Electric">Electric</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Transmission</label>
+                                        <select class="form-control form-select">
+                                            <option value="Automatic" selected>Automatic</option>
+                                            <option value="Manual">Manual</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status & Rate -->
+                            <div class="form-section">
+                                <h4>Status & Rate</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Availability Status</label>
+                                        <select class="form-control form-select">
+                                            <option value="AVAILABLE" selected>Available</option>
+                                            <option value="RENTED">Rented</option>
+                                            <option value="MAINTENANCE">Maintenance</option>
+                                            <option value="UNAVAILABLE">Unavailable</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Rate Per Day (RM)</label>
+                                        <button class="btn manage-rate-btn"
+                                            onclick="alert('Manage Rate modal will be implemented later.')">
+                                            <span>Manage Rate Per Day</span>
+                                            <i class="mdi mdi-cog"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <a th:href="@{/owner/vehicles}" class="btn btn-secondary"
+                                    style="background-color: #343a40; border-color: #343a40; color: white;">Cancel</a>
+                                <button class="btn btn-success"
+                                    onclick="alert('Create functionality is not yet implemented. This is UI only.')">
+                                    <i class="mdi mdi-plus"></i> ADD VEHICLE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

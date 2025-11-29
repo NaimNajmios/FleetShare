@@ -94,6 +94,12 @@ public class OwnerController {
         return "owner/view-vehicle";
     }
 
+    @GetMapping("/vehicles/add")
+    public String addVehicle(Model model) {
+        model.addAttribute("vehicle", new VehicleDTO());
+        return "owner/add-vehicle";
+    }
+
     @GetMapping("/maintenance")
     public String maintenance(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
