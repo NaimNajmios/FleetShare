@@ -1,10 +1,12 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
@@ -35,6 +37,9 @@ public class OwnerController {
 
     @Autowired
     private MaintenanceService maintenanceService;
+
+    @Autowired
+    private BookingService bookingService;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -127,8 +132,28 @@ public class OwnerController {
     }
 
     @GetMapping("/bookings")
-    public String bookings(Model model) {
+    public String bookings(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getOwnerDetails() != null) {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId);
+            model.addAttribute("bookings", bookings);
+        }
         return "owner/bookings";
+    }
+
+    @GetMapping("/bookings/view/{bookingId}")
+    public String viewBooking(@PathVariable Long bookingId, Model model) {
+        BookingDTO booking = bookingService.getBookingDetails(bookingId);
+        model.addAttribute("booking", booking);
+        return "owner/view-booking";
+    }
+
+    @GetMapping("/bookings/edit/{bookingId}")
+    public String editBooking(@PathVariable Long bookingId, Model model) {
+        BookingDTO booking = bookingService.getBookingDetails(bookingId);
+        model.addAttribute("booking", booking);
+        return "owner/edit-booking";
     }
 
     @GetMapping("/payments")

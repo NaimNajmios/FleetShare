@@ -234,4 +234,62 @@ public class BookingService {
     public List<BookingStatusLog> getBookingStatusLogs(Long bookingId) {
         return statusLogRepository.findByBookingIdOrderByStatusTimestampDesc(bookingId);
     }
+
+    /**
+     * Fetches all bookings for a specific fleet owner
+     * 
+     * @param ownerId Fleet owner ID
+     * @return List of BookingDTO objects for owner's vehicle bookings
+     */
+    public List<BookingDTO> getBookingsByOwnerId(Long ownerId) {
+        List<Booking> bookings = bookingRepository.findByFleetOwnerId(ownerId);
+        List<BookingDTO> bookingDTOs = new ArrayList<>();
+
+        for (Booking booking : bookings) {
+            // Get renter information
+            Renter renter = renterRepository.findById(booking.getRenterId()).orElse(null);
+            User renterUser = renter != null ? userRepository.findById(renter.getUserId()).orElse(null) : null;
+
+            // Get vehicle information
+            Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+
+            // Get fleet owner information
+            FleetOwner owner = fleetOwnerRepository.findById(booking.getFleetOwnerId()).orElse(null);
+
+            // Get latest status
+            String status = statusLogRepository.findLatestStatusByBookingId(booking.getBookingId())
+                    .map(log -> log.getStatusValue().name())
+                    .orElse("PENDING");
+
+            if (renter != null && vehicle != null) {
+                BookingDTO dto = new BookingDTO(
+                        booking.getBookingId(),
+                        renter.getRenterId(),
+                        renter.getFullName(),
+                        renterUser != null ? renterUser.getEmail() : "N/A",
+                        vehicle.getVehicleId(),
+                        vehicle.getModel(),
+                        vehicle.getBrand(),
+                        vehicle.getRegistrationNo(),
+                        vehicle.getVehicleImageUrl(),
+                        owner != null ? owner.getBusinessName() : "Unknown Owner",
+                        booking.getStartDate(),
+                        booking.getEndDate(),
+                        status,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        booking.getCreatedAt(),
+                        vehicle.getFuelType(),
+                        vehicle.getTransmissionType(),
+                        vehicle.getCategory(),
+                        null);
+                bookingDTOs.add(dto);
+            }
+        }
+
+        return bookingDTOs;
+    }
 }

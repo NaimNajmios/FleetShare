@@ -1,10 +1,76 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/owner-layout}" th:with="activePage='bookings', pageTitle='My Bookings'">
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='bookings', pageTitle='Booking Management'">
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Custom styles for this page if needed -->
+        <style>
+            .search-filter-bar {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .search-input {
+                flex: 1;
+                min-width: 250px;
+                padding: 0.5rem 1rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+            }
+
+            .filter-select {
+                padding: 0.5rem 1rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+                background: white;
+            }
+
+            .badge {
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .badge-warning {
+                background-color: #fff3cd;
+                color: #856404;
+            }
+
+            .badge-info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .badge-success {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .badge-primary {
+                background-color: #cfe2ff;
+                color: #084298;
+            }
+
+            .badge-danger {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .badge-dark {
+                background-color: #d3d3d4;
+                color: #141619;
+            }
+
+            .no-data {
+                text-align: center;
+                padding: 3rem;
+                color: #6c757d;
+            }
+        </style>
     </th:block>
 </head>
 
@@ -14,8 +80,8 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">My Bookings</h3>
-                        <h6 class="font-weight-normal mb-0">View and manage rental bookings.</h6>
+                        <h3 class="font-weight-bold">Booking Management</h3>
+                        <h6 class="font-weight-normal mb-0">Oversee all rental bookings.</h6>
                     </div>
                 </div>
             </div>
@@ -25,38 +91,72 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Booking History</h4>
+                        <!-- Search and Filters -->
+                        <div class="search-filter-bar">
+                            <input type="text" class="search-input" id="booking-search"
+                                placeholder="Search by renter, vehicle...">
+                            <select class="filter-select" id="status-filter">
+                                <option value="">All Status</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="CONFIRMED">Confirmed</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                                <option value="DISPUTED">Disputed</option>
+                            </select>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-striped" id="bookings-table">
                                 <thead>
                                     <tr>
                                         <th>Booking ID</th>
-                                        <th>Customer</th>
+                                        <th>Renter</th>
                                         <th>Vehicle</th>
-                                        <th>Dates</th>
-                                        <th>Amount</th>
+                                        <th>Plate No.</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
                                         <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>#BK001</td>
-                                        <td>Herman Beck</td>
-                                        <td>Toyota Camry</td>
-                                        <td>12 May 2023 - 15 May 2023</td>
-                                        <td>RM 450</td>
-                                        <td><label class="badge badge-success">Completed</label></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#BK002</td>
-                                        <td>Messsy Adam</td>
-                                        <td>Honda CR-V</td>
-                                        <td>20 May 2023 - 25 May 2023</td>
-                                        <td>RM 1250</td>
-                                        <td><label class="badge badge-info">Active</label></td>
+                                    <tr th:each="booking : ${bookings}" th:attr="data-status=${booking.status}"
+                                        class="booking-row">
+                                        <td th:text="${booking.bookingId}">1</td>
+                                        <td th:text="${booking.renterName}" class="searchable">Herman Beck</td>
+                                        <td th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}"
+                                            class="searchable">Toyota Camry</td>
+                                        <td th:text="${booking.vehicleRegistrationNo}">WXY 1234</td>
+                                        <td th:text="${#temporals.format(booking.startDate, 'yyyy-MM-dd HH:mm')}">
+                                            2024-05-12 10:00</td>
+                                        <td th:text="${#temporals.format(booking.endDate, 'yyyy-MM-dd HH:mm')}">
+                                            2024-05-15 10:00</td>
+                                        <td>
+                                            <span th:if="${booking.status == 'PENDING'}"
+                                                class="badge badge-warning">Pending</span>
+                                            <span th:if="${booking.status == 'CONFIRMED'}"
+                                                class="badge badge-primary">Confirmed</span>
+                                            <span th:if="${booking.status == 'ACTIVE'}"
+                                                class="badge badge-info">Active</span>
+                                            <span th:if="${booking.status == 'COMPLETED'}"
+                                                class="badge badge-success">Completed</span>
+                                            <span th:if="${booking.status == 'CANCELLED'}"
+                                                class="badge badge-danger">Cancelled</span>
+                                            <span th:if="${booking.status == 'DISPUTED'}"
+                                                class="badge badge-dark">Disputed</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/owner/bookings/view/{id}(id=${booking.bookingId})}"
+                                                class="btn btn-sm btn-outline-info">View</a>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
+                            <div th:if="${#lists.isEmpty(bookings)}" class="no-data">
+                                <i class="mdi mdi-calendar-remove mdi-48px"></i>
+                                <p>No bookings found</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -65,7 +165,7 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <!-- Extra JS for this page -->
+        <script th:src="@{/assets/js/booking-management.js}"></script>
     </th:block>
 </body>
 
