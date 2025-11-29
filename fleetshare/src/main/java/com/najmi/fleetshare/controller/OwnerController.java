@@ -3,7 +3,9 @@ package com.najmi.fleetshare.controller;
 import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
+import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.service.UserManagementService;
+import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class OwnerController {
 
     @Autowired
     private UserManagementService userManagementService;
+
+    @Autowired
+    private VehicleManagementService vehicleManagementService;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -53,8 +58,21 @@ public class OwnerController {
     }
 
     @GetMapping("/vehicles")
-    public String vehicles(Model model) {
+    public String vehicles(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getOwnerDetails() != null) {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
+            model.addAttribute("vehicles", vehicles);
+        }
         return "owner/vehicles";
+    }
+
+    @GetMapping("/vehicles/view/{vehicleId}")
+    public String viewVehicle(@PathVariable Long vehicleId, Model model) {
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+        model.addAttribute("vehicle", vehicle);
+        return "owner/view-vehicle";
     }
 
     @GetMapping("/maintenance")

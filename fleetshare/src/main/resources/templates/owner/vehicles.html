@@ -4,7 +4,68 @@
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Custom styles for this page if needed -->
+        <style>
+            .search-filter-bar {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .search-input {
+                flex: 1;
+                min-width: 250px;
+                padding: 0.5rem 1rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+            }
+
+            .filter-select {
+                padding: 0.5rem 1rem;
+                border: 1px solid #ced4da;
+                border-radius: 0.25rem;
+                background: white;
+            }
+
+            .badge {
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .badge-success {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .badge-secondary {
+                background-color: #e2e3e5;
+                color: #383d41;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+            }
+
+            .no-data {
+                text-align: center;
+                padding: 3rem;
+                color: #6c757d;
+            }
+
+            .vehicle-count {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .vehicle-count i {
+                font-size: 1.2rem;
+            }
+        </style>
     </th:block>
 </head>
 
@@ -15,11 +76,13 @@
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                         <h3 class="font-weight-bold">My Vehicles</h3>
-                        <h6 class="font-weight-normal mb-0">Manage your fleet inventory and status.</h6>
+                        <h6 class="font-weight-normal mb-0">Manage your vehicle inventory</h6>
                     </div>
                     <div class="col-12 col-xl-4">
-                        <div class="justify-content-end d-flex">
-                            <button type="button" class="btn btn-primary">Add New Vehicle</button>
+                        <div class="vehicle-count justify-content-xl-end">
+                            <i class="mdi mdi-car"></i>
+                            <span>Total Vehicles: <span class="badge badge-secondary"
+                                    th:text="${#lists.size(vehicles)}">0</span></span>
                         </div>
                     </div>
                 </div>
@@ -30,44 +93,77 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Vehicle Inventory</h4>
+                        <!-- Search and Filters -->
+                        <div class="search-filter-bar">
+                            <input type="text" class="search-input" id="vehicle-search"
+                                placeholder="Search by plate number, model, or brand...">
+                            <select class="filter-select" id="year-filter">
+                                <option value="">All Years</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                            </select>
+                            <select class="filter-select" id="category-filter">
+                                <option value="">All Categories</option>
+                                <option value="Hatchback">Hatchback</option>
+                                <option value="Sedan">Sedan</option>
+                                <option value="SUV">SUV</option>
+                                <option value="Pickup 4x4">Pickup 4x4</option>
+                                <option value="Luxury MPV">Luxury MPV</option>
+                                <option value="Luxury Sedan">Luxury Sedan</option>
+                            </select>
+                        </div>
+
+                        <!-- Vehicles Table -->
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-striped" id="vehicles-table">
                                 <thead>
                                     <tr>
-                                        <th>Vehicle</th>
                                         <th>Plate No.</th>
-                                        <th>Type</th>
+                                        <th>Model</th>
+                                        <th>Brand</th>
+                                        <th>Year</th>
+                                        <th>Category</th>
+                                        <th>Rate/Day (RM)</th>
                                         <th>Status</th>
-                                        <th>Daily Rate</th>
-                                        <th>Action</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>Toyota Camry</td>
-                                        <td>WXY 1234</td>
-                                        <td>Sedan</td>
-                                        <td><label class="badge badge-success">Available</label></td>
-                                        <td>RM 150</td>
+                                    <tr th:each="vehicle : ${vehicles}"
+                                        th:attr="data-year=${vehicle.manufacturingYear}, data-category=${vehicle.category}"
+                                        class="vehicle-row">
+                                        <td th:text="${vehicle.registrationNo}" class="searchable font-weight-bold">
+                                            Registration</td>
+                                        <td th:text="${vehicle.model}" class="searchable">Model</td>
+                                        <td th:text="${vehicle.brand}" class="searchable">Brand</td>
+                                        <td th:text="${vehicle.manufacturingYear}">Year</td>
+                                        <td th:text="${vehicle.category}">Category</td>
+                                        <td th:text="${vehicle.ratePerDay}">Rate</td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                            <span th:if="${vehicle.status == 'AVAILABLE'}"
+                                                class="badge badge-success">Available</span>
+                                            <span th:if="${vehicle.status == 'RENTED'}"
+                                                class="badge badge-warning">Rented</span>
+                                            <span th:if="${vehicle.status == 'MAINTENANCE'}"
+                                                class="badge badge-info">Maintenance</span>
+                                            <span th:if="${vehicle.status == 'UNAVAILABLE'}"
+                                                class="badge badge-secondary">Unavailable</span>
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Honda CR-V</td>
-                                        <td>VAB 5678</td>
-                                        <td>SUV</td>
-                                        <td><label class="badge badge-info">Rented</label></td>
-                                        <td>RM 250</td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                            <a th:href="@{/owner/vehicles/view/{id}(id=${vehicle.vehicleId})}"
+                                                class="btn btn-sm btn-outline-primary">View</a>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                            <div th:if="${#lists.isEmpty(vehicles)}" class="no-data">
+                                <i class="mdi mdi-car-off mdi-48px"></i>
+                                <p>No vehicles found</p>
+                                <p class="text-muted">Your vehicles will appear here</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -76,7 +172,39 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <!-- Extra JS for this page -->
+        <script>
+            // Search and filter functionality
+            const searchInput = document.getElementById('vehicle-search');
+            const yearFilter = document.getElementById('year-filter');
+            const categoryFilter = document.getElementById('category-filter');
+            const vehicleRows = document.querySelectorAll('.vehicle-row');
+
+            function filterVehicles() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const yearValue = yearFilter.value;
+                const categoryValue = categoryFilter.value;
+
+                vehicleRows.forEach(row => {
+                    const searchableText = Array.from(row.querySelectorAll('.searchable'))
+                        .map(cell => cell.textContent.toLowerCase())
+                        .join(' ');
+
+                    const matchesSearch = searchableText.includes(searchTerm);
+                    const matchesYear = !yearValue || row.dataset.year === yearValue;
+                    const matchesCategory = !categoryValue || row.dataset.category === categoryValue;
+
+                    if (matchesSearch && matchesYear && matchesCategory) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            searchInput.addEventListener('input', filterVehicles);
+            yearFilter.addEventListener('change', filterVehicles);
+            categoryFilter.addEventListener('change', filterVehicles);
+        </script>
     </th:block>
 </body>
 

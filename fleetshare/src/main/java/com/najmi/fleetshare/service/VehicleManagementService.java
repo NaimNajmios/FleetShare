@@ -110,4 +110,49 @@ public class VehicleManagementService {
                                 ownerContactPhone,
                                 ownerIsVerified);
         }
+
+        /**
+         * Fetches all vehicles owned by a specific fleet owner
+         * 
+         * @param ownerId Fleet owner ID
+         * @return List of VehicleDTO objects for owner's vehicles
+         */
+        public List<VehicleDTO> getVehiclesByOwnerId(Long ownerId) {
+                List<Vehicle> vehicles = vehicleRepository.findByFleetOwnerId(ownerId);
+                List<VehicleDTO> vehicleDTOs = new ArrayList<>();
+
+                for (Vehicle vehicle : vehicles) {
+                        // Get latest price for this vehicle
+                        BigDecimal ratePerDay = priceHistoryRepository
+                                        .findLatestPriceByVehicleId(vehicle.getVehicleId())
+                                        .map(VehiclePriceHistory::getRatePerDay)
+                                        .orElse(BigDecimal.ZERO);
+
+                        // Get fleet owner information
+                        FleetOwner owner = fleetOwnerRepository.findById(vehicle.getFleetOwnerId()).orElse(null);
+                        String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
+                        String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
+                        Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
+
+                        VehicleDTO dto = new VehicleDTO(
+                                        vehicle.getVehicleId(),
+                                        vehicle.getRegistrationNo(),
+                                        vehicle.getModel(),
+                                        vehicle.getBrand(),
+                                        vehicle.getManufacturingYear(),
+                                        vehicle.getCategory(),
+                                        ratePerDay,
+                                        vehicle.getVehicleImageUrl(),
+                                        ownerBusinessName,
+                                        vehicle.getFuelType(),
+                                        vehicle.getTransmissionType(),
+                                        vehicle.getMileage(),
+                                        vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE",
+                                        ownerContactPhone,
+                                        ownerIsVerified);
+                        vehicleDTOs.add(dto);
+                }
+
+                return vehicleDTOs;
+        }
 }
