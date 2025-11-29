@@ -138,6 +138,11 @@ public class AdminController {
         return "admin/reports";
     }
 
+    @GetMapping("/ai-reports")
+    public String aiReports(Model model) {
+        return "admin/ai-reports";
+    }
+
     @GetMapping("/vehicles")
     public String vehicles(Model model) {
         model.addAttribute("vehicles", vehicleManagementService.getAllVehicles());
