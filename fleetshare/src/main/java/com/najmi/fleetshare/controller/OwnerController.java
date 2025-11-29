@@ -172,6 +172,25 @@ public class OwnerController {
         return "owner/bookings";
     }
 
+    @GetMapping("/bookings/create")
+    public String createBooking(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getOwnerDetails() != null) {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+
+            // Fetch all renters for the dropdown
+            List<RenterDTO> renters = userManagementService.getAllRenters();
+            model.addAttribute("renters", renters);
+
+            // Fetch owner's vehicles for the dropdown
+            List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
+            model.addAttribute("vehicles", vehicles);
+
+            model.addAttribute("booking", new BookingDTO());
+        }
+        return "owner/create-booking";
+    }
+
     @GetMapping("/bookings/view/{bookingId}")
     public String viewBooking(@PathVariable Long bookingId, Model model) {
         BookingDTO booking = bookingService.getBookingDetails(bookingId);

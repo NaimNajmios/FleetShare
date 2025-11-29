@@ -72,6 +72,7 @@ public class UserManagementService {
             User user = userRepository.findById(renter.getUserId()).orElse(null);
             if (user != null) {
                 RenterDTO dto = new RenterDTO(
+                        renter.getRenterId(),
                         user.getUserId(),
                         user.getEmail(),
                         renter.getFullName(),
@@ -159,6 +160,7 @@ public class UserManagementService {
                 User user = userRepository.findById(renter.getUserId()).orElse(null);
                 if (user != null) {
                     RenterDTO dto = new RenterDTO(
+                            renter.getRenterId(),
                             user.getUserId(),
                             user.getEmail(),
                             renter.getFullName(),

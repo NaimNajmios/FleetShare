@@ -3,6 +3,7 @@ package com.najmi.fleetshare.dto;
 import java.time.LocalDateTime;
 
 public class RenterDTO {
+    private Long renterId;
     private Long userId;
     private String email;
     private String fullName;
@@ -14,8 +15,9 @@ public class RenterDTO {
     public RenterDTO() {
     }
 
-    public RenterDTO(Long userId, String email, String fullName, String phoneNumber,
+    public RenterDTO(Long renterId, Long userId, String email, String fullName, String phoneNumber,
             Boolean isActive, LocalDateTime createdAt) {
+        this.renterId = renterId;
         this.userId = userId;
         this.email = email;
         this.fullName = fullName;
@@ -25,6 +27,14 @@ public class RenterDTO {
     }
 
     // Getters and Setters
+    public Long getRenterId() {
+        return renterId;
+    }
+
+    public void setRenterId(Long renterId) {
+        this.renterId = renterId;
+    }
+
     public Long getUserId() {
         return userId;
     }
