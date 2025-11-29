@@ -27,6 +27,18 @@
 
     <!-- Main Content -->
     <main layout:fragment="content" class="fade-in">
+        <div class="container mt-4" th:if="${successMessage} or ${errorMessage}">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMessage}">Success Message</span>
+                <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"
+                    aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}">Error Message</span>
+                <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"
+                    aria-label="Close"></button>
+            </div>
+        </div>
         <!-- Page content goes here -->
     </main>
 
