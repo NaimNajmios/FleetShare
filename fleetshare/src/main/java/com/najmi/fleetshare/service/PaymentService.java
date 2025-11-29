@@ -82,4 +82,43 @@ public class PaymentService {
         // Assuming one payment record per invoice for now
         return payments.get(0);
     }
+
+    /**
+     * Fetches all payments for a specific fleet owner
+     * 
+     * @param ownerId Fleet owner ID
+     * @return List of PaymentDTO objects for owner's invoices
+     */
+    public List<PaymentDTO> getPaymentsByOwnerId(Long ownerId) {
+        // Get all invoices for this owner
+        List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
+        List<PaymentDTO> paymentDTOs = new ArrayList<>();
+
+        for (Invoice invoice : ownerInvoices) {
+            // Get payments for this invoice
+            List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+
+            for (Payment payment : payments) {
+                // Get renter information
+                Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+
+                // Get fleet owner information
+                FleetOwner owner = fleetOwnerRepository.findById(invoice.getFleetOwnerId()).orElse(null);
+
+                PaymentDTO dto = new PaymentDTO(
+                        payment.getPaymentId(),
+                        invoice.getInvoiceNumber(),
+                        renter != null ? renter.getFullName() : "Unknown",
+                        owner != null ? owner.getBusinessName() : "Unknown",
+                        payment.getAmount(),
+                        payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : "N/A",
+                        payment.getPaymentStatus() != null ? payment.getPaymentStatus().name() : "PENDING",
+                        payment.getPaymentDate(),
+                        payment.getTransactionReference());
+                paymentDTOs.add(dto);
+            }
+        }
+
+        return paymentDTOs;
+    }
 }

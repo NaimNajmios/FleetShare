@@ -2,12 +2,14 @@ package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
+import com.najmi.fleetshare.dto.PaymentDTO;
 import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
+import com.najmi.fleetshare.service.PaymentService;
 import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
@@ -40,6 +42,9 @@ public class OwnerController {
 
     @Autowired
     private BookingService bookingService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -157,7 +162,13 @@ public class OwnerController {
     }
 
     @GetMapping("/payments")
-    public String payments(Model model) {
+    public String payments(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getOwnerDetails() != null) {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            List<PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId);
+            model.addAttribute("payments", payments);
+        }
         return "owner/payments";
     }
 
