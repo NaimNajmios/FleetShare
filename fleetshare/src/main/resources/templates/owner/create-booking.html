@@ -59,29 +59,7 @@
                 </div>
             </div>
 
-            <!-- Card 2: Vehicle Information -->
-            <div class="row">
-                <div class="col-12 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Vehicle Information</h4>
-                            <div class="form-group">
-                                <label for="vehicleSelect">Select Vehicle</label>
-                                <select class="form-control form-select" id="vehicleSelect" name="vehicleId">
-                                    <option value="" selected disabled>Select a vehicle...</option>
-                                    <option th:each="vehicle : ${vehicles}" th:value="${vehicle.vehicleId}"
-                                        th:data-rate="${vehicle.ratePerDay != null ? vehicle.ratePerDay : 0}"
-                                        th:text="${vehicle.brand + ' ' + vehicle.model + ' - [' + vehicle.registrationNo + ']'}">
-                                    </option>
-                                </select>
-                                <small class="text-muted">Only available vehicles are shown.</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3: Booking Details -->
+            <!-- Card 2: Booking Details -->
             <div class="row">
                 <div class="col-12 grid-margin stretch-card">
                     <div class="card">
@@ -124,6 +102,28 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Vehicle Information -->
+            <div class="row">
+                <div class="col-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Vehicle Information</h4>
+                            <div class="form-group">
+                                <label for="vehicleSelect">Select Vehicle</label>
+                                <select class="form-control form-select" id="vehicleSelect" name="vehicleId">
+                                    <option value="" selected disabled>Select a vehicle...</option>
+                                    <option th:each="vehicle : ${vehicles}" th:value="${vehicle.vehicleId}"
+                                        th:data-rate="${vehicle.ratePerDay != null ? vehicle.ratePerDay : 0}"
+                                        th:text="${vehicle.brand + ' ' + vehicle.model + ' - [' + vehicle.registrationNo + ']'}">
+                                    </option>
+                                </select>
+                                <small class="text-muted">Select a vehicle based on booking dates.</small>
+                            </div>
 
                             <div class="mt-4 d-flex justify-content-end">
                                 <button type="button" class="btn btn-primary btn-lg" id="createBookingBtn">Create
@@ -156,8 +156,7 @@
                         const diffTime = Math.abs(endDate - startDate);
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                        // Ensure at least 1 day if start and end are same (or handle as 0 if logic dictates)
-                        // Usually rental is at least 1 day. If start == end, let's say 1 day.
+                        // Ensure at least 1 day if start and end are same
                         const days = diffDays === 0 ? 1 : diffDays;
 
                         if (days > 0) {
