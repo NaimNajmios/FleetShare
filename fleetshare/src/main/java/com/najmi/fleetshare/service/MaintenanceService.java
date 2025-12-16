@@ -167,4 +167,88 @@ public class MaintenanceService {
             maintenanceLogRepository.save(log);
         });
     }
+
+    /**
+     * Get maintenance statistics for all records (admin dashboard)
+     */
+    public com.najmi.fleetshare.dto.MaintenanceStatsDTO getMaintenanceStats() {
+        List<VehicleMaintenance> allMaintenance = maintenanceRepository.findAll();
+        return calculateStats(allMaintenance);
+    }
+
+    /**
+     * Get maintenance statistics for a specific fleet owner
+     */
+    public com.najmi.fleetshare.dto.MaintenanceStatsDTO getMaintenanceStatsByOwnerId(Long ownerId) {
+        List<VehicleMaintenance> ownerMaintenance = maintenanceRepository.findByFleetOwnerId(ownerId);
+        return calculateStats(ownerMaintenance);
+    }
+
+    /**
+     * Calculate statistics from maintenance list
+     */
+    private com.najmi.fleetshare.dto.MaintenanceStatsDTO calculateStats(List<VehicleMaintenance> maintenanceList) {
+        com.najmi.fleetshare.dto.MaintenanceStatsDTO stats = new com.najmi.fleetshare.dto.MaintenanceStatsDTO();
+
+        java.math.BigDecimal totalEstimated = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalFinal = java.math.BigDecimal.ZERO;
+        java.util.Map<String, Integer> monthlyCount = new java.util.LinkedHashMap<>();
+        java.util.Map<String, java.math.BigDecimal> monthlyCost = new java.util.LinkedHashMap<>();
+
+        // Initialize last 6 months
+        java.time.LocalDate now = java.time.LocalDate.now();
+        for (int i = 5; i >= 0; i--) {
+            java.time.LocalDate month = now.minusMonths(i);
+            String monthKey = month.getMonth().toString().substring(0, 3);
+            monthlyCount.put(monthKey, 0);
+            monthlyCost.put(monthKey, java.math.BigDecimal.ZERO);
+        }
+
+        for (VehicleMaintenance m : maintenanceList) {
+            // Count by status
+            if (m.getCurrentStatus() != null) {
+                switch (m.getCurrentStatus()) {
+                    case PENDING -> stats.setPendingCount(stats.getPendingCount() + 1);
+                    case IN_PROGRESS -> stats.setInProgressCount(stats.getInProgressCount() + 1);
+                    case COMPLETED -> stats.setCompletedCount(stats.getCompletedCount() + 1);
+                    case CANCELLED -> stats.setCancelledCount(stats.getCancelledCount() + 1);
+                }
+            }
+
+            // Sum costs
+            if (m.getEstimatedCost() != null) {
+                totalEstimated = totalEstimated.add(m.getEstimatedCost());
+            }
+            if (m.getFinalCost() != null) {
+                totalFinal = totalFinal.add(m.getFinalCost());
+            }
+
+            // Monthly aggregation
+            if (m.getScheduledDate() != null) {
+                java.time.LocalDate schedDate = m.getScheduledDate();
+                if (schedDate.isAfter(now.minusMonths(6))) {
+                    String monthKey = schedDate.getMonth().toString().substring(0, 3);
+                    if (monthlyCount.containsKey(monthKey)) {
+                        monthlyCount.put(monthKey, monthlyCount.get(monthKey) + 1);
+                        java.math.BigDecimal cost = m.getFinalCost() != null ? m.getFinalCost()
+                                : (m.getEstimatedCost() != null ? m.getEstimatedCost() : java.math.BigDecimal.ZERO);
+                        monthlyCost.put(monthKey, monthlyCost.get(monthKey).add(cost));
+                    }
+                }
+            }
+        }
+
+        stats.setTotalCount(maintenanceList.size());
+        stats.setTotalEstimatedCost(totalEstimated);
+        stats.setTotalFinalCost(totalFinal);
+        stats.setMonthlyCountData(monthlyCount);
+        stats.setMonthlyCostData(monthlyCost);
+
+        if (!maintenanceList.isEmpty()) {
+            stats.setAvgCostPerMaintenance(totalFinal.divide(
+                    java.math.BigDecimal.valueOf(maintenanceList.size()), 2, java.math.RoundingMode.HALF_UP));
+        }
+
+        return stats;
+    }
 }

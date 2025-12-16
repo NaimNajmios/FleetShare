@@ -77,6 +77,7 @@ public class AdminController {
     @GetMapping("/maintenance")
     public String maintenance(Model model) {
         model.addAttribute("maintenanceRecords", maintenanceService.getAllMaintenance());
+        model.addAttribute("stats", maintenanceService.getMaintenanceStats());
         return "admin/maintenance";
     }
 
