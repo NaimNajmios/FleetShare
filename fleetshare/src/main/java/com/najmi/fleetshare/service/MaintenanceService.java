@@ -4,12 +4,15 @@ import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.entity.Vehicle;
 import com.najmi.fleetshare.entity.VehicleMaintenance;
+import com.najmi.fleetshare.entity.VehicleMaintenanceLog;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
+import com.najmi.fleetshare.repository.VehicleMaintenanceLogRepository;
 import com.najmi.fleetshare.repository.VehicleMaintenanceRepository;
 import com.najmi.fleetshare.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,9 @@ public class MaintenanceService {
 
     @Autowired
     private VehicleMaintenanceRepository maintenanceRepository;
+
+    @Autowired
+    private VehicleMaintenanceLogRepository maintenanceLogRepository;
 
     @Autowired
     private VehicleRepository vehicleRepository;
@@ -60,9 +66,12 @@ public class MaintenanceService {
                         vehicle.getModel(),
                         vehicle.getBrand(),
                         maintenance.getDescription(),
-                        maintenance.getMaintenanceDate(),
-                        maintenance.getCost(),
-                        maintenance.getStatus() != null ? maintenance.getStatus().name() : "PENDING",
+                        maintenance.getScheduledDate(),
+                        maintenance.getActualStartTime(),
+                        maintenance.getActualEndTime(),
+                        maintenance.getEstimatedCost(),
+                        maintenance.getFinalCost(),
+                        maintenance.getCurrentStatus() != null ? maintenance.getCurrentStatus().name() : "PENDING",
                         ownerBusinessName);
                 maintenanceDTOs.add(dto);
             }
@@ -82,23 +91,34 @@ public class MaintenanceService {
         return mapToDTOs(maintenanceList);
     }
 
-    public void addMaintenance(MaintenanceDTO dto) {
+    /**
+     * Get maintenance status logs for a specific maintenance record
+     */
+    public List<VehicleMaintenanceLog> getMaintenanceLogs(Long maintenanceId) {
+        return maintenanceLogRepository.findByMaintenanceIdOrderByLogTimestampDesc(maintenanceId);
+    }
+
+    /**
+     * Add a new maintenance record
+     */
+    public VehicleMaintenance addMaintenance(MaintenanceDTO dto, Long actorUserId) {
         VehicleMaintenance maintenance = new VehicleMaintenance();
         maintenance.setVehicleId(dto.getVehicleId());
         maintenance.setDescription(dto.getDescription());
-        maintenance.setMaintenanceDate(dto.getMaintenanceDate());
-        maintenance.setCost(dto.getCost());
+        maintenance.setScheduledDate(dto.getScheduledDate());
+        maintenance.setEstimatedCost(dto.getEstimatedCost());
+        maintenance.setCreatedAt(LocalDateTime.now());
 
         // Set status, default to PENDING if null
         if (dto.getStatus() != null) {
             try {
-                maintenance.setStatus(
-                        com.najmi.fleetshare.entity.VehicleMaintenance.MaintenanceStatus.valueOf(dto.getStatus()));
+                maintenance.setCurrentStatus(
+                        VehicleMaintenance.MaintenanceStatus.valueOf(dto.getStatus()));
             } catch (IllegalArgumentException e) {
-                maintenance.setStatus(com.najmi.fleetshare.entity.VehicleMaintenance.MaintenanceStatus.PENDING);
+                maintenance.setCurrentStatus(VehicleMaintenance.MaintenanceStatus.PENDING);
             }
         } else {
-            maintenance.setStatus(com.najmi.fleetshare.entity.VehicleMaintenance.MaintenanceStatus.PENDING);
+            maintenance.setCurrentStatus(VehicleMaintenance.MaintenanceStatus.PENDING);
         }
 
         // Set fleet owner ID from vehicle
@@ -106,6 +126,45 @@ public class MaintenanceService {
             maintenance.setFleetOwnerId(vehicle.getFleetOwnerId());
         });
 
-        maintenanceRepository.save(maintenance);
+        VehicleMaintenance saved = maintenanceRepository.save(maintenance);
+
+        // Log the initial status
+        VehicleMaintenanceLog log = new VehicleMaintenanceLog(
+                saved.getMaintenanceId(),
+                saved.getCurrentStatus(),
+                actorUserId,
+                "Maintenance scheduled");
+        maintenanceLogRepository.save(log);
+
+        return saved;
+    }
+
+    /**
+     * Update maintenance status and log the change
+     */
+    public void updateMaintenanceStatus(Long maintenanceId, VehicleMaintenance.MaintenanceStatus newStatus,
+            Long actorUserId, String remarks) {
+        maintenanceRepository.findById(maintenanceId).ifPresent(maintenance -> {
+            maintenance.setCurrentStatus(newStatus);
+
+            // Update actual times based on status
+            if (newStatus == VehicleMaintenance.MaintenanceStatus.IN_PROGRESS
+                    && maintenance.getActualStartTime() == null) {
+                maintenance.setActualStartTime(LocalDateTime.now());
+            } else if (newStatus == VehicleMaintenance.MaintenanceStatus.COMPLETED
+                    && maintenance.getActualEndTime() == null) {
+                maintenance.setActualEndTime(LocalDateTime.now());
+            }
+
+            maintenanceRepository.save(maintenance);
+
+            // Log the status change
+            VehicleMaintenanceLog log = new VehicleMaintenanceLog(
+                    maintenanceId,
+                    newStatus,
+                    actorUserId,
+                    remarks);
+            maintenanceLogRepository.save(log);
+        });
     }
 }

@@ -113,7 +113,7 @@
                                         <td th:text="${record.vehicleBrand + ' ' + record.vehicleModel}"
                                             class="searchable">Toyota Camry</td>
                                         <td th:text="${record.vehicleRegistrationNo}" class="searchable">WXY 1234</td>
-                                        <td th:text="${#temporals.format(record.maintenanceDate, 'yyyy-MM-dd')}">
+                                        <td th:text="${#temporals.format(record.scheduledDate, 'yyyy-MM-dd')}">
                                             2024-11-20</td>
                                         <td>
                                             <span th:if="${record.status == 'PENDING'}"
@@ -162,8 +162,8 @@
                                 </select>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="maintenanceDate" class="form-label">Date</label>
-                                <input type="date" class="form-control" id="maintenanceDate" name="maintenanceDate"
+                                <label for="scheduledDate" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="scheduledDate" name="scheduledDate"
                                     required>
                             </div>
                             <div class="form-group mb-3">

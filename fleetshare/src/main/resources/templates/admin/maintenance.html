@@ -115,7 +115,7 @@
                                             class="searchable">Toyota Camry</td>
                                         <td th:text="${record.vehicleRegistrationNo}" class="searchable">WXY 1234</td>
                                         <td th:text="${record.ownerBusinessName}">MetroCity Car Rental</td>
-                                        <td th:text="${#temporals.format(record.maintenanceDate, 'yyyy-MM-dd')}">
+                                        <td th:text="${#temporals.format(record.scheduledDate, 'yyyy-MM-dd')}">
                                             2024-11-20</td>
                                         <td>
                                             <span th:if="${record.status == 'PENDING'}"

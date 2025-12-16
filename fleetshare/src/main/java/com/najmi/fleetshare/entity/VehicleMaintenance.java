@@ -23,22 +23,31 @@ public class VehicleMaintenance {
     @Column(name = "description", nullable = false, length = 1000)
     private String description;
 
-    @Column(name = "maintenance_date", nullable = false)
-    private LocalDate maintenanceDate;
+    @Column(name = "scheduled_date")
+    private LocalDate scheduledDate;
 
-    @Column(name = "cost", precision = 10, scale = 2)
-    private BigDecimal cost;
+    @Column(name = "actual_start_time")
+    private LocalDateTime actualStartTime;
+
+    @Column(name = "actual_end_time")
+    private LocalDateTime actualEndTime;
+
+    @Column(name = "estimated_cost", precision = 10, scale = 2)
+    private BigDecimal estimatedCost;
+
+    @Column(name = "final_cost", precision = 10, scale = 2)
+    private BigDecimal finalCost;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private MaintenanceStatus status;
+    @Column(name = "current_status")
+    private MaintenanceStatus currentStatus;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     // Enum for status
     public enum MaintenanceStatus {
-        PENDING, IN_PROGRESS, COMPLETED
+        PENDING, IN_PROGRESS, COMPLETED, CANCELLED
     }
 
     // Constructors
@@ -78,28 +87,52 @@ public class VehicleMaintenance {
         this.description = description;
     }
 
-    public LocalDate getMaintenanceDate() {
-        return maintenanceDate;
+    public LocalDate getScheduledDate() {
+        return scheduledDate;
     }
 
-    public void setMaintenanceDate(LocalDate maintenanceDate) {
-        this.maintenanceDate = maintenanceDate;
+    public void setScheduledDate(LocalDate scheduledDate) {
+        this.scheduledDate = scheduledDate;
     }
 
-    public BigDecimal getCost() {
-        return cost;
+    public LocalDateTime getActualStartTime() {
+        return actualStartTime;
     }
 
-    public void setCost(BigDecimal cost) {
-        this.cost = cost;
+    public void setActualStartTime(LocalDateTime actualStartTime) {
+        this.actualStartTime = actualStartTime;
     }
 
-    public MaintenanceStatus getStatus() {
-        return status;
+    public LocalDateTime getActualEndTime() {
+        return actualEndTime;
     }
 
-    public void setStatus(MaintenanceStatus status) {
-        this.status = status;
+    public void setActualEndTime(LocalDateTime actualEndTime) {
+        this.actualEndTime = actualEndTime;
+    }
+
+    public BigDecimal getEstimatedCost() {
+        return estimatedCost;
+    }
+
+    public void setEstimatedCost(BigDecimal estimatedCost) {
+        this.estimatedCost = estimatedCost;
+    }
+
+    public BigDecimal getFinalCost() {
+        return finalCost;
+    }
+
+    public void setFinalCost(BigDecimal finalCost) {
+        this.finalCost = finalCost;
+    }
+
+    public MaintenanceStatus getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public void setCurrentStatus(MaintenanceStatus currentStatus) {
+        this.currentStatus = currentStatus;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Nov 26, 2025 at 06:50 AM
+-- Generation Time: Dec 16, 2025 at 10:32 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `addresses` (
-  `address_id` int(11) NOT NULL,
+  `address_id` bigint(20) NOT NULL,
   `address_user_id` int(11) NOT NULL,
   `address_line1` varchar(255) NOT NULL,
   `address_line2` varchar(255) DEFAULT NULL,
@@ -37,23 +37,25 @@ CREATE TABLE `addresses` (
   `postal_code` varchar(20) NOT NULL,
   `effective_start_date` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `latitude` decimal(10,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `addresses`
 --
 
-INSERT INTO `addresses` (`address_id`, `address_user_id`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `effective_start_date`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Level 20, Menara TM', 'Jalan Pantai Baharu', 'Kuala Lumpur', 'Wilayah Persekutuan', '50672', '2023-01-01', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(2, 2, '41, Jalan Tun Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2023-02-15', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(3, 3, 'Lot 5, Jalan Pantai', 'Tanjung Aru', 'Kota Kinabalu', 'Sabah', '88100', '2023-03-10', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(4, 4, '15, Persiaran Gurney', 'George Town', 'George Town', 'Pulau Pinang', '10250', '2023-04-05', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(5, 5, '12, Kolej Kediaman', 'Universiti Malaya', 'Kuala Lumpur', 'Wilayah Persekutuan', '50603', '2024-01-10', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(6, 6, 'B-12-1, Pavilion Residences', 'Jalan Bukit Bintang', 'Kuala Lumpur', 'Wilayah Persekutuan', '55100', '2024-01-12', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(7, 7, '45, Jalan Gasing', 'Section 10', 'Petaling Jaya', 'Selangor', '46000', '2024-02-01', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(8, 8, 'Shangri-La Hotel', '11 Jalan Sultan Ismail', 'Kuala Lumpur', 'Wilayah Persekutuan', '50250', '2024-03-15', '2025-11-24 02:56:19', '2025-11-24 02:56:19'),
-(9, 9, 'Kg Air', 'Jalan Tuaran', 'Kota Kinabalu', 'Sabah', '88450', '2024-04-20', '2025-11-24 02:56:19', '2025-11-24 02:56:19');
+INSERT INTO `addresses` (`address_id`, `address_user_id`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `effective_start_date`, `created_at`, `updated_at`, `latitude`, `longitude`) VALUES
+(1, 1, 'Level 20, Menara TM', 'Jalan Pantai Baharu', 'Kuala Lumpur', 'Wilayah Persekutuan', '50672', '2023-01-01', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(2, 2, '41, Jalan Tun Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2023-02-15', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(3, 3, 'Lot 5, Jalan Pantai', 'Tanjung Aru', 'Kota Kinabalu', 'Sabah', '88100', '2023-03-10', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(4, 4, '15, Persiaran Gurney', 'George Town', 'George Town', 'Pulau Pinang', '10250', '2023-04-05', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(5, 5, '12, Kolej Kediaman', 'Universiti Malaya', 'Kuala Lumpur', 'Wilayah Persekutuan', '50603', '2024-01-10', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(6, 6, 'B-12-1, Pavilion Residences', 'Jalan Bukit Bintang', 'Kuala Lumpur', 'Wilayah Persekutuan', '55100', '2024-01-12', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(7, 7, '45, Jalan Gasing', 'Section 10', 'Petaling Jaya', 'Selangor', '46000', '2024-02-01', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(8, 8, 'Shangri-La Hotel', '11 Jalan Sultan Ismail', 'Kuala Lumpur', 'Wilayah Persekutuan', '50250', '2024-03-15', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(9, 9, 'Kg Air', 'Jalan Tuaran', 'Kota Kinabalu', 'Sabah', '88450', '2024-04-20', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840);
 
 -- --------------------------------------------------------
 
@@ -155,7 +157,7 @@ CREATE TABLE `fleetowners` (
   `fleet_owner_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `business_name` varchar(255) NOT NULL,
-  `contact_phone` varchar(50) DEFAULT NULL,
+  `contact_phone` varchar(255) DEFAULT NULL,
   `is_verified` tinyint(1) DEFAULT 0,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -262,7 +264,7 @@ INSERT INTO `paymentstatuslog` (`payment_log_id`, `payment_id`, `status_value`, 
 --
 
 CREATE TABLE `platformadmins` (
-  `admin_id` int(11) NOT NULL,
+  `admin_id` bigint(20) NOT NULL,
   `user_id` int(11) NOT NULL,
   `full_name` varchar(255) NOT NULL,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -285,7 +287,7 @@ CREATE TABLE `renters` (
   `renter_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `full_name` varchar(255) NOT NULL,
-  `phone_number` varchar(50) DEFAULT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -338,13 +340,16 @@ INSERT INTO `users` (`user_id`, `email`, `hashed_password`, `user_role`, `profil
 --
 
 CREATE TABLE `vehiclemaintenance` (
-  `maintenance_id` int(11) NOT NULL,
+  `maintenance_id` bigint(20) NOT NULL,
   `vehicle_id` int(11) NOT NULL,
   `fleet_owner_id` int(11) NOT NULL,
   `description` varchar(1000) NOT NULL,
-  `maintenance_date` date NOT NULL,
-  `cost` decimal(10,2) DEFAULT NULL,
-  `status` enum('PENDING','IN_PROGRESS','COMPLETED') DEFAULT 'PENDING',
+  `scheduled_date` date DEFAULT NULL,
+  `actual_start_time` datetime DEFAULT NULL,
+  `actual_end_time` datetime DEFAULT NULL,
+  `estimated_cost` decimal(10,2) DEFAULT NULL,
+  `final_cost` decimal(10,2) DEFAULT NULL,
+  `current_status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') DEFAULT 'PENDING',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -352,19 +357,52 @@ CREATE TABLE `vehiclemaintenance` (
 -- Dumping data for table `vehiclemaintenance`
 --
 
-INSERT INTO `vehiclemaintenance` (`maintenance_id`, `vehicle_id`, `fleet_owner_id`, `description`, `maintenance_date`, `cost`, `status`, `created_at`) VALUES
-(1, 3, 1, 'Regular Service 20k KM (Oil Change)', '2024-12-01', 250.00, 'COMPLETED', '2024-12-01 02:00:00'),
-(2, 1, 1, 'Replace front brake pads', '2024-11-15', 180.00, 'COMPLETED', '2024-11-15 01:00:00'),
-(3, 2, 1, '5000km service - Oil and filter change', '2024-10-20', 150.00, 'COMPLETED', '2024-10-20 02:30:00'),
-(4, 1, 1, 'Scheduled 30k service', '2025-06-01', 350.00, 'PENDING', '2025-05-25 06:00:00'),
-(5, 4, 2, 'Replace air filter and spark plugs', '2024-09-10', 280.00, 'COMPLETED', '2024-09-10 03:00:00'),
-(6, 5, 2, 'Major service 30k km - Engine oil, filters, brake check', '2025-02-14', 650.00, 'COMPLETED', '2025-02-14 00:30:00'),
-(7, 6, 2, 'Tire rotation and wheel alignment', '2024-12-05', 220.00, 'COMPLETED', '2024-12-05 05:00:00'),
-(8, 5, 2, 'Replace rear brake discs', '2025-07-10', 850.00, 'IN_PROGRESS', '2025-07-10 01:00:00'),
-(9, 7, 3, '10k service package', '2025-03-20', 380.00, 'COMPLETED', '2025-03-20 02:00:00'),
-(10, 8, 3, 'Premium detailing and interior cleaning', '2025-01-25', 450.00, 'COMPLETED', '2025-01-25 06:30:00'),
-(11, 9, 3, 'BMW comprehensive inspection', '2024-11-30', 550.00, 'COMPLETED', '2024-11-30 03:00:00'),
-(12, 8, 3, 'Air conditioning system service', '2025-05-15', 420.00, 'COMPLETED', '2025-05-15 07:00:00');
+INSERT INTO `vehiclemaintenance` (`maintenance_id`, `vehicle_id`, `fleet_owner_id`, `description`, `scheduled_date`, `actual_start_time`, `actual_end_time`, `estimated_cost`, `final_cost`, `current_status`, `created_at`) VALUES
+(1, 3, 1, 'Regular Service 20k KM (Oil Change)', '2024-12-01', '2024-12-01 09:00:00', '2024-12-01 17:00:00', 250.00, 250.00, 'COMPLETED', '2024-12-01 02:00:00'),
+(2, 1, 1, 'Replace front brake pads', '2024-11-15', '2024-11-15 09:00:00', '2024-11-15 17:00:00', 180.00, 180.00, 'COMPLETED', '2024-11-15 01:00:00'),
+(3, 2, 1, '5000km service - Oil and filter change', '2024-10-20', '2024-10-20 09:00:00', '2024-10-20 17:00:00', 150.00, 150.00, 'COMPLETED', '2024-10-20 02:30:00'),
+(4, 1, 1, 'Scheduled 30k service', '2025-06-01', NULL, NULL, 350.00, NULL, 'PENDING', '2025-05-25 06:00:00'),
+(5, 4, 2, 'Replace air filter and spark plugs', '2024-09-10', '2024-09-10 09:00:00', '2024-09-10 17:00:00', 280.00, 280.00, 'COMPLETED', '2024-09-10 03:00:00'),
+(6, 5, 2, 'Major service 30k km - Engine oil, filters, brake check', '2025-02-14', '2025-02-14 09:00:00', '2025-02-14 17:00:00', 650.00, 650.00, 'COMPLETED', '2025-02-14 00:30:00'),
+(7, 6, 2, 'Tire rotation and wheel alignment', '2024-12-05', '2024-12-05 09:00:00', '2024-12-05 17:00:00', 220.00, 220.00, 'COMPLETED', '2024-12-05 05:00:00'),
+(8, 5, 2, 'Replace rear brake discs', '2025-07-10', '2025-07-10 09:00:00', NULL, 850.00, NULL, 'IN_PROGRESS', '2025-07-10 01:00:00'),
+(9, 7, 3, '10k service package', '2025-03-20', '2025-03-20 09:00:00', '2025-03-20 17:00:00', 380.00, 380.00, 'COMPLETED', '2025-03-20 02:00:00'),
+(10, 8, 3, 'Premium detailing and interior cleaning', '2025-01-25', '2025-01-25 09:00:00', '2025-01-25 17:00:00', 450.00, 450.00, 'COMPLETED', '2025-01-25 06:30:00'),
+(11, 9, 3, 'BMW comprehensive inspection', '2024-11-30', '2024-11-30 09:00:00', '2024-11-30 17:00:00', 550.00, 550.00, 'COMPLETED', '2024-11-30 03:00:00'),
+(12, 8, 3, 'Air conditioning system service', '2025-05-15', '2025-05-15 09:00:00', '2025-05-15 17:00:00', 420.00, 420.00, 'COMPLETED', '2025-05-15 07:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vehiclemaintenancelog`
+--
+
+CREATE TABLE `vehiclemaintenancelog` (
+  `maintenance_log_id` bigint(20) NOT NULL,
+  `maintenance_id` bigint(20) NOT NULL,
+  `status_value` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') NOT NULL,
+  `actor_user_id` int(11) DEFAULT NULL,
+  `log_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `remarks` varchar(500) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `vehiclemaintenancelog`
+--
+
+INSERT INTO `vehiclemaintenancelog` (`maintenance_log_id`, `maintenance_id`, `status_value`, `actor_user_id`, `log_timestamp`, `remarks`) VALUES
+(1, 1, 'COMPLETED', NULL, '2024-12-01 02:00:00', 'Legacy record migration'),
+(2, 2, 'COMPLETED', NULL, '2024-11-15 01:00:00', 'Legacy record migration'),
+(3, 3, 'COMPLETED', NULL, '2024-10-20 02:30:00', 'Legacy record migration'),
+(4, 4, 'PENDING', NULL, '2025-05-25 06:00:00', 'Legacy record migration'),
+(5, 5, 'COMPLETED', NULL, '2024-09-10 03:00:00', 'Legacy record migration'),
+(6, 6, 'COMPLETED', NULL, '2025-02-14 00:30:00', 'Legacy record migration'),
+(7, 7, 'COMPLETED', NULL, '2024-12-05 05:00:00', 'Legacy record migration'),
+(8, 8, 'IN_PROGRESS', NULL, '2025-07-10 01:00:00', 'Legacy record migration'),
+(9, 9, 'COMPLETED', NULL, '2025-03-20 02:00:00', 'Legacy record migration'),
+(10, 10, 'COMPLETED', NULL, '2025-01-25 06:30:00', 'Legacy record migration'),
+(11, 11, 'COMPLETED', NULL, '2024-11-30 03:00:00', 'Legacy record migration'),
+(12, 12, 'COMPLETED', NULL, '2025-05-15 07:00:00', 'Legacy record migration');
 
 -- --------------------------------------------------------
 
@@ -373,7 +411,7 @@ INSERT INTO `vehiclemaintenance` (`maintenance_id`, `vehicle_id`, `fleet_owner_i
 --
 
 CREATE TABLE `vehiclepricehistory` (
-  `price_id` int(11) NOT NULL,
+  `price_id` bigint(20) NOT NULL,
   `vehicle_id` int(11) NOT NULL,
   `rate_per_day` decimal(10,2) NOT NULL,
   `effective_start_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -413,23 +451,24 @@ CREATE TABLE `vehicles` (
   `mileage` int(11) DEFAULT NULL,
   `vehicle_image_url` varchar(1024) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `status` enum('AVAILABLE','MAINTENANCE','RENTED','UNAVAILABLE') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `vehicles`
 --
 
-INSERT INTO `vehicles` (`vehicle_id`, `fleet_owner_id`, `model`, `brand`, `manufacturing_year`, `registration_no`, `category`, `fuel_type`, `transmission_type`, `mileage`, `vehicle_image_url`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Myvi 1.5 AV', 'Perodua', 2023, 'VHJ 8821', 'Hatchback', 'PETROL', 'AUTO', 15000, 'https://img/myvi.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(2, 1, 'Bezza 1.3 Advance', 'Perodua', 2024, 'VKE 4402', 'Sedan', 'PETROL', 'AUTO', 5000, 'https://img/bezza.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(3, 1, 'Saga 1.3 Premium S', 'Proton', 2023, 'BRA 3022', 'Sedan', 'PETROL', 'AUTO', 22000, 'https://img/saga.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(4, 2, 'X70 1.8 TGDi Premium', 'Proton', 2022, 'SYC 5519', 'SUV', 'PETROL', 'AUTO', 35000, 'https://img/x70.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(5, 2, 'Hilux 2.8 Rogue', 'Toyota', 2023, 'SAB 9921 A', 'Pickup 4x4', 'DIESEL', 'AUTO', 28000, 'https://img/hilux.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(6, 2, 'Ranger Wildtrak', 'Ford', 2023, 'QAA 1122', 'Pickup 4x4', 'DIESEL', 'AUTO', 12000, 'https://img/ranger.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(7, 3, 'City 1.5 V Sensing', 'Honda', 2024, 'PQA 8888', 'Sedan', 'PETROL', 'AUTO', 8000, 'https://img/city.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(8, 3, 'Vellfire 2.5 ZG', 'Toyota', 2023, 'V 1', 'Luxury MPV', 'PETROL', 'AUTO', 15000, 'https://img/vellfire.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33'),
-(9, 3, '320i M Sport', 'BMW', 2023, 'PPP 77', 'Luxury Sedan', 'PETROL', 'AUTO', 9000, 'https://img/bmw.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33');
+INSERT INTO `vehicles` (`vehicle_id`, `fleet_owner_id`, `model`, `brand`, `manufacturing_year`, `registration_no`, `category`, `fuel_type`, `transmission_type`, `mileage`, `vehicle_image_url`, `created_at`, `updated_at`, `status`) VALUES
+(1, 1, 'Myvi 1.5 AV', 'Perodua', 2023, 'VHJ 8821', 'Hatchback', 'PETROL', 'AUTO', 15000, 'https://img/myvi.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(2, 1, 'Bezza 1.3 Advance', 'Perodua', 2024, 'VKE 4402', 'Sedan', 'PETROL', 'AUTO', 5000, 'https://img/bezza.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(3, 1, 'Saga 1.3 Premium S', 'Proton', 2023, 'BRA 3022', 'Sedan', 'PETROL', 'AUTO', 22000, 'https://img/saga.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(4, 2, 'X70 1.8 TGDi Premium', 'Proton', 2022, 'SYC 5519', 'SUV', 'PETROL', 'AUTO', 35000, 'https://img/x70.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(5, 2, 'Hilux 2.8 Rogue', 'Toyota', 2023, 'SAB 9921 A', 'Pickup 4x4', 'DIESEL', 'AUTO', 28000, 'https://img/hilux.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(6, 2, 'Ranger Wildtrak', 'Ford', 2023, 'QAA 1122', 'Pickup 4x4', 'DIESEL', 'AUTO', 12000, 'https://img/ranger.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(7, 3, 'City 1.5 V Sensing', 'Honda', 2024, 'PQA 8888', 'Sedan', 'PETROL', 'AUTO', 8000, 'https://img/city.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(8, 3, 'Vellfire 2.5 ZG', 'Toyota', 2023, 'V 1', 'Luxury MPV', 'PETROL', 'AUTO', 15000, 'https://img/vellfire.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
+(9, 3, '320i M Sport', 'BMW', 2023, 'PPP 77', 'Luxury Sedan', 'PETROL', 'AUTO', 9000, 'https://img/bmw.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL);
 
 --
 -- Indexes for dumped tables
@@ -525,7 +564,15 @@ ALTER TABLE `users`
 ALTER TABLE `vehiclemaintenance`
   ADD PRIMARY KEY (`maintenance_id`),
   ADD KEY `vehicle_id` (`vehicle_id`),
-  ADD KEY `fleet_owner_id` (`fleet_owner_id`);
+  ADD KEY `fleet_owner_id` (`fleet_owner_id`),
+  ADD KEY `idx_emergency_maintenance_id` (`maintenance_id`);
+
+--
+-- Indexes for table `vehiclemaintenancelog`
+--
+ALTER TABLE `vehiclemaintenancelog`
+  ADD PRIMARY KEY (`maintenance_log_id`),
+  ADD KEY `idx_maintenance_log_ref` (`maintenance_id`);
 
 --
 -- Indexes for table `vehiclepricehistory`
@@ -550,7 +597,7 @@ ALTER TABLE `vehicles`
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `address_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `address_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `bookings`
@@ -592,7 +639,7 @@ ALTER TABLE `paymentstatuslog`
 -- AUTO_INCREMENT for table `platformadmins`
 --
 ALTER TABLE `platformadmins`
-  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `admin_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `renters`
@@ -610,13 +657,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `vehiclemaintenance`
 --
 ALTER TABLE `vehiclemaintenance`
-  MODIFY `maintenance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `maintenance_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `vehiclemaintenancelog`
+--
+ALTER TABLE `vehiclemaintenancelog`
+  MODIFY `maintenance_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `vehiclepricehistory`
 --
 ALTER TABLE `vehiclepricehistory`
-  MODIFY `price_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `price_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `vehicles`
@@ -701,6 +754,12 @@ ALTER TABLE `renters`
 ALTER TABLE `vehiclemaintenance`
   ADD CONSTRAINT `vehiclemaintenance_ibfk_1` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`vehicle_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `vehiclemaintenance_ibfk_2` FOREIGN KEY (`fleet_owner_id`) REFERENCES `fleetowners` (`fleet_owner_id`);
+
+--
+-- Constraints for table `vehiclemaintenancelog`
+--
+ALTER TABLE `vehiclemaintenancelog`
+  ADD CONSTRAINT `fk_maintenancelog_main` FOREIGN KEY (`maintenance_id`) REFERENCES `vehiclemaintenance` (`maintenance_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `vehiclepricehistory`

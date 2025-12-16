@@ -2,6 +2,7 @@ package com.najmi.fleetshare.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class MaintenanceDTO {
     private Long maintenanceId;
@@ -10,8 +11,11 @@ public class MaintenanceDTO {
     private String vehicleModel;
     private String vehicleBrand;
     private String description;
-    private LocalDate maintenanceDate;
-    private BigDecimal cost;
+    private LocalDate scheduledDate;
+    private LocalDateTime actualStartTime;
+    private LocalDateTime actualEndTime;
+    private BigDecimal estimatedCost;
+    private BigDecimal finalCost;
     private String status;
     private String ownerBusinessName;
 
@@ -20,16 +24,21 @@ public class MaintenanceDTO {
     }
 
     public MaintenanceDTO(Long maintenanceId, Long vehicleId, String vehicleRegistrationNo, String vehicleModel,
-            String vehicleBrand, String description, LocalDate maintenanceDate,
-            BigDecimal cost, String status, String ownerBusinessName) {
+            String vehicleBrand, String description, LocalDate scheduledDate,
+            LocalDateTime actualStartTime, LocalDateTime actualEndTime,
+            BigDecimal estimatedCost, BigDecimal finalCost,
+            String status, String ownerBusinessName) {
         this.maintenanceId = maintenanceId;
         this.vehicleId = vehicleId;
         this.vehicleRegistrationNo = vehicleRegistrationNo;
         this.vehicleModel = vehicleModel;
         this.vehicleBrand = vehicleBrand;
         this.description = description;
-        this.maintenanceDate = maintenanceDate;
-        this.cost = cost;
+        this.scheduledDate = scheduledDate;
+        this.actualStartTime = actualStartTime;
+        this.actualEndTime = actualEndTime;
+        this.estimatedCost = estimatedCost;
+        this.finalCost = finalCost;
         this.status = status;
         this.ownerBusinessName = ownerBusinessName;
     }
@@ -83,20 +92,44 @@ public class MaintenanceDTO {
         this.description = description;
     }
 
-    public LocalDate getMaintenanceDate() {
-        return maintenanceDate;
+    public LocalDate getScheduledDate() {
+        return scheduledDate;
     }
 
-    public void setMaintenanceDate(LocalDate maintenanceDate) {
-        this.maintenanceDate = maintenanceDate;
+    public void setScheduledDate(LocalDate scheduledDate) {
+        this.scheduledDate = scheduledDate;
     }
 
-    public BigDecimal getCost() {
-        return cost;
+    public LocalDateTime getActualStartTime() {
+        return actualStartTime;
     }
 
-    public void setCost(BigDecimal cost) {
-        this.cost = cost;
+    public void setActualStartTime(LocalDateTime actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public LocalDateTime getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(LocalDateTime actualEndTime) {
+        this.actualEndTime = actualEndTime;
+    }
+
+    public BigDecimal getEstimatedCost() {
+        return estimatedCost;
+    }
+
+    public void setEstimatedCost(BigDecimal estimatedCost) {
+        this.estimatedCost = estimatedCost;
+    }
+
+    public BigDecimal getFinalCost() {
+        return finalCost;
+    }
+
+    public void setFinalCost(BigDecimal finalCost) {
+        this.finalCost = finalCost;
     }
 
     public String getStatus() {

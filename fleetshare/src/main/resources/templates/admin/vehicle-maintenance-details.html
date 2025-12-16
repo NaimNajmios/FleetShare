@@ -134,10 +134,10 @@
                                 <tbody>
                                     <tr th:each="record : ${maintenanceRecords}">
                                         <td th:text="${record.maintenanceId}">1</td>
-                                        <td th:text="${#temporals.format(record.maintenanceDate, 'dd/MM/yyyy')}">
+                                        <td th:text="${#temporals.format(record.scheduledDate, 'dd/MM/yyyy')}">
                                             17/06/2025</td>
                                         <td th:text="${record.description}">Major Service</td>
-                                        <td th:text="${#numbers.formatDecimal(record.cost, 1, 'COMMA', 2, 'POINT')}">
+                                        <td th:text="${#numbers.formatDecimal(record.estimatedCost, 1, 'COMMA', 2, 'POINT')}">
                                             1,200.00</td>
                                         <td>
                                             <span th:if="${record.status == 'COMPLETED'}"

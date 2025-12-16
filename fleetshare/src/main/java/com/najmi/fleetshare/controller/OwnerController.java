@@ -217,7 +217,7 @@ public class OwnerController {
     public String addMaintenance(@org.springframework.web.bind.annotation.ModelAttribute MaintenanceDTO maintenanceDTO,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
-            maintenanceService.addMaintenance(maintenanceDTO);
+            maintenanceService.addMaintenance(maintenanceDTO, null);
             redirectAttributes.addFlashAttribute("successMessage", "Maintenance record added successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error adding maintenance record: " + e.getMessage());
@@ -235,18 +235,18 @@ public class OwnerController {
         List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByVehicleId(vehicleId);
 
         // Sort by date descending
-        maintenanceRecords.sort(Comparator.comparing(MaintenanceDTO::getMaintenanceDate).reversed());
+        maintenanceRecords.sort(Comparator.comparing(MaintenanceDTO::getScheduledDate).reversed());
 
         model.addAttribute("maintenanceRecords", maintenanceRecords);
 
         // Calculate KPI metrics
         int totalRecords = maintenanceRecords.size();
         BigDecimal totalCost = maintenanceRecords.stream()
-                .map(MaintenanceDTO::getCost)
+                .map(MaintenanceDTO::getEstimatedCost)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         LocalDate lastMaintenanceDate = maintenanceRecords.isEmpty() ? null
-                : maintenanceRecords.get(0).getMaintenanceDate();
+                : maintenanceRecords.get(0).getScheduledDate();
 
         model.addAttribute("totalRecords", totalRecords);
         model.addAttribute("totalCost", totalCost);

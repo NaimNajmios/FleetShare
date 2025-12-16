@@ -85,18 +85,20 @@ public class AdminController {
         List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByVehicleId(vehicleId);
 
         // Sort by date descending
-        maintenanceRecords.sort(Comparator.comparing(MaintenanceDTO::getMaintenanceDate).reversed());
+        maintenanceRecords.sort(
+                Comparator.comparing(MaintenanceDTO::getScheduledDate, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .reversed());
 
         model.addAttribute("maintenanceRecords", maintenanceRecords);
 
         // Calculate KPI metrics
         int totalRecords = maintenanceRecords.size();
         BigDecimal totalCost = maintenanceRecords.stream()
-                .map(MaintenanceDTO::getCost)
+                .map(MaintenanceDTO::getEstimatedCost)
                 .filter(cost -> cost != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         LocalDate lastMaintenanceDate = maintenanceRecords.stream()
-                .map(MaintenanceDTO::getMaintenanceDate)
+                .map(MaintenanceDTO::getScheduledDate)
                 .findFirst()
                 .orElse(null);
 
