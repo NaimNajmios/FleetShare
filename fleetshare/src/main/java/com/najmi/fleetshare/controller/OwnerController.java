@@ -53,11 +53,102 @@ public class OwnerController {
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
-        if (user != null) {
-            model.addAttribute("user", user);
-            if (user.getOwnerDetails() != null) {
+        if (user != null && user.getOwnerDetails() != null) {
+            try {
+                Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+                model.addAttribute("user", user);
                 model.addAttribute("businessName", user.getOwnerDetails().getBusinessName());
+
+                // Fetch vehicles for this owner
+                List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
+                if (vehicles == null)
+                    vehicles = new java.util.ArrayList<>();
+                model.addAttribute("totalVehicles", vehicles.size());
+
+                // Count vehicles by status
+                long availableCount = vehicles.stream().filter(v -> v != null && "AVAILABLE".equals(v.getStatus()))
+                        .count();
+                long rentedCount = vehicles.stream().filter(v -> v != null && "RENTED".equals(v.getStatus())).count();
+                long maintenanceCount = vehicles.stream().filter(v -> v != null && "MAINTENANCE".equals(v.getStatus()))
+                        .count();
+                model.addAttribute("availableVehicles", availableCount);
+                model.addAttribute("rentedVehicles", rentedCount);
+                model.addAttribute("maintenanceVehicles", maintenanceCount);
+
+                // Fetch bookings for this owner
+                List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId);
+                if (bookings == null)
+                    bookings = new java.util.ArrayList<>();
+                model.addAttribute("totalBookings", bookings.size());
+
+                // Count active rentals (IN_PROGRESS status)
+                long activeRentals = bookings.stream()
+                        .filter(b -> b != null
+                                && ("IN_PROGRESS".equals(b.getStatus()) || "ACTIVE".equals(b.getStatus())))
+                        .count();
+                model.addAttribute("activeRentals", activeRentals);
+
+                // Count pending bookings
+                long pendingBookings = bookings.stream()
+                        .filter(b -> b != null
+                                && ("PENDING".equals(b.getStatus()) || "CONFIRMED".equals(b.getStatus())))
+                        .count();
+                model.addAttribute("pendingBookings", pendingBookings);
+
+                // Get recent bookings (last 5)
+                List<BookingDTO> recentBookings = bookings.stream()
+                        .filter(Objects::nonNull)
+                        .sorted((b1, b2) -> {
+                            if (b1.getStartDate() == null)
+                                return 1;
+                            if (b2.getStartDate() == null)
+                                return -1;
+                            return b2.getStartDate().compareTo(b1.getStartDate());
+                        })
+                        .limit(5)
+                        .collect(java.util.stream.Collectors.toList());
+                model.addAttribute("recentBookings", recentBookings);
+
+                // Fetch payments and calculate revenue
+                List<PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId);
+                if (payments == null)
+                    payments = new java.util.ArrayList<>();
+                BigDecimal totalRevenue = payments.stream()
+                        .filter(p -> p != null
+                                && ("COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus())))
+                        .map(PaymentDTO::getAmount)
+                        .filter(Objects::nonNull)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                model.addAttribute("totalRevenue", totalRevenue);
+
+                // Pass vehicles list for status overview
+                model.addAttribute("vehicles", vehicles);
+            } catch (Exception e) {
+                // Log error and set defaults
+                e.printStackTrace();
+                model.addAttribute("totalVehicles", 0);
+                model.addAttribute("availableVehicles", 0);
+                model.addAttribute("rentedVehicles", 0);
+                model.addAttribute("maintenanceVehicles", 0);
+                model.addAttribute("totalBookings", 0);
+                model.addAttribute("activeRentals", 0);
+                model.addAttribute("pendingBookings", 0);
+                model.addAttribute("recentBookings", new java.util.ArrayList<>());
+                model.addAttribute("totalRevenue", BigDecimal.ZERO);
+                model.addAttribute("vehicles", new java.util.ArrayList<>());
             }
+        } else {
+            // Set default values when user is null
+            model.addAttribute("totalVehicles", 0);
+            model.addAttribute("availableVehicles", 0);
+            model.addAttribute("rentedVehicles", 0);
+            model.addAttribute("maintenanceVehicles", 0);
+            model.addAttribute("totalBookings", 0);
+            model.addAttribute("activeRentals", 0);
+            model.addAttribute("pendingBookings", 0);
+            model.addAttribute("recentBookings", new java.util.ArrayList<>());
+            model.addAttribute("totalRevenue", BigDecimal.ZERO);
+            model.addAttribute("vehicles", new java.util.ArrayList<>());
         }
         return "owner/dashboard";
     }
