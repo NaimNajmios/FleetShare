@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='profile', pageTitle='My Profile'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+
+            .admin-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.25rem;
+                background: #cce5ff;
+                color: #004085;
+                padding: 0.25rem 0.75rem;
+                border-radius: 1rem;
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
+
+            .avatar-circle {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: #e9ecef;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+
+            .avatar-circle img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .avatar-circle i {
+                font-size: 2.5rem;
+                color: #6c757d;
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            #admin-map {
+                height: 300px;
+                border-radius: 8px;
+                z-index: 1;
+            }
+
+            .map-placeholder {
+                height: 300px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                border-radius: 8px;
+                color: #6c757d;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .map-placeholder i {
+                font-size: 3rem;
+            }
+        </style>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">My Profile</h3>
+                        <h6 class="font-weight-normal mb-0">Manage your admin account settings</h6>
+                    </div>
+                    <div class="col-12 col-xl-4">
+                        <div class="d-flex justify-content-xl-end">
+                            <button type="button" class="btn btn-primary" id="btn-edit">
+                                <i class="ti-pencil"></i> Edit Profile
+                            </button>
+                            <button type="button" class="btn btn-success ml-2 hidden" id="btn-save">
+                                <i class="ti-check"></i> Save Changes
+                            </button>
+                            <button type="button" class="btn btn-secondary ml-2 hidden" id="btn-cancel">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Profile Information Card -->
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Profile Information</h4>
+                        <p class="card-description">Your admin profile details</p>
+
+                        <!-- Avatar -->
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="avatar-circle mr-3">
+                                <img th:if="${user != null and user.profileImageUrl != null}"
+                                    th:src="${user.profileImageUrl}" alt="Profile Photo"
+                                    onerror="this.src='/images/profile-placeholder.png'">
+                                <i th:unless="${user != null and user.profileImageUrl != null}"
+                                    class="mdi mdi-account"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1"
+                                    th:text="${adminDetails != null ? adminDetails.fullName : 'Admin User'}">
+                                    Admin Name</h5>
+                                <span class="admin-badge"><i class="mdi mdi-shield-account"></i> Platform Admin</span>
+                            </div>
+                        </div>
+
+                        <!-- Profile Form -->
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label class="form-label" for="fullName">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName"
+                                    th:value="${adminDetails != null ? adminDetails.fullName : ''}" disabled>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="email">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    th:value="${user != null ? user.email : ''}" disabled readonly>
+                                <small class="text-muted">Email cannot be changed for security reasons</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="role">Role</label>
+                                <input type="text" class="form-control" id="role" name="role"
+                                    value="Platform Administrator" disabled readonly>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Card -->
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Address Information</h4>
+                        <p class="card-description">Your address details</p>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Line 1</label>
+                            <input type="text" class="form-control" id="addressLine1"
+                                th:value="${address != null ? address.addressLine1 : 'N/A'}" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Line 2</label>
+                            <input type="text" class="form-control" id="addressLine2"
+                                th:value="${address != null ? address.addressLine2 : ''}" disabled>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city"
+                                        th:value="${address != null ? address.city : 'N/A'}" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">State</label>
+                                    <input type="text" class="form-control" id="state"
+                                        th:value="${address != null ? address.state : 'N/A'}" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" id="postalCode"
+                                th:value="${address != null ? address.postalCode : 'N/A'}" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Map Row -->
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">My Location</h4>
+                        <p class="card-description">Your location on the map</p>
+
+                        <!-- Map Container -->
+                        <div th:if="${address != null and address.latitude != null and address.longitude != null}">
+                            <div id="admin-map" th:data-lat="${address.latitude}" th:data-lng="${address.longitude}"
+                                th:data-name="${adminDetails != null ? adminDetails.fullName : 'Admin Location'}">
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Latitude: <span
+                                            th:text="${address.latitude}"></span></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">Longitude: <span
+                                            th:text="${address.longitude}"></span></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Placeholder when no coordinates -->
+                        <div th:unless="${address != null and address.latitude != null and address.longitude != null}"
+                            class="map-placeholder">
+                            <i class="mdi mdi-map-marker-off"></i>
+                            <p class="mb-0">Location not set</p>
+                            <small>Add latitude and longitude coordinates to display the map</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings Row -->
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Account Settings</h4>
+                        <p class="card-description">Manage your security and session</p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center p-3 border rounded mb-3">
+                                    <div>
+                                        <h6 class="mb-0"><i class="ti-key mr-2"></i>Password</h6>
+                                        <small class="text-muted">Change your account password</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm"
+                                        id="btn-change-password">Change</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center p-3 border rounded mb-3">
+                                    <div>
+                                        <h6 class="mb-0"><i class="ti-power-off mr-2"></i>Session</h6>
+                                        <small class="text-muted">End your current session</small>
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm" id="btn-logout">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            // Form elements
+            const fullNameInput = document.getElementById('fullName');
+            const addressLine1Input = document.getElementById('addressLine1');
+            const addressLine2Input = document.getElementById('addressLine2');
+            const cityInput = document.getElementById('city');
+            const stateInput = document.getElementById('state');
+            const postalCodeInput = document.getElementById('postalCode');
+
+            const btnEdit = document.getElementById('btn-edit');
+            const btnSave = document.getElementById('btn-save');
+            const btnCancel = document.getElementById('btn-cancel');
+
+            const editableFields = [fullNameInput, addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
+
+            let originalValues = {};
+            editableFields.forEach(field => {
+                if (field) originalValues[field.id] = field.value;
+            });
+
+            btnEdit.addEventListener('click', function () {
+                editableFields.forEach(field => { if (field) field.disabled = false; });
+                btnEdit.classList.add('hidden');
+                btnSave.classList.remove('hidden');
+                btnCancel.classList.remove('hidden');
+            });
+
+            btnCancel.addEventListener('click', function () {
+                editableFields.forEach(field => {
+                    if (field) {
+                        field.value = originalValues[field.id];
+                        field.disabled = true;
+                    }
+                });
+                btnEdit.classList.remove('hidden');
+                btnSave.classList.add('hidden');
+                btnCancel.classList.add('hidden');
+            });
+
+            btnSave.addEventListener('click', function () {
+                editableFields.forEach(field => {
+                    if (field) {
+                        originalValues[field.id] = field.value;
+                        field.disabled = true;
+                    }
+                });
+                btnEdit.classList.remove('hidden');
+                btnSave.classList.add('hidden');
+                btnCancel.classList.add('hidden');
+                alert('Profile updated successfully! (UI Demo - No backend implementation yet)');
+            });
+
+            document.getElementById('btn-change-password').addEventListener('click', function () {
+                alert('Change password feature will be implemented.');
+            });
+
+            document.getElementById('btn-logout').addEventListener('click', function () {
+                if (confirm('Are you sure you want to logout?')) {
+                    window.location.href = '/logout';
+                }
+            });
+
+            // Leaflet Map Initialization
+            (function initMap() {
+                var mapEl = document.getElementById('admin-map');
+                if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
+                    var lat = parseFloat(mapEl.dataset.lat);
+                    var lng = parseFloat(mapEl.dataset.lng);
+                    var locationName = mapEl.dataset.name || 'My Location';
+
+                    // Load Leaflet JS dynamically
+                    var leafletJS = document.createElement('script');
+                    leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                    leafletJS.onload = function () {
+                        var map = L.map('admin-map').setView([lat, lng], 15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors'
+                        }).addTo(map);
+                        L.marker([lat, lng])
+                            .addTo(map)
+                            .bindPopup('<strong>' + locationName + '</strong>')
+                            .openPopup();
+                        setTimeout(function () { map.invalidateSize(); }, 200);
+                    };
+                    document.head.appendChild(leafletJS);
+                }
+            })();
+        </script>
+    </th:block>
+</body>
+
+</html>

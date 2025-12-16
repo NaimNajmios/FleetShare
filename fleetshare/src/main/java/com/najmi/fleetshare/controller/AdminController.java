@@ -11,7 +11,9 @@ import com.najmi.fleetshare.service.PaymentService;
 import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
+import com.najmi.fleetshare.repository.AddressRepository;
 import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,6 +46,9 @@ public class AdminController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     @GetMapping("/")
     public String index() {
@@ -183,5 +188,22 @@ public class AdminController {
     public String updateBooking(BookingDTO bookingDTO) {
         bookingService.updateBooking(bookingDTO);
         return "redirect:/admin/bookings/view/" + bookingDTO.getBookingId();
+    }
+
+    @GetMapping("/profile")
+    public String profile(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null) {
+            model.addAttribute("user", user);
+            if (user.getAdminDetails() != null) {
+                model.addAttribute("adminDetails", user.getAdminDetails());
+            }
+            
+            // Fetch address for the user
+            Optional<com.najmi.fleetshare.entity.Address> addressOpt = addressRepository
+                    .findLatestAddressByUserId(user.getUserId());
+            addressOpt.ifPresent(address -> model.addAttribute("address", address));
+        }
+        return "admin/profile";
     }
 }
