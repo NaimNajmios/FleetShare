@@ -119,7 +119,7 @@
                         <div class="card-header-custom">Booking Information</div>
                         <div class="row">
                             <div class="col-md-4">
-                                <img th:src="*{vehicleImageUrl != null ? vehicleImageUrl : '/assets/images/car-placeholder.png'}"
+                                <img th:src="*{vehicleImageUrl != null and !vehicleImageUrl.startsWith('https://img/') ? vehicleImageUrl : '/images/vehicle-placeholder.png'}"
                                     alt="Vehicle Thumbnail" class="vehicle-thumbnail">
                             </div>
                             <div class="col-md-8">

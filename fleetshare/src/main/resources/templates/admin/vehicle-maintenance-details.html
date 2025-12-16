@@ -75,7 +75,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="vehicle-header">
-                    <img th:src="${vehicle.vehicleImageUrl != null ? vehicle.vehicleImageUrl : '/assets/images/car-placeholder.png'}"
+                    <img th:src="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.startsWith('https://img/') ? vehicle.vehicleImageUrl : '/images/vehicle-placeholder.png'}"
                         alt="Vehicle Thumbnail" class="vehicle-thumbnail">
                     <div class="vehicle-info">
                         <h3 th:text="${vehicle.brand + ' ' + vehicle.model}">Perodua Myvi</h3>
