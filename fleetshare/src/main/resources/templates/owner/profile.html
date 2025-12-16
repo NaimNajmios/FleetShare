@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='profile', pageTitle='My Profile'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+
+            .verified-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.25rem;
+                background: #d4edda;
+                color: #155724;
+                padding: 0.25rem 0.75rem;
+                border-radius: 1rem;
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
+
+            .avatar-circle {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: #e9ecef;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+
+            .avatar-circle img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .avatar-circle i {
+                font-size: 2.5rem;
+                color: #6c757d;
+            }
+
+            .hidden {
+                display: none !important;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">My Profile</h3>
+                        <h6 class="font-weight-normal mb-0">Manage your business and account settings</h6>
+                    </div>
+                    <div class="col-12 col-xl-4">
+                        <div class="d-flex justify-content-xl-end">
+                            <button type="button" class="btn btn-primary" id="btn-edit">
+                                <i class="ti-pencil"></i> Edit Profile
+                            </button>
+                            <button type="button" class="btn btn-success ml-2 hidden" id="btn-save">
+                                <i class="ti-check"></i> Save Changes
+                            </button>
+                            <button type="button" class="btn btn-secondary ml-2 hidden" id="btn-cancel">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Profile Information Card -->
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Business Information</h4>
+                        <p class="card-description">Your business profile details</p>
+
+                        <!-- Avatar -->
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="avatar-circle mr-3">
+                                <img th:if="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
+                                    th:src="${user.profileImageUrl}" alt="Profile Photo">
+                                <i th:unless="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
+                                    class="ti-user"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1" th:text="${ownerDetails != null ? ownerDetails.businessName : 'N/A'}">
+                                    Business Name</h5>
+                                <div th:if="${ownerDetails != null and ownerDetails.isVerified}" class="verified-badge">
+                                    <i class="ti-check"></i> Verified
+                                </div>
+                                <span th:unless="${ownerDetails != null and ownerDetails.isVerified}"
+                                    class="text-muted small">Not yet verified</span>
+                            </div>
+                        </div>
+
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label class="form-label">Business Name</label>
+                                <input type="text" class="form-control" id="businessName"
+                                    th:value="${ownerDetails != null ? ownerDetails.businessName : 'N/A'}" disabled>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Contact Phone</label>
+                                <input type="tel" class="form-control" id="contactPhone"
+                                    th:value="${ownerDetails != null ? ownerDetails.contactPhone : 'N/A'}" disabled>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email"
+                                    th:value="${user != null ? user.email : 'N/A'}" disabled readonly>
+                                <small class="text-muted">Email cannot be changed for security reasons</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Card -->
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Address Information</h4>
+                        <p class="card-description">Your business address</p>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Line 1</label>
+                            <input type="text" class="form-control" id="addressLine1"
+                                th:value="${address != null ? address.addressLine1 : 'N/A'}" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Line 2</label>
+                            <input type="text" class="form-control" id="addressLine2"
+                                th:value="${address != null ? address.addressLine2 : ''}" disabled>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city"
+                                        th:value="${address != null ? address.city : 'N/A'}" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">State</label>
+                                    <input type="text" class="form-control" id="state"
+                                        th:value="${address != null ? address.state : 'N/A'}" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" id="postalCode"
+                                th:value="${address != null ? address.postalCode : 'N/A'}" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings Row -->
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Account Settings</h4>
+                        <p class="card-description">Manage your security and session</p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center p-3 border rounded mb-3">
+                                    <div>
+                                        <h6 class="mb-0"><i class="ti-key mr-2"></i>Password</h6>
+                                        <small class="text-muted">Change your account password</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm"
+                                        id="btn-change-password">Change</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center p-3 border rounded mb-3">
+                                    <div>
+                                        <h6 class="mb-0"><i class="ti-power-off mr-2"></i>Session</h6>
+                                        <small class="text-muted">End your current session</small>
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm" id="btn-logout">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            // Form elements
+            const businessNameInput = document.getElementById('businessName');
+            const contactPhoneInput = document.getElementById('contactPhone');
+            const addressLine1Input = document.getElementById('addressLine1');
+            const addressLine2Input = document.getElementById('addressLine2');
+            const cityInput = document.getElementById('city');
+            const stateInput = document.getElementById('state');
+            const postalCodeInput = document.getElementById('postalCode');
+
+            const btnEdit = document.getElementById('btn-edit');
+            const btnSave = document.getElementById('btn-save');
+            const btnCancel = document.getElementById('btn-cancel');
+
+            const editableFields = [businessNameInput, contactPhoneInput, addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
+
+            let originalValues = {};
+            editableFields.forEach(field => {
+                originalValues[field.id] = field.value;
+            });
+
+            btnEdit.addEventListener('click', function () {
+                editableFields.forEach(field => field.disabled = false);
+                btnEdit.classList.add('hidden');
+                btnSave.classList.remove('hidden');
+                btnCancel.classList.remove('hidden');
+            });
+
+            btnCancel.addEventListener('click', function () {
+                editableFields.forEach(field => {
+                    field.value = originalValues[field.id];
+                    field.disabled = true;
+                });
+                btnEdit.classList.remove('hidden');
+                btnSave.classList.add('hidden');
+                btnCancel.classList.add('hidden');
+            });
+
+            btnSave.addEventListener('click', function () {
+                editableFields.forEach(field => {
+                    originalValues[field.id] = field.value;
+                    field.disabled = true;
+                });
+                btnEdit.classList.remove('hidden');
+                btnSave.classList.add('hidden');
+                btnCancel.classList.add('hidden');
+                alert('Profile updated successfully! (UI Demo - No backend implementation yet)');
+            });
+
+            document.getElementById('btn-change-password').addEventListener('click', function () {
+                alert('Change password modal will be implemented.');
+            });
+
+            document.getElementById('btn-logout').addEventListener('click', function () {
+                if (confirm('Are you sure you want to logout?')) {
+                    window.location.href = '/logout';
+                }
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>

@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/owner")
@@ -45,6 +46,9 @@ public class OwnerController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private com.najmi.fleetshare.repository.AddressRepository addressRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -224,5 +228,20 @@ public class OwnerController {
     @GetMapping("/ai-reports")
     public String aiReports(Model model) {
         return "owner/ai-reports";
+    }
+
+    @GetMapping("/profile")
+    public String profile(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null && user.getOwnerDetails() != null) {
+            model.addAttribute("user", user);
+            model.addAttribute("ownerDetails", user.getOwnerDetails());
+
+            // Fetch address for the user
+            Optional<com.najmi.fleetshare.entity.Address> addressOpt = addressRepository
+                    .findLatestAddressByUserId(user.getUserId());
+            addressOpt.ifPresent(address -> model.addAttribute("address", address));
+        }
+        return "owner/profile";
     }
 }
