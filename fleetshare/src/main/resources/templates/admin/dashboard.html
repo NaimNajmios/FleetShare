@@ -4,80 +4,280 @@
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Custom styles for this page if needed -->
+        <style>
+            .stat-card {
+                transition: transform 0.2s;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+            }
+
+            .stat-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .stat-icon.primary {
+                background: rgba(75, 73, 172, 0.15);
+                color: #4B49AC;
+            }
+
+            .stat-icon.success {
+                background: rgba(40, 167, 69, 0.15);
+                color: #28a745;
+            }
+
+            .stat-icon.warning {
+                background: rgba(255, 193, 7, 0.15);
+                color: #ffc107;
+            }
+
+            .stat-icon.info {
+                background: rgba(23, 162, 184, 0.15);
+                color: #17a2b8;
+            }
+
+            .stat-icon.danger {
+                background: rgba(220, 53, 69, 0.15);
+                color: #dc3545;
+            }
+
+            .status-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                display: inline-block;
+                margin-right: 8px;
+            }
+
+            .status-dot.available {
+                background: #28a745;
+            }
+
+            .status-dot.rented {
+                background: #4B49AC;
+            }
+
+            .status-dot.maintenance {
+                background: #ffc107;
+            }
+
+            .quick-action-btn {
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                transition: all 0.2s;
+            }
+
+            .quick-action-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+        </style>
     </th:block>
 </head>
 
 <body>
     <div layout:fragment="content">
+        <!-- Page Header -->
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                         <h3 class="font-weight-bold">Welcome <span th:text="${adminName} ?: 'Admin'">Admin</span></h3>
-                        <h6 class="font-weight-normal mb-0">All systems are running smoothly! You have <span
-                                class="text-primary">3 unread alerts!</span></h6>
+                        <h6 class="font-weight-normal mb-0">Here's an overview of your platform operations</h6>
+                    </div>
+                    <div class="col-12 col-xl-4">
+                        <div class="d-flex justify-content-xl-end">
+                            <a th:href="@{/admin/users}" class="btn btn-primary">
+                                <i class="ti-user mr-1"></i> Manage Users
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Stats Cards Row -->
         <div class="row">
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card tale-bg">
-                    <div class="card-people mt-auto">
-                        <img th:src="@{/assets/images/dashboard/people.svg}" alt="people">
-                        <div class="weather-info">
-                            <div class="d-flex">
-                                <div>
-                                    <h2 class="mb-0 font-weight-normal"><i class="icon-sun mr-2"></i>31<sup>C</sup></h2>
-                                </div>
-                                <div class="ml-2">
-                                    <h4 class="location font-weight-normal">Kuala Lumpur</h4>
-                                    <h6 class="font-weight-normal">Malaysia</h6>
-                                </div>
+            <div class="col-md-6 col-lg-3 grid-margin stretch-card">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1">Total Users</p>
+                                <h3 class="font-weight-bold mb-0" th:text="${totalUsers} ?: 0">0</h3>
                             </div>
+                            <div class="stat-icon primary">
+                                <i class="ti-user"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 small">
+                            <span class="text-success" th:text="${renterCount} ?: 0">0</span> Renters
+                            <span class="text-muted mx-1">|</span>
+                            <span class="text-primary" th:text="${ownerCount} ?: 0">0</span> Owners
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 grid-margin transparent">
-                <div class="row">
-                    <div class="col-md-6 mb-4 stretch-card transparent">
-                        <div class="card card-tale">
-                            <div class="card-body">
-                                <p class="mb-4">Total Users</p>
-                                <p class="fs-30 mb-2">4006</p>
-                                <p>10.00% (30 days)</p>
+            <div class="col-md-6 col-lg-3 grid-margin stretch-card">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1">Total Vehicles</p>
+                                <h3 class="font-weight-bold mb-0" th:text="${totalVehicles} ?: 0">0</h3>
+                            </div>
+                            <div class="stat-icon success">
+                                <i class="ti-car"></i>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6 mb-4 stretch-card transparent">
-                        <div class="card card-dark-blue">
-                            <div class="card-body">
-                                <p class="mb-4">Total Revenue</p>
-                                <p class="fs-30 mb-2">RM61344</p>
-                                <p>22.00% (30 days)</p>
-                            </div>
+                        <div class="mt-3 small">
+                            <span class="text-success" th:text="${availableVehicles} ?: 0">0</span> Available
+                            <span class="text-muted mx-1">|</span>
+                            <span class="text-primary" th:text="${rentedVehicles} ?: 0">0</span> Rented
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
-                        <div class="card card-light-blue">
-                            <div class="card-body">
-                                <p class="mb-4">Active Rentals</p>
-                                <p class="fs-30 mb-2">34</p>
-                                <p>2.00% (30 days)</p>
+            </div>
+            <div class="col-md-6 col-lg-3 grid-margin stretch-card">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1">Total Revenue</p>
+                                <h3 class="font-weight-bold mb-0">RM <span
+                                        th:text="${#numbers.formatDecimal(totalRevenue ?: 0, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                                </h3>
+                            </div>
+                            <div class="stat-icon info">
+                                <i class="ti-wallet"></i>
                             </div>
                         </div>
+                        <div class="mt-3 small text-muted">
+                            From completed payments
+                        </div>
                     </div>
-                    <div class="col-md-6 stretch-card transparent">
-                        <div class="card card-light-danger">
-                            <div class="card-body">
-                                <p class="mb-4">Total Vehicles</p>
-                                <p class="fs-30 mb-2">47033</p>
-                                <p>0.22% (30 days)</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 grid-margin stretch-card">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1">Active Rentals</p>
+                                <h3 class="font-weight-bold mb-0" th:text="${activeRentals} ?: 0">0</h3>
                             </div>
+                            <div class="stat-icon warning">
+                                <i class="ti-key"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 small text-muted">
+                            Currently on the road
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Bookings & Platform Stats Row -->
+        <div class="row">
+            <!-- Recent Bookings -->
+            <div class="col-lg-8 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="card-title mb-0">Recent Bookings</h4>
+                            <a th:href="@{/admin/bookings}" class="btn btn-outline-primary btn-sm">View All</a>
+                        </div>
+
+                        <div th:if="${recentBookings != null and !recentBookings.isEmpty()}" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Vehicle</th>
+                                        <th>Dates</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="booking : ${recentBookings}">
+                                        <td th:text="${booking.renterName} ?: 'N/A'">Customer Name</td>
+                                        <td
+                                            th:text="${(booking.vehicleBrand ?: '') + ' ' + (booking.vehicleModel ?: '')}">
+                                            Vehicle</td>
+                                        <td>
+                                            <span
+                                                th:text="${booking.startDate != null ? #temporals.format(booking.startDate, 'dd MMM') : 'N/A'}">Start</span>
+                                            -
+                                            <span
+                                                th:text="${booking.endDate != null ? #temporals.format(booking.endDate, 'dd MMM') : 'N/A'}">End</span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                th:class="'badge badge-' + (${booking.status == 'COMPLETED'} ? 'success' : (${booking.status == 'IN_PROGRESS' or booking.status == 'ACTIVE'} ? 'primary' : (${booking.status == 'PENDING'} ? 'warning' : 'secondary')))"
+                                                th:text="${booking.status} ?: 'Unknown'">Status</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:unless="${recentBookings != null and !recentBookings.isEmpty()}"
+                            class="text-center text-muted py-4">
+                            <i class="ti-calendar" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No bookings yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Stats & Quick Actions -->
+            <div class="col-lg-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Vehicle Status</h4>
+
+                        <div th:if="${totalVehicles != null and totalVehicles > 0}">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span><span class="status-dot available"></span> Available</span>
+                                <span class="font-weight-bold" th:text="${availableVehicles} ?: 0">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span><span class="status-dot rented"></span> Rented</span>
+                                <span class="font-weight-bold" th:text="${rentedVehicles} ?: 0">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <span><span class="status-dot maintenance"></span> Maintenance</span>
+                                <span class="font-weight-bold" th:text="${maintenanceVehicles} ?: 0">0</span>
+                            </div>
+                        </div>
+                        <div th:unless="${totalVehicles != null and totalVehicles > 0}"
+                            class="text-center text-muted py-3">
+                            <p class="mb-0">No vehicles registered</p>
+                        </div>
+
+                        <hr>
+
+                        <h4 class="card-title">Quick Actions</h4>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/admin/users}" class="btn btn-outline-primary btn-block mb-2">
+                                <i class="ti-user mr-1"></i> Manage Users
+                            </a>
+                            <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary btn-block mb-2">
+                                <i class="ti-calendar mr-1"></i> View Bookings
+                            </a>
+                            <a th:href="@{/admin/vehicles}" class="btn btn-outline-secondary btn-block mb-2">
+                                <i class="ti-car mr-1"></i> Manage Vehicles
+                            </a>
+                            <a th:href="@{/admin/maintenance}" class="btn btn-outline-secondary btn-block">
+                                <i class="ti-settings mr-1"></i> Maintenance
+                            </a>
                         </div>
                     </div>
                 </div>

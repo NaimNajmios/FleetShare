@@ -66,6 +66,87 @@ public class AdminController {
                 model.addAttribute("adminName", user.getAdminDetails().getFullName());
             }
         }
+
+        try {
+            // Platform-wide user statistics
+            var allOwners = userManagementService.getAllFleetOwners();
+            var allRenters = userManagementService.getAllRenters();
+            int ownerCount = allOwners != null ? allOwners.size() : 0;
+            int renterCount = allRenters != null ? allRenters.size() : 0;
+            int totalUsers = ownerCount + renterCount;
+            model.addAttribute("totalUsers", totalUsers);
+            model.addAttribute("renterCount", renterCount);
+            model.addAttribute("ownerCount", ownerCount);
+
+            // Platform-wide vehicle statistics
+            List<VehicleDTO> allVehicles = vehicleManagementService.getAllVehicles();
+            int totalVehicles = allVehicles != null ? allVehicles.size() : 0;
+            long availableVehicles = allVehicles != null
+                    ? allVehicles.stream().filter(v -> "AVAILABLE".equals(v.getStatus())).count()
+                    : 0;
+            long rentedVehicles = allVehicles != null
+                    ? allVehicles.stream().filter(v -> "RENTED".equals(v.getStatus())).count()
+                    : 0;
+            long maintenanceVehicles = allVehicles != null
+                    ? allVehicles.stream().filter(v -> "MAINTENANCE".equals(v.getStatus())).count()
+                    : 0;
+            model.addAttribute("totalVehicles", totalVehicles);
+            model.addAttribute("availableVehicles", availableVehicles);
+            model.addAttribute("rentedVehicles", rentedVehicles);
+            model.addAttribute("maintenanceVehicles", maintenanceVehicles);
+
+            // Platform-wide booking statistics
+            List<BookingDTO> allBookings = bookingService.getAllBookings();
+            int totalBookings = allBookings != null ? allBookings.size() : 0;
+            long activeRentals = allBookings != null ? allBookings.stream()
+                    .filter(b -> "ACTIVE".equals(b.getStatus()) || "IN_PROGRESS".equals(b.getStatus()))
+                    .count() : 0;
+            long pendingBookings = allBookings != null ? allBookings.stream()
+                    .filter(b -> "PENDING".equals(b.getStatus()) || "CONFIRMED".equals(b.getStatus()))
+                    .count() : 0;
+            model.addAttribute("totalBookings", totalBookings);
+            model.addAttribute("activeRentals", activeRentals);
+            model.addAttribute("pendingBookings", pendingBookings);
+
+            // Recent bookings (last 5)
+            List<BookingDTO> recentBookings = allBookings != null ? allBookings.stream()
+                    .sorted((b1, b2) -> {
+                        if (b1.getCreatedAt() == null)
+                            return 1;
+                        if (b2.getCreatedAt() == null)
+                            return -1;
+                        return b2.getCreatedAt().compareTo(b1.getCreatedAt());
+                    })
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>();
+            model.addAttribute("recentBookings", recentBookings);
+
+            // Platform-wide revenue
+            var allPayments = paymentService.getAllPayments();
+            BigDecimal totalRevenue = allPayments != null ? allPayments.stream()
+                    .filter(p -> "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                    .map(p -> p.getAmount())
+                    .filter(a -> a != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+            model.addAttribute("totalRevenue", totalRevenue);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Set defaults on error
+            model.addAttribute("totalUsers", 0);
+            model.addAttribute("renterCount", 0);
+            model.addAttribute("ownerCount", 0);
+            model.addAttribute("totalVehicles", 0);
+            model.addAttribute("availableVehicles", 0);
+            model.addAttribute("rentedVehicles", 0);
+            model.addAttribute("maintenanceVehicles", 0);
+            model.addAttribute("totalBookings", 0);
+            model.addAttribute("activeRentals", 0);
+            model.addAttribute("pendingBookings", 0);
+            model.addAttribute("recentBookings", new java.util.ArrayList<>());
+            model.addAttribute("totalRevenue", BigDecimal.ZERO);
+        }
+
         return "admin/dashboard";
     }
 
