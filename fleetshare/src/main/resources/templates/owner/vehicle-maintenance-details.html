@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/owner-layout}"
-    th:with="activePage='maintenance', pageTitle='Vehicle Maintenance Details'">
+    th:with="activePage='maintenance', pageTitle='Vehicle Maintenance History'">
 
 <head>
     <th:block layout:fragment="extra-css">
@@ -48,35 +48,68 @@
                 color: #6c757d;
             }
 
-            .vehicle-info-card {
-                background-color: #f8f9fa;
-                border-radius: 0.5rem;
-                padding: 1.5rem;
-                margin-bottom: 1.5rem;
+            .detail-label {
+                font-weight: 600;
+                color: #6c757d;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                margin-bottom: 0.25rem;
             }
 
-            .vehicle-info-card h4 {
-                margin-bottom: 0.5rem;
+            .detail-value {
+                font-size: 1rem;
+                margin-bottom: 1rem;
             }
 
-            .vehicle-info-card .text-muted {
-                font-size: 0.9rem;
-            }
-
-            .stat-item {
+            .stat-card {
                 text-align: center;
-                padding: 1rem;
+                padding: 1.5rem 1rem;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             }
 
-            .stat-item .stat-value {
-                font-size: 1.5rem;
+            .stat-card .stat-value {
+                font-size: 1.75rem;
                 font-weight: 700;
                 color: #4B49AC;
             }
 
-            .stat-item .stat-label {
+            .stat-card .stat-label {
                 font-size: 0.85rem;
                 color: #6c757d;
+                margin-top: 0.25rem;
+            }
+
+            .stat-card.pending .stat-value {
+                color: #856404;
+            }
+
+            .stat-card.in-progress .stat-value {
+                color: #0c5460;
+            }
+
+            .stat-card.completed .stat-value {
+                color: #155724;
+            }
+
+            .vehicle-image {
+                width: 100%;
+                max-height: 200px;
+                object-fit: cover;
+                border-radius: 8px;
+                background: #e9ecef;
+            }
+
+            .vehicle-placeholder {
+                width: 100%;
+                height: 150px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 3rem;
             }
         </style>
     </th:block>
@@ -89,11 +122,17 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <a th:href="@{/owner/maintenance}" class="btn btn-outline-secondary btn-sm mb-3">
-                            <i class="mdi mdi-arrow-left"></i> Back to Maintenance
+                        <a th:href="@{/owner/vehicles}" class="btn btn-outline-secondary btn-sm mb-3">
+                            <i class="mdi mdi-arrow-left"></i> Back to Vehicles
                         </a>
-                        <h3 class="font-weight-bold">Vehicle Maintenance Details</h3>
-                        <h6 class="font-weight-normal mb-0">Maintenance history for this vehicle.</h6>
+                        <h3 class="font-weight-bold">Vehicle Maintenance History</h3>
+                        <h6 class="font-weight-normal mb-0">All maintenance records for this vehicle</h6>
+                    </div>
+                    <div class="col-12 col-xl-4 text-xl-right">
+                        <a th:href="@{/owner/vehicles/view/{id}(id=${vehicle.vehicleId})}"
+                            class="btn btn-outline-primary">
+                            <i class="mdi mdi-car"></i> View Vehicle Details
+                        </a>
                     </div>
                 </div>
             </div>
@@ -104,40 +143,75 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <h4 class="mb-1" th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h4>
-                                <p class="text-muted mb-0">
+                        <div class="row">
+                            <!-- Vehicle Image/Placeholder -->
+                            <div class="col-md-3">
+                                <div class="vehicle-placeholder">
                                     <i class="mdi mdi-car"></i>
-                                    <span th:text="${vehicle.registrationNo}">REG123</span>
-                                    <span class="mx-2">|</span>
-                                    <span th:if="${vehicle.status == 'AVAILABLE'}"
-                                        class="badge badge-success">Available</span>
-                                    <span th:if="${vehicle.status == 'RENTED'}"
-                                        class="badge badge-warning">Rented</span>
-                                    <span th:if="${vehicle.status == 'MAINTENANCE'}"
-                                        class="badge badge-info">Maintenance</span>
-                                    <span th:if="${vehicle.status == 'UNAVAILABLE'}"
-                                        class="badge badge-secondary">Unavailable</span>
-                                </p>
+                                </div>
                             </div>
-                            <div class="col-md-6">
+
+                            <!-- Vehicle Details -->
+                            <div class="col-md-5">
+                                <h4 class="mb-2" th:text="${vehicle.brand + ' ' + vehicle.model}">Toyota Camry</h4>
                                 <div class="row">
-                                    <div class="col-4 stat-item">
-                                        <div class="stat-value" th:text="${totalRecords}">0</div>
-                                        <div class="stat-label">Total Records</div>
+                                    <div class="col-6">
+                                        <div class="detail-label">Registration No.</div>
+                                        <div class="detail-value font-weight-bold" th:text="${vehicle.registrationNo}">
+                                            WXY 1234</div>
                                     </div>
-                                    <div class="col-4 stat-item">
-                                        <div class="stat-value"
-                                            th:text="'RM ' + ${#numbers.formatDecimal(totalCost, 1, 'COMMA', 0, 'POINT')}">
-                                            RM 0</div>
-                                        <div class="stat-label">Total Cost</div>
+                                    <div class="col-6">
+                                        <div class="detail-label">Status</div>
+                                        <div class="detail-value">
+                                            <span th:if="${vehicle.status == 'AVAILABLE'}"
+                                                class="badge badge-success">Available</span>
+                                            <span th:if="${vehicle.status == 'RENTED'}"
+                                                class="badge badge-warning">Rented</span>
+                                            <span th:if="${vehicle.status == 'MAINTENANCE'}"
+                                                class="badge badge-info">Maintenance</span>
+                                            <span th:if="${vehicle.status == 'UNAVAILABLE'}"
+                                                class="badge badge-secondary">Unavailable</span>
+                                        </div>
                                     </div>
-                                    <div class="col-4 stat-item">
-                                        <div class="stat-value"
-                                            th:text="${lastMaintenanceDate != null ? #temporals.format(lastMaintenanceDate, 'dd MMM') : 'N/A'}">
-                                            N/A</div>
-                                        <div class="stat-label">Last Maintenance</div>
+                                    <div class="col-6">
+                                        <div class="detail-label">Category</div>
+                                        <div class="detail-value" th:text="${vehicle.category}">Sedan</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="detail-label">Year</div>
+                                        <div class="detail-value" th:text="${vehicle.manufacturingYear}">2022</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="col-md-4">
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <div class="stat-card">
+                                            <div class="stat-value" th:text="${totalRecords}">0</div>
+                                            <div class="stat-label">Total Records</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="stat-card">
+                                            <div class="stat-value"
+                                                th:text="'RM ' + ${#numbers.formatDecimal(totalCost, 1, 'COMMA', 0, 'POINT')}">
+                                                RM 0</div>
+                                            <div class="stat-label">Total Cost</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-card pending">
+                                            <div class="stat-value" th:text="${pendingCount}">0</div>
+                                            <div class="stat-label">Pending</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-card completed">
+                                            <div class="stat-value" th:text="${completedCount}">0</div>
+                                            <div class="stat-label">Completed</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -152,18 +226,24 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Maintenance History</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="card-title mb-0">Maintenance Records</h4>
+                            <a th:href="@{/owner/maintenance}" class="btn btn-success btn-sm">
+                                <i class="mdi mdi-plus"></i> Add New Record
+                            </a>
+                        </div>
 
                         <div class="table-responsive" th:if="${!#lists.isEmpty(maintenanceRecords)}">
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Maintenance ID</th>
+                                        <th>ID</th>
                                         <th>Description</th>
                                         <th>Scheduled Date</th>
                                         <th>Estimated Cost</th>
                                         <th>Final Cost</th>
                                         <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -171,7 +251,7 @@
                                         <td th:text="${record.maintenanceId}" class="font-weight-bold">1</td>
                                         <td th:text="${record.description}">Description</td>
                                         <td
-                                            th:text="${record.scheduledDate != null ? #temporals.format(record.scheduledDate, 'yyyy-MM-dd') : 'N/A'}">
+                                            th:text="${record.scheduledDate != null ? #temporals.format(record.scheduledDate, 'dd MMM yyyy') : 'N/A'}">
                                             Date</td>
                                         <td
                                             th:text="${record.estimatedCost != null ? 'RM ' + #numbers.formatDecimal(record.estimatedCost, 1, 'COMMA', 2, 'POINT') : 'N/A'}">
@@ -188,6 +268,12 @@
                                                 class="badge badge-success">Completed</span>
                                             <span th:if="${record.status == 'CANCELLED'}"
                                                 class="badge badge-danger">Cancelled</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/owner/maintenance/view/{id}(id=${record.maintenanceId})}"
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="mdi mdi-eye"></i> View
+                                            </a>
                                         </td>
                                     </tr>
                                 </tbody>

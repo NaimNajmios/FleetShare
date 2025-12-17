@@ -270,9 +270,19 @@ public class OwnerController {
         LocalDate lastMaintenanceDate = maintenanceRecords.isEmpty() ? null
                 : maintenanceRecords.get(0).getScheduledDate();
 
+        // Count by status
+        long pendingCount = maintenanceRecords.stream()
+                .filter(m -> "PENDING".equals(m.getStatus()))
+                .count();
+        long completedCount = maintenanceRecords.stream()
+                .filter(m -> "COMPLETED".equals(m.getStatus()))
+                .count();
+
         model.addAttribute("totalRecords", totalRecords);
         model.addAttribute("totalCost", totalCost);
         model.addAttribute("lastMaintenanceDate", lastMaintenanceDate);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("completedCount", completedCount);
         model.addAttribute("ownerName", vehicle.getOwnerBusinessName());
 
         return "owner/vehicle-maintenance-details";
