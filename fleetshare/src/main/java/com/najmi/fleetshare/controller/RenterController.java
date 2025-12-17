@@ -3,6 +3,8 @@ package com.najmi.fleetshare.controller;
 import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.entity.Address;
+import com.najmi.fleetshare.repository.AddressRepository;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
@@ -30,6 +32,9 @@ public class RenterController {
 
     @Autowired
     private com.najmi.fleetshare.service.PaymentService paymentService;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
@@ -153,6 +158,10 @@ public class RenterController {
         if (user != null && user.getRenterDetails() != null) {
             model.addAttribute("user", user);
             model.addAttribute("renterDetails", user.getRenterDetails());
+
+            // Fetch address information
+            Address address = addressRepository.findLatestAddressByUserId(user.getUserId()).orElse(null);
+            model.addAttribute("address", address);
         }
         return "renter/profile";
     }
