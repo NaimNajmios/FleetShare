@@ -5,6 +5,49 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
+            .kpi-card {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 12px;
+                padding: 1.25rem;
+                text-align: center;
+            }
+
+            .kpi-card.pending {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            .kpi-card.confirmed {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            .kpi-card.active {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+
+            .kpi-card.completed {
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            }
+
+            .kpi-card.revenue {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            }
+
+            .kpi-value {
+                font-size: 1.75rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+            }
+
+            .kpi-label {
+                font-size: 0.8rem;
+                opacity: 0.9;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
             .search-filter-bar {
                 display: flex;
                 gap: 1rem;
@@ -76,21 +119,90 @@
 
 <body>
     <div layout:fragment="content">
+        <!-- Page Header -->
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                         <h3 class="font-weight-bold">Booking Management</h3>
-                        <h6 class="font-weight-normal mb-0">Oversee all rental bookings.</h6>
+                        <h6 class="font-weight-normal mb-0">Oversee all rental bookings across the platform.</h6>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- KPI Cards Row -->
+        <div class="row">
+            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
+                <div class="kpi-card pending w-100">
+                    <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
+                    <div class="kpi-label">Pending</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
+                <div class="kpi-card confirmed w-100">
+                    <div class="kpi-value" th:text="${confirmedCount} ?: 0">0</div>
+                    <div class="kpi-label">Confirmed</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
+                <div class="kpi-card active w-100">
+                    <div class="kpi-value" th:text="${activeCount} ?: 0">0</div>
+                    <div class="kpi-label">Active</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
+                <div class="kpi-card completed w-100">
+                    <div class="kpi-value" th:text="${completedCount} ?: 0">0</div>
+                    <div class="kpi-label">Completed</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
+                <div class="kpi-card w-100" style="background: linear-gradient(135deg, #adb5bd 0%, #6c757d 100%);">
+                    <div class="kpi-value" th:text="${cancelledCount + disputedCount} ?: 0">0</div>
+                    <div class="kpi-label">Cancelled/Disputed</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
+                <div class="kpi-card revenue w-100">
+                    <div class="kpi-value"
+                        th:text="'RM' + ${#numbers.formatDecimal(totalRevenue ?: 0, 1, 'COMMA', 0, 'POINT')}">RM0</div>
+                    <div class="kpi-label">Total Revenue</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-5 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Booking Status Distribution</h4>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Monthly Bookings & Revenue</h4>
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Table -->
         <div class="row">
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
+                        <h4 class="card-title">All Bookings</h4>
+
                         <!-- Search and Filters -->
                         <div class="search-filter-bar">
                             <input type="text" class="search-input" id="booking-search"
@@ -122,7 +234,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="booking : ${bookings}" th:attr="data-status=${booking.status}"
+                                    <tr th:each="booking : ${bookings}" th:data-status="${booking.status}"
                                         class="booking-row">
                                         <td th:text="${booking.bookingId}">1</td>
                                         <td th:text="${booking.renterName}" class="searchable">Herman Beck</td>
@@ -167,7 +279,104 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <script th:src="@{/assets/js/booking-management.js}"></script>
+        <script th:inline="javascript">
+            // Chart data from server
+            const bookingStats = {
+                pending: /*[[${pendingCount} ?: 0]]*/ 0,
+                confirmed: /*[[${confirmedCount} ?: 0]]*/ 0,
+                active: /*[[${activeCount} ?: 0]]*/ 0,
+                completed: /*[[${completedCount} ?: 0]]*/ 0,
+                cancelled: /*[[${cancelledCount} ?: 0]]*/ 0,
+                disputed: /*[[${disputedCount} ?: 0]]*/ 0,
+                monthlyLabels: /*[[${monthlyLabels}]]*/[],
+                monthlyBookingCounts: /*[[${monthlyBookingCounts}]]*/[],
+                monthlyRevenue: /*[[${monthlyRevenue}]]*/[]
+            };
+
+            // Status Distribution Doughnut Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled', 'Disputed'],
+                    datasets: [{
+                        data: [bookingStats.pending, bookingStats.confirmed, bookingStats.active,
+                        bookingStats.completed, bookingStats.cancelled, bookingStats.disputed],
+                        backgroundColor: ['#f5576c', '#4facfe', '#667eea', '#43e97b', '#adb5bd', '#6c757d'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Monthly Bookings & Revenue Bar Chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: bookingStats.monthlyLabels,
+                    datasets: [{
+                        label: 'Bookings',
+                        data: bookingStats.monthlyBookingCounts,
+                        backgroundColor: 'rgba(75, 73, 172, 0.7)',
+                        borderColor: '#4B49AC',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Revenue (RM)',
+                        data: bookingStats.monthlyRevenue,
+                        type: 'line',
+                        borderColor: '#fa709a',
+                        backgroundColor: 'rgba(250, 112, 154, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: 'left',
+                            title: { display: true, text: 'Bookings' }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Revenue (RM)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+
+            // Filter functionality
+            document.getElementById('status-filter').addEventListener('change', function () {
+                const status = this.value;
+                document.querySelectorAll('#bookings-table tbody tr').forEach(row => {
+                    row.style.display = !status || row.dataset.status === status ? '' : 'none';
+                });
+            });
+
+            document.getElementById('booking-search').addEventListener('input', function () {
+                const term = this.value.toLowerCase();
+                document.querySelectorAll('#bookings-table tbody tr').forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+                });
+            });
+        </script>
     </th:block>
 </body>
 

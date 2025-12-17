@@ -237,7 +237,62 @@ public class AdminController {
 
     @GetMapping("/bookings")
     public String bookings(Model model) {
-        model.addAttribute("bookings", bookingService.getAllBookings());
+        List<BookingDTO> allBookings = bookingService.getAllBookings();
+        model.addAttribute("bookings", allBookings);
+
+        // Calculate booking statistics
+        long pendingCount = allBookings.stream().filter(b -> "PENDING".equals(b.getStatus())).count();
+        long confirmedCount = allBookings.stream().filter(b -> "CONFIRMED".equals(b.getStatus())).count();
+        long activeCount = allBookings.stream().filter(b -> "ACTIVE".equals(b.getStatus())).count();
+        long completedCount = allBookings.stream().filter(b -> "COMPLETED".equals(b.getStatus())).count();
+        long cancelledCount = allBookings.stream().filter(b -> "CANCELLED".equals(b.getStatus())).count();
+        long disputedCount = allBookings.stream().filter(b -> "DISPUTED".equals(b.getStatus())).count();
+
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("confirmedCount", confirmedCount);
+        model.addAttribute("activeCount", activeCount);
+        model.addAttribute("completedCount", completedCount);
+        model.addAttribute("cancelledCount", cancelledCount);
+        model.addAttribute("disputedCount", disputedCount);
+
+        // Calculate total revenue from completed bookings
+        BigDecimal totalRevenue = allBookings.stream()
+                .filter(b -> "COMPLETED".equals(b.getStatus()) && b.getTotalCost() != null)
+                .map(BookingDTO::getTotalCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        model.addAttribute("totalRevenue", totalRevenue);
+
+        // Calculate monthly booking counts (last 6 months)
+        java.util.Map<String, Long> monthlyBookings = new java.util.LinkedHashMap<>();
+        java.util.Map<String, BigDecimal> monthlyRevenue = new java.util.LinkedHashMap<>();
+
+        for (int i = 5; i >= 0; i--) {
+            LocalDate monthDate = LocalDate.now().minusMonths(i);
+            String monthKey = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("MMM yyyy"));
+            int year = monthDate.getYear();
+            int month = monthDate.getMonthValue();
+
+            long count = allBookings.stream()
+                    .filter(b -> b.getCreatedAt() != null
+                            && b.getCreatedAt().getYear() == year
+                            && b.getCreatedAt().getMonthValue() == month)
+                    .count();
+            monthlyBookings.put(monthKey, count);
+
+            BigDecimal revenue = allBookings.stream()
+                    .filter(b -> b.getCreatedAt() != null
+                            && b.getCreatedAt().getYear() == year
+                            && b.getCreatedAt().getMonthValue() == month
+                            && b.getTotalCost() != null)
+                    .map(BookingDTO::getTotalCost)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            monthlyRevenue.put(monthKey, revenue);
+        }
+
+        model.addAttribute("monthlyLabels", monthlyBookings.keySet());
+        model.addAttribute("monthlyBookingCounts", monthlyBookings.values());
+        model.addAttribute("monthlyRevenue", monthlyRevenue.values());
+
         return "admin/bookings";
     }
 
