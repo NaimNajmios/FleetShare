@@ -4,127 +4,356 @@
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Extra styles for browse vehicles page -->
+        <style>
+            /* Layout Grid */
+            .browse-container {
+                display: grid;
+                grid-template-columns: 280px 1fr;
+                gap: 2rem;
+                padding: 2rem 0;
+                align-items: start;
+            }
+
+            /* Floating Sidebar */
+            .filter-sidebar {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+                position: sticky;
+                top: 100px;
+                /* Adjust based on navbar height */
+                height: fit-content;
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+            }
+
+            .sidebar-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .sidebar-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                margin: 0;
+                color: #333;
+            }
+
+            .clear-filters {
+                font-size: 0.85rem;
+                color: #dc3545;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            .filter-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .filter-group-title {
+                font-size: 0.95rem;
+                font-weight: 600;
+                margin-bottom: 0.75rem;
+                color: #444;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            /* Custom Checkboxes */
+            .custom-checkbox {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.5rem;
+                cursor: pointer;
+                font-size: 0.9rem;
+                color: #666;
+            }
+
+            .custom-checkbox input {
+                margin-right: 0.5rem;
+                width: 16px;
+                height: 16px;
+                accent-color: #4B49AC;
+            }
+
+            /* Price Range Slider */
+            .price-inputs {
+                display: flex;
+                gap: 0.5rem;
+                align-items: center;
+            }
+
+            .price-input {
+                width: 100%;
+                padding: 0.4rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 0.9rem;
+            }
+
+            /* Search Bar in Main Content */
+            .main-content-header {
+                margin-bottom: 1.5rem;
+            }
+
+            .search-bar-large {
+                width: 100%;
+                padding: 1rem 1.5rem;
+                border: none;
+                border-radius: 12px;
+                background: white;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            .search-bar-large:focus {
+                outline: none;
+                box-shadow: 0 0 20px rgba(75, 73, 172, 0.15);
+            }
+
+            /* Responsive */
+            @media (max-width: 991px) {
+                .browse-container {
+                    grid-template-columns: 1fr;
+                }
+
+                .filter-sidebar {
+                    position: static;
+                    margin-bottom: 2rem;
+                }
+            }
+        </style>
     </th:block>
 </head>
 
 <body>
     <main layout:fragment="content">
-        <!-- Search & Filter Section -->
-        <section class="search-filter-section">
-            <div class="search-filter-container">
-                <input type="text" class="search-bar" placeholder="🔍 Search by model, brand, or type..."
-                    id="vehicleSearch">
-
-                <label class="filter-label">Filter by category</label>
-                <div class="filter-pills">
-                    <button class="filter-pill active" data-category="all" onclick="filterVehicles('all')">All</button>
-                    <button class="filter-pill" data-category="sedan" onclick="filterVehicles('sedan')">Sedan</button>
-                    <button class="filter-pill" data-category="suv" onclick="filterVehicles('suv')">SUV</button>
-                    <button class="filter-pill" data-category="hatchback"
-                        onclick="filterVehicles('hatchback')">Hatchback</button>
-                    <button class="filter-pill" data-category="convertible"
-                        onclick="filterVehicles('convertible')">Convertible</button>
+        <div class="browse-container">
+            <!-- Left Sidebar: Filters -->
+            <aside class="filter-sidebar">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">Filters</h3>
+                    <a href="#" class="clear-filters" onclick="clearAllFilters()">Clear All</a>
                 </div>
-            </div>
-        </section>
 
-        <!-- Vehicle Grid -->
-        <div class="vehicle-grid-container">
-            <h2 class="section-title">Available Vehicles</h2>
+                <!-- Category Filter -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Category</div>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="category" value="sedan" onchange="applyFilters()"> Sedan
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="category" value="suv" onchange="applyFilters()"> SUV
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="category" value="hatchback" onchange="applyFilters()"> Hatchback
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="category" value="convertible" onchange="applyFilters()">
+                        Convertible
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="category" value="mpv" onchange="applyFilters()"> MPV
+                    </label>
+                </div>
 
-            <div class="vehicle-grid">
-                <!-- Dynamic Vehicle Cards from Database -->
-                <div class="vehicle-card" th:each="vehicle : ${vehicles}"
-                    th:attr="data-category=${vehicle.category != null ? vehicle.category.toLowerCase() : 'sedan'}">
-                    <div class="vehicle-image-container">
-                        <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}"
-                            style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
-                            <!-- Display vehicle image if available, otherwise show placeholder icon -->
-                            <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
-                                th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image"
-                                style="width: 100%; height: 100%; object-fit: cover;">
-                            <i th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
-                                class="fas fa-car vehicle-placeholder-icon"></i>
-                        </a>
-                        <div class="price-badge" th:text="'RM' + ${vehicle.ratePerDay} + '/day'">RM55/day</div>
+                <!-- Transmission Filter -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Transmission</div>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="transmission" value="auto" onchange="applyFilters()"> Automatic
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="transmission" value="manual" onchange="applyFilters()"> Manual
+                    </label>
+                </div>
+
+                <!-- Price Range Filter -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Price Range (RM/day)</div>
+                    <div class="price-inputs">
+                        <input type="number" id="minPrice" class="price-input" placeholder="Min"
+                            oninput="applyFilters()">
+                        <span>-</span>
+                        <input type="number" id="maxPrice" class="price-input" placeholder="Max"
+                            oninput="applyFilters()">
                     </div>
-                    <div class="vehicle-details">
-                        <h3 class="vehicle-title" th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h3>
-                        <div class="vehicle-specs">
-                            <div class="spec-item">
-                                <i class="fas fa-tachometer-alt spec-icon"></i>
-                                <span th:text="${vehicle.mileage != null ? vehicle.mileage + ' km' : 'N/A'}">15k
-                                    mi</span>
+                </div>
+            </aside>
+
+            <!-- Right Column: Content -->
+            <div class="main-content">
+                <!-- Search Bar -->
+                <div class="main-content-header">
+                    <input type="text" class="search-bar-large" placeholder="🔍 Search by model, brand, or keywords..."
+                        id="vehicleSearch">
+                </div>
+
+                <!-- Vehicle Grid -->
+                <div class="vehicle-grid-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="section-title mb-0">Available Vehicles</h2>
+                        <span class="text-muted" id="resultCount" th:text="${#lists.size(vehicles) + ' results'}">0
+                            results</span>
+                    </div>
+
+                    <div class="vehicle-grid" id="vehicleGrid">
+                        <!-- Dynamic Vehicle Cards from Database -->
+                        <div class="vehicle-card" th:each="vehicle : ${vehicles}" th:attr="data-category=${vehicle.category != null ? vehicle.category.toLowerCase() : 'sedan'},
+                                     data-transmission=${vehicle.transmissionType != null ? vehicle.transmissionType.toLowerCase() : 'auto'},
+                                     data-price=${vehicle.ratePerDay},
+                                     data-brand=${vehicle.brand.toLowerCase()},
+                                     data-model=${vehicle.model.toLowerCase()}">
+                            <div class="vehicle-image-container">
+                                <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}"
+                                    style="display: block; width: 100%; height: 100%; text-decoration: none; color: inherit;">
+                                    <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                                        th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image"
+                                        style="width: 100%; height: 100%; object-fit: cover;">
+                                    <i th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                                        class="fas fa-car vehicle-placeholder-icon"></i>
+                                </a>
+                                <div class="price-badge" th:text="'RM' + ${vehicle.ratePerDay} + '/day'">RM55/day</div>
                             </div>
-                            <div class="spec-item">
-                                <i class="fas fa-cog spec-icon"></i>
-                                <span
-                                    th:text="${vehicle.transmissionType != null ? vehicle.transmissionType : 'Auto'}">Auto</span>
-                            </div>
-                            <div class="spec-item">
-                                <i class="fas fa-users spec-icon"></i>
-                                <span>5 Seats</span>
+                            <div class="vehicle-details">
+                                <h3 class="vehicle-title" th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name
+                                </h3>
+                                <div class="vehicle-specs">
+                                    <div class="spec-item">
+                                        <i class="fas fa-tachometer-alt spec-icon"></i>
+                                        <span th:text="${vehicle.mileage != null ? vehicle.mileage + ' km' : 'N/A'}">15k
+                                            mi</span>
+                                    </div>
+                                    <div class="spec-item">
+                                        <i class="fas fa-cog spec-icon"></i>
+                                        <span
+                                            th:text="${vehicle.transmissionType != null ? vehicle.transmissionType : 'Auto'}">Auto</span>
+                                    </div>
+                                    <div class="spec-item">
+                                        <i class="fas fa-users spec-icon"></i>
+                                        <span>5 Seats</span>
+                                    </div>
+                                </div>
+
+                                <!-- Owner Info -->
+                                <div class="owner-info mt-2 mb-2 d-flex align-items-center">
+                                    <i class="fas fa-store text-muted mr-2" style="font-size: 0.9rem;"></i>
+                                    <span class="text-muted" style="font-size: 0.9rem;"
+                                        th:text="${vehicle.ownerBusinessName}">Owner Name</span>
+                                    <i th:if="${vehicle.ownerIsVerified}" class="fas fa-check-circle text-primary ml-1"
+                                        title="Verified Owner" style="font-size: 0.9rem;"></i>
+                                </div>
+
+                                <!-- Location Info -->
+                                <div class="location-info mb-3 d-flex align-items-center">
+                                    <i class="fas fa-map-marker-alt text-muted mr-2" style="font-size: 0.9rem;"></i>
+                                    <span class="text-muted" style="font-size: 0.9rem;"
+                                        th:text="${vehicle.city + ', ' + vehicle.state}">City, State</span>
+                                </div>
+
+                                <button class="book-now-btn" th:attr="data-vehicle-id=${vehicle.vehicleId}">
+                                    Book Now
+                                </button>
                             </div>
                         </div>
-                        <!-- Fixed: Using data attributes instead of th:onclick to avoid XSS protection issues -->
-                        <button class="book-now-btn"
-                            th:attr="data-vehicle-brand=${vehicle.brand}, data-vehicle-model=${vehicle.model}, data-vehicle-id=${vehicle.vehicleId}">
-                            Book Now
-                        </button>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" th:if="${#lists.isEmpty(vehicles)}"
+                        style="text-align: center; padding: 4rem 2rem; color: #6c757d;">
+                        <i class="fas fa-car" style="font-size: 4rem; margin-bottom: 1rem; color: #ced4da;"></i>
+                        <h3 style="margin-bottom: 0.5rem;">No Vehicles Available</h3>
+                        <p>There are currently no vehicles available for rent. Please check back later.</p>
+                    </div>
+
+                    <!-- No Filter Results State (Hidden by default) -->
+                    <div id="noFilterResults"
+                        style="display: none; text-align: center; padding: 4rem 2rem; color: #6c757d;">
+                        <i class="fas fa-filter" style="font-size: 4rem; margin-bottom: 1rem; color: #ced4da;"></i>
+                        <h3 style="margin-bottom: 0.5rem;">No Matches Found</h3>
+                        <p>Try adjusting your filters to see more results.</p>
+                        <button class="btn btn-outline-primary mt-3" onclick="clearAllFilters()">Clear Filters</button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Empty State -->
-            <div th:if="${#lists.isEmpty(vehicles)}" style="text-align: center; padding: 4rem 2rem; color: #6c757d;">
-                <i class="fas fa-car" style="font-size: 4rem; margin-bottom: 1rem; color: #ced4da;"></i>
-                <h3 style="margin-bottom: 0.5rem;">No Vehicles Available</h3>
-                <p>There are currently no vehicles available for rent. Please check back later.</p>
             </div>
         </div>
     </main>
 
     <th:block layout:fragment="extra-js">
         <script>
-            // Filter functionality
-            function filterVehicles(category) {
+            function applyFilters() {
                 const cards = document.querySelectorAll('.vehicle-card');
-                const pills = document.querySelectorAll('.filter-pill');
+                const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
 
-                // Update active pill
-                pills.forEach(pill => {
-                    if (pill.dataset.category === category) {
-                        pill.classList.add('active');
-                    } else {
-                        pill.classList.remove('active');
-                    }
-                });
+                // Get checked categories
+                const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                    .map(cb => cb.value);
 
-                // Filter cards
+                // Get checked transmissions
+                const checkedTransmissions = Array.from(document.querySelectorAll('input[name="transmission"]:checked'))
+                    .map(cb => cb.value);
+
+                // Get price range
+                const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+                const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+
+                let visibleCount = 0;
+
                 cards.forEach(card => {
-                    if (category === 'all' || card.dataset.category === category) {
+                    const category = card.dataset.category;
+                    const transmission = card.dataset.transmission; // Ensure this matches data attribute
+                    const price = parseFloat(card.dataset.price);
+                    const brand = card.dataset.brand;
+                    const model = card.dataset.model;
+                    const title = brand + ' ' + model;
+
+                    const matchesCategory = checkedCategories.length === 0 || checkedCategories.includes(category);
+                    const matchesTransmission = checkedTransmissions.length === 0 || checkedTransmissions.includes(transmission);
+                    const matchesPrice = price >= minPrice && price <= maxPrice;
+                    const matchesSearch = title.includes(searchInput);
+
+                    if (matchesCategory && matchesTransmission && matchesPrice && matchesSearch) {
                         card.style.display = 'block';
+                        visibleCount++;
                     } else {
                         card.style.display = 'none';
                     }
                 });
+
+                // Update result count
+                document.getElementById('resultCount').textContent = visibleCount + ' results';
+
+                // Show/Hide empty states
+                const emptyState = document.getElementById('emptyState');
+                const noFilterResults = document.getElementById('noFilterResults');
+
+                if (visibleCount === 0) {
+                    if (emptyState) emptyState.style.display = 'none'; // Hide original empty state if it exists
+                    noFilterResults.style.display = 'block';
+                } else {
+                    if (emptyState && cards.length === 0) emptyState.style.display = 'block'; // Only show if list was originally empty
+                    noFilterResults.style.display = 'none';
+                }
             }
 
-            // Search functionality (basic front-end only)
-            document.getElementById('vehicleSearch').addEventListener('input', function (e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const cards = document.querySelectorAll('.vehicle-card');
+            function clearAllFilters() {
+                // Reset inputs
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.getElementById('minPrice').value = '';
+                document.getElementById('maxPrice').value = '';
+                document.getElementById('vehicleSearch').value = '';
 
-                cards.forEach(card => {
-                    const title = card.querySelector('.vehicle-title').textContent.toLowerCase();
-                    if (title.includes(searchTerm)) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
+                applyFilters();
+            }
+
+            // Search listener
+            document.getElementById('vehicleSearch').addEventListener('input', applyFilters);
 
             // Book Now button functionality
             document.addEventListener('DOMContentLoaded', function () {

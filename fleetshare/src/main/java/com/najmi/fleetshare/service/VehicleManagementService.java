@@ -1,9 +1,11 @@
 package com.najmi.fleetshare.service;
 
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.entity.Address;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.entity.Vehicle;
 import com.najmi.fleetshare.entity.VehiclePriceHistory;
+import com.najmi.fleetshare.repository.AddressRepository;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import com.najmi.fleetshare.repository.VehiclePriceHistoryRepository;
 import com.najmi.fleetshare.repository.VehicleRepository;
@@ -25,6 +27,9 @@ public class VehicleManagementService {
 
         @Autowired
         private FleetOwnerRepository fleetOwnerRepository;
+
+        @Autowired
+        private AddressRepository addressRepository;
 
         /**
          * Fetches all vehicles with their pricing and owner information
@@ -48,6 +53,18 @@ public class VehicleManagementService {
                         String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
                         Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
 
+                        // Get address information
+                        String city = "Unknown City";
+                        String state = "Unknown State";
+                        if (owner != null) {
+                                Address address = addressRepository.findLatestAddressByUserId(owner.getUserId())
+                                                .orElse(null);
+                                if (address != null) {
+                                        city = address.getCity();
+                                        state = address.getState();
+                                }
+                        }
+
                         VehicleDTO dto = new VehicleDTO(
                                         vehicle.getVehicleId(),
                                         vehicle.getRegistrationNo(),
@@ -63,7 +80,9 @@ public class VehicleManagementService {
                                         vehicle.getMileage(),
                                         vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE",
                                         ownerContactPhone,
-                                        ownerIsVerified);
+                                        ownerIsVerified,
+                                        city,
+                                        state);
                         vehicleDTOs.add(dto);
                 }
 
@@ -93,6 +112,17 @@ public class VehicleManagementService {
                 String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
                 Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
 
+                // Get address information
+                String city = "Unknown City";
+                String state = "Unknown State";
+                if (owner != null) {
+                        Address address = addressRepository.findLatestAddressByUserId(owner.getUserId()).orElse(null);
+                        if (address != null) {
+                                city = address.getCity();
+                                state = address.getState();
+                        }
+                }
+
                 return new VehicleDTO(
                                 vehicle.getVehicleId(),
                                 vehicle.getRegistrationNo(),
@@ -108,7 +138,9 @@ public class VehicleManagementService {
                                 vehicle.getMileage(),
                                 vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE",
                                 ownerContactPhone,
-                                ownerIsVerified);
+                                ownerIsVerified,
+                                city,
+                                state);
         }
 
         /**
@@ -134,6 +166,18 @@ public class VehicleManagementService {
                         String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
                         Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
 
+                        // Get address information
+                        String city = "Unknown City";
+                        String state = "Unknown State";
+                        if (owner != null) {
+                                Address address = addressRepository.findLatestAddressByUserId(owner.getUserId())
+                                                .orElse(null);
+                                if (address != null) {
+                                        city = address.getCity();
+                                        state = address.getState();
+                                }
+                        }
+
                         VehicleDTO dto = new VehicleDTO(
                                         vehicle.getVehicleId(),
                                         vehicle.getRegistrationNo(),
@@ -149,7 +193,9 @@ public class VehicleManagementService {
                                         vehicle.getMileage(),
                                         vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE",
                                         ownerContactPhone,
-                                        ownerIsVerified);
+                                        ownerIsVerified,
+                                        city,
+                                        state);
                         vehicleDTOs.add(dto);
                 }
 

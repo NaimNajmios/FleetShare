@@ -20,6 +20,8 @@ public class VehicleDTO {
     private String status;
     private String ownerContactPhone;
     private Boolean ownerIsVerified;
+    private String city;
+    private String state;
 
     // Constructors
     public VehicleDTO() {
@@ -29,7 +31,7 @@ public class VehicleDTO {
             Integer manufacturingYear, String category, BigDecimal ratePerDay,
             String vehicleImageUrl, String ownerBusinessName,
             String fuelType, String transmissionType, Integer mileage, String status,
-            String ownerContactPhone, Boolean ownerIsVerified) {
+            String ownerContactPhone, Boolean ownerIsVerified, String city, String state) {
         this.vehicleId = vehicleId;
         this.registrationNo = registrationNo;
         this.model = model;
@@ -45,6 +47,8 @@ public class VehicleDTO {
         this.status = status;
         this.ownerContactPhone = ownerContactPhone;
         this.ownerIsVerified = ownerIsVerified;
+        this.city = city;
+        this.state = state;
     }
 
     // Getters and Setters
@@ -166,5 +170,21 @@ public class VehicleDTO {
 
     public void setOwnerIsVerified(Boolean ownerIsVerified) {
         this.ownerIsVerified = ownerIsVerified;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }
