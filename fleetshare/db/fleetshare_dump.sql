@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Dec 16, 2025 at 10:32 AM
+-- Generation Time: Dec 17, 2025 at 05:18 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -323,15 +323,15 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `email`, `hashed_password`, `user_role`, `profile_image_url`, `created_at`, `is_active`) VALUES
-(1, 'admin@rentmy.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'PLATFORM_ADMIN', NULL, '2023-01-01 00:00:00', 1),
-(2, 'ops@metrocity.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', NULL, '2023-02-15 01:30:00', 1),
-(3, 'josephine@borneo4x4.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', NULL, '2023-03-10 06:20:00', 1),
-(4, 'manager@prestigelimo.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', NULL, '2023-04-05 03:00:00', 1),
-(5, 'nurul.izzah@student.um.edu.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-01-10 02:00:00', 1),
-(6, 'jason.lee@corp.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-01-12 08:30:00', 1),
-(7, 'muthu.kumar@gmail.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-02-01 01:15:00', 1),
-(8, 'sarah.jenkins@ukmail.co.uk', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-03-15 05:45:00', 1),
-(9, 'awang.damit@sabah.gov.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', NULL, '2024-04-20 00:30:00', 1);
+(1, 'admin@rentmy.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'PLATFORM_ADMIN', '/uploads/profiles/profile-placeholder.png', '2023-01-01 00:00:00', 1),
+(2, 'ops@metrocity.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', '/uploads/profiles/profile-placeholder.png', '2023-02-15 01:30:00', 1),
+(3, 'josephine@borneo4x4.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', '/uploads/profiles/profile-placeholder.png', '2023-03-10 06:20:00', 1),
+(4, 'manager@prestigelimo.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', '/uploads/profiles/profile-placeholder.png', '2023-04-05 03:00:00', 1),
+(5, 'nurul.izzah@student.um.edu.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-01-10 02:00:00', 1),
+(6, 'jason.lee@corp.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-01-12 08:30:00', 1),
+(7, 'muthu.kumar@gmail.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-02-01 01:15:00', 1),
+(8, 'sarah.jenkins@ukmail.co.uk', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-03-15 05:45:00', 1),
+(9, 'awang.damit@sabah.gov.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-04-20 00:30:00', 1);
 
 -- --------------------------------------------------------
 
@@ -358,18 +358,32 @@ CREATE TABLE `vehiclemaintenance` (
 --
 
 INSERT INTO `vehiclemaintenance` (`maintenance_id`, `vehicle_id`, `fleet_owner_id`, `description`, `scheduled_date`, `actual_start_time`, `actual_end_time`, `estimated_cost`, `final_cost`, `current_status`, `created_at`) VALUES
-(1, 3, 1, 'Regular Service 20k KM (Oil Change)', '2024-12-01', '2024-12-01 09:00:00', '2024-12-01 17:00:00', 250.00, 250.00, 'COMPLETED', '2024-12-01 02:00:00'),
-(2, 1, 1, 'Replace front brake pads', '2024-11-15', '2024-11-15 09:00:00', '2024-11-15 17:00:00', 180.00, 180.00, 'COMPLETED', '2024-11-15 01:00:00'),
-(3, 2, 1, '5000km service - Oil and filter change', '2024-10-20', '2024-10-20 09:00:00', '2024-10-20 17:00:00', 150.00, 150.00, 'COMPLETED', '2024-10-20 02:30:00'),
-(4, 1, 1, 'Scheduled 30k service', '2025-06-01', NULL, NULL, 350.00, NULL, 'PENDING', '2025-05-25 06:00:00'),
-(5, 4, 2, 'Replace air filter and spark plugs', '2024-09-10', '2024-09-10 09:00:00', '2024-09-10 17:00:00', 280.00, 280.00, 'COMPLETED', '2024-09-10 03:00:00'),
-(6, 5, 2, 'Major service 30k km - Engine oil, filters, brake check', '2025-02-14', '2025-02-14 09:00:00', '2025-02-14 17:00:00', 650.00, 650.00, 'COMPLETED', '2025-02-14 00:30:00'),
-(7, 6, 2, 'Tire rotation and wheel alignment', '2024-12-05', '2024-12-05 09:00:00', '2024-12-05 17:00:00', 220.00, 220.00, 'COMPLETED', '2024-12-05 05:00:00'),
-(8, 5, 2, 'Replace rear brake discs', '2025-07-10', '2025-07-10 09:00:00', NULL, 850.00, NULL, 'IN_PROGRESS', '2025-07-10 01:00:00'),
-(9, 7, 3, '10k service package', '2025-03-20', '2025-03-20 09:00:00', '2025-03-20 17:00:00', 380.00, 380.00, 'COMPLETED', '2025-03-20 02:00:00'),
-(10, 8, 3, 'Premium detailing and interior cleaning', '2025-01-25', '2025-01-25 09:00:00', '2025-01-25 17:00:00', 450.00, 450.00, 'COMPLETED', '2025-01-25 06:30:00'),
-(11, 9, 3, 'BMW comprehensive inspection', '2024-11-30', '2024-11-30 09:00:00', '2024-11-30 17:00:00', 550.00, 550.00, 'COMPLETED', '2024-11-30 03:00:00'),
-(12, 8, 3, 'Air conditioning system service', '2025-05-15', '2025-05-15 09:00:00', '2025-05-15 17:00:00', 420.00, 420.00, 'COMPLETED', '2025-05-15 07:00:00');
+(1, 1, 1, '15,000 km service - Engine oil change, oil filter, air filter replacement', '2025-04-20', '2025-04-20 09:00:00', '2025-04-20 15:00:00', 250.00, 268.50, 'COMPLETED', '2025-04-14 18:00:00'),
+(2, 1, 1, 'Brake pad replacement (front)', '2025-02-10', '2025-02-10 10:00:00', '2025-02-10 16:00:00', 320.00, 320.00, 'COMPLETED', '2025-02-04 19:00:00'),
+(3, 1, 1, 'Scheduled 20,000 km service', '2025-07-15', NULL, NULL, 280.00, NULL, 'PENDING', '2025-06-30 17:00:00'),
+(4, 2, 1, 'First 5,000 km service - Oil and filter change, inspection', '2024-11-05', '2024-11-05 09:00:00', '2024-11-05 14:00:00', 180.00, 180.00, 'COMPLETED', '2024-10-31 18:00:00'),
+(5, 2, 1, 'Air conditioning system cleaning and servicing', '2024-12-28', '2024-12-28 10:00:00', '2024-12-28 17:00:00', 350.00, 385.00, 'COMPLETED', '2024-12-19 20:00:00'),
+(6, 3, 1, '20,000 km major service - Engine oil, transmission fluid, brake fluid top-up', '2024-10-15', '2024-10-15 09:00:00', '2024-10-15 17:00:00', 420.00, 420.00, 'COMPLETED', '2024-10-09 17:00:00'),
+(7, 3, 1, 'Replace worn tires (all 4)', '2024-09-20', '2024-09-20 09:00:00', '2024-09-20 16:00:00', 680.00, 680.00, 'COMPLETED', '2024-09-14 18:00:00'),
+(8, 3, 1, 'Battery replacement (old battery weak)', '2025-06-08', '2025-06-08 11:00:00', '2025-06-08 13:00:00', 280.00, 280.00, 'COMPLETED', '2025-06-04 22:00:00'),
+(9, 4, 2, '30,000 km major service - Full inspection, all fluids changed', '2025-03-10', '2025-03-10 08:00:00', '2025-03-10 18:00:00', 850.00, 925.00, 'COMPLETED', '2025-02-28 17:00:00'),
+(10, 4, 2, 'Suspension check and alignment after off-road trip', '2025-05-25', '2025-05-25 09:00:00', '2025-05-25 15:00:00', 380.00, 380.00, 'COMPLETED', '2025-05-19 20:00:00'),
+(11, 4, 2, 'Replace cabin air filter and engine air filter', '2025-08-05', NULL, NULL, 150.00, NULL, 'PENDING', '2025-07-31 18:00:00'),
+(12, 5, 2, 'Diesel engine 25,000 km service - Oil, diesel filter, inspection', '2025-01-20', '2025-01-20 08:00:00', '2025-01-20 17:00:00', 520.00, 520.00, 'COMPLETED', '2025-01-14 17:00:00'),
+(13, 5, 2, '4x4 system check and differential oil change', '2025-04-15', '2025-04-15 09:00:00', '2025-04-15 16:00:00', 680.00, 720.00, 'COMPLETED', '2025-04-09 19:00:00'),
+(14, 5, 2, 'Brake system overhaul (front and rear)', '2025-09-10', '2025-09-10 08:00:00', NULL, 950.00, NULL, 'IN_PROGRESS', '2025-09-09 16:30:00'),
+(15, 6, 2, '10,000 km service - Oil change and multi-point inspection', '2024-11-25', '2024-11-25 09:00:00', '2024-11-25 15:00:00', 450.00, 450.00, 'COMPLETED', '2024-11-19 18:00:00'),
+(16, 6, 2, 'Underbody wash and rust protection treatment', '2025-02-28', '2025-02-28 10:00:00', '2025-02-28 14:00:00', 280.00, 280.00, 'COMPLETED', '2025-02-24 21:00:00'),
+(17, 6, 2, 'Scheduled 15,000 km service', '2025-12-20', NULL, NULL, 480.00, NULL, 'PENDING', '2025-12-14 17:00:00'),
+(18, 7, 3, 'First 5,000 km service - Complimentary service', '2024-08-10', '2024-08-10 09:00:00', '2024-08-10 14:00:00', 0.00, 0.00, 'COMPLETED', '2024-08-04 17:00:00'),
+(19, 7, 3, '10,000 km service - Oil change, filters, brake inspection', '2025-02-18', '2025-02-18 09:00:00', '2025-02-18 15:00:00', 380.00, 380.00, 'COMPLETED', '2025-02-14 18:00:00'),
+(20, 7, 3, 'Professional detailing and paint protection', '2025-06-12', '2025-06-12 08:00:00', '2025-06-12 17:00:00', 550.00, 550.00, 'COMPLETED', '2025-06-07 19:00:00'),
+(21, 8, 3, '15,000 km premium service - Full synthetic oil, all filters', '2025-03-05', '2025-03-05 08:00:00', '2025-03-05 18:00:00', 780.00, 820.00, 'COMPLETED', '2025-02-28 17:00:00'),
+(22, 8, 3, 'Interior deep cleaning and leather conditioning', '2025-01-15', '2025-01-15 09:00:00', '2025-01-15 17:00:00', 650.00, 650.00, 'COMPLETED', '2025-01-09 20:00:00'),
+(23, 8, 3, 'Air suspension system check and calibration', '2024-12-10', '2024-12-10 10:00:00', '2024-12-10 16:00:00', 580.00, 620.00, 'COMPLETED', '2024-12-04 18:00:00'),
+(24, 9, 3, 'BMW authorized service - 10,000 km interval', '2024-10-20', '2024-10-20 08:00:00', '2024-10-20 17:00:00', 1200.00, 1280.00, 'COMPLETED', '2024-10-14 17:00:00'),
+(25, 9, 3, 'Brake pad and disc replacement (premium parts)', '2025-05-08', '2025-05-08 09:00:00', '2025-05-08 16:00:00', 1850.00, 1850.00, 'COMPLETED', '2025-05-02 19:00:00'),
+(26, 9, 3, 'Full vehicle inspection and software update', '2025-11-15', NULL, NULL, 450.00, NULL, 'PENDING', '2025-11-09 18:00:00');
 
 -- --------------------------------------------------------
 
@@ -391,18 +405,66 @@ CREATE TABLE `vehiclemaintenancelog` (
 --
 
 INSERT INTO `vehiclemaintenancelog` (`maintenance_log_id`, `maintenance_id`, `status_value`, `actor_user_id`, `log_timestamp`, `remarks`) VALUES
-(1, 1, 'COMPLETED', NULL, '2024-12-01 02:00:00', 'Legacy record migration'),
-(2, 2, 'COMPLETED', NULL, '2024-11-15 01:00:00', 'Legacy record migration'),
-(3, 3, 'COMPLETED', NULL, '2024-10-20 02:30:00', 'Legacy record migration'),
-(4, 4, 'PENDING', NULL, '2025-05-25 06:00:00', 'Legacy record migration'),
-(5, 5, 'COMPLETED', NULL, '2024-09-10 03:00:00', 'Legacy record migration'),
-(6, 6, 'COMPLETED', NULL, '2025-02-14 00:30:00', 'Legacy record migration'),
-(7, 7, 'COMPLETED', NULL, '2024-12-05 05:00:00', 'Legacy record migration'),
-(8, 8, 'IN_PROGRESS', NULL, '2025-07-10 01:00:00', 'Legacy record migration'),
-(9, 9, 'COMPLETED', NULL, '2025-03-20 02:00:00', 'Legacy record migration'),
-(10, 10, 'COMPLETED', NULL, '2025-01-25 06:30:00', 'Legacy record migration'),
-(11, 11, 'COMPLETED', NULL, '2024-11-30 03:00:00', 'Legacy record migration'),
-(12, 12, 'COMPLETED', NULL, '2025-05-15 07:00:00', 'Legacy record migration');
+(1, 1, 'PENDING', 2, '2025-04-14 18:00:00', 'Maintenance scheduled by fleet owner'),
+(2, 1, 'IN_PROGRESS', 2, '2025-04-20 01:00:00', 'Vehicle checked in at workshop'),
+(3, 1, 'COMPLETED', 2, '2025-04-20 07:00:00', 'Service completed, additional air filter cleaning RM18.50'),
+(4, 2, 'PENDING', 2, '2025-02-04 19:00:00', 'Customer reported squeaking noise'),
+(5, 2, 'IN_PROGRESS', 2, '2025-02-10 02:00:00', 'Brake inspection confirmed pad wear'),
+(6, 2, 'COMPLETED', 2, '2025-02-10 08:00:00', 'Front brake pads replaced, rear pads 60% remaining'),
+(7, 3, 'PENDING', 2, '2025-06-30 17:00:00', 'Scheduled based on projected mileage'),
+(8, 4, 'PENDING', 2, '2024-10-31 18:00:00', 'First service due'),
+(9, 4, 'COMPLETED', 2, '2024-11-05 06:00:00', 'Complimentary first service completed'),
+(10, 5, 'PENDING', 2, '2024-12-19 20:00:00', 'AC not cooling properly after booking'),
+(11, 5, 'IN_PROGRESS', 2, '2024-12-28 02:00:00', 'Gas refill and compressor check'),
+(12, 5, 'COMPLETED', 2, '2024-12-28 09:00:00', 'AC serviced, gas refilled, extra cleaning RM35'),
+(13, 6, 'PENDING', 2, '2024-10-09 17:00:00', 'Major service due'),
+(14, 6, 'COMPLETED', 2, '2024-10-15 09:00:00', 'All scheduled maintenance completed'),
+(15, 7, 'PENDING', 2, '2024-09-14 18:00:00', 'Tire tread below safety limit'),
+(16, 7, 'IN_PROGRESS', 2, '2024-09-20 01:00:00', 'Replacing with Silverstone NS830'),
+(17, 7, 'COMPLETED', 2, '2024-09-20 08:00:00', 'All 4 tires replaced and balanced'),
+(18, 8, 'PENDING', 2, '2025-06-04 22:00:00', 'Battery voltage low during inspection'),
+(19, 8, 'COMPLETED', 2, '2025-06-08 05:00:00', 'Century battery NS60 installed'),
+(20, 9, 'PENDING', 3, '2025-02-28 17:00:00', 'Scheduled major service'),
+(21, 9, 'IN_PROGRESS', 3, '2025-03-10 00:00:00', 'Full inspection started'),
+(22, 9, 'COMPLETED', 3, '2025-03-10 10:00:00', 'Spark plugs also replaced, additional RM75'),
+(23, 10, 'PENDING', 3, '2025-05-19 20:00:00', 'Post-booking inspection revealed misalignment'),
+(24, 10, 'COMPLETED', 3, '2025-05-25 07:00:00', 'Wheel alignment and balancing done'),
+(25, 11, 'PENDING', 3, '2025-07-31 18:00:00', 'Routine filter change scheduled'),
+(26, 12, 'PENDING', 3, '2025-01-14 17:00:00', 'Diesel service due'),
+(27, 12, 'IN_PROGRESS', 3, '2025-01-20 00:00:00', 'Oil and filter change in progress'),
+(28, 12, 'COMPLETED', 3, '2025-01-20 09:00:00', 'Service completed with Mobil Super 3000 5W-30'),
+(29, 13, 'PENDING', 3, '2025-04-09 19:00:00', 'Heavy usage requires 4x4 check'),
+(30, 13, 'IN_PROGRESS', 3, '2025-04-15 01:00:00', '4WD engagement test and differential service'),
+(31, 13, 'COMPLETED', 3, '2025-04-15 08:00:00', 'Additional gear oil added RM40'),
+(32, 14, 'PENDING', 3, '2025-09-09 16:30:00', 'Major brake work scheduled'),
+(33, 14, 'IN_PROGRESS', 3, '2025-09-10 00:00:00', 'Front brake work started, awaiting rear parts delivery'),
+(34, 15, 'PENDING', 3, '2024-11-19 18:00:00', 'Scheduled maintenance'),
+(35, 15, 'COMPLETED', 3, '2024-11-25 07:00:00', 'Ford authorized service completed'),
+(36, 16, 'PENDING', 3, '2025-02-24 21:00:00', 'Preventive rust protection'),
+(37, 16, 'COMPLETED', 3, '2025-02-28 06:00:00', 'Underbody cleaned and coated'),
+(38, 17, 'PENDING', 3, '2025-12-14 17:00:00', 'Next scheduled service'),
+(39, 18, 'PENDING', 4, '2024-08-04 17:00:00', 'Complimentary service'),
+(40, 18, 'COMPLETED', 4, '2024-08-10 06:00:00', 'Honda complimentary first service'),
+(41, 19, 'PENDING', 4, '2025-02-14 18:00:00', 'Regular maintenance'),
+(42, 19, 'COMPLETED', 4, '2025-02-18 07:00:00', 'Service completed at Honda service center'),
+(43, 20, 'PENDING', 4, '2025-06-07 19:00:00', 'Premium detailing for prestige fleet'),
+(44, 20, 'IN_PROGRESS', 4, '2025-06-12 00:00:00', 'Paint correction and ceramic coating'),
+(45, 20, 'COMPLETED', 4, '2025-06-12 09:00:00', 'Professional detailing completed'),
+(46, 21, 'PENDING', 4, '2025-02-28 17:00:00', 'Premium service due'),
+(47, 21, 'IN_PROGRESS', 4, '2025-03-05 00:00:00', 'Using premium synthetic oil'),
+(48, 21, 'COMPLETED', 4, '2025-03-05 10:00:00', 'Additional cabin filter upgrade RM40'),
+(49, 22, 'PENDING', 4, '2025-01-09 20:00:00', 'Monthly deep cleaning'),
+(50, 22, 'COMPLETED', 4, '2025-01-15 09:00:00', 'Interior shampooed and leather conditioned'),
+(51, 23, 'PENDING', 4, '2024-12-04 18:00:00', 'Air suspension diagnostic'),
+(52, 23, 'IN_PROGRESS', 4, '2024-12-10 02:00:00', 'Suspension system inspection'),
+(53, 23, 'COMPLETED', 4, '2024-12-10 08:00:00', 'Calibration done, minor leak fixed RM40'),
+(54, 24, 'PENDING', 4, '2024-10-14 17:00:00', 'BMW service interval'),
+(55, 24, 'IN_PROGRESS', 4, '2024-10-20 00:00:00', 'At BMW authorized service center'),
+(56, 24, 'COMPLETED', 4, '2024-10-20 09:00:00', 'Oil service + inspection RM80 extra diagnostic'),
+(57, 25, 'PENDING', 4, '2025-05-02 19:00:00', 'Brake warning indicator'),
+(58, 25, 'IN_PROGRESS', 4, '2025-05-08 01:00:00', 'Premium Brembo brake parts'),
+(59, 25, 'COMPLETED', 4, '2025-05-08 08:00:00', 'Front brake pads and discs replaced'),
+(60, 26, 'PENDING', 4, '2025-11-09 18:00:00', 'Scheduled inspection and software update');
 
 -- --------------------------------------------------------
 
@@ -460,15 +522,15 @@ CREATE TABLE `vehicles` (
 --
 
 INSERT INTO `vehicles` (`vehicle_id`, `fleet_owner_id`, `model`, `brand`, `manufacturing_year`, `registration_no`, `category`, `fuel_type`, `transmission_type`, `mileage`, `vehicle_image_url`, `created_at`, `updated_at`, `status`) VALUES
-(1, 1, 'Myvi 1.5 AV', 'Perodua', 2023, 'VHJ 8821', 'Hatchback', 'PETROL', 'AUTO', 15000, 'https://img/myvi.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(2, 1, 'Bezza 1.3 Advance', 'Perodua', 2024, 'VKE 4402', 'Sedan', 'PETROL', 'AUTO', 5000, 'https://img/bezza.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(3, 1, 'Saga 1.3 Premium S', 'Proton', 2023, 'BRA 3022', 'Sedan', 'PETROL', 'AUTO', 22000, 'https://img/saga.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(4, 2, 'X70 1.8 TGDi Premium', 'Proton', 2022, 'SYC 5519', 'SUV', 'PETROL', 'AUTO', 35000, 'https://img/x70.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(5, 2, 'Hilux 2.8 Rogue', 'Toyota', 2023, 'SAB 9921 A', 'Pickup 4x4', 'DIESEL', 'AUTO', 28000, 'https://img/hilux.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(6, 2, 'Ranger Wildtrak', 'Ford', 2023, 'QAA 1122', 'Pickup 4x4', 'DIESEL', 'AUTO', 12000, 'https://img/ranger.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(7, 3, 'City 1.5 V Sensing', 'Honda', 2024, 'PQA 8888', 'Sedan', 'PETROL', 'AUTO', 8000, 'https://img/city.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(8, 3, 'Vellfire 2.5 ZG', 'Toyota', 2023, 'V 1', 'Luxury MPV', 'PETROL', 'AUTO', 15000, 'https://img/vellfire.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL),
-(9, 3, '320i M Sport', 'BMW', 2023, 'PPP 77', 'Luxury Sedan', 'PETROL', 'AUTO', 9000, 'https://img/bmw.jpg', '2025-11-24 02:58:33', '2025-11-24 02:58:33', NULL);
+(1, 1, 'Myvi 1.5 AV', 'Perodua', 2023, 'VHJ 8821', 'Hatchback', 'PETROL', 'AUTO', 15000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(2, 1, 'Bezza 1.3 Advance', 'Perodua', 2024, 'VKE 4402', 'Sedan', 'PETROL', 'AUTO', 5000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(3, 1, 'Saga 1.3 Premium S', 'Proton', 2023, 'BRA 3022', 'Sedan', 'PETROL', 'AUTO', 22000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(4, 2, 'X70 1.8 TGDi Premium', 'Proton', 2022, 'SYC 5519', 'SUV', 'PETROL', 'AUTO', 35000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(5, 2, 'Hilux 2.8 Rogue', 'Toyota', 2023, 'SAB 9921 A', 'Pickup 4x4', 'DIESEL', 'AUTO', 28000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(6, 2, 'Ranger Wildtrak', 'Ford', 2023, 'QAA 1122', 'Pickup 4x4', 'DIESEL', 'AUTO', 12000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(7, 3, 'City 1.5 V Sensing', 'Honda', 2024, 'PQA 8888', 'Sedan', 'PETROL', 'AUTO', 8000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(8, 3, 'Vellfire 2.5 ZG', 'Toyota', 2023, 'V 1', 'Luxury MPV', 'PETROL', 'AUTO', 15000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
+(9, 3, '320i M Sport', 'BMW', 2023, 'PPP 77', 'Luxury Sedan', 'PETROL', 'AUTO', 9000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL);
 
 --
 -- Indexes for dumped tables
@@ -657,13 +719,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `vehiclemaintenance`
 --
 ALTER TABLE `vehiclemaintenance`
-  MODIFY `maintenance_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `maintenance_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `vehiclemaintenancelog`
 --
 ALTER TABLE `vehiclemaintenancelog`
-  MODIFY `maintenance_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `maintenance_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `vehiclepricehistory`

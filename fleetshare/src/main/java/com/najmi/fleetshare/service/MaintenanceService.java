@@ -1,6 +1,8 @@
 package com.najmi.fleetshare.service;
 
 import com.najmi.fleetshare.dto.MaintenanceDTO;
+import com.najmi.fleetshare.dto.MaintenanceLogDTO;
+import com.najmi.fleetshare.entity.User;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.entity.Vehicle;
 import com.najmi.fleetshare.entity.VehicleMaintenance;
@@ -9,6 +11,7 @@ import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import com.najmi.fleetshare.repository.VehicleMaintenanceLogRepository;
 import com.najmi.fleetshare.repository.VehicleMaintenanceRepository;
 import com.najmi.fleetshare.repository.VehicleRepository;
+import com.najmi.fleetshare.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +33,9 @@ public class MaintenanceService {
 
     @Autowired
     private FleetOwnerRepository fleetOwnerRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Fetches all maintenance records with vehicle and owner information
@@ -96,6 +102,66 @@ public class MaintenanceService {
      */
     public List<VehicleMaintenanceLog> getMaintenanceLogs(Long maintenanceId) {
         return maintenanceLogRepository.findByMaintenanceIdOrderByLogTimestampDesc(maintenanceId);
+    }
+
+    /**
+     * Get a single maintenance record by ID
+     */
+    public MaintenanceDTO getMaintenanceById(Long maintenanceId) {
+        return maintenanceRepository.findById(maintenanceId)
+                .map(maintenance -> {
+                    Vehicle vehicle = vehicleRepository.findById(maintenance.getVehicleId()).orElse(null);
+                    String ownerBusinessName = fleetOwnerRepository.findById(maintenance.getFleetOwnerId())
+                            .map(FleetOwner::getBusinessName)
+                            .orElse("Unknown Owner");
+
+                    if (vehicle != null) {
+                        return new MaintenanceDTO(
+                                maintenance.getMaintenanceId(),
+                                vehicle.getVehicleId(),
+                                vehicle.getRegistrationNo(),
+                                vehicle.getModel(),
+                                vehicle.getBrand(),
+                                maintenance.getDescription(),
+                                maintenance.getScheduledDate(),
+                                maintenance.getActualStartTime(),
+                                maintenance.getActualEndTime(),
+                                maintenance.getEstimatedCost(),
+                                maintenance.getFinalCost(),
+                                maintenance.getCurrentStatus() != null ? maintenance.getCurrentStatus().name()
+                                        : "PENDING",
+                                ownerBusinessName);
+                    }
+                    return null;
+                })
+                .orElse(null);
+    }
+
+    /**
+     * Get maintenance logs as DTOs with actor names resolved
+     */
+    public List<MaintenanceLogDTO> getMaintenanceLogsDTO(Long maintenanceId) {
+        List<VehicleMaintenanceLog> logs = maintenanceLogRepository
+                .findByMaintenanceIdOrderByLogTimestampDesc(maintenanceId);
+        List<MaintenanceLogDTO> logDTOs = new ArrayList<>();
+
+        for (VehicleMaintenanceLog log : logs) {
+            String actorName = "System";
+            if (log.getActorUserId() != null) {
+                actorName = userRepository.findById(log.getActorUserId())
+                        .map(User::getEmail)
+                        .orElse("Unknown User");
+            }
+
+            logDTOs.add(new MaintenanceLogDTO(
+                    log.getMaintenanceLogId(),
+                    log.getStatusValue().name(),
+                    log.getLogTimestamp(),
+                    actorName,
+                    log.getRemarks()));
+        }
+
+        return logDTOs;
     }
 
     /**

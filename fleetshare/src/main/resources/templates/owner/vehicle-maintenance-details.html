@@ -6,64 +6,77 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
-            .vehicle-header {
-                background: white;
-                padding: 1.5rem;
-                border-radius: 0.5rem;
-                margin-bottom: 1.5rem;
-                display: flex;
-                align-items: center;
-                gap: 2rem;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            .badge {
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                font-weight: 600;
             }
 
-            .vehicle-thumbnail {
-                width: 120px;
-                height: 120px;
-                object-fit: cover;
-                border-radius: 0.5rem;
+            .badge-warning {
+                background-color: #fff3cd;
+                color: #856404;
+            }
+
+            .badge-info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .badge-success {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .badge-danger {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .badge-secondary {
+                background-color: #e2e3e5;
+                color: #383d41;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+            }
+
+            .no-data {
+                text-align: center;
+                padding: 3rem;
+                color: #6c757d;
+            }
+
+            .vehicle-info-card {
                 background-color: #f8f9fa;
-            }
-
-            .vehicle-info h3 {
-                margin-bottom: 0.5rem;
-                font-weight: bold;
-            }
-
-            .vehicle-info p {
-                margin-bottom: 0.25rem;
-                color: #6c757d;
-            }
-
-            .kpi-card {
-                background: white;
-                padding: 1.5rem;
                 border-radius: 0.5rem;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
             }
 
-            .kpi-title {
-                color: #6c757d;
-                font-size: 0.9rem;
+            .vehicle-info-card h4 {
                 margin-bottom: 0.5rem;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
-            .kpi-value {
-                font-size: 1.8rem;
-                font-weight: bold;
-                color: #333;
+            .vehicle-info-card .text-muted {
+                font-size: 0.9rem;
             }
 
-            .badge-pill {
-                padding-right: 0.6em;
-                padding-left: 0.6em;
-                border-radius: 10rem;
+            .stat-item {
+                text-align: center;
+                padding: 1rem;
+            }
+
+            .stat-item .stat-value {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #4B49AC;
+            }
+
+            .stat-item .stat-label {
+                font-size: 0.85rem;
+                color: #6c757d;
             }
         </style>
     </th:block>
@@ -71,44 +84,65 @@
 
 <body>
     <div layout:fragment="content">
-        <!-- Vehicle Profile Header -->
+        <!-- Page Header with Back Button -->
         <div class="row">
-            <div class="col-12">
-                <div class="vehicle-header">
-                    <img th:src="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.startsWith('https://img/') ? vehicle.vehicleImageUrl : '/images/vehicle-placeholder.png'}"
-                        alt="Vehicle Thumbnail" class="vehicle-thumbnail">
-                    <div class="vehicle-info">
-                        <h3 th:text="${vehicle.brand + ' ' + vehicle.model}">Perodua Myvi</h3>
-                        <p><strong>Registration No:</strong> <span th:text="${vehicle.registrationNo}">WUX 5815</span>
-                        </p>
-                        <p><strong>Vehicle ID:</strong> <span th:text="${vehicle.vehicleId}">1</span></p>
-                        <p><strong>Owner:</strong> <span th:text="${ownerName}">MetroCity Car Rental</span></p>
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <a th:href="@{/owner/maintenance}" class="btn btn-outline-secondary btn-sm mb-3">
+                            <i class="mdi mdi-arrow-left"></i> Back to Maintenance
+                        </a>
+                        <h3 class="font-weight-bold">Vehicle Maintenance Details</h3>
+                        <h6 class="font-weight-normal mb-0">Maintenance history for this vehicle.</h6>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Summary Metrics (KPI Cards) -->
-        <div class="row mb-4">
-            <div class="col-md-4 grid-margin stretch-card">
-                <div class="kpi-card">
-                    <div class="kpi-title">Total Maintenance Records</div>
-                    <div class="kpi-value" th:text="${totalRecords}">3</div>
-                </div>
-            </div>
-            <div class="col-md-4 grid-margin stretch-card">
-                <div class="kpi-card">
-                    <div class="kpi-title">Total Maintenance Cost</div>
-                    <div class="kpi-value"
-                        th:text="${'RM ' + #numbers.formatDecimal(totalCost, 1, 'COMMA', 2, 'POINT')}">RM 1,810.00</div>
-                </div>
-            </div>
-            <div class="col-md-4 grid-margin stretch-card">
-                <div class="kpi-card">
-                    <div class="kpi-title">Last Maintenance Date</div>
-                    <div class="kpi-value"
-                        th:text="${lastMaintenanceDate != null ? #temporals.format(lastMaintenanceDate, 'dd/MM/yyyy') : 'N/A'}">
-                        17/06/2025</div>
+        <!-- Vehicle Info Card -->
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h4 class="mb-1" th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h4>
+                                <p class="text-muted mb-0">
+                                    <i class="mdi mdi-car"></i>
+                                    <span th:text="${vehicle.registrationNo}">REG123</span>
+                                    <span class="mx-2">|</span>
+                                    <span th:if="${vehicle.status == 'AVAILABLE'}"
+                                        class="badge badge-success">Available</span>
+                                    <span th:if="${vehicle.status == 'RENTED'}"
+                                        class="badge badge-warning">Rented</span>
+                                    <span th:if="${vehicle.status == 'MAINTENANCE'}"
+                                        class="badge badge-info">Maintenance</span>
+                                    <span th:if="${vehicle.status == 'UNAVAILABLE'}"
+                                        class="badge badge-secondary">Unavailable</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-4 stat-item">
+                                        <div class="stat-value" th:text="${totalRecords}">0</div>
+                                        <div class="stat-label">Total Records</div>
+                                    </div>
+                                    <div class="col-4 stat-item">
+                                        <div class="stat-value"
+                                            th:text="'RM ' + ${#numbers.formatDecimal(totalCost, 1, 'COMMA', 0, 'POINT')}">
+                                            RM 0</div>
+                                        <div class="stat-label">Total Cost</div>
+                                    </div>
+                                    <div class="col-4 stat-item">
+                                        <div class="stat-value"
+                                            th:text="${lastMaintenanceDate != null ? #temporals.format(lastMaintenanceDate, 'dd MMM') : 'N/A'}">
+                                            N/A</div>
+                                        <div class="stat-label">Last Maintenance</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -118,50 +152,55 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Maintenance Records</h4>
-                        <div class="table-responsive">
+                        <h4 class="card-title">Maintenance History</h4>
+
+                        <div class="table-responsive" th:if="${!#lists.isEmpty(maintenanceRecords)}">
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Date</th>
+                                        <th>Maintenance ID</th>
                                         <th>Description</th>
-                                        <th>Cost (RM)</th>
+                                        <th>Scheduled Date</th>
+                                        <th>Estimated Cost</th>
+                                        <th>Final Cost</th>
                                         <th>Status</th>
-                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="record : ${maintenanceRecords}">
-                                        <td th:text="${record.maintenanceId}">1</td>
-                                        <td th:text="${#temporals.format(record.scheduledDate, 'dd/MM/yyyy')}">
-                                            17/06/2025</td>
-                                        <td th:text="${record.description}">Major Service</td>
-                                        <td th:text="${#numbers.formatDecimal(record.estimatedCost, 1, 'COMMA', 2, 'POINT')}">
-                                            1,200.00</td>
+                                        <td th:text="${record.maintenanceId}" class="font-weight-bold">1</td>
+                                        <td th:text="${record.description}">Description</td>
+                                        <td
+                                            th:text="${record.scheduledDate != null ? #temporals.format(record.scheduledDate, 'yyyy-MM-dd') : 'N/A'}">
+                                            Date</td>
+                                        <td
+                                            th:text="${record.estimatedCost != null ? 'RM ' + #numbers.formatDecimal(record.estimatedCost, 1, 'COMMA', 2, 'POINT') : 'N/A'}">
+                                            Cost</td>
+                                        <td
+                                            th:text="${record.finalCost != null ? 'RM ' + #numbers.formatDecimal(record.finalCost, 1, 'COMMA', 2, 'POINT') : '-'}">
+                                            Final Cost</td>
                                         <td>
-                                            <span th:if="${record.status == 'COMPLETED'}"
-                                                class="badge badge-success badge-pill">Completed</span>
                                             <span th:if="${record.status == 'PENDING'}"
-                                                class="badge badge-warning badge-pill">Pending</span>
-                                            <span th:if="${record.status == 'IN_PROGRESS'}"
-                                                class="badge badge-info badge-pill">In Progress</span>
+                                                class="badge badge-warning">Pending</span>
+                                            <span th:if="${record.status == 'IN_PROGRESS'}" class="badge badge-info">In
+                                                Progress</span>
+                                            <span th:if="${record.status == 'COMPLETED'}"
+                                                class="badge badge-success">Completed</span>
+                                            <span th:if="${record.status == 'CANCELLED'}"
+                                                class="badge badge-danger">Cancelled</span>
                                         </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-warning" title="Mark Pending">
-                                                <i class="mdi mdi-undo"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger" title="Delete">
-                                                <i class="mdi mdi-delete"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(maintenanceRecords)}">
-                                        <td colspan="6" class="text-center py-4">No maintenance records found for this
-                                            vehicle.</td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(maintenanceRecords)}" class="no-data">
+                            <i class="mdi mdi-wrench mdi-48px"></i>
+                            <p>No maintenance records found</p>
+                            <p class="text-muted">No maintenance history available for this vehicle.</p>
+                            <a th:href="@{/owner/maintenance}" class="btn btn-primary">
+                                <i class="mdi mdi-plus"></i> Add Maintenance Record
+                            </a>
                         </div>
                     </div>
                 </div>

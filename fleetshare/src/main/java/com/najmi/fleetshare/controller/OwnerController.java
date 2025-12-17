@@ -2,6 +2,7 @@ package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
+import com.najmi.fleetshare.dto.MaintenanceLogDTO;
 import com.najmi.fleetshare.dto.PaymentDTO;
 import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
@@ -226,6 +227,26 @@ public class OwnerController {
         return "redirect:/owner/maintenance";
     }
 
+    @GetMapping("/maintenance/view/{maintenanceId}")
+    public String viewMaintenance(@PathVariable Long maintenanceId, Model model) {
+        // Get maintenance details
+        MaintenanceDTO maintenance = maintenanceService.getMaintenanceById(maintenanceId);
+        if (maintenance == null) {
+            return "redirect:/owner/maintenance";
+        }
+        model.addAttribute("maintenance", maintenance);
+
+        // Get vehicle details
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(maintenance.getVehicleId());
+        model.addAttribute("vehicle", vehicle);
+
+        // Get status logs
+        List<MaintenanceLogDTO> statusLogs = maintenanceService.getMaintenanceLogsDTO(maintenanceId);
+        model.addAttribute("statusLogs", statusLogs);
+
+        return "owner/view-maintenance";
+    }
+
     @GetMapping("/maintenance/vehicle/{vehicleId}")
     public String vehicleMaintenance(@PathVariable Long vehicleId, Model model) {
         // Get vehicle details
@@ -239,7 +260,6 @@ public class OwnerController {
         maintenanceRecords.sort(Comparator.comparing(MaintenanceDTO::getScheduledDate).reversed());
 
         model.addAttribute("maintenanceRecords", maintenanceRecords);
-            model.addAttribute("stats", maintenanceService.getMaintenanceStatsByOwnerId(ownerId));
 
         // Calculate KPI metrics
         int totalRecords = maintenanceRecords.size();
