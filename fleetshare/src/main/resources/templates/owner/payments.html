@@ -5,6 +5,45 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
+            .kpi-card {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 12px;
+                padding: 1.25rem;
+                text-align: center;
+            }
+
+            .kpi-card.pending {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            .kpi-card.verified {
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            }
+
+            .kpi-card.failed {
+                background: linear-gradient(135deg, #adb5bd 0%, #6c757d 100%);
+            }
+
+            .kpi-card.total {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            }
+
+            .kpi-value {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+            }
+
+            .kpi-label {
+                font-size: 0.8rem;
+                opacity: 0.9;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
             .search-filter-bar {
                 display: flex;
                 gap: 1rem;
@@ -61,21 +100,89 @@
 
 <body>
     <div layout:fragment="content">
+        <!-- Page Header -->
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                         <h3 class="font-weight-bold">Payment Management</h3>
-                        <h6 class="font-weight-normal mb-0">Track all payment transactions.</h6>
+                        <h6 class="font-weight-normal mb-0">Track all payment transactions for your fleet.</h6>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- KPI Cards Row -->
+        <div class="row">
+            <div class="col-6 col-md-3 grid-margin stretch-card">
+                <div class="kpi-card pending w-100">
+                    <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
+                    <div class="kpi-label">Pending Payments</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 grid-margin stretch-card">
+                <div class="kpi-card verified w-100">
+                    <div class="kpi-value" th:text="${verifiedCount} ?: 0">0</div>
+                    <div class="kpi-label">Verified Payments</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 grid-margin stretch-card">
+                <div class="kpi-card failed w-100">
+                    <div class="kpi-value" th:text="${failedCount} ?: 0">0</div>
+                    <div class="kpi-label">Failed Payments</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 grid-margin stretch-card">
+                <div class="kpi-card total w-100">
+                    <div class="kpi-value"
+                        th:text="'RM' + ${#numbers.formatDecimal(verifiedAmount ?: 0, 1, 'COMMA', 0, 'POINT')}">RM0
+                    </div>
+                    <div class="kpi-label">Verified Amount</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Payment Status</h4>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Payment Methods</h4>
+                        <div class="chart-container">
+                            <canvas id="methodChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Monthly Trend</h4>
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Table -->
         <div class="row">
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
+                        <h4 class="card-title">All Payments</h4>
+
                         <!-- Search and Filters -->
                         <div class="search-filter-bar">
                             <input type="text" class="search-input" id="payment-search"
@@ -109,9 +216,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="payment : ${payments}"
-                                        th:attr="data-status=${payment.paymentStatus}, data-method=${payment.paymentMethod}"
-                                        class="payment-row">
+                                    <tr th:each="payment : ${payments}" th:data-status="${payment.paymentStatus}"
+                                        th:data-method="${payment.paymentMethod}" class="payment-row">
                                         <td th:text="${payment.paymentId}">1</td>
                                         <td th:text="${payment.invoiceNumber}" class="searchable">INV-2025-001</td>
                                         <td th:text="${payment.renterName}" class="searchable">John Doe</td>
@@ -143,38 +249,110 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <script>
-            // Search and filter functionality
-            const searchInput = document.getElementById('payment-search');
-            const statusFilter = document.getElementById('status-filter');
-            const methodFilter = document.getElementById('method-filter');
-            const paymentRows = document.querySelectorAll('.payment-row');
+        <script th:inline="javascript">
+            // Chart data from server
+            const paymentStats = {
+                pending: /*[[${pendingCount} ?: 0]]*/ 0,
+                verified: /*[[${verifiedCount} ?: 0]]*/ 0,
+                failed: /*[[${failedCount} ?: 0]]*/ 0,
+                creditCard: /*[[${creditCardCount} ?: 0]]*/ 0,
+                bankTransfer: /*[[${bankTransferCount} ?: 0]]*/ 0,
+                qrPayment: /*[[${qrPaymentCount} ?: 0]]*/ 0,
+                cash: /*[[${cashCount} ?: 0]]*/ 0,
+                monthlyLabels: /*[[${monthlyLabels}]]*/[],
+                monthlyPaymentCounts: /*[[${monthlyPaymentCounts}]]*/[],
+                monthlyPaymentAmounts: /*[[${monthlyPaymentAmounts}]]*/[]
+            };
 
-            function filterPayments() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value;
-                const methodValue = methodFilter.value;
-
-                paymentRows.forEach(row => {
-                    const searchableText = Array.from(row.querySelectorAll('.searchable'))
-                        .map(cell => cell.textContent.toLowerCase())
-                        .join(' ');
-
-                    const matchesSearch = searchableText.includes(searchTerm);
-                    const matchesStatus = !statusValue || row.dataset.status === statusValue;
-                    const matchesMethod = !methodValue || row.dataset.method === methodValue;
-
-                    if (matchesSearch && matchesStatus && matchesMethod) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
+            // Status Distribution Doughnut Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Verified', 'Failed'],
+                    datasets: [{
+                        data: [paymentStats.pending, paymentStats.verified, paymentStats.failed],
+                        backgroundColor: ['#f5576c', '#43e97b', '#adb5bd'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
                     }
+                }
+            });
+
+            // Payment Methods Pie Chart
+            const methodCtx = document.getElementById('methodChart').getContext('2d');
+            new Chart(methodCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Credit Card', 'Bank Transfer', 'QR Payment', 'Cash'],
+                    datasets: [{
+                        data: [paymentStats.creditCard, paymentStats.bankTransfer, paymentStats.qrPayment, paymentStats.cash],
+                        backgroundColor: ['#4facfe', '#667eea', '#fa709a', '#fee140'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Monthly Trend Chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'line',
+                data: {
+                    labels: paymentStats.monthlyLabels,
+                    datasets: [{
+                        label: 'Amount (RM)',
+                        data: paymentStats.monthlyPaymentAmounts,
+                        borderColor: '#4B49AC',
+                        backgroundColor: 'rgba(75, 73, 172, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Filter functionality
+            function applyFilters() {
+                const status = document.getElementById('status-filter').value;
+                const method = document.getElementById('method-filter').value;
+                const search = document.getElementById('payment-search').value.toLowerCase();
+
+                document.querySelectorAll('#payments-table tbody tr').forEach(row => {
+                    const matchStatus = !status || row.dataset.status === status ||
+                        (status === 'VERIFIED' && ['VERIFIED', 'COMPLETED', 'PAID'].includes(row.dataset.status)) ||
+                        (status === 'FAILED' && ['FAILED', 'REJECTED'].includes(row.dataset.status));
+                    const matchMethod = !method || row.dataset.method === method;
+                    const matchSearch = row.textContent.toLowerCase().includes(search);
+                    row.style.display = matchStatus && matchMethod && matchSearch ? '' : 'none';
                 });
             }
 
-            searchInput.addEventListener('input', filterPayments);
-            statusFilter.addEventListener('change', filterPayments);
-            methodFilter.addEventListener('change', filterPayments);
+            document.getElementById('status-filter').addEventListener('change', applyFilters);
+            document.getElementById('method-filter').addEventListener('change', applyFilters);
+            document.getElementById('payment-search').addEventListener('input', applyFilters);
         </script>
     </th:block>
 </body>

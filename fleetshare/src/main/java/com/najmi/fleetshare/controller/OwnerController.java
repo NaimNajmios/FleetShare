@@ -1,6 +1,7 @@
 package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.BookingDTO;
+import com.najmi.fleetshare.dto.BookingLogDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.MaintenanceLogDTO;
 import com.najmi.fleetshare.dto.PaymentDTO;
@@ -295,6 +296,59 @@ public class OwnerController {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
             List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId);
             model.addAttribute("bookings", bookings);
+
+            // Calculate booking statistics
+            long pendingCount = bookings.stream().filter(b -> "PENDING".equals(b.getStatus())).count();
+            long confirmedCount = bookings.stream().filter(b -> "CONFIRMED".equals(b.getStatus())).count();
+            long activeCount = bookings.stream().filter(b -> "ACTIVE".equals(b.getStatus())).count();
+            long completedCount = bookings.stream().filter(b -> "COMPLETED".equals(b.getStatus())).count();
+            long cancelledCount = bookings.stream().filter(b -> "CANCELLED".equals(b.getStatus())).count();
+            long disputedCount = bookings.stream().filter(b -> "DISPUTED".equals(b.getStatus())).count();
+
+            model.addAttribute("pendingCount", pendingCount);
+            model.addAttribute("confirmedCount", confirmedCount);
+            model.addAttribute("activeCount", activeCount);
+            model.addAttribute("completedCount", completedCount);
+            model.addAttribute("cancelledCount", cancelledCount);
+            model.addAttribute("disputedCount", disputedCount);
+
+            // Calculate total revenue from completed bookings
+            BigDecimal totalRevenue = bookings.stream()
+                    .filter(b -> "COMPLETED".equals(b.getStatus()) && b.getTotalCost() != null)
+                    .map(BookingDTO::getTotalCost)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            model.addAttribute("totalRevenue", totalRevenue);
+
+            // Calculate monthly booking counts (last 6 months)
+            java.util.Map<String, Long> monthlyBookings = new java.util.LinkedHashMap<>();
+            java.util.Map<String, BigDecimal> monthlyRevenue = new java.util.LinkedHashMap<>();
+
+            for (int i = 5; i >= 0; i--) {
+                LocalDate monthDate = LocalDate.now().minusMonths(i);
+                String monthKey = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("MMM yyyy"));
+                int year = monthDate.getYear();
+                int month = monthDate.getMonthValue();
+
+                long count = bookings.stream()
+                        .filter(b -> b.getCreatedAt() != null
+                                && b.getCreatedAt().getYear() == year
+                                && b.getCreatedAt().getMonthValue() == month)
+                        .count();
+                monthlyBookings.put(monthKey, count);
+
+                BigDecimal revenue = bookings.stream()
+                        .filter(b -> b.getCreatedAt() != null
+                                && b.getCreatedAt().getYear() == year
+                                && b.getCreatedAt().getMonthValue() == month
+                                && b.getTotalCost() != null)
+                        .map(BookingDTO::getTotalCost)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                monthlyRevenue.put(monthKey, revenue);
+            }
+
+            model.addAttribute("monthlyLabels", monthlyBookings.keySet());
+            model.addAttribute("monthlyBookingCounts", monthlyBookings.values());
+            model.addAttribute("monthlyRevenue", monthlyRevenue.values());
         }
         return "owner/bookings";
     }
@@ -322,6 +376,11 @@ public class OwnerController {
     public String viewBooking(@PathVariable Long bookingId, Model model) {
         BookingDTO booking = bookingService.getBookingDetails(bookingId);
         model.addAttribute("booking", booking);
+
+        // Get status logs for timeline
+        List<BookingLogDTO> statusLogs = bookingService.getBookingStatusLogsDTO(bookingId);
+        model.addAttribute("statusLogs", statusLogs);
+
         return "owner/view-booking";
     }
 
@@ -339,6 +398,80 @@ public class OwnerController {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
             List<PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId);
             model.addAttribute("payments", payments);
+
+            // Calculate payment statistics by status
+            long pendingCount = payments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();
+            long verifiedCount = payments.stream().filter(p -> "VERIFIED".equals(p.getPaymentStatus())
+                    || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus())).count();
+            long failedCount = payments.stream()
+                    .filter(p -> "FAILED".equals(p.getPaymentStatus()) || "REJECTED".equals(p.getPaymentStatus()))
+                    .count();
+
+            model.addAttribute("pendingCount", pendingCount);
+            model.addAttribute("verifiedCount", verifiedCount);
+            model.addAttribute("failedCount", failedCount);
+
+            // Calculate statistics by payment method
+            long creditCardCount = payments.stream().filter(p -> "CREDIT_CARD".equals(p.getPaymentMethod())).count();
+            long bankTransferCount = payments.stream().filter(p -> "BANK_TRANSFER".equals(p.getPaymentMethod()))
+                    .count();
+            long qrPaymentCount = payments.stream().filter(p -> "QR_PAYMENT".equals(p.getPaymentMethod())).count();
+            long cashCount = payments.stream().filter(p -> "CASH".equals(p.getPaymentMethod())).count();
+
+            model.addAttribute("creditCardCount", creditCardCount);
+            model.addAttribute("bankTransferCount", bankTransferCount);
+            model.addAttribute("qrPaymentCount", qrPaymentCount);
+            model.addAttribute("cashCount", cashCount);
+
+            // Calculate total amounts
+            BigDecimal totalAmount = payments.stream()
+                    .filter(p -> p.getAmount() != null)
+                    .map(p -> p.getAmount())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal verifiedAmount = payments.stream()
+                    .filter(p -> ("VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus())
+                            || "PAID".equals(p.getPaymentStatus())) && p.getAmount() != null)
+                    .map(p -> p.getAmount())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal pendingAmount = payments.stream()
+                    .filter(p -> "PENDING".equals(p.getPaymentStatus()) && p.getAmount() != null)
+                    .map(p -> p.getAmount())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            model.addAttribute("totalAmount", totalAmount);
+            model.addAttribute("verifiedAmount", verifiedAmount);
+            model.addAttribute("pendingAmount", pendingAmount);
+
+            // Calculate monthly payment data (last 6 months)
+            java.util.Map<String, Long> monthlyPaymentCounts = new java.util.LinkedHashMap<>();
+            java.util.Map<String, BigDecimal> monthlyPaymentAmounts = new java.util.LinkedHashMap<>();
+
+            for (int i = 5; i >= 0; i--) {
+                LocalDate monthDate = LocalDate.now().minusMonths(i);
+                String monthKey = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("MMM yyyy"));
+                int year = monthDate.getYear();
+                int month = monthDate.getMonthValue();
+
+                long count = payments.stream()
+                        .filter(p -> p.getPaymentDate() != null
+                                && p.getPaymentDate().getYear() == year
+                                && p.getPaymentDate().getMonthValue() == month)
+                        .count();
+                monthlyPaymentCounts.put(monthKey, count);
+
+                BigDecimal amount = payments.stream()
+                        .filter(p -> p.getPaymentDate() != null
+                                && p.getPaymentDate().getYear() == year
+                                && p.getPaymentDate().getMonthValue() == month
+                                && p.getAmount() != null)
+                        .map(p -> p.getAmount())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                monthlyPaymentAmounts.put(monthKey, amount);
+            }
+
+            model.addAttribute("monthlyLabels", monthlyPaymentCounts.keySet());
+            model.addAttribute("monthlyPaymentCounts", monthlyPaymentCounts.values());
+            model.addAttribute("monthlyPaymentAmounts", monthlyPaymentAmounts.values());
         }
         return "owner/payments";
     }
