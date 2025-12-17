@@ -190,6 +190,7 @@
                             <table class="table table-striped" id="maintenance-table">
                                 <thead>
                                     <tr>
+                                        <th>ID</th>
                                         <th>Vehicle</th>
                                         <th>Fleet Owner</th>
                                         <th>Description</th>
@@ -201,6 +202,7 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="record : ${maintenanceRecords}" th:data-status="${record.status}">
+                                        <td th:text="${record.maintenanceId}" class="font-weight-bold">1</td>
                                         <td>
                                             <strong
                                                 th:text="${record.vehicleBrand + ' ' + record.vehicleModel}">Vehicle</strong>
@@ -221,7 +223,7 @@
                                                 th:text="${record.status}">Status</span>
                                         </td>
                                         <td>
-                                            <a th:href="@{/admin/maintenance/vehicle/{id}(id=${record.vehicleId})}"
+                                            <a th:href="@{/admin/maintenance/view/{id}(id=${record.maintenanceId})}"
                                                 class="btn btn-sm btn-outline-primary">
                                                 <i class="mdi mdi-eye"></i> View
                                             </a>

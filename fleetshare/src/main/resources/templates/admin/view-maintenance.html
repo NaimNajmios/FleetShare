@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}"
+    th:with="activePage='maintenance-management', pageTitle='Maintenance Details'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .badge {
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .badge-warning {
+                background-color: #fff3cd;
+                color: #856404;
+            }
+
+            .badge-info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .badge-success {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .badge-danger {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .badge-secondary {
+                background-color: #e2e3e5;
+                color: #383d41;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: #6c757d;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+            }
+
+            .detail-value {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Timeline Styles */
+            .timeline {
+                position: relative;
+                padding-left: 40px;
+                margin-top: 1rem;
+            }
+
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 15px;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: linear-gradient(to bottom, #4B49AC, #7978E9);
+                border-radius: 3px;
+            }
+
+            .timeline-item {
+                position: relative;
+                padding-bottom: 1.5rem;
+            }
+
+            .timeline-item:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -29px;
+                top: 5px;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background: #4B49AC;
+                border: 3px solid white;
+                box-shadow: 0 0 0 3px #4B49AC;
+            }
+
+            .timeline-item.status-PENDING::before {
+                background: #ffc107;
+                box-shadow: 0 0 0 3px #ffc107;
+            }
+
+            .timeline-item.status-IN_PROGRESS::before {
+                background: #17a2b8;
+                box-shadow: 0 0 0 3px #17a2b8;
+            }
+
+            .timeline-item.status-COMPLETED::before {
+                background: #28a745;
+                box-shadow: 0 0 0 3px #28a745;
+            }
+
+            .timeline-item.status-CANCELLED::before {
+                background: #dc3545;
+                box-shadow: 0 0 0 3px #dc3545;
+            }
+
+            .timeline-content {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 1rem;
+                border-left: 4px solid #4B49AC;
+            }
+
+            .timeline-item.status-PENDING .timeline-content {
+                border-left-color: #ffc107;
+            }
+
+            .timeline-item.status-IN_PROGRESS .timeline-content {
+                border-left-color: #17a2b8;
+            }
+
+            .timeline-item.status-COMPLETED .timeline-content {
+                border-left-color: #28a745;
+            }
+
+            .timeline-item.status-CANCELLED .timeline-content {
+                border-left-color: #dc3545;
+            }
+
+            .timeline-time {
+                font-size: 0.8rem;
+                color: #6c757d;
+            }
+
+            .timeline-status {
+                font-weight: 600;
+                font-size: 1rem;
+            }
+
+            .timeline-actor {
+                font-size: 0.85rem;
+                color: #6c757d;
+            }
+
+            .timeline-remarks {
+                margin-top: 0.5rem;
+                font-style: italic;
+                color: #495057;
+            }
+
+            .no-data {
+                text-align: center;
+                padding: 2rem;
+                color: #6c757d;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header with Back Button -->
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <a th:href="@{/admin/maintenance}" class="btn btn-outline-secondary btn-sm mb-3">
+                            <i class="mdi mdi-arrow-left"></i> Back to Maintenance
+                        </a>
+                        <h3 class="font-weight-bold">Maintenance Details</h3>
+                        <h6 class="font-weight-normal mb-0">
+                            Maintenance ID: <span class="font-weight-bold"
+                                th:text="'#' + ${maintenance.maintenanceId}">#1</span>
+                        </h6>
+                    </div>
+                    <div class="col-12 col-xl-4 text-xl-right">
+                        <span th:if="${maintenance.status == 'PENDING'}" class="badge badge-warning"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">Pending</span>
+                        <span th:if="${maintenance.status == 'IN_PROGRESS'}" class="badge badge-info"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">In Progress</span>
+                        <span th:if="${maintenance.status == 'COMPLETED'}" class="badge badge-success"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">Completed</span>
+                        <span th:if="${maintenance.status == 'CANCELLED'}" class="badge badge-danger"
+                            style="font-size: 1rem; padding: 0.5rem 1rem;">Cancelled</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Maintenance Details Card -->
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Maintenance Information</h4>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value" th:text="${maintenance.description}">Oil Change</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-label">Fleet Owner</div>
+                                <div class="detail-value" th:text="${maintenance.ownerBusinessName}">Fleet Owner</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-label">Scheduled Date</div>
+                                <div class="detail-value"
+                                    th:text="${maintenance.scheduledDate != null ? #temporals.format(maintenance.scheduledDate, 'dd MMM yyyy') : 'N/A'}">
+                                    01 Jan 2024</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-label">Started At</div>
+                                <div class="detail-value"
+                                    th:text="${maintenance.actualStartTime != null ? #temporals.format(maintenance.actualStartTime, 'dd MMM yyyy HH:mm') : 'Not Started'}">
+                                    01 Jan 2024</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-label">Estimated Cost</div>
+                                <div class="detail-value"
+                                    th:text="${maintenance.estimatedCost != null ? 'RM ' + #numbers.formatDecimal(maintenance.estimatedCost, 1, 'COMMA', 2, 'POINT') : 'N/A'}">
+                                    RM 150.00</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-label">Final Cost</div>
+                                <div class="detail-value"
+                                    th:text="${maintenance.finalCost != null ? 'RM ' + #numbers.formatDecimal(maintenance.finalCost, 1, 'COMMA', 2, 'POINT') : 'Not Finalized'}">
+                                    RM 145.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Details Card -->
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Vehicle Information</h4>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-label">Vehicle</div>
+                                <div class="detail-value" th:text="${vehicle.brand + ' ' + vehicle.model}">Toyota Camry
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-label">Registration No.</div>
+                                <div class="detail-value font-weight-bold" th:text="${vehicle.registrationNo}">WXY 1234
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-label">Category</div>
+                                <div class="detail-value" th:text="${vehicle.category}">Sedan</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-label">Year</div>
+                                <div class="detail-value" th:text="${vehicle.manufacturingYear}">2022</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-label">Current Status</div>
+                                <div class="detail-value">
+                                    <span th:if="${vehicle.status == 'AVAILABLE'}"
+                                        class="badge badge-success">Available</span>
+                                    <span th:if="${vehicle.status == 'RENTED'}"
+                                        class="badge badge-warning">Rented</span>
+                                    <span th:if="${vehicle.status == 'MAINTENANCE'}"
+                                        class="badge badge-info">Maintenance</span>
+                                    <span th:if="${vehicle.status == 'UNAVAILABLE'}"
+                                        class="badge badge-secondary">Unavailable</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-label">View Details</div>
+                                <div class="detail-value">
+                                    <a th:href="@{/admin/vehicles/view/{id}(id=${vehicle.vehicleId})}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="mdi mdi-eye"></i> View Vehicle
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Timeline Card -->
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Status Timeline</h4>
+                        <p class="card-description">History of status changes for this maintenance record</p>
+
+                        <div th:if="${!#lists.isEmpty(statusLogs)}" class="timeline">
+                            <div th:each="log : ${statusLogs}" th:class="'timeline-item status-' + ${log.status}">
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="timeline-status">
+                                                <span th:if="${log.status == 'PENDING'}"
+                                                    class="badge badge-warning">Pending</span>
+                                                <span th:if="${log.status == 'IN_PROGRESS'}" class="badge badge-info">In
+                                                    Progress</span>
+                                                <span th:if="${log.status == 'COMPLETED'}"
+                                                    class="badge badge-success">Completed</span>
+                                                <span th:if="${log.status == 'CANCELLED'}"
+                                                    class="badge badge-danger">Cancelled</span>
+                                            </div>
+                                            <div class="timeline-actor" th:text="'By: ' + ${log.actorName}">By:
+                                                admin@example.com</div>
+                                        </div>
+                                        <div class="timeline-time"
+                                            th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">01 Jan
+                                            2024 10:00</div>
+                                    </div>
+                                    <div th:if="${log.remarks != null && !log.remarks.isEmpty()}"
+                                        class="timeline-remarks" th:text="${log.remarks}">Remarks</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(statusLogs)}" class="no-data">
+                            <i class="mdi mdi-timeline-text mdi-48px"></i>
+                            <p>No status changes recorded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

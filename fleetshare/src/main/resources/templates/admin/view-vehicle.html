@@ -293,6 +293,10 @@
                                     </span>
                                 </div>
                                 <div class="mode-toggle">
+                                    <a th:href="@{/admin/maintenance/vehicle/{id}(id=${vehicle.vehicleId})}"
+                                        class="btn btn-outline-info view-actions">
+                                        <i class="mdi mdi-wrench"></i> Maintenance History
+                                    </a>
                                     <button id="editBtn" class="btn btn-primary view-actions">
                                         <i class="mdi mdi-pencil"></i> Edit Vehicle
                                     </button>

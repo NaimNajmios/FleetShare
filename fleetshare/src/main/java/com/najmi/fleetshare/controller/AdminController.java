@@ -2,6 +2,7 @@ package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
+import com.najmi.fleetshare.dto.MaintenanceLogDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
@@ -112,6 +113,16 @@ public class AdminController {
         model.addAttribute("totalCost", totalCost);
         model.addAttribute("lastMaintenanceDate", lastMaintenanceDate);
 
+        // Count by status
+        long pendingCount = maintenanceRecords.stream()
+                .filter(m -> "PENDING".equals(m.getStatus()))
+                .count();
+        long completedCount = maintenanceRecords.stream()
+                .filter(m -> "COMPLETED".equals(m.getStatus()))
+                .count();
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("completedCount", completedCount);
+
         // Get owner name
         String ownerName = "Unknown Owner";
         if (!maintenanceRecords.isEmpty()) {
@@ -120,6 +131,26 @@ public class AdminController {
         model.addAttribute("ownerName", ownerName);
 
         return "admin/vehicle-maintenance-details";
+    }
+
+    @GetMapping("/maintenance/view/{maintenanceId}")
+    public String viewMaintenance(@PathVariable Long maintenanceId, Model model) {
+        // Get maintenance details
+        MaintenanceDTO maintenance = maintenanceService.getMaintenanceById(maintenanceId);
+        if (maintenance == null) {
+            return "redirect:/admin/maintenance";
+        }
+        model.addAttribute("maintenance", maintenance);
+
+        // Get vehicle details
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(maintenance.getVehicleId());
+        model.addAttribute("vehicle", vehicle);
+
+        // Get status logs
+        List<MaintenanceLogDTO> statusLogs = maintenanceService.getMaintenanceLogsDTO(maintenanceId);
+        model.addAttribute("statusLogs", statusLogs);
+
+        return "admin/view-maintenance";
     }
 
     @GetMapping("/bookings")
@@ -199,7 +230,7 @@ public class AdminController {
             if (user.getAdminDetails() != null) {
                 model.addAttribute("adminDetails", user.getAdminDetails());
             }
-            
+
             // Fetch address for the user
             Optional<com.najmi.fleetshare.entity.Address> addressOpt = addressRepository
                     .findLatestAddressByUserId(user.getUserId());
