@@ -1,6 +1,7 @@
 package com.najmi.fleetshare.service;
 
 import com.najmi.fleetshare.dto.BookingDTO;
+import com.najmi.fleetshare.dto.BookingLogDTO;
 import com.najmi.fleetshare.entity.*;
 import com.najmi.fleetshare.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -233,6 +234,29 @@ public class BookingService {
 
     public List<BookingStatusLog> getBookingStatusLogs(Long bookingId) {
         return statusLogRepository.findByBookingIdOrderByStatusTimestampDesc(bookingId);
+    }
+
+    public List<BookingLogDTO> getBookingStatusLogsDTO(Long bookingId) {
+        List<BookingStatusLog> logs = statusLogRepository.findByBookingIdOrderByStatusTimestampDesc(bookingId);
+        List<BookingLogDTO> logDTOs = new ArrayList<>();
+
+        for (BookingStatusLog log : logs) {
+            String actorName = "System";
+            if (log.getActorUserId() != null) {
+                actorName = userRepository.findById(log.getActorUserId())
+                        .map(User::getEmail)
+                        .orElse("Unknown User");
+            }
+
+            logDTOs.add(new BookingLogDTO(
+                    log.getBookingLogId(),
+                    log.getStatusValue().name(),
+                    log.getStatusTimestamp(),
+                    actorName,
+                    log.getRemarks()));
+        }
+
+        return logDTOs;
     }
 
     /**

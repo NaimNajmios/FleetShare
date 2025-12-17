@@ -83,11 +83,11 @@
             }
 
             .status-badge {
-                padding: 0.5em 1em;
+                padding: 0.4em 0.8em;
                 border-radius: 0.25rem;
                 font-weight: bold;
                 text-transform: uppercase;
-                font-size: 0.85rem;
+                font-size: 0.75rem;
             }
 
             .status-confirmed {
@@ -114,6 +114,171 @@
                 background-color: #f8d7da;
                 color: #721c24;
             }
+
+            /* Timeline Styles */
+            .timeline {
+                position: relative;
+                padding-left: 30px;
+                margin-top: 1rem;
+            }
+
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 10px;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: linear-gradient(to bottom, #4B49AC, #7978E9);
+                border-radius: 3px;
+            }
+
+            .timeline-item {
+                position: relative;
+                padding-bottom: 1.25rem;
+            }
+
+            .timeline-item:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -24px;
+                top: 5px;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #4B49AC;
+                border: 2px solid white;
+                box-shadow: 0 0 0 2px #4B49AC;
+            }
+
+            .timeline-item.status-PENDING::before {
+                background: #ffc107;
+                box-shadow: 0 0 0 2px #ffc107;
+            }
+
+            .timeline-item.status-CONFIRMED::before {
+                background: #28a745;
+                box-shadow: 0 0 0 2px #28a745;
+            }
+
+            .timeline-item.status-ACTIVE::before {
+                background: #17a2b8;
+                box-shadow: 0 0 0 2px #17a2b8;
+            }
+
+            .timeline-item.status-COMPLETED::before {
+                background: #6f42c1;
+                box-shadow: 0 0 0 2px #6f42c1;
+            }
+
+            .timeline-item.status-CANCELLED::before {
+                background: #dc3545;
+                box-shadow: 0 0 0 2px #dc3545;
+            }
+
+            .timeline-item.status-DISPUTED::before {
+                background: #fd7e14;
+                box-shadow: 0 0 0 2px #fd7e14;
+            }
+
+            .timeline-content {
+                background: #f8f9fa;
+                border-radius: 6px;
+                padding: 0.75rem;
+                border-left: 3px solid #4B49AC;
+            }
+
+            .timeline-item.status-PENDING .timeline-content {
+                border-left-color: #ffc107;
+            }
+
+            .timeline-item.status-CONFIRMED .timeline-content {
+                border-left-color: #28a745;
+            }
+
+            .timeline-item.status-ACTIVE .timeline-content {
+                border-left-color: #17a2b8;
+            }
+
+            .timeline-item.status-COMPLETED .timeline-content {
+                border-left-color: #6f42c1;
+            }
+
+            .timeline-item.status-CANCELLED .timeline-content {
+                border-left-color: #dc3545;
+            }
+
+            .timeline-item.status-DISPUTED .timeline-content {
+                border-left-color: #fd7e14;
+            }
+
+            .timeline-status {
+                margin-bottom: 0.35rem;
+            }
+
+            .timeline-status .status-badge {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .timeline-time {
+                font-size: 0.7rem;
+                color: #6c757d;
+                display: block;
+            }
+
+            .timeline-actor {
+                font-size: 0.7rem;
+                color: #6c757d;
+                word-break: break-word;
+            }
+
+            .timeline-remarks {
+                margin-top: 0.35rem;
+                font-style: italic;
+                color: #495057;
+                font-size: 0.75rem;
+            }
+
+            .no-data {
+                text-align: center;
+                padding: 2rem;
+                color: #6c757d;
+            }
+
+            .badge-pending {
+                background-color: #fff3cd;
+                color: #856404;
+            }
+
+            .badge-confirmed {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .badge-active {
+                background-color: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .badge-completed {
+                background-color: #e2d5f1;
+                color: #6f42c1;
+            }
+
+            .badge-cancelled {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .badge-disputed {
+                background-color: #ffe5d0;
+                color: #fd7e14;
+            }
         </style>
     </th:block>
 </head>
@@ -125,8 +290,11 @@
             <div class="col-12">
                 <div class="booking-header">
                     <div class="booking-title">
+                        <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary btn-sm mb-2">
+                            <i class="mdi mdi-arrow-left"></i> Back to Bookings
+                        </a>
                         <h3>Booking Details</h3>
-                        <p>Panoramic view of Booking ID: <span th:text="${booking.bookingId}">24</span></p>
+                        <p>Booking ID: <span th:text="${booking.bookingId}">24</span></p>
                     </div>
                     <div>
                         <span th:text="${booking.status}" th:class="'status-badge ' + 
@@ -256,7 +424,7 @@
                 </div>
             </div>
 
-            <!-- Right Column: Action Panel -->
+            <!-- Right Column: Action Panel & Timeline -->
             <div class="col-lg-4">
                 <div class="action-panel">
                     <div class="card-header-custom">Actions</div>
@@ -280,6 +448,44 @@
                     <a th:href="@{/admin/bookings/edit/{id}(id=${booking.bookingId})}"
                         class="btn btn-warning btn-block mb-2">Edit Booking Details</a>
                     <button class="btn btn-secondary btn-block">Print Booking Details</button>
+                </div>
+
+                <!-- Status Timeline -->
+                <div class="info-card mt-3">
+                    <div class="card-header-custom">Status Timeline</div>
+
+                    <div th:if="${!#lists.isEmpty(statusLogs)}" class="timeline">
+                        <div th:each="log : ${statusLogs}" th:class="'timeline-item status-' + ${log.status}">
+                            <div class="timeline-content">
+                                <div class="timeline-status">
+                                    <span th:if="${log.status == 'PENDING'}"
+                                        class="status-badge badge-pending">Pending</span>
+                                    <span th:if="${log.status == 'CONFIRMED'}"
+                                        class="status-badge badge-confirmed">Confirmed</span>
+                                    <span th:if="${log.status == 'ACTIVE'}"
+                                        class="status-badge badge-active">Active</span>
+                                    <span th:if="${log.status == 'COMPLETED'}"
+                                        class="status-badge badge-completed">Completed</span>
+                                    <span th:if="${log.status == 'CANCELLED'}"
+                                        class="status-badge badge-cancelled">Cancelled</span>
+                                    <span th:if="${log.status == 'DISPUTED'}"
+                                        class="status-badge badge-disputed">Disputed</span>
+                                </div>
+                                <div class="timeline-actor" th:text="'By: ' + ${log.actorName}">By: admin@example.com
+                                </div>
+                                <div class="timeline-time"
+                                    th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">01 Jan 2024 10:00
+                                </div>
+                                <div th:if="${log.remarks != null && !log.remarks.isEmpty()}" class="timeline-remarks"
+                                    th:text="${log.remarks}">Remarks</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(statusLogs)}" class="no-data">
+                        <i class="mdi mdi-timeline-text" style="font-size: 2rem;"></i>
+                        <p>No status changes recorded yet</p>
+                    </div>
                 </div>
             </div>
         </div>

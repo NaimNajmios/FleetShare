@@ -1,6 +1,7 @@
 package com.najmi.fleetshare.controller;
 
 import com.najmi.fleetshare.dto.BookingDTO;
+import com.najmi.fleetshare.dto.BookingLogDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.MaintenanceLogDTO;
 import com.najmi.fleetshare.dto.SessionUser;
@@ -163,6 +164,11 @@ public class AdminController {
     public String viewBooking(@PathVariable Long bookingId, Model model) {
         BookingDTO booking = bookingService.getBookingDetails(bookingId);
         model.addAttribute("booking", booking);
+
+        // Get status logs for timeline
+        List<BookingLogDTO> statusLogs = bookingService.getBookingStatusLogsDTO(bookingId);
+        model.addAttribute("statusLogs", statusLogs);
+
         return "admin/booking-details";
     }
 
