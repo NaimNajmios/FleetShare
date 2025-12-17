@@ -310,7 +310,81 @@ public class AdminController {
 
     @GetMapping("/payment")
     public String payment(Model model) {
-        model.addAttribute("payments", paymentService.getAllPayments());
+        var allPayments = paymentService.getAllPayments();
+        model.addAttribute("payments", allPayments);
+
+        // Calculate payment statistics by status
+        long pendingCount = allPayments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();
+        long verifiedCount = allPayments.stream().filter(p -> "VERIFIED".equals(p.getPaymentStatus())
+                || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus())).count();
+        long failedCount = allPayments.stream()
+                .filter(p -> "FAILED".equals(p.getPaymentStatus()) || "REJECTED".equals(p.getPaymentStatus())).count();
+
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("verifiedCount", verifiedCount);
+        model.addAttribute("failedCount", failedCount);
+
+        // Calculate statistics by payment method
+        long creditCardCount = allPayments.stream().filter(p -> "CREDIT_CARD".equals(p.getPaymentMethod())).count();
+        long bankTransferCount = allPayments.stream().filter(p -> "BANK_TRANSFER".equals(p.getPaymentMethod())).count();
+        long qrPaymentCount = allPayments.stream().filter(p -> "QR_PAYMENT".equals(p.getPaymentMethod())).count();
+        long cashCount = allPayments.stream().filter(p -> "CASH".equals(p.getPaymentMethod())).count();
+
+        model.addAttribute("creditCardCount", creditCardCount);
+        model.addAttribute("bankTransferCount", bankTransferCount);
+        model.addAttribute("qrPaymentCount", qrPaymentCount);
+        model.addAttribute("cashCount", cashCount);
+
+        // Calculate total amounts
+        BigDecimal totalAmount = allPayments.stream()
+                .filter(p -> p.getAmount() != null)
+                .map(p -> p.getAmount())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal verifiedAmount = allPayments.stream()
+                .filter(p -> ("VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus())
+                        || "PAID".equals(p.getPaymentStatus())) && p.getAmount() != null)
+                .map(p -> p.getAmount())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal pendingAmount = allPayments.stream()
+                .filter(p -> "PENDING".equals(p.getPaymentStatus()) && p.getAmount() != null)
+                .map(p -> p.getAmount())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("verifiedAmount", verifiedAmount);
+        model.addAttribute("pendingAmount", pendingAmount);
+
+        // Calculate monthly payment data (last 6 months)
+        java.util.Map<String, Long> monthlyPaymentCounts = new java.util.LinkedHashMap<>();
+        java.util.Map<String, BigDecimal> monthlyPaymentAmounts = new java.util.LinkedHashMap<>();
+
+        for (int i = 5; i >= 0; i--) {
+            LocalDate monthDate = LocalDate.now().minusMonths(i);
+            String monthKey = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("MMM yyyy"));
+            int year = monthDate.getYear();
+            int month = monthDate.getMonthValue();
+
+            long count = allPayments.stream()
+                    .filter(p -> p.getPaymentDate() != null
+                            && p.getPaymentDate().getYear() == year
+                            && p.getPaymentDate().getMonthValue() == month)
+                    .count();
+            monthlyPaymentCounts.put(monthKey, count);
+
+            BigDecimal amount = allPayments.stream()
+                    .filter(p -> p.getPaymentDate() != null
+                            && p.getPaymentDate().getYear() == year
+                            && p.getPaymentDate().getMonthValue() == month
+                            && p.getAmount() != null)
+                    .map(p -> p.getAmount())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            monthlyPaymentAmounts.put(monthKey, amount);
+        }
+
+        model.addAttribute("monthlyLabels", monthlyPaymentCounts.keySet());
+        model.addAttribute("monthlyPaymentCounts", monthlyPaymentCounts.values());
+        model.addAttribute("monthlyPaymentAmounts", monthlyPaymentAmounts.values());
+
         return "admin/payments";
     }
 
