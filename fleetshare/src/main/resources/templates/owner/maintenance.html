@@ -5,6 +5,45 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
+            .kpi-card {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                text-align: center;
+            }
+
+            .kpi-card.pending {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            .kpi-card.in-progress {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            .kpi-card.completed {
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            }
+
+            .kpi-card.cost {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            }
+
+            .kpi-value {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+            }
+
+            .kpi-label {
+                font-size: 0.85rem;
+                opacity: 0.9;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
             .search-filter-bar {
                 display: flex;
                 gap: 1rem;
@@ -99,11 +138,60 @@
                                 data-bs-target="#addMaintenanceModal">
                                 <i class="mdi mdi-plus"></i> Add Maintenance Record
                             </button>
-                            <div class="d-flex align-items-center">
-                                <i class="mdi mdi-wrench mr-2" style="font-size: 1.2rem;"></i>
-                                <span>Total: <span class="badge badge-secondary"
-                                        th:text="${#lists.size(maintenanceRecords)}">0</span></span>
-                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards Row -->
+        <div class="row">
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="kpi-card pending w-100">
+                    <div class="kpi-value" th:text="${stats != null ? stats.pendingCount : 0}">0</div>
+                    <div class="kpi-label">Pending</div>
+                </div>
+            </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="kpi-card in-progress w-100">
+                    <div class="kpi-value" th:text="${stats != null ? stats.inProgressCount : 0}">0</div>
+                    <div class="kpi-label">In Progress</div>
+                </div>
+            </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="kpi-card completed w-100">
+                    <div class="kpi-value" th:text="${stats != null ? stats.completedCount : 0}">0</div>
+                    <div class="kpi-label">Completed</div>
+                </div>
+            </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="kpi-card cost w-100">
+                    <div class="kpi-value"
+                        th:text="'RM' + ${stats != null ? #numbers.formatDecimal(stats.totalFinalCost, 1, 'COMMA', 0, 'POINT') : '0'}">
+                        RM0</div>
+                    <div class="kpi-label">Total Cost</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-5 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Status Distribution</h4>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Monthly Maintenance Cost</h4>
+                        <div class="chart-container">
+                            <canvas id="costChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -114,6 +202,8 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
+                        <h4 class="card-title">All Maintenance Records</h4>
+
                         <!-- Search and Filters -->
                         <div class="search-filter-bar">
                             <input type="text" class="search-input" id="maintenance-search"
@@ -234,7 +324,64 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <script>
+        <script th:inline="javascript">
+            // Chart data from server
+            const statsData = {
+                pending: /*[[${stats != null ? stats.pendingCount : 0}]]*/ 0,
+                inProgress: /*[[${stats != null ? stats.inProgressCount : 0}]]*/ 0,
+                completed: /*[[${stats != null ? stats.completedCount : 0}]]*/ 0,
+                cancelled: /*[[${stats != null ? stats.cancelledCount : 0}]]*/ 0,
+                monthlyLabels: /*[[${stats?.monthlyCountData?.keySet() ?: {}}]]*/[],
+                monthlyCosts: /*[[${stats?.monthlyCostData?.values() ?: {}}]]*/[]
+            };
+
+            // Status Distribution Doughnut Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'In Progress', 'Completed', 'Cancelled'],
+                    datasets: [{
+                        data: [statsData.pending, statsData.inProgress, statsData.completed, statsData.cancelled],
+                        backgroundColor: ['#f5576c', '#4facfe', '#43e97b', '#adb5bd'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Monthly Cost Bar Chart
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            new Chart(costCtx, {
+                type: 'bar',
+                data: {
+                    labels: statsData.monthlyLabels,
+                    datasets: [{
+                        label: 'Cost (RM)',
+                        data: statsData.monthlyCosts,
+                        backgroundColor: 'rgba(75, 73, 172, 0.7)',
+                        borderColor: '#4B49AC',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
             // Search and filter functionality
             const searchInput = document.getElementById('maintenance-search');
             const statusFilter = document.getElementById('status-filter');
@@ -245,13 +392,7 @@
                 const statusValue = statusFilter.value;
 
                 maintenanceRows.forEach(row => {
-                    const searchableText = Array.from(row.querySelectorAll('.searchable'))
-                        .map(cell => cell.textContent.toLowerCase())
-                        .join(' ');
-
-                    // Also include the ID in search
                     const fullText = row.textContent.toLowerCase();
-
                     const matchesSearch = fullText.includes(searchTerm);
                     const matchesStatus = !statusValue || row.dataset.status === statusValue;
 
