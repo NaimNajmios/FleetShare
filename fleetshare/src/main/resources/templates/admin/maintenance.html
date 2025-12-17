@@ -18,7 +18,7 @@
                 background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             }
 
-            .kpi-card.progress {
+            .kpi-card.in-progress {
                 background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             }
 
@@ -121,7 +121,7 @@
                 </div>
             </div>
             <div class="col-md-3 grid-margin stretch-card">
-                <div class="kpi-card progress w-100">
+                <div class="kpi-card in-progress w-100">
                     <div class="kpi-value" th:text="${stats != null ? stats.inProgressCount : 0}">0</div>
                     <div class="kpi-label">In Progress</div>
                 </div>

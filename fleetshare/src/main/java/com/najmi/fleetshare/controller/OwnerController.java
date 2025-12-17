@@ -202,6 +202,7 @@ public class OwnerController {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
             List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByOwnerId(ownerId);
             model.addAttribute("maintenanceRecords", maintenanceRecords);
+            model.addAttribute("stats", maintenanceService.getMaintenanceStatsByOwnerId(ownerId));
 
             // Add vehicles for the dropdown
             List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
@@ -238,6 +239,7 @@ public class OwnerController {
         maintenanceRecords.sort(Comparator.comparing(MaintenanceDTO::getScheduledDate).reversed());
 
         model.addAttribute("maintenanceRecords", maintenanceRecords);
+            model.addAttribute("stats", maintenanceService.getMaintenanceStatsByOwnerId(ownerId));
 
         // Calculate KPI metrics
         int totalRecords = maintenanceRecords.size();

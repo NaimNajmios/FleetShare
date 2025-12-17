@@ -195,9 +195,9 @@ public class MaintenanceService {
         java.util.Map<String, Integer> monthlyCount = new java.util.LinkedHashMap<>();
         java.util.Map<String, java.math.BigDecimal> monthlyCost = new java.util.LinkedHashMap<>();
 
-        // Initialize last 6 months
+        // Initialize last 12 months for better historical view
         java.time.LocalDate now = java.time.LocalDate.now();
-        for (int i = 5; i >= 0; i--) {
+        for (int i = 11; i >= 0; i--) {
             java.time.LocalDate month = now.minusMonths(i);
             String monthKey = month.getMonth().toString().substring(0, 3);
             monthlyCount.put(monthKey, 0);
@@ -223,17 +223,15 @@ public class MaintenanceService {
                 totalFinal = totalFinal.add(m.getFinalCost());
             }
 
-            // Monthly aggregation
+            // Monthly aggregation - include all data in the chart
             if (m.getScheduledDate() != null) {
                 java.time.LocalDate schedDate = m.getScheduledDate();
-                if (schedDate.isAfter(now.minusMonths(6))) {
-                    String monthKey = schedDate.getMonth().toString().substring(0, 3);
-                    if (monthlyCount.containsKey(monthKey)) {
-                        monthlyCount.put(monthKey, monthlyCount.get(monthKey) + 1);
-                        java.math.BigDecimal cost = m.getFinalCost() != null ? m.getFinalCost()
-                                : (m.getEstimatedCost() != null ? m.getEstimatedCost() : java.math.BigDecimal.ZERO);
-                        monthlyCost.put(monthKey, monthlyCost.get(monthKey).add(cost));
-                    }
+                String monthKey = schedDate.getMonth().toString().substring(0, 3);
+                if (monthlyCount.containsKey(monthKey)) {
+                    monthlyCount.put(monthKey, monthlyCount.get(monthKey) + 1);
+                    java.math.BigDecimal cost = m.getFinalCost() != null ? m.getFinalCost()
+                            : (m.getEstimatedCost() != null ? m.getEstimatedCost() : java.math.BigDecimal.ZERO);
+                    monthlyCost.put(monthKey, monthlyCost.get(monthKey).add(cost));
                 }
             }
         }
