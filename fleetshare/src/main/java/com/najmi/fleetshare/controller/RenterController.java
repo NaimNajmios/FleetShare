@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.najmi.fleetshare.entity.BookingStatusLog;
+import com.najmi.fleetshare.entity.FleetOwner;
+import com.najmi.fleetshare.dto.OwnerProfileDTO;
+import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +38,9 @@ public class RenterController {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private FleetOwnerRepository fleetOwnerRepository;
 
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
@@ -211,6 +217,58 @@ public class RenterController {
             }
         }
         return "redirect:/renter/bookings";
+    }
+
+    @GetMapping("/owners/{id}")
+    public String ownerProfile(@PathVariable Long id, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user != null) {
+            model.addAttribute("user", user);
+            if (user.getRenterDetails() != null) {
+                model.addAttribute("renterName", user.getRenterDetails().getFullName());
+            }
+        }
+
+        // Fetch owner details
+        FleetOwner owner = fleetOwnerRepository.findById(id).orElse(null);
+        if (owner == null) {
+            return "redirect:/renter/vehicles";
+        }
+
+        // Get address information
+        String city = "Unknown City";
+        String state = "Unknown State";
+        Double latitude = null;
+        Double longitude = null;
+        Address address = addressRepository.findLatestAddressByUserId(owner.getUserId()).orElse(null);
+        if (address != null) {
+            city = address.getCity();
+            state = address.getState();
+            latitude = address.getLatitude();
+            longitude = address.getLongitude();
+        }
+
+        // Get owner's vehicles (only available ones)
+        List<VehicleDTO> ownerVehicles = vehicleManagementService.getVehiclesByOwnerId(id);
+        List<VehicleDTO> availableVehicles = ownerVehicles.stream()
+                .filter(v -> "AVAILABLE".equals(v.getStatus()))
+                .collect(Collectors.toList());
+
+        // Create owner profile DTO
+        OwnerProfileDTO ownerProfile = new OwnerProfileDTO(
+                owner.getFleetOwnerId(),
+                owner.getBusinessName(),
+                owner.getContactPhone(),
+                owner.getIsVerified(),
+                city,
+                state,
+                latitude,
+                longitude,
+                ownerVehicles.size());
+
+        model.addAttribute("owner", ownerProfile);
+        model.addAttribute("vehicles", availableVehicles);
+        return "renter/owner-profile";
     }
 
     @GetMapping("/home")

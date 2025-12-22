@@ -89,6 +89,7 @@ public class VehicleManagementService {
                                         state,
                                         ownerLatitude,
                                         ownerLongitude);
+                        dto.setFleetOwnerId(vehicle.getFleetOwnerId());
                         vehicleDTOs.add(dto);
                 }
 
@@ -133,7 +134,7 @@ public class VehicleManagementService {
                         }
                 }
 
-                return new VehicleDTO(
+                VehicleDTO result = new VehicleDTO(
                                 vehicle.getVehicleId(),
                                 vehicle.getRegistrationNo(),
                                 vehicle.getModel(),
@@ -153,6 +154,8 @@ public class VehicleManagementService {
                                 state,
                                 ownerLatitude,
                                 ownerLongitude);
+                result.setFleetOwnerId(vehicle.getFleetOwnerId());
+                return result;
         }
 
         /**
@@ -214,6 +217,7 @@ public class VehicleManagementService {
                                         state,
                                         ownerLatitude,
                                         ownerLongitude);
+                        dto.setFleetOwnerId(vehicle.getFleetOwnerId());
                         vehicleDTOs.add(dto);
                 }
 

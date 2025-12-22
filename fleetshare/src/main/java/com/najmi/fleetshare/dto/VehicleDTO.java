@@ -24,6 +24,7 @@ public class VehicleDTO {
     private String state;
     private Double ownerLatitude;
     private Double ownerLongitude;
+    private Long fleetOwnerId;
 
     // Constructors
     public VehicleDTO() {
@@ -207,5 +208,13 @@ public class VehicleDTO {
 
     public void setOwnerLongitude(Double ownerLongitude) {
         this.ownerLongitude = ownerLongitude;
+    }
+
+    public Long getFleetOwnerId() {
+        return fleetOwnerId;
+    }
+
+    public void setFleetOwnerId(Long fleetOwnerId) {
+        this.fleetOwnerId = fleetOwnerId;
     }
 }
