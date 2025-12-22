@@ -4,6 +4,8 @@
 
 <head>
     <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
         <style>
             .vehicle-details-container {
                 max-width: 1200px;
@@ -12,7 +14,7 @@
             }
 
             .back-link {
-                color: #0d6efd;
+                color: #8b5cf6;
                 text-decoration: none;
                 font-size: 0.875rem;
                 font-weight: 500;
@@ -24,7 +26,7 @@
             }
 
             .back-link:hover {
-                color: #0a58ca;
+                color: #7c3aed;
             }
 
             /* Hero Card */
@@ -109,7 +111,7 @@
 
             .spec-value {
                 font-size: 1.125rem;
-                color: #0d6efd;
+                color: #8b5cf6;
                 font-weight: 700;
             }
 
@@ -141,20 +143,14 @@
                 color: #212529;
             }
 
-            .price-period {
-                font-size: 1rem;
-                color: #6c757d;
-                font-weight: 400;
-            }
-
             .btn-book-now {
-                background: #0d6efd;
+                background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
                 color: white;
                 border: none;
                 padding: 1rem 2.5rem;
                 font-size: 1rem;
                 font-weight: 600;
-                border-radius: 0.5rem;
+                border-radius: 0.75rem;
                 cursor: pointer;
                 transition: all 0.2s ease;
                 text-decoration: none;
@@ -162,15 +158,28 @@
                 align-items: center;
                 justify-content: center;
                 min-width: 200px;
+                box-shadow: 0 4px 15px -3px rgba(139, 92, 246, 0.4);
             }
 
             .btn-book-now:hover {
-                background: #0b5ed7;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px -5px rgba(139, 92, 246, 0.5);
+                color: white;
             }
 
-            /* Fleet Owner Section */
+            /* Owner Section - Grid Layout */
+            .owner-section {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+
+            @media (max-width: 992px) {
+                .owner-section {
+                    grid-template-columns: 1fr;
+                }
+            }
+
             .owner-card {
                 background: white;
                 border-radius: 1rem;
@@ -185,13 +194,13 @@
             .owner-icon {
                 width: 60px;
                 height: 60px;
-                background: #e9ecef;
+                background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 1.5rem;
-                color: #6c757d;
+                color: white;
             }
 
             .owner-info {
@@ -210,8 +219,8 @@
 
             .verified-badge {
                 font-size: 0.75rem;
-                background: #d1e7dd;
-                color: #0f5132;
+                background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+                color: #166534;
                 padding: 0.25rem 0.5rem;
                 border-radius: 1rem;
                 font-weight: 600;
@@ -228,6 +237,58 @@
                 gap: 0.5rem;
             }
 
+            .location-card {
+                background: white;
+                border-radius: 1rem;
+                padding: 1.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .location-card-header {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .location-card-header i {
+                color: #8b5cf6;
+                font-size: 1.25rem;
+            }
+
+            .location-card-header h4 {
+                margin: 0;
+                font-size: 1rem;
+                font-weight: 600;
+                color: #212529;
+            }
+
+            #owner-map {
+                height: 200px;
+                border-radius: 0.75rem;
+                z-index: 1;
+                border: 2px solid rgba(139, 92, 246, 0.1);
+            }
+
+            .map-placeholder {
+                height: 200px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #f0f9ff 0%, #fdf4ff 100%);
+                border-radius: 0.75rem;
+                color: #6c757d;
+                flex-direction: column;
+                gap: 0.5rem;
+                border: 2px dashed rgba(139, 92, 246, 0.2);
+            }
+
+            .map-placeholder i {
+                font-size: 2rem;
+                color: #8b5cf6;
+                opacity: 0.5;
+            }
+
             .status-badge {
                 position: absolute;
                 top: 1rem;
@@ -241,13 +302,13 @@
             }
 
             .status-available {
-                background: #d1e7dd;
-                color: #0f5132;
+                background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+                color: #166534;
             }
 
             .status-unavailable {
-                background: #f8d7da;
-                color: #842029;
+                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+                color: #b91c1c;
             }
         </style>
     </th:block>
@@ -323,26 +384,81 @@
                 </div>
             </div>
 
-            <!-- Fleet Owner Section -->
-            <div class="owner-card">
-                <div class="owner-icon">
-                    <i class="fas fa-building"></i>
-                </div>
-                <div class="owner-info">
-                    <div class="owner-name">
-                        <span th:text="${vehicle.ownerBusinessName}">FleetCo Rentals</span>
-                        <span class="verified-badge" th:if="${vehicle.ownerIsVerified}">
-                            <i class="fas fa-check-circle"></i> Verified
-                        </span>
+            <!-- Fleet Owner Section with Map -->
+            <div class="owner-section">
+                <!-- Owner Info Card -->
+                <div class="owner-card">
+                    <div class="owner-icon">
+                        <i class="fas fa-building"></i>
                     </div>
-                    <div class="owner-contact">
-                        <i class="fas fa-phone-alt"></i>
-                        <span th:text="${vehicle.ownerContactPhone}">+60 12-345 6789</span>
+                    <div class="owner-info">
+                        <div class="owner-name">
+                            <span th:text="${vehicle.ownerBusinessName}">FleetCo Rentals</span>
+                            <span class="verified-badge" th:if="${vehicle.ownerIsVerified}">
+                                <i class="fas fa-check-circle"></i> Verified
+                            </span>
+                        </div>
+                        <div class="owner-contact">
+                            <i class="fas fa-phone-alt"></i>
+                            <span th:text="${vehicle.ownerContactPhone}">+60 12-345 6789</span>
+                        </div>
+                        <div class="owner-contact" style="margin-top: 0.5rem;">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span th:text="${vehicle.city + ', ' + vehicle.state}">City, State</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Location Map -->
+                <div class="location-card">
+                    <div class="location-card-header">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <h4>Business Location</h4>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div th:if="${vehicle.ownerLatitude != null and vehicle.ownerLongitude != null}">
+                        <div id="owner-map" th:data-lat="${vehicle.ownerLatitude}"
+                            th:data-lng="${vehicle.ownerLongitude}" th:data-name="${vehicle.ownerBusinessName}">
+                        </div>
+                    </div>
+
+                    <!-- Placeholder when no coordinates -->
+                    <div th:unless="${vehicle.ownerLatitude != null and vehicle.ownerLongitude != null}"
+                        class="map-placeholder">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p style="margin: 0; font-weight: 500;">Location not available</p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <th:block layout:fragment="extra-js">
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <script>
+            (function initOwnerMap() {
+                var mapEl = document.getElementById('owner-map');
+                if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
+                    var lat = parseFloat(mapEl.dataset.lat);
+                    var lng = parseFloat(mapEl.dataset.lng);
+                    var businessName = mapEl.dataset.name || 'Business Location';
+
+                    var map = L.map('owner-map').setView([lat, lng], 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    L.marker([lat, lng])
+                        .addTo(map)
+                        .bindPopup('<strong>' + businessName + '</strong><br>Business Location')
+                        .openPopup();
+
+                    setTimeout(function () { map.invalidateSize(); }, 200);
+                }
+            })();
+        </script>
+    </th:block>
 </body>
 
 </html>

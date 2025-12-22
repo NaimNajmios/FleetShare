@@ -388,6 +388,28 @@ public class AdminController {
         return "admin/payments";
     }
 
+    @GetMapping("/payment/view/{paymentId}")
+    public String viewPayment(@PathVariable Long paymentId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return "redirect:/login";
+        }
+
+        com.najmi.fleetshare.dto.PaymentDetailDTO payment = paymentService.getPaymentDetailById(paymentId);
+        if (payment == null) {
+            return "redirect:/admin/payment";
+        }
+
+        model.addAttribute("payment", payment);
+
+        // Get status logs for timeline
+        java.util.List<com.najmi.fleetshare.dto.PaymentStatusLogDTO> statusLogs = paymentService
+                .getPaymentStatusLogsDTO(paymentId);
+        model.addAttribute("statusLogs", statusLogs);
+
+        return "admin/view-payment";
+    }
+
     @GetMapping("/reports")
     public String reports(Model model) {
         return "admin/reports";

@@ -94,6 +94,15 @@
                 padding: 3rem;
                 color: #6c757d;
             }
+
+            .payment-row {
+                cursor: pointer;
+                transition: background-color 0.15s ease-in-out;
+            }
+
+            .payment-row:hover {
+                background-color: #e9ecef !important;
+            }
         </style>
     </th:block>
 </head>
@@ -217,7 +226,8 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="payment : ${payments}" th:data-status="${payment.paymentStatus}"
-                                        th:data-method="${payment.paymentMethod}" class="payment-row">
+                                        th:data-method="${payment.paymentMethod}"
+                                        th:data-payment-id="${payment.paymentId}" class="payment-row">
                                         <td th:text="${payment.paymentId}">1</td>
                                         <td th:text="${payment.invoiceNumber}" class="searchable">INV-2025-001</td>
                                         <td th:text="${payment.renterName}" class="searchable">John Doe</td>
@@ -353,6 +363,16 @@
             document.getElementById('status-filter').addEventListener('change', applyFilters);
             document.getElementById('method-filter').addEventListener('change', applyFilters);
             document.getElementById('payment-search').addEventListener('input', applyFilters);
+
+            // Row click handler to navigate to payment details
+            document.querySelectorAll('.payment-row').forEach(row => {
+                row.addEventListener('click', function () {
+                    const paymentId = this.getAttribute('data-payment-id');
+                    if (paymentId) {
+                        window.location.href = '/owner/payments/view/' + paymentId;
+                    }
+                });
+            });
         </script>
     </th:block>
 </body>

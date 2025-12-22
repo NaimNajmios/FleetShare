@@ -476,6 +476,28 @@ public class OwnerController {
         return "owner/payments";
     }
 
+    @GetMapping("/payments/view/{paymentId}")
+    public String viewPayment(@PathVariable Long paymentId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        com.najmi.fleetshare.dto.PaymentDetailDTO payment = paymentService.getPaymentDetailById(paymentId);
+        if (payment == null) {
+            return "redirect:/owner/payments";
+        }
+
+        model.addAttribute("payment", payment);
+
+        // Get status logs for timeline
+        java.util.List<com.najmi.fleetshare.dto.PaymentStatusLogDTO> statusLogs = paymentService
+                .getPaymentStatusLogsDTO(paymentId);
+        model.addAttribute("statusLogs", statusLogs);
+
+        return "owner/view-payment";
+    }
+
     @GetMapping("/reports")
     public String reports(Model model) {
         return "owner/reports";

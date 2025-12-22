@@ -56,12 +56,16 @@ public class VehicleManagementService {
                         // Get address information
                         String city = "Unknown City";
                         String state = "Unknown State";
+                        Double ownerLatitude = null;
+                        Double ownerLongitude = null;
                         if (owner != null) {
                                 Address address = addressRepository.findLatestAddressByUserId(owner.getUserId())
                                                 .orElse(null);
                                 if (address != null) {
                                         city = address.getCity();
                                         state = address.getState();
+                                        ownerLatitude = address.getLatitude();
+                                        ownerLongitude = address.getLongitude();
                                 }
                         }
 
@@ -82,7 +86,9 @@ public class VehicleManagementService {
                                         ownerContactPhone,
                                         ownerIsVerified,
                                         city,
-                                        state);
+                                        state,
+                                        ownerLatitude,
+                                        ownerLongitude);
                         vehicleDTOs.add(dto);
                 }
 
@@ -115,11 +121,15 @@ public class VehicleManagementService {
                 // Get address information
                 String city = "Unknown City";
                 String state = "Unknown State";
+                Double ownerLatitude = null;
+                Double ownerLongitude = null;
                 if (owner != null) {
                         Address address = addressRepository.findLatestAddressByUserId(owner.getUserId()).orElse(null);
                         if (address != null) {
                                 city = address.getCity();
                                 state = address.getState();
+                                ownerLatitude = address.getLatitude();
+                                ownerLongitude = address.getLongitude();
                         }
                 }
 
@@ -140,7 +150,9 @@ public class VehicleManagementService {
                                 ownerContactPhone,
                                 ownerIsVerified,
                                 city,
-                                state);
+                                state,
+                                ownerLatitude,
+                                ownerLongitude);
         }
 
         /**
@@ -169,12 +181,16 @@ public class VehicleManagementService {
                         // Get address information
                         String city = "Unknown City";
                         String state = "Unknown State";
+                        Double ownerLatitude = null;
+                        Double ownerLongitude = null;
                         if (owner != null) {
                                 Address address = addressRepository.findLatestAddressByUserId(owner.getUserId())
                                                 .orElse(null);
                                 if (address != null) {
                                         city = address.getCity();
                                         state = address.getState();
+                                        ownerLatitude = address.getLatitude();
+                                        ownerLongitude = address.getLongitude();
                                 }
                         }
 
@@ -195,7 +211,9 @@ public class VehicleManagementService {
                                         ownerContactPhone,
                                         ownerIsVerified,
                                         city,
-                                        state);
+                                        state,
+                                        ownerLatitude,
+                                        ownerLongitude);
                         vehicleDTOs.add(dto);
                 }
 

@@ -1,6 +1,8 @@
 package com.najmi.fleetshare.service;
 
 import com.najmi.fleetshare.dto.PaymentDTO;
+import com.najmi.fleetshare.dto.PaymentDetailDTO;
+import com.najmi.fleetshare.dto.PaymentStatusLogDTO;
 import com.najmi.fleetshare.entity.*;
 import com.najmi.fleetshare.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class PaymentService {
 
     @Autowired
     private PaymentStatusLogRepository paymentStatusLogRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Fetches all payments with related information
@@ -68,6 +73,34 @@ public class PaymentService {
         return paymentStatusLogRepository.findByPaymentIdOrderByStatusTimestampDesc(paymentId);
     }
 
+    /**
+     * Fetches payment status logs as DTOs with actor names resolved
+     * 
+     * @param paymentId Payment ID
+     * @return List of PaymentStatusLogDTO objects
+     */
+    public List<PaymentStatusLogDTO> getPaymentStatusLogsDTO(Long paymentId) {
+        List<PaymentStatusLog> logs = paymentStatusLogRepository.findByPaymentIdOrderByStatusTimestampDesc(paymentId);
+        List<PaymentStatusLogDTO> dtos = new ArrayList<>();
+
+        for (PaymentStatusLog log : logs) {
+            String actorName = "System";
+            if (log.getActorUserId() != null) {
+                User actor = userRepository.findById(log.getActorUserId()).orElse(null);
+                if (actor != null) {
+                    actorName = actor.getEmail();
+                }
+            }
+            PaymentStatusLogDTO dto = new PaymentStatusLogDTO(
+                    log.getStatusValue() != null ? log.getStatusValue().name() : "UNKNOWN",
+                    actorName,
+                    log.getStatusTimestamp());
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
     public Payment getPaymentByBookingId(Long bookingId) {
         List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
         if (invoices.isEmpty()) {
@@ -81,6 +114,60 @@ public class PaymentService {
         }
         // Assuming one payment record per invoice for now
         return payments.get(0);
+    }
+
+    /**
+     * Fetches detailed payment information by payment ID
+     * 
+     * @param paymentId Payment ID
+     * @return PaymentDetailDTO with all related information
+     */
+    public PaymentDetailDTO getPaymentDetailById(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId).orElse(null);
+        if (payment == null) {
+            return null;
+        }
+
+        Invoice invoice = invoiceRepository.findById(payment.getInvoiceId()).orElse(null);
+        if (invoice == null) {
+            return null;
+        }
+
+        Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+        FleetOwner owner = fleetOwnerRepository.findById(invoice.getFleetOwnerId()).orElse(null);
+
+        // Get renter email from User entity
+        String renterEmail = "Unknown";
+        if (renter != null && renter.getUserId() != null) {
+            User renterUser = userRepository.findById(renter.getUserId()).orElse(null);
+            if (renterUser != null) {
+                renterEmail = renterUser.getEmail();
+            }
+        }
+
+        PaymentDetailDTO dto = new PaymentDetailDTO();
+        dto.setPaymentId(payment.getPaymentId());
+        dto.setInvoiceNumber(invoice.getInvoiceNumber());
+        dto.setRenterName(renter != null ? renter.getFullName() : "Unknown");
+        dto.setRenterEmail(renterEmail);
+        dto.setRenterId(renter != null ? renter.getRenterId() : null);
+        dto.setOwnerBusinessName(owner != null ? owner.getBusinessName() : "Unknown");
+        dto.setAmount(payment.getAmount());
+        dto.setPaymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : "N/A");
+        dto.setPaymentStatus(payment.getPaymentStatus() != null ? payment.getPaymentStatus().name() : "PENDING");
+        dto.setPaymentDate(payment.getPaymentDate());
+        dto.setTransactionReference(payment.getTransactionReference());
+        dto.setVerificationProofUrl(payment.getVerificationProofUrl());
+
+        // Invoice details
+        dto.setInvoiceId(invoice.getInvoiceId());
+        dto.setIssueDate(invoice.getIssueDate());
+        dto.setDueDate(invoice.getDueDate());
+        dto.setInvoiceStatus(invoice.getStatus() != null ? invoice.getStatus().name() : "UNKNOWN");
+        dto.setInvoiceRemarks(invoice.getRemarks());
+        dto.setBookingId(invoice.getBookingId());
+
+        return dto;
     }
 
     /**

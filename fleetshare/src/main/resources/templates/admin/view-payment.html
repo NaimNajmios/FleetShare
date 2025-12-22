@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='payment', pageTitle='Payment Details'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .payment-header {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .payment-title h3 {
+                margin-bottom: 0.25rem;
+                font-weight: bold;
+            }
+
+            .payment-title p {
+                margin-bottom: 0;
+                color: #6c757d;
+            }
+
+            .info-card {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+                margin-bottom: 1.5rem;
+            }
+
+            .card-header-custom {
+                border-bottom: 1px solid #f3f3f3;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+                font-weight: bold;
+                font-size: 1.1rem;
+                color: #333;
+            }
+
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.75rem;
+                border-bottom: 1px solid #f8f9fa;
+                padding-bottom: 0.5rem;
+            }
+
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+
+            .detail-label {
+                color: #6c757d;
+                font-weight: 500;
+            }
+
+            .detail-value {
+                font-weight: 600;
+                color: #333;
+                text-align: right;
+            }
+
+            .status-badge {
+                padding: 0.5em 1em;
+                border-radius: 0.25rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+            }
+
+            .status-pending {
+                background-color: #fff3cd;
+                color: #856404;
+            }
+
+            .status-verified {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .status-failed {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            /* Timeline Styles */
+            .timeline {
+                position: relative;
+                padding-left: 30px;
+                margin-top: 1rem;
+            }
+
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 10px;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: linear-gradient(to bottom, #4B49AC, #7978E9);
+                border-radius: 3px;
+            }
+
+            .timeline-item {
+                position: relative;
+                padding-bottom: 1.25rem;
+            }
+
+            .timeline-item:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -24px;
+                top: 5px;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #4B49AC;
+                border: 2px solid white;
+                box-shadow: 0 0 0 2px #4B49AC;
+            }
+
+            .timeline-item.status-PENDING::before {
+                background: #ffc107;
+                box-shadow: 0 0 0 2px #ffc107;
+            }
+
+            .timeline-item.status-VERIFIED::before {
+                background: #28a745;
+                box-shadow: 0 0 0 2px #28a745;
+            }
+
+            .timeline-item.status-FAILED::before {
+                background: #dc3545;
+                box-shadow: 0 0 0 2px #dc3545;
+            }
+
+            .timeline-content {
+                background: #f8f9fa;
+                border-radius: 6px;
+                padding: 0.75rem;
+                border-left: 3px solid #4B49AC;
+            }
+
+            .timeline-item.status-PENDING .timeline-content {
+                border-left-color: #ffc107;
+            }
+
+            .timeline-item.status-VERIFIED .timeline-content {
+                border-left-color: #28a745;
+            }
+
+            .timeline-item.status-FAILED .timeline-content {
+                border-left-color: #dc3545;
+            }
+
+            .timeline-status {
+                margin-bottom: 0.35rem;
+            }
+
+            .timeline-status .status-badge {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .timeline-time {
+                font-size: 0.7rem;
+                color: #6c757d;
+                display: block;
+            }
+
+            .timeline-actor {
+                font-size: 0.7rem;
+                color: #6c757d;
+                word-break: break-word;
+            }
+
+            .badge-pending {
+                background-color: #fff3cd;
+                color: #856404;
+            }
+
+            .badge-verified {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .badge-failed {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .action-panel {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .amount-display {
+                font-size: 2rem;
+                font-weight: bold;
+                color: #4B49AC;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="payment-header">
+                    <div class="payment-title">
+                        <h3>Payment Details</h3>
+                        <p>Payment ID: <span th:text="${payment.paymentId}">1</span></p>
+                    </div>
+                    <div>
+                        <span th:text="${payment.paymentStatus}" th:class="'status-badge ' + 
+                              (${payment.paymentStatus == 'VERIFIED'} ? 'status-verified' : 
+                              (${payment.paymentStatus == 'PENDING'} ? 'status-pending' : 
+                              (${payment.paymentStatus == 'FAILED'} ? 'status-failed' : '')))">
+                            PENDING
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Info Cards -->
+            <div class="col-lg-8">
+                <!-- Payment Information -->
+                <div class="info-card">
+                    <div class="card-header-custom">Payment Information</div>
+                    <div class="amount-display"
+                        th:text="'RM ' + ${#numbers.formatDecimal(payment.amount, 1, 'COMMA', 2, 'POINT')}">
+                        RM 1,200.00
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Date</span>
+                        <span class="detail-value"
+                            th:text="${payment.paymentDate != null ? #temporals.format(payment.paymentDate, 'MMMM dd, yyyy HH:mm') : 'N/A'}">June
+                            20, 2025 14:30</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Method</span>
+                        <span class="detail-value" th:text="${payment.paymentMethod}">BANK_TRANSFER</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Transaction Reference</span>
+                        <span class="detail-value"
+                            th:text="${payment.transactionReference != null ? payment.transactionReference : 'N/A'}">TXN-12345</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Verification Proof</span>
+                        <span class="detail-value">
+                            <a th:if="${payment.verificationProofUrl != null}" th:href="${payment.verificationProofUrl}"
+                                target="_blank" class="text-primary">View Proof</a>
+                            <span th:unless="${payment.verificationProofUrl != null}" class="text-muted">No proof
+                                uploaded</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Invoice Information -->
+                <div class="info-card">
+                    <div class="card-header-custom">Invoice Information</div>
+                    <div class="detail-row">
+                        <span class="detail-label">Invoice Number</span>
+                        <span class="detail-value" th:text="${payment.invoiceNumber}">INV-2025-001</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Issue Date</span>
+                        <span class="detail-value"
+                            th:text="${payment.issueDate != null ? #temporals.format(payment.issueDate, 'MMMM dd, yyyy') : 'N/A'}">June
+                            15, 2025</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Due Date</span>
+                        <span class="detail-value"
+                            th:text="${payment.dueDate != null ? #temporals.format(payment.dueDate, 'MMMM dd, yyyy') : 'N/A'}">June
+                            30, 2025</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Invoice Status</span>
+                        <span class="detail-value" th:text="${payment.invoiceStatus}">PAID</span>
+                    </div>
+                    <div th:if="${payment.invoiceRemarks != null}" class="detail-row">
+                        <span class="detail-label">Remarks</span>
+                        <span class="detail-value" th:text="${payment.invoiceRemarks}">-</span>
+                    </div>
+                    <div th:if="${payment.bookingId != null}" class="mt-3 text-right">
+                        <a th:href="@{/admin/bookings/view/{id}(id=${payment.bookingId})}"
+                            class="btn btn-sm btn-outline-primary">View Booking</a>
+                    </div>
+                </div>
+
+                <!-- Entity References -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-card h-100">
+                            <div class="card-header-custom">Renter Information</div>
+                            <div class="detail-row">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-value" th:text="${payment.renterName}">John Doe</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value" th:text="${payment.renterEmail}">john@example.com</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Renter ID</span>
+                                <span class="detail-value" th:text="${payment.renterId}">1001</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card h-100">
+                            <div class="card-header-custom">Fleet Owner</div>
+                            <div class="detail-row">
+                                <span class="detail-label">Business Name</span>
+                                <span class="detail-value" th:text="${payment.ownerBusinessName}">Metro Car
+                                    Rental</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actions & Timeline -->
+            <div class="col-lg-4">
+                <div class="action-panel">
+                    <div class="card-header-custom">Actions</div>
+                    <a href="/admin/payment" class="btn btn-outline-secondary btn-block mb-3">
+                        <i class="mdi mdi-arrow-left"></i> Back to Payments
+                    </a>
+                    <button class="btn btn-secondary btn-block" onclick="window.print()">
+                        <i class="mdi mdi-printer"></i> Print Details
+                    </button>
+                </div>
+
+                <!-- Status Timeline -->
+                <div class="info-card mt-3">
+                    <div class="card-header-custom">Status Timeline</div>
+
+                    <div th:if="${!#lists.isEmpty(statusLogs)}" class="timeline">
+                        <div th:each="log : ${statusLogs}" th:class="'timeline-item status-' + ${log.status}">
+                            <div class="timeline-content">
+                                <div class="timeline-status">
+                                    <span th:if="${log.status == 'PENDING'}"
+                                        class="status-badge badge-pending">Pending</span>
+                                    <span th:if="${log.status == 'VERIFIED'}"
+                                        class="status-badge badge-verified">Verified</span>
+                                    <span th:if="${log.status == 'FAILED'}"
+                                        class="status-badge badge-failed">Failed</span>
+                                </div>
+                                <div class="timeline-actor" th:text="'By: ' + ${log.actorName}">By: admin@example.com
+                                </div>
+                                <div class="timeline-time"
+                                    th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">01 Jan 2024 10:00
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(statusLogs)}" class="text-center text-muted py-3">
+                        <i class="mdi mdi-timeline-text" style="font-size: 2rem;"></i>
+                        <p class="mb-0">No status changes recorded yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
