@@ -24,11 +24,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -207,6 +209,26 @@ public class OwnerController {
     public String addVehicle(Model model) {
         model.addAttribute("vehicle", new VehicleDTO());
         return "owner/add-vehicle";
+    }
+
+    @PostMapping("/vehicles/add")
+    public String createVehicle(@ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            Long fleetOwnerId = user.getOwnerDetails().getFleetOwnerId();
+            vehicleManagementService.createVehicle(fleetOwnerId, request);
+            redirectAttributes.addFlashAttribute("successMessage", "Vehicle added successfully!");
+            return "redirect:/owner/vehicles";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding vehicle: " + e.getMessage());
+            return "redirect:/owner/vehicles/add";
+        }
     }
 
     @GetMapping("/maintenance")
