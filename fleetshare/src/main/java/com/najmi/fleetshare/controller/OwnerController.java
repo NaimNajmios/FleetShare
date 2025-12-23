@@ -231,6 +231,27 @@ public class OwnerController {
         }
     }
 
+    @PostMapping("/vehicles/update/{vehicleId}")
+    public String updateVehicle(@PathVariable Long vehicleId,
+            @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            Long fleetOwnerId = user.getOwnerDetails().getFleetOwnerId();
+            vehicleManagementService.updateVehicle(vehicleId, fleetOwnerId, request);
+            redirectAttributes.addFlashAttribute("successMessage", "Vehicle updated successfully!");
+            return "redirect:/owner/vehicles/view/" + vehicleId;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating vehicle: " + e.getMessage());
+            return "redirect:/owner/vehicles/view/" + vehicleId;
+        }
+    }
+
     @GetMapping("/maintenance")
     public String maintenance(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
