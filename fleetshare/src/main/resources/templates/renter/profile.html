@@ -354,6 +354,38 @@
             .map-placeholder i {
                 font-size: 3rem;
             }
+
+            /* Toast Notifications */
+            .toast-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 0.75rem;
+                color: white;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                z-index: 9999;
+                opacity: 0;
+                transform: translateX(100px);
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            }
+
+            .toast-notification.show {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .toast-success {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            }
+
+            .toast-error {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            }
         </style>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -545,7 +577,12 @@
             const btnCancel = document.getElementById('btn-cancel');
             const btnSave = document.getElementById('btn-save');
 
-            const editableFields = [fullNameInput, phoneNumberInput, addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
+            // Profile fields (editable)
+            const profileFields = [fullNameInput, phoneNumberInput];
+            // Address fields (read-only - separate table)
+            const addressFields = [addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
+            // All fields for reference
+            const editableFields = profileFields;
 
             let originalValues = {};
             editableFields.forEach(field => {
@@ -565,13 +602,47 @@
                 exitEditMode(true);
             });
 
-            btnSave.addEventListener('click', function () {
-                editableFields.forEach(field => {
-                    if (field) originalValues[field.id] = field.value;
-                });
-                alert('Profile updated successfully! (UI Demo - No backend implementation yet)');
-                exitEditMode(false);
+            btnSave.addEventListener('click', async function () {
+                const profileData = {
+                    fullName: fullNameInput.value,
+                    phoneNumber: phoneNumberInput.value
+                };
+
+                try {
+                    const response = await fetch('/renter/profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(profileData)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        originalValues['fullName'] = fullNameInput.value;
+                        originalValues['phoneNumber'] = phoneNumberInput.value;
+                        showToast('Profile updated successfully!', 'success');
+                        exitEditMode(false);
+                    } else {
+                        showToast(result.error || 'Failed to update profile', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    showToast('An error occurred while updating profile', 'error');
+                }
             });
+
+            function showToast(message, type) {
+                const existingToast = document.querySelector('.toast-notification');
+                if (existingToast) existingToast.remove();
+
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+                toast.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i> ' + message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+            }
 
             function exitEditMode(restoreOriginal) {
                 isEditMode = false;

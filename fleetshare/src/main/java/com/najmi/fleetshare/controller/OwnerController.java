@@ -9,6 +9,8 @@ import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.entity.FleetOwner;
+import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.PaymentService;
@@ -17,16 +19,23 @@ import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -51,6 +60,9 @@ public class OwnerController {
 
     @Autowired
     private com.najmi.fleetshare.repository.AddressRepository addressRepository;
+
+    @Autowired
+    private FleetOwnerRepository fleetOwnerRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -521,5 +533,39 @@ public class OwnerController {
             addressOpt.ifPresent(address -> model.addAttribute("address", address));
         }
         return "owner/profile";
+    }
+
+    @PostMapping("/profile")
+    @ResponseBody
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileData, HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null || sessionUser.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        String businessName = profileData.get("businessName");
+        String contactPhone = profileData.get("contactPhone");
+
+        // Validation
+        if (businessName == null || businessName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Business name is required"));
+        }
+
+        // Find and update owner entity
+        FleetOwner owner = fleetOwnerRepository.findByUserId(sessionUser.getUserId()).orElse(null);
+        if (owner == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Owner not found"));
+        }
+
+        owner.setBusinessName(businessName.trim());
+        owner.setContactPhone(contactPhone != null ? contactPhone.trim() : null);
+        owner.setUpdatedAt(LocalDateTime.now());
+        fleetOwnerRepository.save(owner);
+
+        // Update session
+        sessionUser.getOwnerDetails().setBusinessName(businessName.trim());
+        sessionUser.getOwnerDetails().setContactPhone(contactPhone != null ? contactPhone.trim() : null);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
     }
 }
