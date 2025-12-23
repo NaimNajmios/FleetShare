@@ -29,7 +29,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -40,6 +42,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller
 @RequestMapping("/owner")
@@ -249,6 +257,61 @@ public class OwnerController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating vehicle: " + e.getMessage());
             return "redirect:/owner/vehicles/view/" + vehicleId;
+        }
+    }
+
+    @PostMapping("/vehicles/{vehicleId}/image")
+    @ResponseBody
+    public ResponseEntity<?> uploadVehicleImage(@PathVariable Long vehicleId,
+            @RequestParam("image") MultipartFile file,
+            HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            // Validate file
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No file uploaded"));
+            }
+
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Only image files are allowed"));
+            }
+
+            // Create uploads directory if it doesn't exist (external to src for runtime
+            // access)
+            String uploadDir = "C:/fleetshare-uploads/vehicles";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Generate unique filename
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null && originalFilename.contains(".")
+                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                    : ".jpg";
+            String uniqueFilename = "vehicle_" + vehicleId + "_" + UUID.randomUUID().toString().substring(0, 8)
+                    + extension;
+
+            // Save file
+            Path filePath = uploadPath.resolve(uniqueFilename);
+            Files.copy(file.getInputStream(), filePath);
+
+            // Update database with new image URL
+            String imageUrl = "/uploads/vehicles/" + uniqueFilename;
+            Long fleetOwnerId = user.getOwnerDetails().getFleetOwnerId();
+            vehicleManagementService.updateVehicleImage(vehicleId, fleetOwnerId, imageUrl);
+
+            return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload image: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

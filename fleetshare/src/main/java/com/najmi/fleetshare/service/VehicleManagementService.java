@@ -337,4 +337,28 @@ public class VehicleManagementService {
 
                 return savedVehicle;
         }
+
+        /**
+         * Updates the vehicle image URL
+         * 
+         * @param vehicleId    Vehicle ID
+         * @param fleetOwnerId Fleet owner ID for authorization
+         * @param imageUrl     New image URL
+         * @return Updated Vehicle
+         */
+        @Transactional
+        public Vehicle updateVehicleImage(Long vehicleId, Long fleetOwnerId, String imageUrl) {
+                Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+                if (vehicle == null) {
+                        throw new RuntimeException("Vehicle not found");
+                }
+
+                if (!vehicle.getFleetOwnerId().equals(fleetOwnerId)) {
+                        throw new RuntimeException("Unauthorized to update this vehicle");
+                }
+
+                vehicle.setVehicleImageUrl(imageUrl);
+                vehicle.setUpdatedAt(LocalDateTime.now());
+                return vehicleRepository.save(vehicle);
+        }
 }
