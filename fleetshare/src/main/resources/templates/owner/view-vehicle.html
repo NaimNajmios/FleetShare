@@ -371,14 +371,19 @@
                                 <div class="profile-header">
                                     <div>
                                         <div class="vehicle-image-container">
-                                            <img th:if="${vehicle.vehicleImageUrl}" th:src="${vehicle.vehicleImageUrl}"
-                                                class="vehicle-image" alt="Vehicle Image">
+                                            <img id="vehicleImage" th:if="${vehicle.vehicleImageUrl}"
+                                                th:src="${vehicle.vehicleImageUrl}" class="vehicle-image"
+                                                alt="Vehicle Image">
                                             <i th:unless="${vehicle.vehicleImageUrl}"
-                                                class="mdi mdi-car vehicle-placeholder"></i>
+                                                class="mdi mdi-car vehicle-placeholder" id="vehiclePlaceholder"></i>
                                         </div>
                                         <div class="image-controls">
-                                            <button class="btn btn-sm btn-outline-danger">Change</button>
-                                            <button class="btn btn-sm btn-secondary">Reset</button>
+                                            <input type="file" id="vehicleImageInput" accept="image/*"
+                                                style="display: none;">
+                                            <button type="button" id="changeImageBtn"
+                                                class="btn btn-sm btn-outline-danger">Change</button>
+                                            <button type="button" id="resetImageBtn"
+                                                class="btn btn-sm btn-secondary">Reset</button>
                                         </div>
                                     </div>
 
@@ -557,7 +562,7 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <script>
+        <script th:inline="javascript">
             // Toggle between view and edit modes
             const container = document.querySelector('.profile-container');
             const editBtn = document.getElementById('editBtn');
@@ -620,6 +625,146 @@
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) closeRateModal();
             });
+            // Image Upload Logic - Preview first, upload on form submit
+            const vehicleId = /*[[${vehicle.vehicleId}]]*/ 0;
+            const changeImageBtn = document.getElementById('changeImageBtn');
+            const vehicleImageInput = document.getElementById('vehicleImageInput');
+            let vehicleImageEl = document.getElementById('vehicleImage');
+            const vehiclePlaceholder = document.getElementById('vehiclePlaceholder');
+            const vehicleForm = document.getElementById('vehicleForm');
+
+            let selectedFile = null;
+
+            // Change button opens file picker
+            changeImageBtn.addEventListener('click', function() {
+                vehicleImageInput.click();
+            });
+
+            // When file selected, show preview on page (not modal)
+            vehicleImageInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    selectedFile = e.target.files[0];
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        // Show preview on page
+                        if (vehicleImageEl) {
+                            vehicleImageEl.src = event.target.result;
+                        } else if (vehiclePlaceholder) {
+                            vehiclePlaceholder.outerHTML = '<img id="vehicleImage" src="' + event.target.result + '" class="vehicle-image" alt="Vehicle Image">';
+                            vehicleImageEl = document.getElementById('vehicleImage');
+                        }
+                    };
+                    reader.readAsDataURL(selectedFile);
+                }
+            });
+
+            // Intercept form submit to show confirmation modal with summary
+            vehicleForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Build summary of changes
+                const brand = vehicleForm.querySelector('[name="brand"]').value;
+                const model = vehicleForm.querySelector('[name="model"]').value;
+                const year = vehicleForm.querySelector('[name="manufacturingYear"]').value;
+                const regNo = vehicleForm.querySelector('[name="registrationNo"]').value;
+                const category = vehicleForm.querySelector('[name="category"]').value;
+                const mileage = vehicleForm.querySelector('[name="mileage"]').value;
+                const fuelType = vehicleForm.querySelector('[name="fuelType"]').value;
+                const transmission = vehicleForm.querySelector('[name="transmissionType"]').value;
+                const status = vehicleForm.querySelector('[name="status"]').value;
+                const rate = document.getElementById('ratePerDayInput').value;
+                
+                let summaryHtml = '<div style="text-align: left; font-size: 14px;">';
+                summaryHtml += '<table style="width: 100%; border-collapse: collapse;">';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Brand:</strong></td><td style="padding: 4px 8px;">' + brand + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Model:</strong></td><td style="padding: 4px 8px;">' + model + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Year:</strong></td><td style="padding: 4px 8px;">' + (year || 'N/A') + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Reg. No:</strong></td><td style="padding: 4px 8px;">' + regNo + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Category:</strong></td><td style="padding: 4px 8px;">' + category + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Mileage:</strong></td><td style="padding: 4px 8px;">' + (mileage || 'N/A') + ' km</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Fuel:</strong></td><td style="padding: 4px 8px;">' + fuelType + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Transmission:</strong></td><td style="padding: 4px 8px;">' + transmission + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Status:</strong></td><td style="padding: 4px 8px;">' + status + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Rate/Day:</strong></td><td style="padding: 4px 8px;">RM ' + (parseFloat(rate) || 0).toFixed(2) + '</td></tr>';
+                if (selectedFile) {
+                    summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>New Image:</strong></td><td style="padding: 4px 8px; color: #28a745;">Yes (pending upload)</td></tr>';
+                }
+                summaryHtml += '</table></div>';
+                
+                // Show confirmation modal with summary
+                document.getElementById('confirmModalPreview').innerHTML = summaryHtml;
+                document.getElementById('confirmModalPreview').style.display = 'block';
+                document.getElementById('confirmModalTitle').textContent = 'Confirm Vehicle Update';
+                document.getElementById('confirmModalMessage').textContent = 'Please review the vehicle information below:';
+                
+                const confirmBtn = document.getElementById('confirmModalBtn');
+                confirmBtn.onclick = function() {
+                    performUpdate();
+                };
+                
+                const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                modal.show();
+            });
+
+            function performUpdate() {
+                document.getElementById('confirmModalBtn').disabled = true;
+                document.getElementById('confirmModalBtn').textContent = 'Updating...';
+                
+                // If there's a new image, upload it first
+                if (selectedFile) {
+                    const formData = new FormData();
+                    formData.append('image', selectedFile);
+                    
+                    fetch('/owner/vehicles/' + vehicleId + '/image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Image uploaded, now submit the form
+                            submitFormData();
+                        } else {
+                            alert('Error uploading image: ' + (data.error || 'Failed'));
+                            resetModalBtn();
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error: ' + error.message);
+                        resetModalBtn();
+                    });
+                } else {
+                    // No new image, just submit the form
+                    submitFormData();
+                }
+            }
+
+            function submitFormData() {
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+                // Create and submit form data
+                const formData = new FormData(vehicleForm);
+                fetch(vehicleForm.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                    resetModalBtn();
+                });
+            }
+
+            function resetModalBtn() {
+                document.getElementById('confirmModalBtn').disabled = false;
+                document.getElementById('confirmModalBtn').textContent = 'Confirm';
+            }
         </script>
     </th:block>
 </body>
