@@ -7,6 +7,8 @@ import com.najmi.fleetshare.dto.MaintenanceLogDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.entity.PlatformAdmin;
+import com.najmi.fleetshare.repository.PlatformAdminRepository;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.PaymentService;
@@ -16,17 +18,23 @@ import com.najmi.fleetshare.util.SessionHelper;
 import com.najmi.fleetshare.repository.AddressRepository;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -51,6 +59,9 @@ public class AdminController {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private PlatformAdminRepository platformAdminRepository;
 
     @GetMapping("/")
     public String index() {
@@ -475,5 +486,36 @@ public class AdminController {
             addressOpt.ifPresent(address -> model.addAttribute("address", address));
         }
         return "admin/profile";
+    }
+
+    @PostMapping("/profile")
+    @ResponseBody
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileData, HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null || sessionUser.getAdminDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        String fullName = profileData.get("fullName");
+
+        // Validation
+        if (fullName == null || fullName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Full name is required"));
+        }
+
+        // Find and update admin entity
+        PlatformAdmin admin = platformAdminRepository.findByUserId(sessionUser.getUserId()).orElse(null);
+        if (admin == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Admin not found"));
+        }
+
+        admin.setFullName(fullName.trim());
+        admin.setUpdatedAt(LocalDateTime.now());
+        platformAdminRepository.save(admin);
+
+        // Update session
+        sessionUser.getAdminDetails().setFullName(fullName.trim());
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
     }
 }

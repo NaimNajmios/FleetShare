@@ -392,16 +392,47 @@
                 btnCancel.classList.add('hidden');
             });
 
-            btnSave.addEventListener('click', function () {
-                editableFields.forEach(field => {
-                    originalValues[field.id] = field.value;
-                    field.disabled = true;
-                });
-                btnEdit.classList.remove('hidden');
-                btnSave.classList.add('hidden');
-                btnCancel.classList.add('hidden');
-                alert('Profile updated successfully! (UI Demo - No backend implementation yet)');
+            btnSave.addEventListener('click', async function () {
+                const profileData = {
+                    businessName: businessNameInput.value,
+                    contactPhone: contactPhoneInput.value
+                };
+
+                try {
+                    const response = await fetch('/owner/profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(profileData)
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        originalValues['businessName'] = businessNameInput.value;
+                        originalValues['contactPhone'] = contactPhoneInput.value;
+                        showToast('Profile updated successfully!', 'success');
+                        editableFields.forEach(field => field.disabled = true);
+                        btnEdit.classList.remove('hidden');
+                        btnSave.classList.add('hidden');
+                        btnCancel.classList.add('hidden');
+                    } else {
+                        showToast(result.error || 'Failed to update profile', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('An error occurred', 'error');
+                }
             });
+
+            function showToast(message, type) {
+                const existing = document.querySelector('.toast-notification');
+                if (existing) existing.remove();
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+                toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:1rem 1.5rem;border-radius:0.75rem;color:white;font-weight:500;z-index:9999;opacity:0;transform:translateX(100px);transition:all 0.3s;box-shadow:0 10px 25px rgba(0,0,0,0.2);background:' + (type === 'success' ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#ef4444,#dc2626)');
+                toast.innerHTML = '<i class="mdi ' + (type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle') + ' mr-2"></i>' + message;
+                document.body.appendChild(toast);
+                setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(0)'; }, 10);
+                setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+            }
 
             document.getElementById('btn-change-password').addEventListener('click', function () {
                 alert('Change password modal will be implemented.');

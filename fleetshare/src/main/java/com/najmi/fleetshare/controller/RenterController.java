@@ -4,23 +4,32 @@ import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.entity.Address;
+import com.najmi.fleetshare.entity.Renter;
 import com.najmi.fleetshare.repository.AddressRepository;
+import com.najmi.fleetshare.repository.RenterRepository;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.najmi.fleetshare.entity.BookingStatusLog;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.dto.OwnerProfileDTO;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -41,6 +50,9 @@ public class RenterController {
 
     @Autowired
     private FleetOwnerRepository fleetOwnerRepository;
+
+    @Autowired
+    private RenterRepository renterRepository;
 
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
@@ -170,6 +182,40 @@ public class RenterController {
             model.addAttribute("address", address);
         }
         return "renter/profile";
+    }
+
+    @PostMapping("/profile")
+    @ResponseBody
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileData, HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null || sessionUser.getRenterDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        String fullName = profileData.get("fullName");
+        String phoneNumber = profileData.get("phoneNumber");
+
+        // Validation
+        if (fullName == null || fullName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Full name is required"));
+        }
+
+        // Find and update renter entity
+        Renter renter = renterRepository.findByUserId(sessionUser.getUserId()).orElse(null);
+        if (renter == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Renter not found"));
+        }
+
+        renter.setFullName(fullName.trim());
+        renter.setPhoneNumber(phoneNumber != null ? phoneNumber.trim() : null);
+        renter.setUpdatedAt(LocalDateTime.now());
+        renterRepository.save(renter);
+
+        // Update session
+        sessionUser.getRenterDetails().setFullName(fullName.trim());
+        sessionUser.getRenterDetails().setPhoneNumber(phoneNumber != null ? phoneNumber.trim() : null);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
     }
 
     @GetMapping("/bookings/{id}")

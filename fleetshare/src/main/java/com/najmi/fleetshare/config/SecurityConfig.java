@@ -19,6 +19,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for AJAX requests
                 .authorizeHttpRequests(auth -> auth
                         // Public resources
                         .requestMatchers("/css/**", "/js/**", "/assets/**", "/images/**").permitAll()
