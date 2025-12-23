@@ -132,6 +132,108 @@
                     grid-template-columns: 1fr;
                 }
             }
+
+            /* Rate Modal Styles */
+            .rate-modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1050;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .rate-modal-overlay.show {
+                display: flex;
+            }
+
+            .rate-modal {
+                background: white;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 400px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                animation: modalSlideIn 0.3s ease;
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .rate-modal-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid #e9ecef;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .rate-modal-header h5 {
+                margin: 0;
+                font-weight: 600;
+                color: #2c2e30;
+            }
+
+            .rate-modal-close {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #6c757d;
+                cursor: pointer;
+            }
+
+            .rate-modal-body {
+                padding: 1.5rem;
+            }
+
+            .rate-input-group {
+                display: flex;
+                align-items: center;
+                border: 2px solid #ced4da;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .rate-input-group:focus-within {
+                border-color: #007bff;
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+            }
+
+            .rate-input-prefix {
+                padding: 0.75rem 1rem;
+                background: #f8f9fa;
+                font-weight: 600;
+                color: #495057;
+            }
+
+            .rate-input {
+                flex: 1;
+                border: none;
+                padding: 0.75rem;
+                font-size: 1.25rem;
+                font-weight: 500;
+                outline: none;
+            }
+
+            .rate-modal-footer {
+                padding: 1rem 1.5rem;
+                border-top: 1px solid #e9ecef;
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.75rem;
+            }
         </style>
     </th:block>
 </head>
@@ -242,9 +344,9 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Rate Per Day (RM)</label>
-                                        <button class="btn manage-rate-btn"
-                                            onclick="alert('Manage Rate modal will be implemented later.')">
-                                            <span>Manage Rate Per Day</span>
+                                        <input type="hidden" id="ratePerDayInput" name="ratePerDay" value="0">
+                                        <button type="button" class="btn manage-rate-btn" id="openRateModal">
+                                            <span id="rateDisplay">Set Rate Per Day</span>
                                             <i class="mdi mdi-cog"></i>
                                         </button>
                                     </div>
@@ -265,7 +367,67 @@
                 </div>
             </div>
         </div>
+
+    <!-- Rate Per Day Modal -->
+    <div class="rate-modal-overlay" id="rateModalOverlay">
+        <div class="rate-modal">
+            <div class="rate-modal-header">
+                <h5><i class="mdi mdi-currency-usd mr-2"></i>Set Rate Per Day</h5>
+                <button class="rate-modal-close" id="closeRateModal">&times;</button>
+            </div>
+            <div class="rate-modal-body">
+                <p class="text-muted mb-3">Enter the daily rental rate for this vehicle</p>
+                <div class="rate-input-group">
+                    <span class="rate-input-prefix">RM</span>
+                    <input type="number" class="rate-input" id="rateModalInput" min="0" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+            <div class="rate-modal-footer">
+                <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
+                <button class="btn btn-primary" id="saveRateModal">Save Rate</button>
+            </div>
+        </div>
     </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            // Rate Modal Logic
+            const rateModalOverlay = document.getElementById('rateModalOverlay');
+            const rateModalInput = document.getElementById('rateModalInput');
+            const rateDisplay = document.getElementById('rateDisplay');
+            const ratePerDayInput = document.getElementById('ratePerDayInput');
+
+            document.getElementById('openRateModal').addEventListener('click', function () {
+                rateModalInput.value = ratePerDayInput.value || '';
+                rateModalOverlay.classList.add('show');
+                rateModalInput.focus();
+            });
+
+            document.getElementById('closeRateModal').addEventListener('click', closeModal);
+            document.getElementById('cancelRateModal').addEventListener('click', closeModal);
+
+            rateModalOverlay.addEventListener('click', function (e) {
+                if (e.target === rateModalOverlay) closeModal();
+            });
+
+            document.getElementById('saveRateModal').addEventListener('click', function () {
+                const rate = parseFloat(rateModalInput.value) || 0;
+                ratePerDayInput.value = rate.toFixed(2);
+                rateDisplay.textContent = rate > 0 ? 'RM ' + rate.toFixed(2) + ' / day' : 'Set Rate Per Day';
+                closeModal();
+            });
+
+            function closeModal() {
+                rateModalOverlay.classList.remove('show');
+            }
+
+            // Close on Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) closeModal();
+            });
+        </script>
+    </th:block>
 </body>
 
 </html>
