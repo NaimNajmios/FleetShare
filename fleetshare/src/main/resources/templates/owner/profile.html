@@ -242,6 +242,82 @@
             </div>
         </div>
 
+        <!-- Payment Settings Row -->
+        <div class="row">
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="mdi mdi-credit-card-outline mr-2"></i>ToyyibPay Integration</h4>
+                        <p class="card-description">Configure your ToyyibPay account for payment processing (BYOK)</p>
+
+                        <div class="form-group">
+                            <label class="form-label">ToyyibPay Secret Key</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="toyyibpaySecretKey"
+                                    placeholder="Enter your ToyyibPay secret key" disabled>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleSecretKey">
+                                        <i class="ti-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted">Your secret key is encrypted and stored securely</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ToyyibPay Category Code</label>
+                            <input type="text" class="form-control" id="toyyibpayCategoryCode"
+                                placeholder="Enter your category code" disabled>
+                            <small class="text-muted">Category code from your ToyyibPay dashboard</small>
+                        </div>
+
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="mdi mdi-information-outline mr-2" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Bring Your Own Key (BYOK)</strong><br>
+                                <small>Use your own ToyyibPay account to receive payments directly. Create an account at <a href="https://toyyibpay.com" target="_blank">toyyibpay.com</a></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="mdi mdi-qrcode mr-2"></i>Payment QR Code</h4>
+                        <p class="card-description">Upload a QR code for alternative payment methods</p>
+
+                        <div class="text-center mb-4">
+                            <div id="qrCodePreview" class="border rounded p-4" style="min-height: 200px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                <div class="text-muted">
+                                    <i class="mdi mdi-qrcode" style="font-size: 4rem; opacity: 0.3;"></i>
+                                    <p class="mb-0 mt-2">No QR code uploaded</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Upload QR Code Image</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="qrCodeUpload" accept="image/*" disabled>
+                                <label class="custom-file-label" for="qrCodeUpload">Choose file...</label>
+                            </div>
+                            <small class="text-muted">Accepted formats: PNG, JPG, JPEG (Max 2MB)</small>
+                        </div>
+
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="mdi mdi-alert-outline mr-2" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Display Only</strong><br>
+                                <small>This QR code will be shown to renters as an alternative payment option (e.g., DuitNow, Touch n Go)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Account Settings Row -->
         <div class="row">
             <div class="col-lg-12 grid-margin stretch-card">
@@ -367,6 +443,81 @@
                 };
                 document.head.appendChild(leafletJS);
             }
+
+            // Payment Settings - Toggle Secret Key Visibility
+            const toggleSecretKeyBtn = document.getElementById('toggleSecretKey');
+            const secretKeyInput = document.getElementById('toyyibpaySecretKey');
+            if (toggleSecretKeyBtn && secretKeyInput) {
+                toggleSecretKeyBtn.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    if (secretKeyInput.type === 'password') {
+                        secretKeyInput.type = 'text';
+                        icon.classList.remove('ti-eye');
+                        icon.classList.add('ti-eye-off');
+                    } else {
+                        secretKeyInput.type = 'password';
+                        icon.classList.remove('ti-eye-off');
+                        icon.classList.add('ti-eye');
+                    }
+                });
+            }
+
+            // Payment Settings - QR Code Preview
+            const qrCodeUpload = document.getElementById('qrCodeUpload');
+            const qrCodePreview = document.getElementById('qrCodePreview');
+            if (qrCodeUpload && qrCodePreview) {
+                qrCodeUpload.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Validate file size (max 2MB)
+                        if (file.size > 2 * 1024 * 1024) {
+                            alert('File size must be less than 2MB');
+                            this.value = '';
+                            return;
+                        }
+                        
+                        // Validate file type
+                        if (!file.type.startsWith('image/')) {
+                            alert('Please upload an image file');
+                            this.value = '';
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            qrCodePreview.innerHTML = '<img src="' + event.target.result + '" alt="Payment QR Code" style="max-width: 100%; max-height: 200px; border-radius: 8px;">';
+                        };
+                        reader.readAsDataURL(file);
+                        
+                        // Update file label
+                        const label = document.querySelector('.custom-file-label');
+                        if (label) label.textContent = file.name;
+                    }
+                });
+            }
+
+            // Add payment fields to editable fields list
+            const toyyibpaySecretKeyInput = document.getElementById('toyyibpaySecretKey');
+            const toyyibpayCategoryCodeInput = document.getElementById('toyyibpayCategoryCode');
+            const qrCodeUploadInput = document.getElementById('qrCodeUpload');
+            
+            const paymentFields = [toyyibpaySecretKeyInput, toyyibpayCategoryCodeInput, qrCodeUploadInput].filter(f => f);
+            
+            // Extend edit functionality to include payment fields
+            const originalBtnEditHandler = btnEdit.onclick;
+            btnEdit.addEventListener('click', function() {
+                paymentFields.forEach(field => field.disabled = false);
+            });
+            
+            const originalBtnCancelHandler = btnCancel.onclick;
+            btnCancel.addEventListener('click', function() {
+                paymentFields.forEach(field => field.disabled = true);
+            });
+            
+            const originalBtnSaveHandler = btnSave.onclick;
+            btnSave.addEventListener('click', function() {
+                paymentFields.forEach(field => field.disabled = true);
+            });
         })();
         </script></th:block>
 </body>
