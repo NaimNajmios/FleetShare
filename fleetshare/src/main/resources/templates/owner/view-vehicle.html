@@ -364,178 +364,196 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <div class="profile-container" id="viewMode">
-                            <!-- Vehicle Header -->
-                            <div class="profile-header">
-                                <div>
-                                    <div class="vehicle-image-container">
-                                        <img th:if="${vehicle.vehicleImageUrl}" th:src="${vehicle.vehicleImageUrl}"
-                                            class="vehicle-image" alt="Vehicle Image">
-                                        <i th:unless="${vehicle.vehicleImageUrl}"
-                                            class="mdi mdi-car vehicle-placeholder"></i>
+                        <form th:action="@{/owner/vehicles/update/{id}(id=${vehicle.vehicleId})}" method="post"
+                            id="vehicleForm">
+                            <div class="profile-container" id="viewMode">
+                                <!-- Vehicle Header -->
+                                <div class="profile-header">
+                                    <div>
+                                        <div class="vehicle-image-container">
+                                            <img th:if="${vehicle.vehicleImageUrl}" th:src="${vehicle.vehicleImageUrl}"
+                                                class="vehicle-image" alt="Vehicle Image">
+                                            <i th:unless="${vehicle.vehicleImageUrl}"
+                                                class="mdi mdi-car vehicle-placeholder"></i>
+                                        </div>
+                                        <div class="image-controls">
+                                            <button class="btn btn-sm btn-outline-danger">Change</button>
+                                            <button class="btn btn-sm btn-secondary">Reset</button>
+                                        </div>
                                     </div>
-                                    <div class="image-controls">
-                                        <button class="btn btn-sm btn-outline-danger">Change</button>
-                                        <button class="btn btn-sm btn-secondary">Reset</button>
-                                    </div>
-                                </div>
 
-                                <div class="profile-info">
-                                    <h2 th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h2>
-                                    <p class="vehicle-meta" th:text="${vehicle.registrationNo}">Registration</p>
+                                    <div class="profile-info">
+                                        <h2 th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h2>
+                                        <p class="vehicle-meta" th:text="${vehicle.registrationNo}">Registration</p>
 
-                                    <span class="status-badge"
-                                        th:classappend="${'status-' + #strings.toLowerCase(vehicle.status)}"
-                                        th:text="${vehicle.status}">
-                                        AVAILABLE
-                                    </span>
-                                </div>
-                                <div class="mode-toggle">
-                                    <a th:href="@{/owner/maintenance/vehicle/{id}(id=${vehicle.vehicleId})}"
-                                        class="btn btn-outline-info view-actions">
-                                        <i class="mdi mdi-wrench"></i> Maintenance History
-                                    </a>
-                                    <button id="editBtn" class="btn btn-primary view-actions">
-                                        <i class="mdi mdi-pencil"></i> Edit Vehicle
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Vehicle Specifications -->
-                            <div class="form-section">
-                                <h4>Vehicle Specifications</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Brand</label>
-                                        <input type="text" class="form-control" th:value="${vehicle.brand}" readonly>
+                                        <span class="status-badge"
+                                            th:classappend="${'status-' + #strings.toLowerCase(vehicle.status)}"
+                                            th:text="${vehicle.status}">
+                                            AVAILABLE
+                                        </span>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Model</label>
-                                        <input type="text" class="form-control" th:value="${vehicle.model}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Manufacturing Year</label>
-                                        <input type="number" class="form-control"
-                                            th:value="${vehicle.manufacturingYear}" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Registration No.</label>
-                                        <input type="text" class="form-control" th:value="${vehicle.registrationNo}"
-                                            readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Category</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">Sedan
-                                            </option>
-                                            <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV</option>
-                                            <option th:selected="${vehicle.category == 'MPV'}" value="MPV">MPV</option>
-                                            <option th:selected="${vehicle.category == 'Hatchback'}" value="Hatchback">
-                                                Hatchback</option>
-                                            <option th:selected="${vehicle.category == 'Luxury'}" value="Luxury">Luxury
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Mileage (km)</label>
-                                        <input type="number" class="form-control" th:value="${vehicle.mileage}"
-                                            readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Fuel Type</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.fuelType == 'Petrol'}" value="Petrol">Petrol
-                                            </option>
-                                            <option th:selected="${vehicle.fuelType == 'Diesel'}" value="Diesel">Diesel
-                                            </option>
-                                            <option th:selected="${vehicle.fuelType == 'Hybrid'}" value="Hybrid">Hybrid
-                                            </option>
-                                            <option th:selected="${vehicle.fuelType == 'Electric'}" value="Electric">
-                                                Electric</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Transmission</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.transmissionType == 'Automatic'}"
-                                                value="Automatic">Automatic</option>
-                                            <option th:selected="${vehicle.transmissionType == 'Manual'}"
-                                                value="Manual">Manual</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Status & Rate -->
-                            <div class="form-section">
-                                <h4>Status & Rate</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Availability Status</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.status == 'AVAILABLE'}" value="AVAILABLE">
-                                                Available</option>
-                                            <option th:selected="${vehicle.status == 'RENTED'}" value="RENTED">Rented
-                                            </option>
-                                            <option th:selected="${vehicle.status == 'MAINTENANCE'}"
-                                                value="MAINTENANCE">Maintenance</option>
-                                            <option th:selected="${vehicle.status == 'UNAVAILABLE'}"
-                                                value="UNAVAILABLE">Unavailable</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Rate Per Day (RM)</label>
-                                        <input type="hidden" id="ratePerDayInput" name="ratePerDay"
-                                            th:value="${vehicle.ratePerDay}">
-                                        <button type="button" class="btn manage-rate-btn" id="openRateModal"
-                                            th:data-rate="${vehicle.ratePerDay}">
-                                            <span id="rateDisplay" th:text="${'RM ' + vehicle.ratePerDay + ' / day'}">RM
-                                                100.00 / day</span>
-                                            <i class="mdi mdi-cog manage-rate-icon"></i>
+                                    <div class="mode-toggle">
+                                        <a th:href="@{/owner/maintenance/vehicle/{id}(id=${vehicle.vehicleId})}"
+                                            class="btn btn-outline-info view-actions">
+                                            <i class="mdi mdi-wrench"></i> Maintenance History
+                                        </a>
+                                        <button id="editBtn" type="button" class="btn btn-primary view-actions">
+                                            <i class="mdi mdi-pencil"></i> Edit Vehicle
                                         </button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Action Buttons -->
-                            <div class="action-buttons">
-                                <div class="edit-actions">
-                                    <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
-                                    <button id="saveBtn" class="btn btn-danger">Update Vehicle</button>
+                                <!-- Vehicle Specifications -->
+                                <div class="form-section">
+                                    <h4>Vehicle Specifications</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Brand</label>
+                                            <input type="text" class="form-control" name="brand"
+                                                th:value="${vehicle.brand}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Model</label>
+                                            <input type="text" class="form-control" name="model"
+                                                th:value="${vehicle.model}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Manufacturing Year</label>
+                                            <input type="number" class="form-control" name="manufacturingYear"
+                                                th:value="${vehicle.manufacturingYear}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Registration No.</label>
+                                            <input type="text" class="form-control" name="registrationNo"
+                                                th:value="${vehicle.registrationNo}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Category</label>
+                                            <select class="form-control form-select" name="category" disabled>
+                                                <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">Sedan
+                                                </option>
+                                                <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV
+                                                </option>
+                                                <option th:selected="${vehicle.category == 'MPV'}" value="MPV">MPV
+                                                </option>
+                                                <option th:selected="${vehicle.category == 'Hatchback'}"
+                                                    value="Hatchback">
+                                                    Hatchback</option>
+                                                <option th:selected="${vehicle.category == 'Luxury'}" value="Luxury">
+                                                    Luxury
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Mileage (km)</label>
+                                            <input type="number" class="form-control" name="mileage"
+                                                th:value="${vehicle.mileage}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Fuel Type</label>
+                                            <select class="form-control form-select" name="fuelType" disabled>
+                                                <option th:selected="${vehicle.fuelType == 'Petrol'}" value="Petrol">
+                                                    Petrol
+                                                </option>
+                                                <option th:selected="${vehicle.fuelType == 'Diesel'}" value="Diesel">
+                                                    Diesel
+                                                </option>
+                                                <option th:selected="${vehicle.fuelType == 'Hybrid'}" value="Hybrid">
+                                                    Hybrid
+                                                </option>
+                                                <option th:selected="${vehicle.fuelType == 'Electric'}"
+                                                    value="Electric">
+                                                    Electric</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Transmission</label>
+                                            <select class="form-control form-select" name="transmissionType" disabled>
+                                                <option th:selected="${vehicle.transmissionType == 'Automatic'}"
+                                                    value="Automatic">Automatic</option>
+                                                <option th:selected="${vehicle.transmissionType == 'Manual'}"
+                                                    value="Manual">Manual</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Status & Rate -->
+                                <div class="form-section">
+                                    <h4>Status & Rate</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Availability Status</label>
+                                            <select class="form-control form-select" name="status" disabled>
+                                                <option th:selected="${vehicle.status == 'AVAILABLE'}"
+                                                    value="AVAILABLE">
+                                                    Available</option>
+                                                <option th:selected="${vehicle.status == 'RENTED'}" value="RENTED">
+                                                    Rented
+                                                </option>
+                                                <option th:selected="${vehicle.status == 'MAINTENANCE'}"
+                                                    value="MAINTENANCE">Maintenance</option>
+                                                <option th:selected="${vehicle.status == 'UNAVAILABLE'}"
+                                                    value="UNAVAILABLE">Unavailable</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Rate Per Day (RM)</label>
+                                            <input type="hidden" id="ratePerDayInput" name="ratePerDay"
+                                                th:value="${vehicle.ratePerDay}">
+                                            <button type="button" class="btn manage-rate-btn" id="openRateModal"
+                                                th:data-rate="${vehicle.ratePerDay}">
+                                                <span id="rateDisplay"
+                                                    th:text="${'RM ' + vehicle.ratePerDay + ' / day'}">RM
+                                                    100.00 / day</span>
+                                                <i class="mdi mdi-cog manage-rate-icon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="action-buttons">
+                                    <div class="edit-actions">
+                                        <button id="cancelBtn" type="button" class="btn btn-secondary">Cancel</button>
+                                        <button id="saveBtn" type="submit" class="btn btn-danger">Update
+                                            Vehicle</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
 
-    <!-- Rate Per Day Modal -->
-    <div class="rate-modal-overlay" id="rateModalOverlay">
-        <div class="rate-modal">
-            <div class="rate-modal-header">
-                <h5><i class="mdi mdi-currency-usd mr-2"></i>Update Rate Per Day</h5>
-                <button class="rate-modal-close" id="closeRateModal">&times;</button>
-            </div>
-            <div class="rate-modal-body">
-                <p class="text-muted mb-3">Enter the daily rental rate for this vehicle</p>
-                <div class="rate-input-group">
-                    <span class="rate-input-prefix">RM</span>
-                    <input type="number" class="rate-input" id="rateModalInput" min="0" step="0.01" placeholder="0.00">
+        <!-- Rate Per Day Modal -->
+        <div class="rate-modal-overlay" id="rateModalOverlay">
+            <div class="rate-modal">
+                <div class="rate-modal-header">
+                    <h5><i class="mdi mdi-currency-usd mr-2"></i>Update Rate Per Day</h5>
+                    <button class="rate-modal-close" id="closeRateModal">&times;</button>
+                </div>
+                <div class="rate-modal-body">
+                    <p class="text-muted mb-3">Enter the daily rental rate for this vehicle</p>
+                    <div class="rate-input-group">
+                        <span class="rate-input-prefix">RM</span>
+                        <input type="number" class="rate-input" id="rateModalInput" min="0" step="0.01"
+                            placeholder="0.00">
+                    </div>
+                </div>
+                <div class="rate-modal-footer">
+                    <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
+                    <button class="btn btn-primary" id="saveRateModal">Save Rate</button>
                 </div>
             </div>
-            <div class="rate-modal-footer">
-                <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
-                <button class="btn btn-primary" id="saveRateModal">Save Rate</button>
-            </div>
         </div>
-    </div>
     </div>
 
     <th:block layout:fragment="extra-js">
@@ -570,9 +588,7 @@
                 location.reload();
             });
 
-            saveBtn.addEventListener('click', function () {
-                alert('Update functionality will be implemented soon!');
-            });
+            // saveBtn is now type="submit", so no need for click handler - form submits naturally
 
             // Rate Modal Logic - only in edit mode
             openRateModalBtn.addEventListener('click', function () {

@@ -274,4 +274,67 @@ public class VehicleManagementService {
 
                 return savedVehicle;
         }
+
+        /**
+         * Updates an existing vehicle and optionally updates rate per day
+         * 
+         * @param vehicleId    Vehicle ID to update
+         * @param fleetOwnerId Fleet owner ID (for authorization)
+         * @param request      AddVehicleRequest with updated details
+         * @return Updated Vehicle entity
+         */
+        @Transactional
+        public Vehicle updateVehicle(Long vehicleId, Long fleetOwnerId, AddVehicleRequest request) {
+                Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+                if (vehicle == null) {
+                        throw new RuntimeException("Vehicle not found");
+                }
+
+                // Verify ownership
+                if (!vehicle.getFleetOwnerId().equals(fleetOwnerId)) {
+                        throw new RuntimeException("Unauthorized to update this vehicle");
+                }
+
+                // Update vehicle fields
+                vehicle.setBrand(request.getBrand());
+                vehicle.setModel(request.getModel());
+                vehicle.setManufacturingYear(request.getManufacturingYear());
+                vehicle.setRegistrationNo(request.getRegistrationNo());
+                vehicle.setCategory(request.getCategory());
+                vehicle.setFuelType(request.getFuelType());
+                vehicle.setTransmissionType(request.getTransmissionType());
+                vehicle.setMileage(request.getMileage());
+
+                if (request.getVehicleImageUrl() != null && !request.getVehicleImageUrl().isEmpty()) {
+                        vehicle.setVehicleImageUrl(request.getVehicleImageUrl());
+                }
+
+                // Update status
+                if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+                        vehicle.setStatus(Vehicle.VehicleStatus.valueOf(request.getStatus()));
+                }
+
+                LocalDateTime now = LocalDateTime.now();
+                vehicle.setUpdatedAt(now);
+
+                Vehicle savedVehicle = vehicleRepository.save(vehicle);
+
+                // Update price history if rate changed
+                if (request.getRatePerDay() != null && request.getRatePerDay().compareTo(BigDecimal.ZERO) > 0) {
+                        // Check if rate has changed
+                        BigDecimal currentRate = priceHistoryRepository.findLatestPriceByVehicleId(vehicleId)
+                                        .map(VehiclePriceHistory::getRatePerDay)
+                                        .orElse(BigDecimal.ZERO);
+
+                        if (request.getRatePerDay().compareTo(currentRate) != 0) {
+                                VehiclePriceHistory priceHistory = new VehiclePriceHistory();
+                                priceHistory.setVehicleId(vehicleId);
+                                priceHistory.setRatePerDay(request.getRatePerDay());
+                                priceHistory.setEffectiveStartDate(now);
+                                priceHistoryRepository.save(priceHistory);
+                        }
+                }
+
+                return savedVehicle;
+        }
 }
