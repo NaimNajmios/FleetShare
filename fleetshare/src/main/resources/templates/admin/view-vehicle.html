@@ -48,7 +48,6 @@
             .image-controls {
                 margin-top: 0.5rem;
                 display: none;
-                /* Hidden in view mode */
                 gap: 0.5rem;
                 justify-content: center;
             }
@@ -162,7 +161,7 @@
             }
 
             .form-control:disabled,
-            .form-control [readonly] {
+            .form-control[readonly] {
                 background-color: #e9ecef;
                 opacity: 1;
             }
@@ -181,7 +180,6 @@
                 background: #f8f9fa;
                 border-color: #e9ecef;
                 pointer-events: none;
-                /* Remove arrow for selects in view mode */
                 -webkit-appearance: none;
                 -moz-appearance: none;
                 appearance: none;
@@ -240,6 +238,108 @@
                     margin-left: 0;
                 }
             }
+
+            /* Rate Modal Styles */
+            .rate-modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1050;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .rate-modal-overlay.show {
+                display: flex;
+            }
+
+            .rate-modal {
+                background: white;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 400px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                animation: modalSlideIn 0.3s ease;
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .rate-modal-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid #e9ecef;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .rate-modal-header h5 {
+                margin: 0;
+                font-weight: 600;
+                color: #2c2e30;
+            }
+
+            .rate-modal-close {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #6c757d;
+                cursor: pointer;
+            }
+
+            .rate-modal-body {
+                padding: 1.5rem;
+            }
+
+            .rate-input-group {
+                display: flex;
+                align-items: center;
+                border: 2px solid #ced4da;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .rate-input-group:focus-within {
+                border-color: #007bff;
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+            }
+
+            .rate-input-prefix {
+                padding: 0.75rem 1rem;
+                background: #f8f9fa;
+                font-weight: 600;
+                color: #495057;
+            }
+
+            .rate-input {
+                flex: 1;
+                border: none;
+                padding: 0.75rem;
+                font-size: 1.25rem;
+                font-weight: 500;
+                outline: none;
+            }
+
+            .rate-modal-footer {
+                padding: 1rem 1.5rem;
+                border-top: 1px solid #e9ecef;
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.75rem;
+            }
         </style>
     </th:block>
 </head>
@@ -264,159 +364,393 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <div class="profile-container" id="viewMode">
-                            <!-- Vehicle Header -->
-                            <div class="profile-header">
-                                <div>
-                                    <div class="vehicle-image-container">
-                                        <img th:if="${vehicle.vehicleImageUrl}" th:src="${vehicle.vehicleImageUrl}"
-                                            class="vehicle-image" alt="Vehicle Image">
-                                        <i th:unless="${vehicle.vehicleImageUrl}"
-                                            class="mdi mdi-car vehicle-placeholder"></i>
+                        <form th:action="@{/admin/vehicles/update/{id}(id=${vehicle.vehicleId})}" method="post"
+                            id="vehicleForm">
+                            <div class="profile-container" id="viewMode">
+                                <!-- Vehicle Header -->
+                                <div class="profile-header">
+                                    <div>
+                                        <div class="vehicle-image-container">
+                                            <img id="vehicleImage" th:if="${vehicle.vehicleImageUrl}"
+                                                th:src="${vehicle.vehicleImageUrl}" class="vehicle-image"
+                                                alt="Vehicle Image">
+                                            <i th:unless="${vehicle.vehicleImageUrl}"
+                                                class="mdi mdi-car vehicle-placeholder" id="vehiclePlaceholder"></i>
+                                        </div>
+                                        <div class="image-controls">
+                                            <input type="file" id="vehicleImageInput" accept="image/*"
+                                                style="display: none;">
+                                            <button type="button" id="changeImageBtn"
+                                                class="btn btn-sm btn-outline-danger">Change</button>
+                                            <button type="button" id="resetImageBtn"
+                                                class="btn btn-sm btn-secondary">Reset</button>
+                                        </div>
                                     </div>
-                                    <div class="image-controls">
-                                        <button class="btn btn-sm btn-outline-danger">Change</button>
-                                        <button class="btn btn-sm btn-secondary">Reset</button>
-                                    </div>
-                                </div>
 
-                                <div class="profile-info">
-                                    <h2 th:text="${vehicle.brand + ' ' + vehicle.model}">Perodua Myvi</h2>
-                                    <p class="vehicle-meta" th:text="${vehicle.registrationNo}">WUX 5815</p>
-                                    <p class="vehicle-meta" th:text="${'Owner: ' + vehicle.ownerBusinessName}">Owner:
-                                        MetroCity Car Rental</p>
+                                    <div class="profile-info">
+                                        <h2 th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h2>
+                                        <p class="vehicle-meta" th:text="${vehicle.registrationNo}">Registration</p>
 
-                                    <span class="status-badge"
-                                        th:classappend="${'status-' + #strings.toLowerCase(vehicle.status)}"
-                                        th:text="${vehicle.status}">
-                                        AVAILABLE
-                                    </span>
-                                </div>
-                                <div class="mode-toggle">
-                                    <a th:href="@{/admin/maintenance/vehicle/{id}(id=${vehicle.vehicleId})}"
-                                        class="btn btn-outline-info view-actions">
-                                        <i class="mdi mdi-wrench"></i> Maintenance History
-                                    </a>
-                                    <button id="editBtn" class="btn btn-primary view-actions">
-                                        <i class="mdi mdi-pencil"></i> Edit Vehicle
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Vehicle Specifications -->
-                            <div class="form-section">
-                                <h4>Vehicle Specifications</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Brand</label>
-                                        <input type="text" class="form-control" th:value="${vehicle.brand}" readonly>
+                                        <span class="status-badge"
+                                            th:classappend="${'status-' + #strings.toLowerCase(vehicle.status)}"
+                                            th:text="${vehicle.status}">
+                                            AVAILABLE
+                                        </span>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Model</label>
-                                        <input type="text" class="form-control" th:value="${vehicle.model}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Manufacturing Year</label>
-                                        <input type="number" class="form-control"
-                                            th:value="${vehicle.manufacturingYear}" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Registration No.</label>
-                                        <input type="text" class="form-control" th:value="${vehicle.registrationNo}"
-                                            readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Category</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">Sedan
-                                            </option>
-                                            <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV</option>
-                                            <option th:selected="${vehicle.category == 'MPV'}" value="MPV">MPV</option>
-                                            <option th:selected="${vehicle.category == 'Hatchback'}" value="Hatchback">
-                                                Hatchback</option>
-                                            <option th:selected="${vehicle.category == 'Luxury'}" value="Luxury">Luxury
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Mileage (km)</label>
-                                        <input type="number" class="form-control" th:value="${vehicle.mileage}"
-                                            readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Fuel Type</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.fuelType == 'Petrol'}" value="Petrol">Petrol
-                                            </option>
-                                            <option th:selected="${vehicle.fuelType == 'Diesel'}" value="Diesel">Diesel
-                                            </option>
-                                            <option th:selected="${vehicle.fuelType == 'Hybrid'}" value="Hybrid">Hybrid
-                                            </option>
-                                            <option th:selected="${vehicle.fuelType == 'Electric'}" value="Electric">
-                                                Electric</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Transmission</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.transmissionType == 'Automatic'}"
-                                                value="Automatic">Automatic</option>
-                                            <option th:selected="${vehicle.transmissionType == 'Manual'}"
-                                                value="Manual">Manual</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Status & Rate -->
-                            <div class="form-section">
-                                <h4>Status & Rate</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Availability Status</label>
-                                        <select class="form-control form-select" disabled>
-                                            <option th:selected="${vehicle.status == 'AVAILABLE'}" value="AVAILABLE">
-                                                Available</option>
-                                            <option th:selected="${vehicle.status == 'RENTED'}" value="RENTED">Rented
-                                            </option>
-                                            <option th:selected="${vehicle.status == 'MAINTENANCE'}"
-                                                value="MAINTENANCE">Maintenance</option>
-                                            <option th:selected="${vehicle.status == 'UNAVAILABLE'}"
-                                                value="UNAVAILABLE">Unavailable</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Rate Per Day (RM)</label>
-                                        <button class="btn manage-rate-btn">
-                                            <span th:text="${'RM ' + vehicle.ratePerDay}">RM 100.00</span>
-                                            <i class="mdi mdi-cog manage-rate-icon"></i>
+                                    <div class="mode-toggle">
+                                        <a th:href="@{/admin/maintenance/vehicle/{id}(id=${vehicle.vehicleId})}"
+                                            class="btn btn-outline-info view-actions">
+                                            <i class="mdi mdi-wrench"></i> Maintenance History
+                                        </a>
+                                        <button id="editBtn" type="button" class="btn btn-primary view-actions">
+                                            <i class="mdi mdi-pencil"></i> Edit Vehicle
                                         </button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Action Buttons -->
-                            <div class="action-buttons">
-                                <div class="edit-actions">
-                                    <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
-                                    <button id="saveBtn" class="btn btn-danger">Update Vehicle</button>
+                                <!-- Vehicle Specifications -->
+                                <div class="form-section">
+                                    <h4>Vehicle Specifications</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Brand</label>
+                                            <input type="text" class="form-control" name="brand"
+                                                th:value="${vehicle.brand}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Model</label>
+                                            <input type="text" class="form-control" name="model"
+                                                th:value="${vehicle.model}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Manufacturing Year</label>
+                                            <input type="number" class="form-control" name="manufacturingYear"
+                                                th:value="${vehicle.manufacturingYear}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Registration No.</label>
+                                            <input type="text" class="form-control" name="registrationNo"
+                                                th:value="${vehicle.registrationNo}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Category</label>
+                                            <select class="form-control form-select" name="category" disabled>
+                                                <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">Sedan
+                                                </option>
+                                                <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV
+                                                </option>
+                                                <option th:selected="${vehicle.category == 'MPV'}" value="MPV">MPV
+                                                </option>
+                                                <option th:selected="${vehicle.category == 'Hatchback'}"
+                                                    value="Hatchback">
+                                                    Hatchback</option>
+                                                <option th:selected="${vehicle.category == 'Luxury'}" value="Luxury">
+                                                    Luxury
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Mileage (km)</label>
+                                            <input type="number" class="form-control" name="mileage"
+                                                th:value="${vehicle.mileage}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Fuel Type</label>
+                                            <select class="form-control form-select" name="fuelType" disabled>
+                                                <option th:selected="${vehicle.fuelType == 'Petrol'}" value="Petrol">
+                                                    Petrol
+                                                </option>
+                                                <option th:selected="${vehicle.fuelType == 'Diesel'}" value="Diesel">
+                                                    Diesel
+                                                </option>
+                                                <option th:selected="${vehicle.fuelType == 'Hybrid'}" value="Hybrid">
+                                                    Hybrid
+                                                </option>
+                                                <option th:selected="${vehicle.fuelType == 'Electric'}"
+                                                    value="Electric">
+                                                    Electric</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Transmission</label>
+                                            <select class="form-control form-select" name="transmissionType" disabled>
+                                                <option th:selected="${vehicle.transmissionType == 'Automatic'}"
+                                                    value="Automatic">Automatic</option>
+                                                <option th:selected="${vehicle.transmissionType == 'Manual'}"
+                                                    value="Manual">Manual</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Status & Rate -->
+                                <div class="form-section">
+                                    <h4>Status & Rate</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Availability Status</label>
+                                            <select class="form-control form-select" name="status" disabled>
+                                                <option th:selected="${vehicle.status == 'AVAILABLE'}"
+                                                    value="AVAILABLE">
+                                                    Available</option>
+                                                <option th:selected="${vehicle.status == 'RENTED'}" value="RENTED">
+                                                    Rented
+                                                </option>
+                                                <option th:selected="${vehicle.status == 'MAINTENANCE'}"
+                                                    value="MAINTENANCE">Maintenance</option>
+                                                <option th:selected="${vehicle.status == 'UNAVAILABLE'}"
+                                                    value="UNAVAILABLE">Unavailable</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Rate Per Day (RM)</label>
+                                            <input type="hidden" id="ratePerDayInput" name="ratePerDay"
+                                                th:value="${vehicle.ratePerDay}">
+                                            <button type="button" class="btn manage-rate-btn" id="openRateModal"
+                                                th:data-rate="${vehicle.ratePerDay}">
+                                                <span id="rateDisplay"
+                                                    th:text="${'RM ' + vehicle.ratePerDay + ' / day'}">RM
+                                                    100.00 / day</span>
+                                                <i class="mdi mdi-cog manage-rate-icon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="action-buttons">
+                                    <div class="edit-actions">
+                                        <button id="cancelBtn" type="button" class="btn btn-secondary">Cancel</button>
+                                        <button id="saveBtn" type="submit" class="btn btn-danger">Update
+                                            Vehicle</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rate Per Day Modal -->
+        <div class="rate-modal-overlay" id="rateModalOverlay">
+            <div class="rate-modal">
+                <div class="rate-modal-header">
+                    <h5><i class="mdi mdi-currency-usd mr-2"></i>Update Rate Per Day</h5>
+                    <button class="rate-modal-close" id="closeRateModal">&times;</button>
+                </div>
+                <div class="rate-modal-body">
+                    <p class="text-muted mb-3">Enter the daily rental rate for this vehicle</p>
+                    <div class="rate-input-group">
+                        <span class="rate-input-prefix">RM</span>
+                        <input type="number" class="rate-input" id="rateModalInput" min="0" step="0.01"
+                            placeholder="0.00">
+                    </div>
+                </div>
+                <div class="rate-modal-footer">
+                    <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
+                    <button class="btn btn-primary" id="saveRateModal">Save Rate</button>
                 </div>
             </div>
         </div>
     </div>
 
     <th:block layout:fragment="extra-js">
-        <script th:src="@{/assets/js/vehicle-profile.js}"></script>
+        <script th:inline="javascript">
+            // Toggle between view and edit modes
+            const container = document.querySelector('.profile-container');
+            const editBtn = document.getElementById('editBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const saveBtn = document.getElementById('saveBtn');
+
+            // Rate Modal elements
+            const rateModalOverlay = document.getElementById('rateModalOverlay');
+            const rateModalInput = document.getElementById('rateModalInput');
+            const rateDisplay = document.getElementById('rateDisplay');
+            const ratePerDayInput = document.getElementById('ratePerDayInput');
+            const openRateModalBtn = document.getElementById('openRateModal');
+
+            editBtn.addEventListener('click', function () {
+                container.id = 'editMode';
+                document.querySelectorAll('.form-control, .form-select').forEach(input => {
+                    input.removeAttribute('readonly');
+                    input.removeAttribute('disabled');
+                });
+            });
+
+            cancelBtn.addEventListener('click', function () {
+                container.id = 'viewMode';
+                document.querySelectorAll('.form-control, .form-select').forEach(input => {
+                    input.setAttribute('readonly', 'readonly');
+                    input.setAttribute('disabled', 'disabled');
+                });
+                location.reload();
+            });
+
+            // saveBtn is now type="submit", so no need for click handler - form submits naturally
+
+            // Rate Modal Logic - only in edit mode
+            openRateModalBtn.addEventListener('click', function () {
+                if (container.id === 'editMode') {
+                    rateModalInput.value = ratePerDayInput.value || openRateModalBtn.dataset.rate || '';
+                    rateModalOverlay.classList.add('show');
+                    rateModalInput.focus();
+                }
+            });
+
+            document.getElementById('closeRateModal').addEventListener('click', closeRateModal);
+            document.getElementById('cancelRateModal').addEventListener('click', closeRateModal);
+
+            rateModalOverlay.addEventListener('click', function (e) {
+                if (e.target === rateModalOverlay) closeRateModal();
+            });
+
+            document.getElementById('saveRateModal').addEventListener('click', function () {
+                const rate = parseFloat(rateModalInput.value) || 0;
+                ratePerDayInput.value = rate.toFixed(2);
+                rateDisplay.textContent = 'RM ' + rate.toFixed(2) + ' / day';
+                closeRateModal();
+            });
+
+            function closeRateModal() {
+                rateModalOverlay.classList.remove('show');
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) closeRateModal();
+            });
+            // Image Upload Logic - Preview first, upload on form submit
+            const vehicleId = /*[[${vehicle.vehicleId}]]*/ 0;
+            const changeImageBtn = document.getElementById('changeImageBtn');
+            const vehicleImageInput = document.getElementById('vehicleImageInput');
+            let vehicleImageEl = document.getElementById('vehicleImage');
+            const vehiclePlaceholder = document.getElementById('vehiclePlaceholder');
+            const vehicleForm = document.getElementById('vehicleForm');
+
+            let selectedFile = null;
+
+            // Change button opens file picker
+            changeImageBtn.addEventListener('click', function() {
+                vehicleImageInput.click();
+            });
+
+            // When file selected, show preview on page (not modal)
+            vehicleImageInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    selectedFile = e.target.files[0];
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        // Show preview on page
+                        if (vehicleImageEl) {
+                            vehicleImageEl.src = event.target.result;
+                        } else if (vehiclePlaceholder) {
+                            vehiclePlaceholder.outerHTML = '<img id="vehicleImage" src="' + event.target.result + '" class="vehicle-image" alt="Vehicle Image">';
+                            vehicleImageEl = document.getElementById('vehicleImage');
+                        }
+                    };
+                    reader.readAsDataURL(selectedFile);
+                }
+            });
+
+            // Intercept form submit to show confirmation modal with summary
+            vehicleForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Build summary of changes
+                const brand = vehicleForm.querySelector('[name="brand"]').value;
+                const model = vehicleForm.querySelector('[name="model"]').value;
+                const year = vehicleForm.querySelector('[name="manufacturingYear"]').value;
+                const regNo = vehicleForm.querySelector('[name="registrationNo"]').value;
+                const category = vehicleForm.querySelector('[name="category"]').value;
+                const mileage = vehicleForm.querySelector('[name="mileage"]').value;
+                const fuelType = vehicleForm.querySelector('[name="fuelType"]').value;
+                const transmission = vehicleForm.querySelector('[name="transmissionType"]').value;
+                const status = vehicleForm.querySelector('[name="status"]').value;
+                const rate = document.getElementById('ratePerDayInput').value;
+                
+                let summaryHtml = '<div style="text-align: left; font-size: 14px;">';
+                summaryHtml += '<table style="width: 100%; border-collapse: collapse;">';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Brand:</strong></td><td style="padding: 4px 8px;">' + brand + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Model:</strong></td><td style="padding: 4px 8px;">' + model + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Year:</strong></td><td style="padding: 4px 8px;">' + (year || 'N/A') + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Reg. No:</strong></td><td style="padding: 4px 8px;">' + regNo + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Category:</strong></td><td style="padding: 4px 8px;">' + category + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Mileage:</strong></td><td style="padding: 4px 8px;">' + (mileage || 'N/A') + ' km</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Fuel:</strong></td><td style="padding: 4px 8px;">' + fuelType + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Transmission:</strong></td><td style="padding: 4px 8px;">' + transmission + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Status:</strong></td><td style="padding: 4px 8px;">' + status + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Rate/Day:</strong></td><td style="padding: 4px 8px;">RM ' + (parseFloat(rate) || 0).toFixed(2) + '</td></tr>';
+                if (selectedFile) {
+                    summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>New Image:</strong></td><td style="padding: 4px 8px; color: #28a745;">Yes (pending upload)</td></tr>';
+                }
+                summaryHtml += '</table></div>';
+                
+                // Show confirmation modal with summary
+                document.getElementById('confirmModalPreview').innerHTML = summaryHtml;
+                document.getElementById('confirmModalPreview').style.display = 'block';
+                document.getElementById('confirmModalTitle').textContent = 'Confirm Vehicle Update';
+                document.getElementById('confirmModalMessage').textContent = 'Please review the vehicle information below:';
+                
+                const confirmBtn = document.getElementById('confirmModalBtn');
+                confirmBtn.onclick = function() {
+                    performUpdate();
+                };
+                
+                const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                modal.show();
+            });
+
+            function performUpdate() {
+                document.getElementById('confirmModalBtn').disabled = true;
+                document.getElementById('confirmModalBtn').textContent = 'Updating...';
+                
+                // If there's a new image, upload it first
+                if (selectedFile) {
+                    const formData = new FormData();
+                    formData.append('image', selectedFile);
+                    
+                    fetch('/admin/vehicles/' + vehicleId + '/image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Image uploaded, now submit the form
+                            submitFormData();
+                        } else {
+                            alert('Error uploading image: ' + (data.error || 'Failed'));
+                            resetModalBtn();
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error: ' + error.message);
+                        resetModalBtn();
+                    });
+                } else {
+                    // No new image, just submit the form
+                    submitFormData();
+                }
+            }
+
+            function submitFormData() {
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+                // Submit form directly (not via AJAX since controller returns redirect)
+                vehicleForm.submit();
+            }
+
+            function resetModalBtn() {
+                document.getElementById('confirmModalBtn').disabled = false;
+                document.getElementById('confirmModalBtn').textContent = 'Confirm';
+            }
+        </script>
     </th:block>
 </body>
 

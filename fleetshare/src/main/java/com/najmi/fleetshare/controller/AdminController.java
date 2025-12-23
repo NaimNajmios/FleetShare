@@ -32,11 +32,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.UUID;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.UUID;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -451,6 +468,62 @@ public class AdminController {
         model.addAttribute("vehicle", vehicle);
         return "admin/view-vehicle";
     }
+
+    @PostMapping("/vehicles/update/{vehicleId}")
+    public String updateAdminVehicle(@PathVariable Long vehicleId,
+            @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            VehicleDTO existing = vehicleManagementService.getVehicleDetails(vehicleId);
+            if (existing == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vehicle not found");
+                return "redirect:/admin/vehicles";
+            }
+            vehicleManagementService.updateVehicle(vehicleId, existing.getFleetOwnerId(), request);
+            redirectAttributes.addFlashAttribute("successMessage", "Vehicle updated successfully!");
+            return "redirect:/admin/vehicles/view/" + vehicleId;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+            return "redirect:/admin/vehicles/view/" + vehicleId;
+        }
+    }
+
+    @PostMapping("/vehicles/{vehicleId}/image")
+    @ResponseBody
+    public ResponseEntity<?> uploadAdminVehicleImage(@PathVariable Long vehicleId,
+            @RequestParam("image") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No file uploaded"));
+            }
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Only image files are allowed"));
+            }
+            String uploadDir = "C:/fleetshare-uploads/vehicles";
+            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
+            if (!java.nio.file.Files.exists(uploadPath)) {
+                java.nio.file.Files.createDirectories(uploadPath);
+            }
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null && originalFilename.contains(".")
+                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                    : ".jpg";
+            String uniqueFilename = "vehicle_" + vehicleId + "_" + java.util.UUID.randomUUID().toString().substring(0, 8) + extension;
+            java.nio.file.Path filePath = uploadPath.resolve(uniqueFilename);
+            java.nio.file.Files.copy(file.getInputStream(), filePath);
+            VehicleDTO existing = vehicleManagementService.getVehicleDetails(vehicleId);
+            String imageUrl = "/uploads/vehicles/" + uniqueFilename;
+            vehicleManagementService.updateVehicleImage(vehicleId, existing.getFleetOwnerId(), imageUrl);
+            return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
+        } catch (java.io.IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
 
     @GetMapping("/vehicles/add")
     public String addVehicle(Model model) {
