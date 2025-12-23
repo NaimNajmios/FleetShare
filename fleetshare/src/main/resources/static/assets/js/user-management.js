@@ -2,24 +2,7 @@
 (function () {
     'use strict';
 
-    // Tab Switching
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const tabId = this.getAttribute('data-tab');
-
-            // Remove active class from all tabs and buttons
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-
-            // Add active class to clicked button and corresponding content
-            this.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-
+    // Tab Switching logic removed as it is now handled by Bootstrap 5
     // Fleet Owners Filtering
     const ownerSearchInput = document.getElementById('owner-search');
     const ownerStatusFilter = document.getElementById('owner-status-filter');
@@ -98,7 +81,7 @@
         if (visibleRows.length === 0 && rows.length > 0) {
             if (!noDataDiv) {
                 noDataDiv = document.createElement('div');
-                noDataDiv.className = 'no-data no-data-filtered';
+                noDataDiv.className = 'text-center p-5 text-muted no-data no-data-filtered';
                 noDataDiv.innerHTML = '<i class="mdi mdi-filter-remove mdi-48px"></i><p>No results match your filters</p>';
                 table.parentElement.appendChild(noDataDiv);
             }
