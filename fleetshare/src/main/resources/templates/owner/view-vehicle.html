@@ -742,23 +742,8 @@
 
             function submitFormData() {
                 bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
-                // Create and submit form data
-                const formData = new FormData(vehicleForm);
-                fetch(vehicleForm.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else {
-                        window.location.reload();
-                    }
-                })
-                .catch(error => {
-                    alert('Error: ' + error.message);
-                    resetModalBtn();
-                });
+                // Submit form directly (not via AJAX since controller returns redirect)
+                vehicleForm.submit();
             }
 
             function resetModalBtn() {
