@@ -164,10 +164,18 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div th:if="${#lists.isEmpty(vehicles)}" class="no-data">
-                                <i class="mdi mdi-car-off mdi-48px"></i>
-                                <p>No vehicles found</p>
-                                <p class="text-muted">Your vehicles will appear here</p>
+                            <div th:if="${#lists.isEmpty(vehicles)}" class="no-data py-5">
+                                <div class="mb-3">
+                                    <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle" style="width: 80px; height: 80px;">
+                                        <i class="mdi mdi-car-off mdi-36px text-muted"></i>
+                                    </div>
+                                </div>
+                                <h4 class="text-dark font-weight-bold">No Vehicles Found</h4>
+                                <p class="text-muted mb-4">You haven't added any vehicles to your fleet yet.</p>
+                                <a th:href="@{/owner/vehicles/add}" class="btn btn-primary btn-icon-text">
+                                    <i class="mdi mdi-plus btn-icon-prepend"></i>
+                                    Add Your First Vehicle
+                                </a>
                             </div>
                         </div>
                     </div>
