@@ -446,8 +446,11 @@
                                     <div class="owner-avatar">
                                         <i class="fas fa-store"></i>
                                     </div>
-                                    <span class="text-muted" style="font-size: 0.85rem; font-weight: 500;"
-                                        th:text="${vehicle.ownerBusinessName}">Owner Name</span>
+                                    <a th:href="@{/renter/owners/{id}(id=${vehicle.fleetOwnerId})}" class="text-muted"
+                                        style="font-size: 0.85rem; font-weight: 500; text-decoration: none;"
+                                        onmouseover="this.style.textDecoration='underline'; this.style.color='#4B49AC';"
+                                        onmouseout="this.style.textDecoration='none'; this.style.color='#6c757d';"
+                                        th:text="${vehicle.ownerBusinessName}">Owner Name</a>
                                     <i th:if="${vehicle.ownerIsVerified}" class="fas fa-check-circle text-primary"
                                         title="Verified Owner" style="font-size: 0.85rem; margin-left: 0.5rem;"></i>
                                 </div>

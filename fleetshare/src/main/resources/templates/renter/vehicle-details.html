@@ -393,7 +393,11 @@
                     </div>
                     <div class="owner-info">
                         <div class="owner-name">
-                            <span th:text="${vehicle.ownerBusinessName}">FleetCo Rentals</span>
+                            <a th:href="@{/renter/owners/{id}(id=${vehicle.fleetOwnerId})}"
+                                style="color: #212529; text-decoration: none;"
+                                onmouseover="this.style.textDecoration='underline'; this.style.color='#8b5cf6';"
+                                onmouseout="this.style.textDecoration='none'; this.style.color='#212529';"
+                                th:text="${vehicle.ownerBusinessName}">FleetCo Rentals</a>
                             <span class="verified-badge" th:if="${vehicle.ownerIsVerified}">
                                 <i class="fas fa-check-circle"></i> Verified
                             </span>
