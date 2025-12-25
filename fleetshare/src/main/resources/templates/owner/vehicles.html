@@ -123,17 +123,18 @@
 
                         <!-- Vehicles Table -->
                         <div class="table-responsive">
-                            <table class="table table-striped" id="vehicles-table">
+                            <table class="table table-striped" id="vehicles-table" th:unless="${#lists.isEmpty(vehicles)}">
+                                <caption class="visually-hidden">List of vehicles owned by you</caption>
                                 <thead>
                                     <tr>
-                                        <th>Plate No.</th>
-                                        <th>Model</th>
-                                        <th>Brand</th>
-                                        <th>Year</th>
-                                        <th>Category</th>
-                                        <th>Rate/Day (RM)</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+                                        <th scope="col">Plate No.</th>
+                                        <th scope="col">Model</th>
+                                        <th scope="col">Brand</th>
+                                        <th scope="col">Year</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col">Rate/Day (RM)</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -159,7 +160,8 @@
                                         </td>
                                         <td>
                                             <a th:href="@{/owner/vehicles/view/{id}(id=${vehicle.vehicleId})}"
-                                                class="btn btn-sm btn-outline-primary">View</a>
+                                                class="btn btn-sm btn-outline-primary"
+                                                th:aria-label="'View details for ' + ${vehicle.brand} + ' ' + ${vehicle.model} + ' (' + ${vehicle.registrationNo} + ')'">View</a>
                                         </td>
                                     </tr>
                                 </tbody>
