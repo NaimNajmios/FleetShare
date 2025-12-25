@@ -716,8 +716,15 @@
                     const formData = new FormData();
                     formData.append('image', selectedFile);
                     
+                    // CSRF Protection
+                    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
                     fetch('/owner/vehicles/' + vehicleId + '/image', {
                         method: 'POST',
+                        headers: {
+                            [csrfHeader]: csrfToken
+                        },
                         body: formData
                     })
                     .then(response => response.json())
