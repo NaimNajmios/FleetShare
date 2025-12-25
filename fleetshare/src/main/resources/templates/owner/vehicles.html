@@ -4,68 +4,7 @@
 
 <head>
     <th:block layout:fragment="extra-css">
-        <style>
-            .search-filter-bar {
-                display: flex;
-                gap: 1rem;
-                margin-bottom: 1.5rem;
-                flex-wrap: wrap;
-                align-items: center;
-            }
-
-            .search-input {
-                flex: 1;
-                min-width: 250px;
-                padding: 0.5rem 1rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-            }
-
-            .filter-select {
-                padding: 0.5rem 1rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-                background: white;
-            }
-
-            .badge {
-                padding: 0.25rem 0.5rem;
-                border-radius: 0.25rem;
-                font-size: 0.75rem;
-                font-weight: 600;
-            }
-
-            .badge-success {
-                background-color: #d4edda;
-                color: #155724;
-            }
-
-            .badge-secondary {
-                background-color: #e2e3e5;
-                color: #383d41;
-            }
-
-            .table-responsive {
-                overflow-x: auto;
-            }
-
-            .no-data {
-                text-align: center;
-                padding: 3rem;
-                color: #6c757d;
-            }
-
-            .vehicle-count {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .vehicle-count i {
-                font-size: 1.2rem;
-            }
-        </style>
+        <!-- Custom CSS removed in favor of Bootstrap 5 utilities -->
     </th:block>
 </head>
 
@@ -79,13 +18,13 @@
                         <h6 class="font-weight-normal mb-0">Manage your vehicle inventory</h6>
                     </div>
                     <div class="col-12 col-xl-4">
-                        <div class="vehicle-count justify-content-xl-end">
-                            <a th:href="@{/owner/vehicles/add}" class="btn btn-primary mr-3">
+                        <div class="d-flex align-items-center gap-2 mb-3 justify-content-xl-end">
+                            <a th:href="@{/owner/vehicles/add}" class="btn btn-primary me-3">
                                 <i class="mdi mdi-plus"></i> Add New Vehicle
                             </a>
                             <div class="d-flex align-items-center">
-                                <i class="mdi mdi-car mr-2" style="font-size: 1.2rem;"></i>
-                                <span>Total: <span class="badge badge-secondary"
+                                <i class="mdi mdi-car me-2 fs-5"></i>
+                                <span>Total: <span class="badge bg-secondary"
                                         th:text="${#lists.size(vehicles)}">0</span></span>
                             </div>
                         </div>
@@ -99,10 +38,10 @@
                 <div class="card">
                     <div class="card-body">
                         <!-- Search and Filters -->
-                        <div class="search-filter-bar">
-                            <input type="text" class="search-input" id="vehicle-search"
-                                placeholder="Search by plate number, model, or brand...">
-                            <select class="filter-select" id="year-filter">
+                        <div class="d-flex gap-3 mb-4 flex-wrap align-items-center">
+                            <input type="text" class="form-control w-auto flex-grow-1" id="vehicle-search"
+                                placeholder="Search by plate number, model, or brand..." style="min-width: 250px;">
+                            <select class="form-select w-auto" id="year-filter">
                                 <option value="">All Years</option>
                                 <option value="2024">2024</option>
                                 <option value="2023">2023</option>
@@ -110,7 +49,7 @@
                                 <option value="2021">2021</option>
                                 <option value="2020">2020</option>
                             </select>
-                            <select class="filter-select" id="category-filter">
+                            <select class="form-select w-auto" id="category-filter">
                                 <option value="">All Categories</option>
                                 <option value="Hatchback">Hatchback</option>
                                 <option value="Sedan">Sedan</option>
@@ -149,13 +88,13 @@
                                         <td th:text="${vehicle.ratePerDay}">Rate</td>
                                         <td>
                                             <span th:if="${vehicle.status == 'AVAILABLE'}"
-                                                class="badge badge-success">Available</span>
+                                                class="badge bg-success">Available</span>
                                             <span th:if="${vehicle.status == 'RENTED'}"
-                                                class="badge badge-warning">Rented</span>
+                                                class="badge bg-warning">Rented</span>
                                             <span th:if="${vehicle.status == 'MAINTENANCE'}"
-                                                class="badge badge-info">Maintenance</span>
+                                                class="badge bg-info">Maintenance</span>
                                             <span th:if="${vehicle.status == 'UNAVAILABLE'}"
-                                                class="badge badge-secondary">Unavailable</span>
+                                                class="badge bg-secondary">Unavailable</span>
                                         </td>
                                         <td>
                                             <a th:href="@{/owner/vehicles/view/{id}(id=${vehicle.vehicleId})}"
@@ -164,7 +103,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div th:if="${#lists.isEmpty(vehicles)}" class="no-data py-5">
+                            <div th:if="${#lists.isEmpty(vehicles)}" class="text-center py-5 text-muted">
                                 <div class="mb-3">
                                     <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle" style="width: 80px; height: 80px;">
                                         <i class="mdi mdi-car-off mdi-36px text-muted"></i>
