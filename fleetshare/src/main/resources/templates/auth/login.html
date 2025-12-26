@@ -33,11 +33,11 @@
             </div>
 
             <!-- Error Messages -->
-            <div th:if="${param.error}" class="form-error" style="margin-bottom: 1.5rem;">
-                <i class="mdi mdi-alert-circle"></i>
+            <div th:if="${param.error}" class="form-error mb-4" role="alert">
+                <i class="mdi mdi-alert-circle" aria-hidden="true"></i>
                 <span>Invalid email or password. Please try again.</span>
             </div>
-            <div th:if="${param.logout}" class="form-helper" style="color: var(--fs-success); margin-bottom: 1.5rem;">
+            <div th:if="${param.logout}" class="form-helper text-success mb-4" role="status">
                 You have been logged out successfully.
             </div>
 
@@ -53,8 +53,12 @@
                 <!-- Password -->
                 <div class="form-group">
                     <label class="form-label" for="password">Password</label>
-                    <input type="password" class="form-input" id="password" name="password"
-                        placeholder="Enter your password" required autocomplete="current-password">
+                    <div class="input-wrapper">
+                        <input type="password" class="form-input form-input-with-icon" id="password" name="password"
+                            placeholder="Enter your password" required autocomplete="current-password">
+                        <i class="mdi mdi-eye-off-outline input-icon-right" id="togglePassword" role="button"
+                           aria-label="Show password" tabindex="0"></i>
+                    </div>
                     <a href="#" class="auth-link forgot-password-link">Forgot Password?</a>
                 </div>
 
@@ -70,8 +74,9 @@
 
                 <!-- Login Button -->
                 <div class="form-group mb-0">
-                    <button type="submit" class="btn btn-primary">
-                        Login
+                    <button type="submit" class="btn btn-primary" id="loginButton">
+                        <span class="btn-text">Login</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
@@ -85,6 +90,59 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password Toggle
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
+
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function (e) {
+                    // toggle the type attribute
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+
+                    // toggle the eye icon
+                    this.classList.toggle('mdi-eye-outline');
+                    this.classList.toggle('mdi-eye-off-outline');
+
+                    // update aria-label
+                    this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+                });
+
+                // Add keyboard support for accessibility
+                togglePassword.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            }
+
+            // Form Loading State
+            const loginForm = document.getElementById('loginForm');
+            const loginButton = document.getElementById('loginButton');
+
+            if (loginForm && loginButton) {
+                loginForm.addEventListener('submit', function() {
+                    if (loginForm.checkValidity()) {
+                        loginButton.classList.add('btn-loading-inline');
+                        loginButton.disabled = true;
+
+                        // Show spinner
+                        const spinner = loginButton.querySelector('.spinner-border');
+                        if (spinner) {
+                            spinner.classList.remove('d-none');
+                        }
+
+                        // Ensure button maintains width
+                        loginButton.style.width = loginButton.offsetWidth + 'px';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
