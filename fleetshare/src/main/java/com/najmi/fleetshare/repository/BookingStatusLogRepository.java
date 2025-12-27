@@ -15,4 +15,7 @@ public interface BookingStatusLogRepository extends JpaRepository<BookingStatusL
     Optional<BookingStatusLog> findLatestStatusByBookingId(Long bookingId);
 
     List<BookingStatusLog> findByBookingIdOrderByStatusTimestampDesc(Long bookingId);
+
+    @Query("SELECT bsl FROM BookingStatusLog bsl WHERE bsl.bookingId IN :bookingIds")
+    List<BookingStatusLog> findByBookingIdIn(java.util.Collection<Long> bookingIds);
 }
