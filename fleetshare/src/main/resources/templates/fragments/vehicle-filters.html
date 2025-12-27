@@ -1,0 +1,53 @@
+<div th:fragment="vehicle-filters" xmlns:th="http://www.thymeleaf.org">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <h5 class="mb-0 fw-bold text-dark">Filters</h5>
+        <a href="#" class="text-danger text-decoration-none small fw-medium" onclick="clearAllFilters()">Clear All</a>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="mb-4">
+        <h6 class="fw-bold mb-3 text-uppercase small text-dark">Category</h6>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="category" value="sedan" onchange="applyFilters()">
+            <label class="form-check-label text-muted">Sedan</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="category" value="suv" onchange="applyFilters()">
+            <label class="form-check-label text-muted">SUV</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="category" value="hatchback" onchange="applyFilters()">
+            <label class="form-check-label text-muted">Hatchback</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="category" value="convertible" onchange="applyFilters()">
+            <label class="form-check-label text-muted">Convertible</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="category" value="mpv" onchange="applyFilters()">
+            <label class="form-check-label text-muted">MPV</label>
+        </div>
+    </div>
+
+    <!-- Transmission Filter -->
+    <div class="mb-4">
+        <h6 class="fw-bold mb-3 text-uppercase small text-dark">Transmission</h6>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="transmission" value="auto" onchange="applyFilters()">
+            <label class="form-check-label text-muted">Automatic</label>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="transmission" value="manual" onchange="applyFilters()">
+            <label class="form-check-label text-muted">Manual</label>
+        </div>
+    </div>
+
+    <!-- Price Range Filter -->
+    <div class="mb-2">
+        <h6 class="fw-bold mb-3 text-uppercase small text-dark">Price Range (RM/day)</h6>
+        <div class="d-flex gap-2 align-items-center">
+            <input type="number" id="minPrice" class="form-control bg-light border-0" placeholder="Min" oninput="applyFilters()">
+            <input type="number" id="maxPrice" class="form-control bg-light border-0" placeholder="Max" oninput="applyFilters()">
+        </div>
+    </div>
+</div>

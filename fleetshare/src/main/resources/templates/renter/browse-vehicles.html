@@ -4,66 +4,56 @@
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Bootstrap 5 is sufficient -->
+        <!-- Bootstrap 5 is included in layout -->
+        <style>
+            /* Custom Scrollbar for Offcanvas */
+            .offcanvas-body::-webkit-scrollbar {
+                width: 6px;
+            }
+            .offcanvas-body::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+            .offcanvas-body::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 3px;
+            }
+
+            /* Fade transition for grid */
+            #vehicleGrid {
+                transition: opacity 0.3s ease;
+            }
+            .grid-loading {
+                opacity: 0.5;
+                pointer-events: none;
+            }
+        </style>
     </th:block>
 </head>
 
 <body>
     <main layout:fragment="content">
         <div class="row g-4 py-4">
-            <!-- Left Sidebar: Filters -->
+            <!-- Mobile Filter Toggle Button -->
+            <div class="d-lg-none mb-2">
+                 <button class="btn btn-primary w-100 d-flex justify-content-between align-items-center shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas" aria-controls="filterOffcanvas">
+                    <span><i class="fas fa-filter me-2"></i>Filters</span>
+                    <span class="badge bg-white text-primary rounded-pill" id="mobileFilterCount" style="display: none;">0</span>
+                </button>
+            </div>
+
+            <!-- Left Sidebar: Filters (Responsive Offcanvas) -->
             <aside class="col-lg-3">
-                <div class="card border-0 shadow-sm sticky-top" style="top: 100px; z-index: 900;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                            <h5 class="mb-0 fw-bold text-dark">Filters</h5>
-                            <a href="#" class="text-danger text-decoration-none small fw-medium" onclick="clearAllFilters()">Clear All</a>
-                        </div>
-
-                        <!-- Category Filter -->
-                        <div class="mb-4">
-                            <h6 class="fw-bold mb-3 text-uppercase small text-dark">Category</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="category" value="sedan" onchange="applyFilters()">
-                                <label class="form-check-label text-muted">Sedan</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="category" value="suv" onchange="applyFilters()">
-                                <label class="form-check-label text-muted">SUV</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="category" value="hatchback" onchange="applyFilters()">
-                                <label class="form-check-label text-muted">Hatchback</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="category" value="convertible" onchange="applyFilters()">
-                                <label class="form-check-label text-muted">Convertible</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="category" value="mpv" onchange="applyFilters()">
-                                <label class="form-check-label text-muted">MPV</label>
-                            </div>
-                        </div>
-
-                        <!-- Transmission Filter -->
-                        <div class="mb-4">
-                            <h6 class="fw-bold mb-3 text-uppercase small text-dark">Transmission</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="transmission" value="auto" onchange="applyFilters()">
-                                <label class="form-check-label text-muted">Automatic</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="transmission" value="manual" onchange="applyFilters()">
-                                <label class="form-check-label text-muted">Manual</label>
-                            </div>
-                        </div>
-
-                        <!-- Price Range Filter -->
-                        <div class="mb-2">
-                            <h6 class="fw-bold mb-3 text-uppercase small text-dark">Price Range (RM/day)</h6>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input type="number" id="minPrice" class="form-control bg-light border-0" placeholder="Min" oninput="applyFilters()">
-                                <input type="number" id="maxPrice" class="form-control bg-light border-0" placeholder="Max" oninput="applyFilters()">
+                <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
+                    <div class="offcanvas-header border-bottom">
+                        <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">
+                            <i class="fas fa-filter me-2 text-primary"></i>Filter Vehicles
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filterOffcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body p-0">
+                        <div class="card border-0 shadow-sm sticky-top w-100" style="top: 100px; z-index: 900;">
+                            <div class="card-body p-4">
+                                <div th:replace="fragments/vehicle-filters :: vehicle-filters"></div>
                             </div>
                         </div>
                     </div>
@@ -81,10 +71,17 @@
                 </div>
 
                 <!-- Vehicle Grid -->
-                <div class="vehicle-grid-container">
+                <div class="vehicle-grid-container position-relative">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="h4 mb-0 fw-bold text-dark">Available Vehicles</h2>
                         <span class="text-muted" id="resultCount" th:text="${#lists.size(vehicles) + ' results'}">0 results</span>
+                    </div>
+
+                    <!-- Loading Overlay -->
+                    <div id="loadingOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 z-2 d-none" style="min-height: 200px;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
                     </div>
 
                     <div class="row g-4" id="vehicleGrid">
@@ -186,9 +183,25 @@
 
     <th:block layout:fragment="extra-js">
         <script>
-            // ... existing JS ...
+            let debounceTimer;
+
             function applyFilters() {
-                const cards = document.querySelectorAll('.vehicle-card'); // This now selects the column wrapper
+                // Show loading overlay
+                document.getElementById('loadingOverlay').classList.remove('d-none');
+                document.getElementById('vehicleGrid').classList.add('grid-loading');
+
+                // Debounce the actual filter logic to simulate processing/allow UI update
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    executeFilters();
+                    // Hide loading overlay
+                    document.getElementById('loadingOverlay').classList.add('d-none');
+                    document.getElementById('vehicleGrid').classList.remove('grid-loading');
+                }, 300);
+            }
+
+            function executeFilters() {
+                const cards = document.querySelectorAll('.vehicle-card');
                 const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
 
                 // Get checked categories
@@ -219,15 +232,7 @@
                     const matchesSearch = title.includes(searchInput);
 
                     if (matchesCategory && matchesTransmission && matchesPrice && matchesSearch) {
-                        // For a column in a row, we usually just remove d-none.
-                        // But original code used 'flex'.
-                        // Default display for a div is block. But it's a grid column.
-                        // Bootstrap uses flexbox for grid.
-                        // If we set display: none, it hides.
-                        // If we set display: flex, it overrides d-flex logic of the row? No, items are flex items.
-                        // Actually, 'd-flex' class is on the element itself (d-flex align-items-stretch).
-                        // So we should restore it to 'flex' or remove 'display: none'.
-                        card.style.display = 'flex';
+                        card.style.display = 'flex'; // Restore flex for grid columns
                         visibleCount++;
                     } else {
                         card.style.display = 'none';
@@ -236,6 +241,16 @@
 
                 // Update result count
                 document.getElementById('resultCount').textContent = visibleCount + ' results';
+
+                // Update mobile filter badge
+                const totalFilters = checkedCategories.length + checkedTransmissions.length + (document.getElementById('minPrice').value ? 1 : 0) + (document.getElementById('maxPrice').value ? 1 : 0);
+                const badge = document.getElementById('mobileFilterCount');
+                if (totalFilters > 0) {
+                    badge.textContent = totalFilters;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
 
                 // Show/Hide empty states
                 const emptyState = document.getElementById('emptyState');
