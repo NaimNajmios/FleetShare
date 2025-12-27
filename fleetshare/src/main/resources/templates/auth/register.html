@@ -103,13 +103,43 @@
 
                 <!-- Role Selection -->
                 <div class="form-group mt-4">
-                    <label class="form-label" for="userRole">User Role</label>
-                    <select class="form-select" id="userRole" name="userRole" required>
+                    <label class="form-label" id="roleLabel">User Role</label>
+                    <div class="role-selection-group" role="radiogroup" aria-labelledby="roleLabel">
+                        <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="renter">
+                            <div class="role-icon">
+                                <i class="mdi mdi-car-key"></i>
+                            </div>
+                            <div class="role-content">
+                                <div class="role-title">Renter</div>
+                                <div class="role-description">I want to rent vehicles</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="mdi mdi-check-circle"></i>
+                            </div>
+                        </div>
+
+                        <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="owner">
+                            <div class="role-icon">
+                                <i class="mdi mdi-car-multiple"></i>
+                            </div>
+                            <div class="role-content">
+                                <div class="role-title">Vehicle Owner</div>
+                                <div class="role-description">I want to share my vehicles</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="mdi mdi-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <select class="form-select visually-hidden" id="userRole" name="userRole" required tabindex="-1">
                         <option value="">Select your role</option>
-                        <option value="renter">Renter - I want to rent vehicles</option>
-                        <option value="owner">Vehicle Owner - I want to share my vehicles</option>
+                        <option value="renter">Renter</option>
+                        <option value="owner">Vehicle Owner</option>
                     </select>
-                    <small class="form-helper">Choose how you plan to use FleetShare</small>
+                    <div class="form-error d-none" id="roleError">
+                        <i class="mdi mdi-alert-circle"></i> Please select a role
+                    </div>
                 </div>
 
                 <!-- Terms and Conditions -->
