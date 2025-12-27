@@ -151,6 +151,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
+            // Special validation for Role Cards
+            const roleSelect = form.querySelector('#userRole');
+            const roleError = form.querySelector('#roleError');
+            if (roleSelect && roleSelect.classList.contains('visually-hidden') && !roleSelect.value) {
+                isValid = false;
+                if (roleError) {
+                    roleError.classList.remove('d-none');
+                }
+            }
+
             if (isValid) {
                 // Show loading state
                 const submitButton = form.querySelector('button[type="submit"]');
@@ -226,6 +236,53 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // ============================================
+    // Role Selection Cards
+    // ============================================
+
+    const roleCards = document.querySelectorAll('.role-card');
+    const roleSelect = document.getElementById('userRole');
+    const roleError = document.getElementById('roleError');
+
+    if (roleCards.length > 0 && roleSelect) {
+
+        function selectRole(card) {
+            // Deselect all cards
+            roleCards.forEach(c => {
+                c.classList.remove('selected');
+                c.setAttribute('aria-checked', 'false');
+            });
+
+            // Select clicked card
+            card.classList.add('selected');
+            card.setAttribute('aria-checked', 'true');
+
+            // Update hidden select
+            const value = card.getAttribute('data-value');
+            roleSelect.value = value;
+
+            // Clear error if present
+            if (roleError) {
+                roleError.classList.add('d-none');
+            }
+        }
+
+        roleCards.forEach(card => {
+            // Mouse interaction
+            card.addEventListener('click', function() {
+                selectRole(this);
+            });
+
+            // Keyboard interaction
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectRole(this);
+                }
+            });
+        });
+    }
     
 });
 
