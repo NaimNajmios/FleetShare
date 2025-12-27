@@ -10,3 +10,13 @@
 3.  Updated all AJAX `POST` requests in `profile.html` (renter, admin, owner) and `view-vehicle.html` (admin, owner) to include the CSRF token in the request headers.
 **Prevention:** Always ensure CSRF is enabled for web applications using session-based authentication. Use Spring Security's default CSRF protection and ensure client-side code handles the token correctly.
 **References:** OWASP Top 10 - Broken Access Control
+
+## 2025-12-26 - [HTTP Security Headers Implementation]
+
+**Context:** `SecurityConfig.java` configuration
+**Vulnerability:** Missing HTTP Security Headers (CSP, HSTS, X-Frame-Options, etc.)
+**Severity:** Medium
+**Root Cause:** Spring Security default configuration was not enhanced with explicit header policies.
+**Fix Applied:** Added `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, and `Referrer-Policy` to the security filter chain.
+**Prevention:** Always configure explicit security headers in `SecurityFilterChain`.
+**References:** OWASP Secure Headers Project
