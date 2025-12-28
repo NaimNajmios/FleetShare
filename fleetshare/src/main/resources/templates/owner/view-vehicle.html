@@ -1,8 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/owner-layout}" th:with="activePage='vehicles', pageTitle='Vehicle Details'">
 
 <head>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <th:block layout:fragment="extra-css">
         <style>
             .profile-container {
@@ -137,14 +140,6 @@
                 font-size: 1rem;
             }
 
-            .form-control-plaintext {
-                padding: 0.75rem;
-                background: #f8f9fa;
-                border: 1px solid #e9ecef;
-                border-radius: 0.25rem;
-                color: #495057;
-            }
-
             .manage-rate-btn {
                 display: flex;
                 align-items: center;
@@ -156,16 +151,6 @@
                 color: #495057;
             }
 
-            .manage-rate-btn:hover {
-                background-color: #e2e6ea;
-            }
-
-            .form-control:disabled,
-            .form-control[readonly] {
-                background-color: #e9ecef;
-                opacity: 1;
-            }
-
             .action-buttons {
                 display: flex;
                 justify-content: flex-end;
@@ -174,50 +159,16 @@
                 border-top: 2px solid #e8ecef;
             }
 
-            /* View Mode: Hide edit controls */
             #viewMode .form-control,
-            #viewMode .form-select {
-                background: #f8f9fa;
-                border-color: #e9ecef;
-                pointer-events: none;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                appearance: none;
-            }
-
+            #viewMode .form-select,
             #viewMode .manage-rate-btn {
-                pointer-events: none;
                 background: #f8f9fa;
-                border-color: #e9ecef;
+                pointer-events: none;
             }
 
+            #viewMode .edit-actions,
             #viewMode .manage-rate-icon {
                 display: none;
-            }
-
-            #viewMode .edit-actions {
-                display: none;
-            }
-
-            #viewMode .view-actions {
-                display: flex;
-            }
-
-            /* Edit Mode: Show editable fields */
-            #editMode .form-control,
-            #editMode .form-select {
-                background: white;
-                border-color: #ced4da;
-            }
-
-            #editMode .manage-rate-btn {
-                background: white;
-                border-color: #ced4da;
-                cursor: pointer;
-            }
-
-            #editMode .edit-actions {
-                display: flex;
             }
 
             #editMode .view-actions {
@@ -239,7 +190,6 @@
                 }
             }
 
-            /* Rate Modal Styles */
             .rate-modal-overlay {
                 display: none;
                 position: fixed;
@@ -263,82 +213,6 @@
                 width: 100%;
                 max-width: 400px;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-                animation: modalSlideIn 0.3s ease;
-            }
-
-            @keyframes modalSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .rate-modal-header {
-                padding: 1.5rem;
-                border-bottom: 1px solid #e9ecef;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .rate-modal-header h5 {
-                margin: 0;
-                font-weight: 600;
-                color: #2c2e30;
-            }
-
-            .rate-modal-close {
-                background: none;
-                border: none;
-                font-size: 1.5rem;
-                color: #6c757d;
-                cursor: pointer;
-            }
-
-            .rate-modal-body {
-                padding: 1.5rem;
-            }
-
-            .rate-input-group {
-                display: flex;
-                align-items: center;
-                border: 2px solid #ced4da;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-
-            .rate-input-group:focus-within {
-                border-color: #007bff;
-                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-            }
-
-            .rate-input-prefix {
-                padding: 0.75rem 1rem;
-                background: #f8f9fa;
-                font-weight: 600;
-                color: #495057;
-            }
-
-            .rate-input {
-                flex: 1;
-                border: none;
-                padding: 0.75rem;
-                font-size: 1.25rem;
-                font-weight: 500;
-                outline: none;
-            }
-
-            .rate-modal-footer {
-                padding: 1rem 1.5rem;
-                border-top: 1px solid #e9ecef;
-                display: flex;
-                justify-content: flex-end;
-                gap: 0.75rem;
             }
         </style>
     </th:block>
@@ -367,7 +241,6 @@
                         <form th:action="@{/owner/vehicles/update/{id}(id=${vehicle.vehicleId})}" method="post"
                             id="vehicleForm">
                             <div class="profile-container" id="viewMode">
-                                <!-- Vehicle Header -->
                                 <div class="profile-header">
                                     <div>
                                         <div class="vehicle-image-container">
@@ -390,12 +263,9 @@
                                     <div class="profile-info">
                                         <h2 th:text="${vehicle.brand + ' ' + vehicle.model}">Vehicle Name</h2>
                                         <p class="vehicle-meta" th:text="${vehicle.registrationNo}">Registration</p>
-
                                         <span class="status-badge"
                                             th:classappend="${'status-' + #strings.toLowerCase(vehicle.status)}"
-                                            th:text="${vehicle.status}">
-                                            AVAILABLE
-                                        </span>
+                                            th:text="${vehicle.status}">AVAILABLE</span>
                                     </div>
                                     <div class="mode-toggle">
                                         <a th:href="@{/owner/maintenance/vehicle/{id}(id=${vehicle.vehicleId})}"
@@ -408,7 +278,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Vehicle Specifications -->
                                 <div class="form-section">
                                     <h4>Vehicle Specifications</h4>
                                     <div class="form-row">
@@ -425,32 +294,14 @@
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>Manufacturing Year</label>
-                                            <input type="number" class="form-control" name="manufacturingYear"
-                                                th:value="${vehicle.manufacturingYear}" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Registration No.</label>
-                                            <input type="text" class="form-control" name="registrationNo"
-                                                th:value="${vehicle.registrationNo}" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
                                             <label>Category</label>
                                             <select class="form-control form-select" name="category" disabled>
                                                 <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">Sedan
                                                 </option>
                                                 <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV
                                                 </option>
-                                                <option th:selected="${vehicle.category == 'MPV'}" value="MPV">MPV
-                                                </option>
-                                                <option th:selected="${vehicle.category == 'Hatchback'}"
-                                                    value="Hatchback">
-                                                    Hatchback</option>
                                                 <option th:selected="${vehicle.category == 'Luxury'}" value="Luxury">
-                                                    Luxury
-                                                </option>
+                                                    Luxury</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -459,37 +310,8 @@
                                                 th:value="${vehicle.mileage}" readonly>
                                         </div>
                                     </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Fuel Type</label>
-                                            <select class="form-control form-select" name="fuelType" disabled>
-                                                <option th:selected="${vehicle.fuelType == 'Petrol'}" value="Petrol">
-                                                    Petrol
-                                                </option>
-                                                <option th:selected="${vehicle.fuelType == 'Diesel'}" value="Diesel">
-                                                    Diesel
-                                                </option>
-                                                <option th:selected="${vehicle.fuelType == 'Hybrid'}" value="Hybrid">
-                                                    Hybrid
-                                                </option>
-                                                <option th:selected="${vehicle.fuelType == 'Electric'}"
-                                                    value="Electric">
-                                                    Electric</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Transmission</label>
-                                            <select class="form-control form-select" name="transmissionType" disabled>
-                                                <option th:selected="${vehicle.transmissionType == 'Automatic'}"
-                                                    value="Automatic">Automatic</option>
-                                                <option th:selected="${vehicle.transmissionType == 'Manual'}"
-                                                    value="Manual">Manual</option>
-                                            </select>
-                                        </div>
-                                    </div>
                                 </div>
 
-                                <!-- Status & Rate -->
                                 <div class="form-section">
                                     <h4>Status & Rate</h4>
                                     <div class="form-row">
@@ -497,22 +319,16 @@
                                             <label>Availability Status</label>
                                             <select class="form-control form-select" name="status" disabled>
                                                 <option th:selected="${vehicle.status == 'AVAILABLE'}"
-                                                    value="AVAILABLE">
-                                                    Available</option>
-                                                <option th:selected="${vehicle.status == 'RENTED'}" value="RENTED">
-                                                    Rented
-                                                </option>
+                                                    value="AVAILABLE">Available</option>
                                                 <option th:selected="${vehicle.status == 'MAINTENANCE'}"
                                                     value="MAINTENANCE">Maintenance</option>
-                                                <option th:selected="${vehicle.status == 'UNAVAILABLE'}"
-                                                    value="UNAVAILABLE">Unavailable</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label class="d-flex justify-content-between align-items-center">
                                                 Rate Per Day (RM)
                                                 <button type="button" class="btn btn-sm btn-link p-0"
-                                                    id="viewRateHistoryBtn" style="font-size: 0.875rem;">
+                                                    id="viewRateHistoryBtn">
                                                     <i class="mdi mdi-history mr-1"></i>History
                                                 </button>
                                             </label>
@@ -521,15 +337,14 @@
                                             <button type="button" class="btn manage-rate-btn" id="openRateModal"
                                                 th:data-rate="${vehicle.ratePerDay}">
                                                 <span id="rateDisplay"
-                                                    th:text="${'RM ' + vehicle.ratePerDay + ' / day'}">RM
-                                                    100.00 / day</span>
+                                                    th:text="${'RM ' + vehicle.ratePerDay + ' / day'}">RM 100.00 /
+                                                    day</span>
                                                 <i class="mdi mdi-cog manage-rate-icon"></i>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Action Buttons -->
                                 <div class="action-buttons">
                                     <div class="edit-actions">
                                         <button id="cancelBtn" type="button" class="btn btn-secondary">Cancel</button>
@@ -544,394 +359,198 @@
             </div>
         </div>
 
-        <!-- Rate Per Day Modal -->
         <div class="rate-modal-overlay" id="rateModalOverlay">
             <div class="rate-modal">
-                <div class="rate-modal-header">
-                    <h5><i class="mdi mdi-currency-usd mr-2"></i>Update Rate Per Day</h5>
-                    <button class="rate-modal-close" id="closeRateModal">&times;</button>
+                <div class="rate-modal-header p-3 border-bottom d-flex justify-content-between">
+                    <h5>Update Rate</h5>
+                    <button class="rate-modal-close border-0 bg-transparent" id="closeRateModal">&times;</button>
                 </div>
-                <div class="rate-modal-body">
-                    <p class="text-muted mb-3">Enter the daily rental rate for this vehicle</p>
-                    <div class="rate-input-group">
-                        <span class="rate-input-prefix">RM</span>
-                        <input type="number" class="rate-input" id="rateModalInput" min="0" step="0.01"
-                            placeholder="0.00">
-                    </div>
+                <div class="rate-modal-body p-3">
+                    <input type="number" class="form-control" id="rateModalInput" step="0.01">
                 </div>
-                <div class="rate-modal-footer">
+                <div class="rate-modal-footer p-3 border-top d-flex justify-content-end gap-2">
                     <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
-                    <button class="btn btn-primary" id="saveRateModal">Save Rate</button>
+                    <button class="btn btn-primary" id="saveRateModal">Save</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Rate History Modal -->
-    <div class="rate-modal-overlay" id="rateHistoryModalOverlay">
-        <div class="rate-modal" style="max-width: 600px;">
-            <div class="rate-modal-header">
-                <h5><i class="mdi mdi-history mr-2"></i>Rate History</h5>
-                <button class="rate-modal-close" id="closeRateHistoryModal">&times;</button>
-            </div>
-            <div class="rate-modal-body">
-                <!-- Add New Rate Form -->
-                <div class="mb-4 p-3 bg-light rounded">
-                    <h6 class="mb-3">Schedule New Rate</h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="small font-weight-bold">New Rate (RM)</label>
-                            <input type="number" class="form-control form-control-sm" id="newRateInput" step="0.01"
-                                placeholder="0.00">
-                        </div>
-                        <div class="col-md-5">
-                            <label class="small font-weight-bold">Effective Date</label>
-                            <input type="datetime-local" class="form-control form-control-sm" id="newRateDateInput">
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-sm btn-primary btn-block" id="addNewRateBtn">
-                                <i class="mdi mdi-plus"></i> Add
-                            </button>
+        <!-- Rate History Modal -->
+        <div class="rate-modal-overlay" id="historyModalOverlay">
+            <div class="rate-modal" style="max-width: 500px;">
+                <div class="rate-modal-header p-3 border-bottom d-flex justify-content-between">
+                    <h5><i class="mdi mdi-history mr-2"></i>Rate History</h5>
+                    <button class="rate-modal-close border-0 bg-transparent" id="closeHistoryModal">&times;</button>
+                </div>
+                <div class="rate-modal-body p-3" id="historyModalBody" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center py-3" id="historyLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
                         </div>
                     </div>
+                    <div id="historyContent"></div>
                 </div>
-
-                <!-- History Table -->
-                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                    <table class="table table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th>Effective Date</th>
-                                <th>Rate (RM)</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rateHistoryTableBody">
-                            <!-- Populated via JS -->
-                            <tr>
-                                <td colspan="3" class="text-center">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="rate-modal-footer p-3 border-top d-flex justify-content-end">
+                    <button class="btn btn-secondary" id="closeHistoryModalBtn">Close</button>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
             const vehicleId = [[${ vehicle.vehicleId }]];
-            // Toggle between view and edit modes
             const container = document.querySelector('.profile-container');
-            const editBtn = document.getElementById('editBtn');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const saveBtn = document.getElementById('saveBtn');
+            const vehicleForm = document.getElementById('vehicleForm');
 
-            // Rate Modal elements
-            const rateModalOverlay = document.getElementById('rateModalOverlay');
-            const rateModalInput = document.getElementById('rateModalInput');
-            const rateDisplay = document.getElementById('rateDisplay');
-            const ratePerDayInput = document.getElementById('ratePerDayInput');
-            const openRateModalBtn = document.getElementById('openRateModal');
+            // --- CSRF Utility ---
+            function getCsrfConfig() {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+                const headers = {};
+                headers[header] = token;
+                return headers;
+            }
 
-            editBtn.addEventListener('click', function () {
+            // Mode Toggle
+            document.getElementById('editBtn').addEventListener('click', () => {
                 container.id = 'editMode';
-                document.querySelectorAll('.form-control, .form-select').forEach(input => {
-                    input.removeAttribute('readonly');
-                    input.removeAttribute('disabled');
+                document.querySelectorAll('.form-control, .form-select').forEach(i => {
+                    i.removeAttribute('readonly');
+                    i.removeAttribute('disabled');
                 });
             });
 
-            cancelBtn.addEventListener('click', function () {
-                container.id = 'viewMode';
-                document.querySelectorAll('.form-control, .form-select').forEach(input => {
-                    input.setAttribute('readonly', 'readonly');
-                    input.setAttribute('disabled', 'disabled');
-                });
-                location.reload();
-            });
+            document.getElementById('cancelBtn').addEventListener('click', () => location.reload());
 
-            // saveBtn is now type="submit", so no need for click handler - form submits naturally
-
-            // Rate Modal Logic - only in edit mode
-            openRateModalBtn.addEventListener('click', function () {
+            // Rate Modal
+            const rateModalOverlay = document.getElementById('rateModalOverlay');
+            document.getElementById('openRateModal').addEventListener('click', () => {
                 if (container.id === 'editMode') {
-                    rateModalInput.value = ratePerDayInput.value || openRateModalBtn.dataset.rate || '';
+                    document.getElementById('rateModalInput').value = document.getElementById('ratePerDayInput').value;
                     rateModalOverlay.classList.add('show');
-                    rateModalInput.focus();
                 }
             });
 
-            document.getElementById('closeRateModal').addEventListener('click', closeRateModal);
-            document.getElementById('cancelRateModal').addEventListener('click', closeRateModal);
-
-            rateModalOverlay.addEventListener('click', function (e) {
-                if (e.target === rateModalOverlay) closeRateModal();
-            });
-
-            document.getElementById('saveRateModal').addEventListener('click', function () {
-                const rate = parseFloat(rateModalInput.value) || 0;
-                ratePerDayInput.value = rate.toFixed(2);
-                rateDisplay.textContent = 'RM ' + rate.toFixed(2) + ' / day';
-                closeRateModal();
-            });
-
-            function closeRateModal() {
+            document.getElementById('saveRateModal').addEventListener('click', () => {
+                const val = parseFloat(document.getElementById('rateModalInput').value) || 0;
+                document.getElementById('ratePerDayInput').value = val.toFixed(2);
+                document.getElementById('rateDisplay').textContent = 'RM ' + val.toFixed(2) + ' / day';
                 rateModalOverlay.classList.remove('show');
-            }
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) closeRateModal();
             });
-            // Image Upload Logic - Preview first, upload on form submit
-            // Image Upload Logic - Preview first, upload on form submit
-            const changeImageBtn = document.getElementById('changeImageBtn');
-            const vehicleImageInput = document.getElementById('vehicleImageInput');
-            let vehicleImageEl = document.getElementById('vehicleImage');
-            const vehiclePlaceholder = document.getElementById('vehiclePlaceholder');
-            const vehicleForm = document.getElementById('vehicleForm');
 
+            // Image Logic
             let selectedFile = null;
-
-            // Change button opens file picker
-            changeImageBtn.addEventListener('click', function () {
-                vehicleImageInput.click();
-            });
-
-            // When file selected, show preview on page (not modal)
-            vehicleImageInput.addEventListener('change', function (e) {
-                if (e.target.files && e.target.files[0]) {
+            document.getElementById('changeImageBtn').addEventListener('click', () => document.getElementById('vehicleImageInput').click());
+            document.getElementById('vehicleImageInput').addEventListener('change', (e) => {
+                if (e.target.files[0]) {
                     selectedFile = e.target.files[0];
-
                     const reader = new FileReader();
-                    reader.onload = function (event) {
-                        // Show preview on page
-                        if (vehicleImageEl) {
-                            vehicleImageEl.src = event.target.result;
-                        } else if (vehiclePlaceholder) {
-                            vehiclePlaceholder.outerHTML = '<img id="vehicleImage" src="' + event.target.result + '" class="vehicle-image" alt="Vehicle Image">';
-                            vehicleImageEl = document.getElementById('vehicleImage');
-                        }
+                    reader.onload = (ev) => {
+                        const img = document.getElementById('vehicleImage');
+                        if (img) img.src = ev.target.result;
                     };
                     reader.readAsDataURL(selectedFile);
                 }
             });
 
-            // Intercept form submit to show confirmation modal with summary
+            // Form Submit Logic
             vehicleForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-
-                // Build summary of changes
-                const brand = vehicleForm.querySelector('[name="brand"]').value;
-                const model = vehicleForm.querySelector('[name="model"]').value;
-                const year = vehicleForm.querySelector('[name="manufacturingYear"]').value;
-                const regNo = vehicleForm.querySelector('[name="registrationNo"]').value;
-                const category = vehicleForm.querySelector('[name="category"]').value;
-                const mileage = vehicleForm.querySelector('[name="mileage"]').value;
-                const fuelType = vehicleForm.querySelector('[name="fuelType"]').value;
-                const transmission = vehicleForm.querySelector('[name="transmissionType"]').value;
-                const status = vehicleForm.querySelector('[name="status"]').value;
-                const rate = document.getElementById('ratePerDayInput').value;
-
-                let summaryHtml = '<div style="text-align: left; font-size: 14px;">';
-                summaryHtml += '<table style="width: 100%; border-collapse: collapse;">';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Brand:</strong></td><td style="padding: 4px 8px;">' + brand + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Model:</strong></td><td style="padding: 4px 8px;">' + model + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Year:</strong></td><td style="padding: 4px 8px;">' + (year || 'N/A') + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Reg. No:</strong></td><td style="padding: 4px 8px;">' + regNo + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Category:</strong></td><td style="padding: 4px 8px;">' + category + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Mileage:</strong></td><td style="padding: 4px 8px;">' + (mileage || 'N/A') + ' km</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Fuel:</strong></td><td style="padding: 4px 8px;">' + fuelType + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Transmission:</strong></td><td style="padding: 4px 8px;">' + transmission + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Status:</strong></td><td style="padding: 4px 8px;">' + status + '</td></tr>';
-                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Rate/Day:</strong></td><td style="padding: 4px 8px;">RM ' + (parseFloat(rate) || 0).toFixed(2) + '</td></tr>';
-                if (selectedFile) {
-                    summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>New Image:</strong></td><td style="padding: 4px 8px; color: #28a745;">Yes (pending upload)</td></tr>';
-                }
-                summaryHtml += '</table></div>';
-
-                // Show confirmation modal with summary
-                document.getElementById('confirmModalPreview').innerHTML = summaryHtml;
-                document.getElementById('confirmModalPreview').style.display = 'block';
-                document.getElementById('confirmModalTitle').textContent = 'Confirm Vehicle Update';
-                document.getElementById('confirmModalMessage').textContent = 'Please review the vehicle information below:';
-
-                const confirmBtn = document.getElementById('confirmModalBtn');
-                confirmBtn.onclick = function () {
-                    performUpdate();
-                };
-
-                const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-                modal.show();
+                performUpdate();
             });
 
             function performUpdate() {
-                document.getElementById('confirmModalBtn').disabled = true;
-                document.getElementById('confirmModalBtn').textContent = 'Updating...';
-
-                // If there's a new image, upload it first
                 if (selectedFile) {
                     const formData = new FormData();
                     formData.append('image', selectedFile);
 
-                    // CSRF Protection
-                    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
                     fetch('/owner/vehicles/' + vehicleId + '/image', {
                         method: 'POST',
-                        headers: {
-                            [csrfHeader]: csrfToken
-                        },
+                        headers: getCsrfConfig(),
                         body: formData
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Image uploaded, now submit the form
-                                submitFormData();
-                            } else {
-                                alert('Error uploading image: ' + (data.error || 'Failed'));
-                                resetModalBtn();
-                            }
-                        })
-                        .catch(error => {
-                            alert('Error: ' + error.message);
-                            resetModalBtn();
-                        });
+                        .then(res => res.json())
+                        .then(data => data.success ? vehicleForm.submit() : alert('Upload Failed'))
+                        .catch(err => alert('Error: ' + err.message));
                 } else {
-                    // No new image, just submit the form
-                    submitFormData();
+                    vehicleForm.submit();
                 }
             }
 
-            function submitFormData() {
-                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
-                // Submit form directly (not via AJAX since controller returns redirect)
-                vehicleForm.submit();
+            // --- View Rate History Modal Logic ---
+            const historyModalOverlay = document.getElementById('historyModalOverlay');
+            const historyModalBody = document.getElementById('historyModalBody');
+            const historyLoading = document.getElementById('historyLoading');
+            const historyContent = document.getElementById('historyContent');
+
+            function closeHistoryModal() {
+                historyModalOverlay.classList.remove('show');
             }
 
-            function resetModalBtn() {
-                document.getElementById('confirmModalBtn').disabled = false;
-                document.getElementById('confirmModalBtn').textContent = 'Confirm';
-            }
-            // --- Rate History Logic ---
-            const rateHistoryModalOverlay = document.getElementById('rateHistoryModalOverlay');
-            const viewRateHistoryBtn = document.getElementById('viewRateHistoryBtn');
-            const closeRateHistoryModal = document.getElementById('closeRateHistoryModal');
-            const rateHistoryTableBody = document.getElementById('rateHistoryTableBody');
-            const addNewRateBtn = document.getElementById('addNewRateBtn');
-            const newRateInput = document.getElementById('newRateInput');
-            const newRateDateInput = document.getElementById('newRateDateInput');
+            document.getElementById('closeHistoryModal').addEventListener('click', closeHistoryModal);
+            document.getElementById('closeHistoryModalBtn').addEventListener('click', closeHistoryModal);
+            historyModalOverlay.addEventListener('click', (e) => {
+                if (e.target === historyModalOverlay) closeHistoryModal();
+            });
 
-            if (viewRateHistoryBtn) {
-                viewRateHistoryBtn.addEventListener('click', function () {
-                    rateHistoryModalOverlay.classList.add('show');
-                    fetchRateHistory();
+            document.getElementById('viewRateHistoryBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                historyLoading.style.display = 'block';
+                historyContent.innerHTML = '';
+                historyModalOverlay.classList.add('show');
 
-                    // Set default date to now
-                    const now = new Date();
-                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                    newRateDateInput.value = now.toISOString().slice(0, 16);
-                });
-            }
-
-            if (closeRateHistoryModal) {
-                closeRateHistoryModal.addEventListener('click', function () {
-                    rateHistoryModalOverlay.classList.remove('show');
-                });
-            }
-
-            if (rateHistoryModalOverlay) {
-                rateHistoryModalOverlay.addEventListener('click', function (e) {
-                    if (e.target === rateHistoryModalOverlay) {
-                        rateHistoryModalOverlay.classList.remove('show');
-                    }
-                });
-            }
-
-            function fetchRateHistory() {
-                fetch('/owner/vehicles/' + vehicleId + '/rate-history')
-                    .then(response => response.json())
+                fetch('/owner/vehicles/' + vehicleId + '/rate-history', {
+                    method: 'GET',
+                    headers: getCsrfConfig()
+                })
+                    .then(res => res.json())
                     .then(data => {
-                        rateHistoryTableBody.innerHTML = '';
-                        if (data.length === 0) {
-                            rateHistoryTableBody.innerHTML = '<tr><td colspan="3" class="text-center">No history found</td></tr>';
+                        historyLoading.style.display = 'none';
+                        if (data.error) {
+                            historyContent.innerHTML = '<div class="alert alert-danger">Error: ' + data.error + '</div>';
                             return;
                         }
-
-                        const now = new Date();
-
-                        data.forEach(item => {
-                            const date = new Date(item.effectiveStartDate);
-                            const isFuture = date > now;
-                            const statusBadge = isFuture
-                                ? '<span class="badge badge-info">Scheduled</span>'
-                                : '<span class="badge badge-success">Active/Past</span>';
-
-                            // Simple formatting
-                            const dateStr = date.toLocaleString();
-
-                            const row = `
-                                <tr>
-                                    <td>${dateStr}</td>
-                                    <td>RM ${item.ratePerDay.toFixed(2)}</td>
-                                    <td>${statusBadge}</td>
-                                </tr>
-                            `;
-                            rateHistoryTableBody.innerHTML += row;
+                        if (data.length === 0) {
+                            historyContent.innerHTML = '<div class="text-center text-muted py-3"><i class="mdi mdi-information-outline mr-2"></i>No rate history available for this vehicle.</div>';
+                            return;
+                        }
+                        let html = '<table class="table table-sm table-striped mb-0">';
+                        html += '<thead><tr><th>#</th><th>Rate</th><th>Effective Date</th></tr></thead><tbody>';
+                        data.forEach((item, index) => {
+                            const date = new Date(item.effectiveStartDate).toLocaleDateString();
+                            html += '<tr><td>' + (index + 1) + '</td><td><strong>RM ' + parseFloat(item.ratePerDay).toFixed(2) + '</strong></td><td>' + date + '</td></tr>';
                         });
+                        html += '</tbody></table>';
+                        historyContent.innerHTML = html;
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        rateHistoryTableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error loading history</td></tr>';
+                    .catch(err => {
+                        historyLoading.style.display = 'none';
+                        console.error('Error fetching rate history:', err);
+                        historyContent.innerHTML = '<div class="alert alert-danger">Failed to fetch rate history.</div>';
                     });
-            }
+            });
 
+            // --- Rate History Logic with CSRF ---
+            const addNewRateBtn = document.getElementById('addNewRateBtn');
             if (addNewRateBtn) {
                 addNewRateBtn.addEventListener('click', function () {
-                    const rate = newRateInput.value;
-                    const date = newRateDateInput.value;
+                    const rate = document.getElementById('newRateInput').value;
+                    const date = document.getElementById('newRateDateInput').value;
 
-                    if (!rate || !date) {
-                        alert('Please enter both rate and date');
-                        return;
-                    }
+                    if (!rate || !date) return alert('Enter rate and date');
 
-                    addNewRateBtn.disabled = true;
-                    addNewRateBtn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Adding...';
+                    const headers = getCsrfConfig();
+                    headers['Content-Type'] = 'application/json';
 
                     fetch('/owner/vehicles/' + vehicleId + '/rates', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            rate: rate,
-                            effectiveDate: date
-                        })
+                        headers: headers,
+                        body: JSON.stringify({ rate: rate, effectiveDate: date })
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Refresh history
-                                fetchRateHistory();
-                                // Clear inputs
-                                newRateInput.value = '';
-                                // Show success feedback
-                                // alert('Rate added successfully');
-                            } else {
-                                alert('Error: ' + (data.error || 'Unknown error'));
-                            }
-                        })
-                        .catch(error => {
-                            alert('Error: ' + error.message);
-                        })
-                        .finally(() => {
-                            addNewRateBtn.disabled = false;
-                            addNewRateBtn.innerHTML = '<i class="mdi mdi-plus"></i> Add';
-                        });
+                        .then(res => res.json())
+                        .then(data => data.success ? location.reload() : alert('Error adding rate'))
+                        .catch(err => console.error(err));
                 });
             }
         </script>
