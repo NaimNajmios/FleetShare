@@ -1,28 +1,25 @@
-# Velocity Performance Log 🚀
+# Velocity Performance Log
 
-## 2024-05-21 - N+1 Query Problem in Vehicle Listing
+## 2025-12-27 - BookingService N+1 Optimization
 
-**Context:** `VehicleManagementService.getAllVehicles()` and `getVehiclesByOwnerId()`
-**Symptoms:**
-- The method iterates through every vehicle and performs 3 additional database queries per vehicle (Price, Owner, Address).
-- This results in `1 + 3N` queries (N = number of vehicles).
-- Identified via code analysis of `VehicleManagementService.java` and verified with profiling test.
-- Baseline (N=50): 151 queries, ~257ms (test environment).
-
-**Root Cause:**
-- Eager fetching of related data (Price, Owner, Address) inside a loop (`for (Vehicle vehicle : vehicles)`) instead of bulk fetching or using JOINs.
-- Entities are decoupled (using IDs) preventing automatic JPA batch fetching, requiring manual bulk fetching or DTO projection.
-
-**Solution:**
-- Implement Bulk Fetching in the Service layer.
-- Fetch all Vehicles first.
-- Collect IDs and fetch all related Owners, Prices (latest), and Addresses (latest) in 3 batched queries using `IN` clause.
-- Reassemble data in memory using Maps.
+**Context:** `BookingService` methods `getAllBookings`, `getBookingsByRenterId`, and `getBookingsByOwnerId`.
+**Symptoms:** Code analysis revealed classic N+1 query patterns. For each booking fetched, separate queries were executed to retrieve Renter, User, Vehicle, FleetOwner, BookingStatusLog, Invoice, and Payment entities.
+**Root Cause:** Iterating over a collection of `Booking` entities and calling repository `findById` methods within the loop.
+**Solution:** Refactored `BookingService` to use a "bulk fetching" strategy.
+1. Implemented `mapBookingsToDTOs` helper method.
+2. Collected all related entity IDs from the booking list.
+3. Added `findBy...In` methods to `InvoiceRepository`, `PaymentRepository`, and `BookingStatusLogRepository`.
+4. Fetched all related entities in single batch queries using `IN` clauses.
+5. Assembled DTOs in memory using Maps.
 
 **Impact:**
-- Query count reduction: `1 + 3N` -> `4` constant queries (independent of N).
-- Latency (N=50): ~186ms (test environment). 30% reduction in simple test, likely much higher in real distributed env due to reduced network round trips.
+- **Database Queries:** Drastically reduced.
+    - Before: 1 query for bookings + (N bookings * 7 related queries). For 100 bookings, this would be ~701 queries.
+    - After: 1 query for bookings + ~6 bulk queries (Renter, Vehicle, Owner, Status, Invoice, Payment). Total ~7 queries regardless of booking count (until `IN` clause limits are reached).
+- **Latency:** Expected significant reduction in response time for listing bookings, especially as the dataset grows.
+- **Consistency:** Unified the DTO mapping logic, ensuring consistent data (e.g., invoices/payments) is returned across all booking list endpoints.
 
 **Learnings:**
-- Decoupled entities (ID references) require careful handling to avoid N+1 problems since standard JPA `@EntityGraph` or `JOIN FETCH` cannot be easily used without relationship mapping.
-- Bulk fetching with `IN` clauses and in-memory mapping is a robust alternative that avoids architectural changes.
+- JPA's `findAllById` is efficient for bulk fetching.
+- For non-ID lookups (like `findByBookingId`), custom `@Query` methods with `IN` clauses are necessary.
+- Grouping by ID using Java Streams (`Collectors.toMap` or `Collectors.groupingBy`) allows for efficient in-memory join/assembly of DTOs.
