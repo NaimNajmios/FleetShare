@@ -47,7 +47,7 @@ public class VehicleManagementService {
          * @return List of VehicleDTO objects
          */
         public List<VehicleDTO> getAllVehicles() {
-                List<Vehicle> vehicles = vehicleRepository.findAll();
+                List<Vehicle> vehicles = vehicleRepository.findByIsDeletedFalse();
                 if (vehicles.isEmpty()) {
                         return Collections.emptyList();
                 }
@@ -207,7 +207,7 @@ public class VehicleManagementService {
          * @return List of VehicleDTO objects for owner's vehicles
          */
         public List<VehicleDTO> getVehiclesByOwnerId(Long ownerId) {
-                List<Vehicle> vehicles = vehicleRepository.findByFleetOwnerId(ownerId);
+                List<Vehicle> vehicles = vehicleRepository.findByFleetOwnerIdAndIsDeletedFalse(ownerId);
                 if (vehicles.isEmpty()) {
                         return Collections.emptyList();
                 }
@@ -400,5 +400,44 @@ public class VehicleManagementService {
                 // latest price dynamically, so we are good.
 
                 return priceHistoryRepository.save(priceHistory);
+        }
+
+        /**
+         * Soft deletes a vehicle
+         * 
+         * @param vehicleId    Vehicle ID
+         * @param fleetOwnerId Fleet Owner ID (for auth)
+         */
+        @Transactional
+        public void softDeleteVehicle(Long vehicleId, Long fleetOwnerId) {
+                Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+                if (vehicle == null) {
+                        throw new RuntimeException("Vehicle not found");
+                }
+
+                if (!vehicle.getFleetOwnerId().equals(fleetOwnerId)) {
+                        throw new RuntimeException("Unauthorized to delete this vehicle");
+                }
+
+                vehicle.setIsDeleted(true);
+                vehicle.setDeletedAt(LocalDateTime.now());
+                vehicleRepository.save(vehicle);
+        }
+
+        /**
+         * Soft deletes a vehicle (Admin version)
+         * 
+         * @param vehicleId Vehicle ID
+         */
+        @Transactional
+        public void adminSoftDeleteVehicle(Long vehicleId) {
+                Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+                if (vehicle == null) {
+                        throw new RuntimeException("Vehicle not found");
+                }
+
+                vehicle.setIsDeleted(true);
+                vehicle.setDeletedAt(LocalDateTime.now());
+                vehicleRepository.save(vehicle);
         }
 }

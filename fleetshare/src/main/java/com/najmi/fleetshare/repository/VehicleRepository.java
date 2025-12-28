@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByFleetOwnerId(Long fleetOwnerId);
+
+    List<Vehicle> findByFleetOwnerIdAndIsDeletedFalse(Long fleetOwnerId);
+
+    List<Vehicle> findByIsDeletedFalse();
 }

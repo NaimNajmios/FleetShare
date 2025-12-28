@@ -64,6 +64,12 @@ public class AdminController {
     @Autowired
     private PlatformAdminRepository platformAdminRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private com.najmi.fleetshare.repository.UserRepository userRepository;
+
     @GetMapping("/")
     public String index() {
         return "redirect:/admin/dashboard";
@@ -468,6 +474,33 @@ public class AdminController {
             return "redirect:/admin/vehicles/view/" + vehicleId;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+            return "redirect:/admin/vehicles/view/" + vehicleId;
+        }
+    }
+
+    @PostMapping("/vehicles/delete/{vehicleId}")
+    public String deleteVehicle(@PathVariable Long vehicleId,
+            @RequestParam("password") String password,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Verify password
+            com.najmi.fleetshare.entity.User dbUser = userRepository.findById(user.getUserId()).orElse(null);
+            if (dbUser == null || !passwordEncoder.matches(password, dbUser.getHashedPassword())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Incorrect password. Vehicle deletion failed.");
+                return "redirect:/admin/vehicles/view/" + vehicleId;
+            }
+
+            vehicleManagementService.adminSoftDeleteVehicle(vehicleId);
+            redirectAttributes.addFlashAttribute("successMessage", "Vehicle deleted successfully!");
+            return "redirect:/admin/vehicles";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting vehicle: " + e.getMessage());
             return "redirect:/admin/vehicles/view/" + vehicleId;
         }
     }

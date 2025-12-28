@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Dec 17, 2025 at 05:18 AM
+-- Generation Time: Dec 28, 2025 at 09:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -167,7 +167,7 @@ CREATE TABLE `fleetowners` (
 --
 
 INSERT INTO `fleetowners` (`fleet_owner_id`, `user_id`, `business_name`, `contact_phone`, `is_verified`, `updated_at`) VALUES
-(1, 2, 'MetroCity Car Rental Sdn Bhd', '+603-77214000', 1, '2025-11-24 02:55:07'),
+(1, 2, 'MetroCity Car Rental Corps Sdn Bhd', '+603-77214000', 1, '2025-12-23 02:40:56'),
 (2, 3, 'Borneo 4x4 Expeditions Ent', '+6088-234567', 1, '2025-11-24 02:55:07'),
 (3, 4, 'Prestige Limousines PLT', '+604-2267890', 1, '2025-11-24 02:55:07');
 
@@ -275,7 +275,7 @@ CREATE TABLE `platformadmins` (
 --
 
 INSERT INTO `platformadmins` (`admin_id`, `user_id`, `full_name`, `updated_at`) VALUES
-(1, 1, 'Azman bin Khalid', '2025-11-24 02:55:07');
+(1, 1, 'Azman bin Khalid Ibrahim', '2025-12-23 02:40:13');
 
 -- --------------------------------------------------------
 
@@ -296,7 +296,7 @@ CREATE TABLE `renters` (
 --
 
 INSERT INTO `renters` (`renter_id`, `user_id`, `full_name`, `phone_number`, `updated_at`) VALUES
-(1, 5, 'Nurul Izzah binti Ahmad', '+6011-22334455', '2025-11-24 02:55:07'),
+(1, 5, 'Nurul Izzah binti Ahmad', '+6011-22334455', '2025-12-23 03:03:40'),
 (2, 6, 'Jason Lee Keng Wee', '+6012-3456789', '2025-11-24 02:55:07'),
 (3, 7, 'Muthu Kumar a/l Balakrishnan', '+6013-9876543', '2025-11-24 02:55:07'),
 (4, 8, 'Sarah Jenkins', '+44-7700900000', '2025-11-24 02:55:07'),
@@ -492,7 +492,8 @@ INSERT INTO `vehiclepricehistory` (`price_id`, `vehicle_id`, `rate_per_day`, `ef
 (6, 6, 500.00, '2023-12-31 16:00:00'),
 (7, 7, 220.00, '2023-12-31 16:00:00'),
 (8, 8, 850.00, '2023-12-31 16:00:00'),
-(9, 9, 900.00, '2023-12-31 16:00:00');
+(9, 9, 900.00, '2023-12-31 16:00:00'),
+(10, 10, 120.00, '2025-12-23 06:11:51');
 
 -- --------------------------------------------------------
 
@@ -514,23 +515,26 @@ CREATE TABLE `vehicles` (
   `vehicle_image_url` varchar(1024) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` enum('AVAILABLE','MAINTENANCE','RENTED','UNAVAILABLE') DEFAULT NULL
+  `status` enum('AVAILABLE','MAINTENANCE','RENTED','UNAVAILABLE') DEFAULT NULL,
+  `is_deleted` tinyint(1) DEFAULT 0,
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `vehicles`
 --
 
-INSERT INTO `vehicles` (`vehicle_id`, `fleet_owner_id`, `model`, `brand`, `manufacturing_year`, `registration_no`, `category`, `fuel_type`, `transmission_type`, `mileage`, `vehicle_image_url`, `created_at`, `updated_at`, `status`) VALUES
-(1, 1, 'Myvi 1.5 AV', 'Perodua', 2023, 'VHJ 8821', 'Hatchback', 'PETROL', 'AUTO', 15000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(2, 1, 'Bezza 1.3 Advance', 'Perodua', 2024, 'VKE 4402', 'Sedan', 'PETROL', 'AUTO', 5000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(3, 1, 'Saga 1.3 Premium S', 'Proton', 2023, 'BRA 3022', 'Sedan', 'PETROL', 'AUTO', 22000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(4, 2, 'X70 1.8 TGDi Premium', 'Proton', 2022, 'SYC 5519', 'SUV', 'PETROL', 'AUTO', 35000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(5, 2, 'Hilux 2.8 Rogue', 'Toyota', 2023, 'SAB 9921 A', 'Pickup 4x4', 'DIESEL', 'AUTO', 28000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(6, 2, 'Ranger Wildtrak', 'Ford', 2023, 'QAA 1122', 'Pickup 4x4', 'DIESEL', 'AUTO', 12000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(7, 3, 'City 1.5 V Sensing', 'Honda', 2024, 'PQA 8888', 'Sedan', 'PETROL', 'AUTO', 8000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(8, 3, 'Vellfire 2.5 ZG', 'Toyota', 2023, 'V 1', 'Luxury MPV', 'PETROL', 'AUTO', 15000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL),
-(9, 3, '320i M Sport', 'BMW', 2023, 'PPP 77', 'Luxury Sedan', 'PETROL', 'AUTO', 9000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL);
+INSERT INTO `vehicles` (`vehicle_id`, `fleet_owner_id`, `model`, `brand`, `manufacturing_year`, `registration_no`, `category`, `fuel_type`, `transmission_type`, `mileage`, `vehicle_image_url`, `created_at`, `updated_at`, `status`, `is_deleted`, `deleted_at`) VALUES
+(1, 1, 'Myvi 1.5 AV', 'Perodua', 2023, 'VHJ 8821', 'Hatchback', 'Petrol', 'Automatic', 15000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-28 03:57:32', 'AVAILABLE', 0, NULL),
+(2, 1, 'Bezza 1.3 Advance', 'Perodua', 2024, 'VKE 4402', 'Sedan', 'PETROL', 'AUTO', 5000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(3, 1, 'Saga 1.3 Premium S', 'Proton', 2023, 'BRA 3022', 'Sedan', 'PETROL', 'AUTO', 22000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(4, 2, 'X70 1.8 TGDi Premium', 'Proton', 2022, 'SYC 5519', 'SUV', 'PETROL', 'AUTO', 35000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(5, 2, 'Hilux 2.8 Rogue', 'Toyota', 2023, 'SAB 9921 A', 'Pickup 4x4', 'DIESEL', 'AUTO', 28000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(6, 2, 'Ranger Wildtrak', 'Ford', 2023, 'QAA 1122', 'Pickup 4x4', 'DIESEL', 'AUTO', 12000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(7, 3, 'City 1.5 V Sensing', 'Honda', 2024, 'PQA 8888', 'Sedan', 'PETROL', 'AUTO', 8000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(8, 3, 'Vellfire 2.5 ZG', 'Toyota', 2023, 'V 1', 'Luxury MPV', 'PETROL', 'AUTO', 15000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(9, 3, '320i M Sport', 'BMW', 2023, 'PPP 77', 'Luxury Sedan', 'PETROL', 'AUTO', 9000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
+(10, 1, 'Camry II', 'Toyota', 2020, 'VEB 8175', 'Sedan', 'Petrol', 'Automatic', 23000, '/uploads/vehicles/vehicle_10_a33dd1f2.jpeg', '2025-12-23 06:11:51', '2025-12-28 06:01:45', 'AVAILABLE', 0, NULL);
 
 --
 -- Indexes for dumped tables
@@ -737,7 +741,7 @@ ALTER TABLE `vehiclepricehistory`
 -- AUTO_INCREMENT for table `vehicles`
 --
 ALTER TABLE `vehicles`
-  MODIFY `vehicle_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `vehicle_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
