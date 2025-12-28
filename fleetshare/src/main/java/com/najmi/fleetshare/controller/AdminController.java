@@ -31,29 +31,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.IOException;
-import java.util.UUID;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.IOException;
-import java.util.UUID;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -509,7 +493,8 @@ public class AdminController {
             String extension = originalFilename != null && originalFilename.contains(".")
                     ? originalFilename.substring(originalFilename.lastIndexOf("."))
                     : ".jpg";
-            String uniqueFilename = "vehicle_" + vehicleId + "_" + java.util.UUID.randomUUID().toString().substring(0, 8) + extension;
+            String uniqueFilename = "vehicle_" + vehicleId + "_"
+                    + java.util.UUID.randomUUID().toString().substring(0, 8) + extension;
             java.nio.file.Path filePath = uploadPath.resolve(uniqueFilename);
             java.nio.file.Files.copy(file.getInputStream(), filePath);
             VehicleDTO existing = vehicleManagementService.getVehicleDetails(vehicleId);
@@ -523,7 +508,6 @@ public class AdminController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
 
     @GetMapping("/vehicles/add")
     public String addVehicle(Model model) {
