@@ -723,6 +723,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirm Update Modal -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalTitle">Confirm Update</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="confirmModalMessage">Are you sure you want to update this vehicle?</p>
+                        <div id="confirmModalPreview" class="mt-3 p-3 bg-light rounded"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmModalBtn">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
@@ -800,10 +820,57 @@
             // Form Submit Logic
             vehicleForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                performUpdate();
+                showConfirmModal();
             });
 
+            // Build summary of changes (admin-style implementation)
+            function showConfirmModal() {
+                const brand = vehicleForm.querySelector('[name="brand"]')?.value || 'N/A';
+                const model = vehicleForm.querySelector('[name="model"]')?.value || 'N/A';
+                const year = vehicleForm.querySelector('[name="manufacturingYear"]')?.value || 'N/A';
+                const regNo = vehicleForm.querySelector('[name="registrationNo"]')?.value || 'N/A';
+                const category = vehicleForm.querySelector('[name="category"]')?.value || 'N/A';
+                const mileage = vehicleForm.querySelector('[name="mileage"]')?.value || 'N/A';
+                const fuelType = vehicleForm.querySelector('[name="fuelType"]')?.value || 'N/A';
+                const transmission = vehicleForm.querySelector('[name="transmissionType"]')?.value || 'N/A';
+                const status = vehicleForm.querySelector('[name="status"]')?.value || 'N/A';
+                const rate = document.getElementById('ratePerDayInput')?.value || '0';
+
+                let summaryHtml = '<div style="text-align: left; font-size: 14px;">';
+                summaryHtml += '<table style="width: 100%; border-collapse: collapse;">';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Brand:</strong></td><td style="padding: 4px 8px;">' + brand + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Model:</strong></td><td style="padding: 4px 8px;">' + model + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Year:</strong></td><td style="padding: 4px 8px;">' + (year || 'N/A') + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Reg. No:</strong></td><td style="padding: 4px 8px;">' + regNo + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Category:</strong></td><td style="padding: 4px 8px;">' + category + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Mileage:</strong></td><td style="padding: 4px 8px;">' + (mileage || 'N/A') + ' km</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Fuel:</strong></td><td style="padding: 4px 8px;">' + fuelType + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Transmission:</strong></td><td style="padding: 4px 8px;">' + transmission + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Status:</strong></td><td style="padding: 4px 8px;">' + status + '</td></tr>';
+                summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Rate/Day:</strong></td><td style="padding: 4px 8px;">RM ' + (parseFloat(rate) || 0).toFixed(2) + '</td></tr>';
+                if (selectedFile) {
+                    summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>New Image:</strong></td><td style="padding: 4px 8px; color: #28a745;">Yes (pending upload)</td></tr>';
+                }
+                summaryHtml += '</table></div>';
+
+                document.getElementById('confirmModalPreview').innerHTML = summaryHtml;
+                document.getElementById('confirmModalPreview').style.display = 'block';
+                document.getElementById('confirmModalTitle').textContent = 'Confirm Vehicle Update';
+                document.getElementById('confirmModalMessage').textContent = 'Please review the vehicle information below:';
+
+                const confirmBtn = document.getElementById('confirmModalBtn');
+                confirmBtn.onclick = function () {
+                    performUpdate();
+                };
+
+                const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                modal.show();
+            }
+
             function performUpdate() {
+                document.getElementById('confirmModalBtn').disabled = true;
+                document.getElementById('confirmModalBtn').textContent = 'Updating...';
+
                 if (selectedFile) {
                     const formData = new FormData();
                     formData.append('image', selectedFile);
@@ -814,11 +881,31 @@
                         body: formData
                     })
                         .then(res => res.json())
-                        .then(data => data.success ? vehicleForm.submit() : alert('Upload Failed'))
-                        .catch(err => alert('Error: ' + err.message));
+                        .then(data => {
+                            if (data.success) {
+                                submitFormData();
+                            } else {
+                                alert('Error uploading image: ' + (data.error || 'Failed'));
+                                resetModalBtn();
+                            }
+                        })
+                        .catch(err => {
+                            alert('Error: ' + err.message);
+                            resetModalBtn();
+                        });
                 } else {
-                    vehicleForm.submit();
+                    submitFormData();
                 }
+            }
+
+            function submitFormData() {
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+                vehicleForm.submit();
+            }
+
+            function resetModalBtn() {
+                document.getElementById('confirmModalBtn').disabled = false;
+                document.getElementById('confirmModalBtn').textContent = 'Confirm';
             }
 
             // --- View Rate History Modal Logic ---
@@ -921,3 +1008,6 @@
 </body>
 
 </html>
+
+
+
