@@ -10,6 +10,7 @@ import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.entity.FleetOwner;
+import com.najmi.fleetshare.entity.VehiclePriceHistory;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
@@ -310,6 +311,65 @@ public class OwnerController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload image: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    }
+
+    }
+
+    @GetMapping("/vehicles/{vehicleId}/rate-history")
+    @ResponseBody
+    public ResponseEntity<?> getRateHistory(@PathVariable Long vehicleId, HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            // Verify ownership
+            VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+            if (vehicle == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Unauthorized"));
+            }
+
+            List<VehiclePriceHistory> history = vehicleManagementService.getRateHistory(vehicleId);
+            return ResponseEntity.ok(history);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/vehicles/{vehicleId}/rates")
+    @ResponseBody
+    public ResponseEntity<?> addRate(@PathVariable Long vehicleId,
+            @RequestBody Map<String, String> payload,
+            HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            Long fleetOwnerId = user.getOwnerDetails().getFleetOwnerId();
+
+            String rateStr = payload.get("rate");
+            String dateStr = payload.get("effectiveDate");
+
+            if (rateStr == null || dateStr == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Rate and Effective Date are required"));
+            }
+
+            BigDecimal rate = new BigDecimal(rateStr);
+            LocalDateTime effectiveDate = LocalDateTime.parse(dateStr);
+
+            vehicleManagementService.addRate(vehicleId, fleetOwnerId, rate, effectiveDate);
+
+            return ResponseEntity.ok(Map.of("success", true, "message", "Rate updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
