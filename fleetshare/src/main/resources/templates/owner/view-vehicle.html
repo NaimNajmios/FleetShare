@@ -621,7 +621,7 @@
 
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
-            const vehicleId = [[${vehicle.vehicleId}]];
+            const vehicleId = [[${ vehicle.vehicleId }]];
             // Toggle between view and edit modes
             const container = document.querySelector('.profile-container');
             const editBtn = document.getElementById('editBtn');
@@ -685,7 +685,7 @@
                 if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) closeRateModal();
             });
             // Image Upload Logic - Preview first, upload on form submit
-            const vehicleId = /*[[${vehicle.vehicleId}]]*/ 0;
+            // Image Upload Logic - Preview first, upload on form submit
             const changeImageBtn = document.getElementById('changeImageBtn');
             const vehicleImageInput = document.getElementById('vehicleImageInput');
             let vehicleImageEl = document.getElementById('vehicleImage');
@@ -774,7 +774,7 @@
                 if (selectedFile) {
                     const formData = new FormData();
                     formData.append('image', selectedFile);
-                    
+
                     // CSRF Protection
                     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
                     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
