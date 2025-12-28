@@ -509,7 +509,13 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label>Rate Per Day (RM)</label>
+                                            <label class="d-flex justify-content-between align-items-center">
+                                                Rate Per Day (RM)
+                                                <button type="button" class="btn btn-sm btn-link p-0"
+                                                    id="viewRateHistoryBtn" style="font-size: 0.875rem;">
+                                                    <i class="mdi mdi-history mr-1"></i>History
+                                                </button>
+                                            </label>
                                             <input type="hidden" id="ratePerDayInput" name="ratePerDay"
                                                 th:value="${vehicle.ratePerDay}">
                                             <button type="button" class="btn manage-rate-btn" id="openRateModal"
@@ -559,6 +565,58 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Rate History Modal -->
+    <div class="rate-modal-overlay" id="rateHistoryModalOverlay">
+        <div class="rate-modal" style="max-width: 600px;">
+            <div class="rate-modal-header">
+                <h5><i class="mdi mdi-history mr-2"></i>Rate History</h5>
+                <button class="rate-modal-close" id="closeRateHistoryModal">&times;</button>
+            </div>
+            <div class="rate-modal-body">
+                <!-- Add New Rate Form -->
+                <div class="mb-4 p-3 bg-light rounded">
+                    <h6 class="mb-3">Schedule New Rate</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="small font-weight-bold">New Rate (RM)</label>
+                            <input type="number" class="form-control form-control-sm" id="newRateInput" step="0.01"
+                                placeholder="0.00">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="small font-weight-bold">Effective Date</label>
+                            <input type="datetime-local" class="form-control form-control-sm" id="newRateDateInput">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-sm btn-primary btn-block" id="addNewRateBtn">
+                                <i class="mdi mdi-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Table -->
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Effective Date</th>
+                                <th>Rate (RM)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rateHistoryTableBody">
+                            <!-- Populated via JS -->
+                            <tr>
+                                <td colspan="3" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 
     <th:block layout:fragment="extra-js">
@@ -636,17 +694,17 @@
             let selectedFile = null;
 
             // Change button opens file picker
-            changeImageBtn.addEventListener('click', function() {
+            changeImageBtn.addEventListener('click', function () {
                 vehicleImageInput.click();
             });
 
             // When file selected, show preview on page (not modal)
-            vehicleImageInput.addEventListener('change', function(e) {
+            vehicleImageInput.addEventListener('change', function (e) {
                 if (e.target.files && e.target.files[0]) {
                     selectedFile = e.target.files[0];
-                    
+
                     const reader = new FileReader();
-                    reader.onload = function(event) {
+                    reader.onload = function (event) {
                         // Show preview on page
                         if (vehicleImageEl) {
                             vehicleImageEl.src = event.target.result;
@@ -660,9 +718,9 @@
             });
 
             // Intercept form submit to show confirmation modal with summary
-            vehicleForm.addEventListener('submit', function(e) {
+            vehicleForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                
+
                 // Build summary of changes
                 const brand = vehicleForm.querySelector('[name="brand"]').value;
                 const model = vehicleForm.querySelector('[name="model"]').value;
@@ -674,7 +732,7 @@
                 const transmission = vehicleForm.querySelector('[name="transmissionType"]').value;
                 const status = vehicleForm.querySelector('[name="status"]').value;
                 const rate = document.getElementById('ratePerDayInput').value;
-                
+
                 let summaryHtml = '<div style="text-align: left; font-size: 14px;">';
                 summaryHtml += '<table style="width: 100%; border-collapse: collapse;">';
                 summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>Brand:</strong></td><td style="padding: 4px 8px;">' + brand + '</td></tr>';
@@ -691,18 +749,18 @@
                     summaryHtml += '<tr><td style="padding: 4px 8px; color: #666;"><strong>New Image:</strong></td><td style="padding: 4px 8px; color: #28a745;">Yes (pending upload)</td></tr>';
                 }
                 summaryHtml += '</table></div>';
-                
+
                 // Show confirmation modal with summary
                 document.getElementById('confirmModalPreview').innerHTML = summaryHtml;
                 document.getElementById('confirmModalPreview').style.display = 'block';
                 document.getElementById('confirmModalTitle').textContent = 'Confirm Vehicle Update';
                 document.getElementById('confirmModalMessage').textContent = 'Please review the vehicle information below:';
-                
+
                 const confirmBtn = document.getElementById('confirmModalBtn');
-                confirmBtn.onclick = function() {
+                confirmBtn.onclick = function () {
                     performUpdate();
                 };
-                
+
                 const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
                 modal.show();
             });
@@ -710,30 +768,30 @@
             function performUpdate() {
                 document.getElementById('confirmModalBtn').disabled = true;
                 document.getElementById('confirmModalBtn').textContent = 'Updating...';
-                
+
                 // If there's a new image, upload it first
                 if (selectedFile) {
                     const formData = new FormData();
                     formData.append('image', selectedFile);
-                    
+
                     fetch('/owner/vehicles/' + vehicleId + '/image', {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Image uploaded, now submit the form
-                            submitFormData();
-                        } else {
-                            alert('Error uploading image: ' + (data.error || 'Failed'));
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Image uploaded, now submit the form
+                                submitFormData();
+                            } else {
+                                alert('Error uploading image: ' + (data.error || 'Failed'));
+                                resetModalBtn();
+                            }
+                        })
+                        .catch(error => {
+                            alert('Error: ' + error.message);
                             resetModalBtn();
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error: ' + error.message);
-                        resetModalBtn();
-                    });
+                        });
                 } else {
                     // No new image, just submit the form
                     submitFormData();
@@ -749,6 +807,124 @@
             function resetModalBtn() {
                 document.getElementById('confirmModalBtn').disabled = false;
                 document.getElementById('confirmModalBtn').textContent = 'Confirm';
+            }
+            // --- Rate History Logic ---
+            const rateHistoryModalOverlay = document.getElementById('rateHistoryModalOverlay');
+            const viewRateHistoryBtn = document.getElementById('viewRateHistoryBtn');
+            const closeRateHistoryModal = document.getElementById('closeRateHistoryModal');
+            const rateHistoryTableBody = document.getElementById('rateHistoryTableBody');
+            const addNewRateBtn = document.getElementById('addNewRateBtn');
+            const newRateInput = document.getElementById('newRateInput');
+            const newRateDateInput = document.getElementById('newRateDateInput');
+
+            if (viewRateHistoryBtn) {
+                viewRateHistoryBtn.addEventListener('click', function () {
+                    rateHistoryModalOverlay.classList.add('show');
+                    fetchRateHistory();
+
+                    // Set default date to now
+                    const now = new Date();
+                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                    newRateDateInput.value = now.toISOString().slice(0, 16);
+                });
+            }
+
+            if (closeRateHistoryModal) {
+                closeRateHistoryModal.addEventListener('click', function () {
+                    rateHistoryModalOverlay.classList.remove('show');
+                });
+            }
+
+            if (rateHistoryModalOverlay) {
+                rateHistoryModalOverlay.addEventListener('click', function (e) {
+                    if (e.target === rateHistoryModalOverlay) {
+                        rateHistoryModalOverlay.classList.remove('show');
+                    }
+                });
+            }
+
+            function fetchRateHistory() {
+                fetch('/owner/vehicles/' + vehicleId + '/rate-history')
+                    .then(response => response.json())
+                    .then(data => {
+                        rateHistoryTableBody.innerHTML = '';
+                        if (data.length === 0) {
+                            rateHistoryTableBody.innerHTML = '<tr><td colspan="3" class="text-center">No history found</td></tr>';
+                            return;
+                        }
+
+                        const now = new Date();
+
+                        data.forEach(item => {
+                            const date = new Date(item.effectiveStartDate);
+                            const isFuture = date > now;
+                            const statusBadge = isFuture
+                                ? '<span class="badge badge-info">Scheduled</span>'
+                                : '<span class="badge badge-success">Active/Past</span>';
+
+                            // Simple formatting
+                            const dateStr = date.toLocaleString();
+
+                            const row = `
+                                <tr>
+                                    <td>${dateStr}</td>
+                                    <td>RM ${item.ratePerDay.toFixed(2)}</td>
+                                    <td>${statusBadge}</td>
+                                </tr>
+                            `;
+                            rateHistoryTableBody.innerHTML += row;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        rateHistoryTableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error loading history</td></tr>';
+                    });
+            }
+
+            if (addNewRateBtn) {
+                addNewRateBtn.addEventListener('click', function () {
+                    const rate = newRateInput.value;
+                    const date = newRateDateInput.value;
+
+                    if (!rate || !date) {
+                        alert('Please enter both rate and date');
+                        return;
+                    }
+
+                    addNewRateBtn.disabled = true;
+                    addNewRateBtn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Adding...';
+
+                    fetch('/owner/vehicles/' + vehicleId + '/rates', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            rate: rate,
+                            effectiveDate: date
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Refresh history
+                                fetchRateHistory();
+                                // Clear inputs
+                                newRateInput.value = '';
+                                // Show success feedback
+                                // alert('Rate added successfully');
+                            } else {
+                                alert('Error: ' + (data.error || 'Unknown error'));
+                            }
+                        })
+                        .catch(error => {
+                            alert('Error: ' + error.message);
+                        })
+                        .finally(() => {
+                            addNewRateBtn.disabled = false;
+                            addNewRateBtn.innerHTML = '<i class="mdi mdi-plus"></i> Add';
+                        });
+                });
             }
         </script>
     </th:block>

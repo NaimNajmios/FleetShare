@@ -361,4 +361,57 @@ public class VehicleManagementService {
                 vehicle.setUpdatedAt(LocalDateTime.now());
                 return vehicleRepository.save(vehicle);
         }
+
+        /**
+         * Fetches rate history for a vehicle
+         * 
+         * @param vehicleId Vehicle ID
+         * @return List of VehiclePriceHistory
+         */
+        public List<VehiclePriceHistory> getRateHistory(Long vehicleId) {
+                return priceHistoryRepository.findByVehicleIdOrderByEffectiveStartDateDesc(vehicleId);
+        }
+
+        /**
+         * Adds a new rate for a vehicle
+         * 
+         * @param vehicleId     Vehicle ID
+         * @param fleetOwnerId  Fleet Owner ID (for auth)
+         * @param rate          New rate per day
+         * @param effectiveDate Effective start date
+         * @return Created VehiclePriceHistory
+         */
+        @Transactional
+        public VehiclePriceHistory addRate(Long vehicleId, Long fleetOwnerId, BigDecimal rate,
+                        LocalDateTime effectiveDate) {
+                Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+                if (vehicle == null) {
+                        throw new RuntimeException("Vehicle not found");
+                }
+
+                if (!vehicle.getFleetOwnerId().equals(fleetOwnerId)) {
+                        throw new RuntimeException("Unauthorized to update this vehicle");
+                }
+
+                if (rate.compareTo(BigDecimal.ZERO) <= 0) {
+                        throw new RuntimeException("Rate must be greater than zero");
+                }
+
+                VehiclePriceHistory priceHistory = new VehiclePriceHistory();
+                priceHistory.setVehicleId(vehicleId);
+                priceHistory.setRatePerDay(rate);
+                priceHistory.setEffectiveStartDate(effectiveDate);
+
+                // If the new rate is effective immediately or in the past, update the vehicle's
+                // current rate display
+                // This is a bit of a simplification, ideally we'd have a scheduled task to
+                // update this,
+                // but for now we'll assume the "current rate" on the vehicle DTO comes from the
+                // latest history entry anyway.
+                // However, if we want to cache it or something, we might need to do more.
+                // The current implementation of getAllVehicles/getVehicleDetails fetches the
+                // latest price dynamically, so we are good.
+
+                return priceHistoryRepository.save(priceHistory);
+        }
 }
