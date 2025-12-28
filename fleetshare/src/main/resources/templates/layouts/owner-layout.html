@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title th:text="${pageTitle} + ' - FleetShare Owner'">FleetShare Owner</title>
     <!-- plugins:css -->
     <link rel="stylesheet" th:href="@{/assets/vendors/feather/feather.css}">
@@ -40,24 +40,20 @@
             <!-- partial -->
             <div class="main-panel">
                 <div class="content-wrapper">
+                    <!-- Alerts -->
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <span th:text="${successMessage}">Success Message</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <span th:text="${errorMessage}">Error Message</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
                     <!-- Main Content -->
                     <div layout:fragment="content">
-                        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show"
-                            role="alert">
-                            <span th:text="${successMessage}">Success Message</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show"
-                            role="alert">
-                            <span th:text="${errorMessage}">Error Message</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
                         <!-- Default content can go here -->
                     </div>
                 </div>
-                <!-- content-wrapper ends -->
-                <!-- partial:fragments/owner-footer.html -->
-                <div th:replace="~{fragments/owner-footer :: owner-footer}"></div>
                 <!-- partial -->
             </div>
             <!-- main-panel ends -->

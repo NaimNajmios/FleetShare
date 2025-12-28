@@ -12,6 +12,8 @@ import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.entity.VehiclePriceHistory;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
+import com.najmi.fleetshare.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
 import com.najmi.fleetshare.service.PaymentService;
@@ -73,6 +75,12 @@ public class OwnerController {
 
     @Autowired
     private FleetOwnerRepository fleetOwnerRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -256,6 +264,34 @@ public class OwnerController {
             return "redirect:/owner/vehicles/view/" + vehicleId;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating vehicle: " + e.getMessage());
+            return "redirect:/owner/vehicles/view/" + vehicleId;
+        }
+    }
+
+    @PostMapping("/vehicles/delete/{vehicleId}")
+    public String deleteVehicle(@PathVariable Long vehicleId,
+            @RequestParam("password") String password,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Verify password
+            com.najmi.fleetshare.entity.User dbUser = userRepository.findById(user.getUserId()).orElse(null);
+            if (dbUser == null || !passwordEncoder.matches(password, dbUser.getHashedPassword())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Incorrect password. Vehicle deletion failed.");
+                return "redirect:/owner/vehicles/view/" + vehicleId;
+            }
+
+            Long fleetOwnerId = user.getOwnerDetails().getFleetOwnerId();
+            vehicleManagementService.softDeleteVehicle(vehicleId, fleetOwnerId);
+            redirectAttributes.addFlashAttribute("successMessage", "Vehicle deleted successfully!");
+            return "redirect:/owner/vehicles";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting vehicle: " + e.getMessage());
             return "redirect:/owner/vehicles/view/" + vehicleId;
         }
     }
