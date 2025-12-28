@@ -17,7 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class VehicleManagementService {
@@ -36,34 +43,63 @@ public class VehicleManagementService {
 
         /**
          * Fetches all vehicles with their pricing and owner information
+         * Optimized to avoid N+1 problem.
          * 
          * @return List of VehicleDTO objects
          */
         public List<VehicleDTO> getAllVehicles() {
                 List<Vehicle> vehicles = vehicleRepository.findAll();
+                if (vehicles.isEmpty()) {
+                        return Collections.emptyList();
+                }
+                return mapVehiclesToDTOs(vehicles);
+        }
+
+        private List<VehicleDTO> mapVehiclesToDTOs(List<Vehicle> vehicles) {
+                Set<Long> vehicleIds = vehicles.stream().map(Vehicle::getVehicleId).collect(Collectors.toSet());
+                Set<Long> fleetOwnerIds = vehicles.stream().map(Vehicle::getFleetOwnerId).collect(Collectors.toSet());
+
+                // Bulk fetch prices
+                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findByVehicleIdIn(vehicleIds).stream()
+                        .collect(Collectors.groupingBy(VehiclePriceHistory::getVehicleId,
+                                Collectors.collectingAndThen(
+                                        Collectors.maxBy(Comparator.comparing(VehiclePriceHistory::getEffectiveStartDate)),
+                                        opt -> opt.map(VehiclePriceHistory::getRatePerDay).orElse(BigDecimal.ZERO)
+                                )));
+
+                // Bulk fetch owners
+                Map<Long, FleetOwner> ownerMap = fleetOwnerRepository.findAllById(fleetOwnerIds).stream()
+                        .collect(Collectors.toMap(FleetOwner::getFleetOwnerId, Function.identity()));
+
+                // Bulk fetch addresses for owners
+                Set<Long> userIds = ownerMap.values().stream().map(FleetOwner::getUserId).collect(Collectors.toSet());
+                Map<Long, Address> addressMap = addressRepository.findByAddressUserIdIn(userIds).stream()
+                        .collect(Collectors.groupingBy(Address::getAddressUserId,
+                                Collectors.collectingAndThen(
+                                        Collectors.maxBy(Comparator.comparing(Address::getEffectiveStartDate)),
+                                        opt -> opt.orElse(null)
+                                )));
+
                 List<VehicleDTO> vehicleDTOs = new ArrayList<>();
 
                 for (Vehicle vehicle : vehicles) {
-                        // Get latest price for this vehicle
-                        BigDecimal ratePerDay = priceHistoryRepository
-                                        .findLatestPriceByVehicleId(vehicle.getVehicleId())
-                                        .map(VehiclePriceHistory::getRatePerDay)
-                                        .orElse(BigDecimal.ZERO);
+                        // Get latest price for this vehicle from map
+                        BigDecimal ratePerDay = priceMap.getOrDefault(vehicle.getVehicleId(), BigDecimal.ZERO);
 
-                        // Get fleet owner information
-                        FleetOwner owner = fleetOwnerRepository.findById(vehicle.getFleetOwnerId()).orElse(null);
+                        // Get fleet owner information from map
+                        FleetOwner owner = ownerMap.get(vehicle.getFleetOwnerId());
                         String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
                         String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
                         Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
+                        if (ownerIsVerified == null) ownerIsVerified = false; // Safety check
 
-                        // Get address information
+                        // Get address information from map
                         String city = "Unknown City";
                         String state = "Unknown State";
                         Double ownerLatitude = null;
                         Double ownerLongitude = null;
                         if (owner != null) {
-                                Address address = addressRepository.findLatestAddressByUserId(owner.getUserId())
-                                                .orElse(null);
+                                Address address = addressMap.get(owner.getUserId());
                                 if (address != null) {
                                         city = address.getCity();
                                         state = address.getState();
@@ -121,6 +157,7 @@ public class VehicleManagementService {
                 String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
                 String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
                 Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
+                if (ownerIsVerified == null) ownerIsVerified = false;
 
                 // Get address information
                 String city = "Unknown City";
@@ -169,62 +206,10 @@ public class VehicleManagementService {
          */
         public List<VehicleDTO> getVehiclesByOwnerId(Long ownerId) {
                 List<Vehicle> vehicles = vehicleRepository.findByFleetOwnerId(ownerId);
-                List<VehicleDTO> vehicleDTOs = new ArrayList<>();
-
-                for (Vehicle vehicle : vehicles) {
-                        // Get latest price for this vehicle
-                        BigDecimal ratePerDay = priceHistoryRepository
-                                        .findLatestPriceByVehicleId(vehicle.getVehicleId())
-                                        .map(VehiclePriceHistory::getRatePerDay)
-                                        .orElse(BigDecimal.ZERO);
-
-                        // Get fleet owner information
-                        FleetOwner owner = fleetOwnerRepository.findById(vehicle.getFleetOwnerId()).orElse(null);
-                        String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
-                        String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
-                        Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
-
-                        // Get address information
-                        String city = "Unknown City";
-                        String state = "Unknown State";
-                        Double ownerLatitude = null;
-                        Double ownerLongitude = null;
-                        if (owner != null) {
-                                Address address = addressRepository.findLatestAddressByUserId(owner.getUserId())
-                                                .orElse(null);
-                                if (address != null) {
-                                        city = address.getCity();
-                                        state = address.getState();
-                                        ownerLatitude = address.getLatitude();
-                                        ownerLongitude = address.getLongitude();
-                                }
-                        }
-
-                        VehicleDTO dto = new VehicleDTO(
-                                        vehicle.getVehicleId(),
-                                        vehicle.getRegistrationNo(),
-                                        vehicle.getModel(),
-                                        vehicle.getBrand(),
-                                        vehicle.getManufacturingYear(),
-                                        vehicle.getCategory(),
-                                        ratePerDay,
-                                        vehicle.getVehicleImageUrl(),
-                                        ownerBusinessName,
-                                        vehicle.getFuelType(),
-                                        vehicle.getTransmissionType(),
-                                        vehicle.getMileage(),
-                                        vehicle.getStatus() != null ? vehicle.getStatus().name() : "AVAILABLE",
-                                        ownerContactPhone,
-                                        ownerIsVerified,
-                                        city,
-                                        state,
-                                        ownerLatitude,
-                                        ownerLongitude);
-                        dto.setFleetOwnerId(vehicle.getFleetOwnerId());
-                        vehicleDTOs.add(dto);
+                if (vehicles.isEmpty()) {
+                        return Collections.emptyList();
                 }
-
-                return vehicleDTOs;
+                return mapVehiclesToDTOs(vehicles);
         }
 
         /**

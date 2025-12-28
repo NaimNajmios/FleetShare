@@ -217,6 +217,33 @@ body.auth-page {
     box-sizing: border-box;
 }
 
+/* Input with Icon */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon-right {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--fs-text-muted);
+    transition: color 0.2s ease;
+    font-size: 1.1rem;
+    z-index: 1;
+}
+
+.input-icon-right:hover {
+    color: var(--fs-text-secondary);
+}
+
+.form-input-with-icon {
+    padding-right: 3rem;
+    box-sizing: border-box;
+}
+
 /* Select Dropdown */
 .form-select {
     width: 100%;
@@ -518,4 +545,166 @@ body.auth-page {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ============================================
+   New Loading State (Bootstrap-compatible)
+   ============================================ */
+
+.btn-loading-inline {
+    cursor: wait;
+}
+
+.btn-loading-inline .btn-text {
+    display: none;
+}
+
+.spinner-border {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    vertical-align: text-bottom;
+    border: 0.15em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spinner-border .75s linear infinite;
+    animation: spinner-border .75s linear infinite;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+.d-none {
+    display: none !important;
+}
+
+.text-success {
+    color: var(--fs-success) !important;
+}
+/* ============================================
+   Role Selection Cards
+   ============================================ */
+
+.role-selection-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--fs-spacing-md);
+    margin-bottom: var(--fs-spacing-xs);
+}
+
+.role-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--fs-spacing-lg) var(--fs-spacing-md);
+    border: 2px solid #e5e7eb;
+    border-radius: var(--fs-radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.role-card:hover {
+    border-color: var(--fs-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--fs-shadow-md);
+}
+
+.role-card:focus {
+    outline: none;
+    border-color: var(--fs-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.role-card.selected {
+    border-color: var(--fs-primary);
+    background-color: #eff6ff; /* Light blue background */
+}
+
+.role-icon {
+    font-size: 2rem;
+    color: var(--fs-text-secondary);
+    margin-bottom: var(--fs-spacing-sm);
+    transition: color 0.2s ease;
+}
+
+.role-card.selected .role-icon,
+.role-card:hover .role-icon {
+    color: var(--fs-primary);
+}
+
+.role-title {
+    font-weight: 600;
+    color: var(--fs-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.role-card.selected .role-title {
+    color: var(--fs-primary);
+}
+
+.role-description {
+    font-size: 0.8125rem;
+    color: var(--fs-text-secondary);
+    line-height: 1.4;
+}
+
+.role-check {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    color: var(--fs-primary);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s ease;
+    font-size: 1.25rem;
+}
+
+.role-card.selected .role-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (max-width: 480px) {
+    .role-selection-group {
+        grid-template-columns: 1fr;
+    }
+
+    .role-card {
+        padding: var(--fs-spacing-md);
+        flex-direction: row;
+        text-align: left;
+        align-items: center;
+        gap: var(--fs-spacing-md);
+    }
+
+    .role-icon {
+        margin-bottom: 0;
+        font-size: 1.75rem;
+    }
+
+    .role-content {
+        flex: 1;
+    }
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
