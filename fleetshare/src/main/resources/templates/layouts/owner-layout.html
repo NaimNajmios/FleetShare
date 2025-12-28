@@ -41,14 +41,8 @@
             <div class="main-panel">
                 <div class="content-wrapper">
                     <!-- Alerts -->
-                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-                        <span th:text="${successMessage}">Success Message</span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <span th:text="${errorMessage}">Error Message</span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                    <!-- Toast Notifications -->
+                    <div th:replace="~{fragments/toast :: toast}"></div>
                     <!-- Main Content -->
                     <div layout:fragment="content">
                         <!-- Default content can go here -->

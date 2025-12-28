@@ -1,0 +1,80 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="toast">
+    <style>
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .toast-notification i {
+            font-size: 1.25rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        function showToast(message, type) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+
+            // Use MDI icons if available, otherwise fallback to Font Awesome
+            let iconClass = type === 'success' ? 'mdi mdi-check-circle' : 'mdi mdi-alert-circle';
+
+            // Simple check if we are on renter side (which might use FA)
+            // But we will ensure MDI is loaded on all layouts for consistency
+
+            toast.innerHTML = `<i class="${iconClass}"></i>${message}`;
+            document.body.appendChild(toast);
+
+            // Trigger reflow
+            toast.offsetHeight;
+
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Check for flash messages on load
+        document.addEventListener('DOMContentLoaded', function () {
+            /*[[${successMessage}]]*/
+            const successMsg = [[${ successMessage }]];
+            /*[[${errorMessage}]]*/
+            const errorMsg = [[${ errorMessage }]];
+
+            if (successMsg) {
+                showToast(successMsg, 'success');
+            }
+            if (errorMsg) {
+                showToast(errorMsg, 'error');
+            }
+        });
+    </script>
+</th:block>
