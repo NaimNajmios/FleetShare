@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/owner-layout}" th:with="activePage='vehicles', pageTitle='Vehicle Details'">
 
@@ -179,6 +179,19 @@
                 width: 100%;
                 max-width: 450px;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                animation: modalSlideIn 0.3s ease;
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
             /* Cards Grid System */
@@ -204,10 +217,6 @@
 
             .info-card:hover {
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            }
-
-            .info-card.editable {
-                position: relative;
             }
 
             .info-card-header {
@@ -246,6 +255,10 @@
 
             .info-card-value.mileage-value {
                 color: #007bff;
+            }
+
+            .info-card-value.year-value {
+                color: #6f42c1;
             }
 
             .info-card-footer {
@@ -338,15 +351,6 @@
                     grid-template-columns: 1fr;
                 }
             }
-
-            /* Edit mode input styling */
-            #editMode .info-card .edit-input {
-                display: block;
-            }
-
-            #viewMode .info-card .edit-input {
-                display: none;
-            }
         </style>
     </th:block>
 </head>
@@ -374,6 +378,7 @@
                         <form th:action="@{/owner/vehicles/update/{id}(id=${vehicle.vehicleId})}" method="post"
                             id="vehicleForm">
                             <div class="profile-container" id="viewMode">
+                                <!-- Vehicle Header -->
                                 <div class="profile-header">
                                     <div>
                                         <div class="vehicle-image-container">
@@ -422,7 +427,8 @@
                                                     <i class="mdi mdi-tag"></i> Brand
                                                 </span>
                                             </div>
-                                            <div class="info-card-value" th:text="${vehicle.brand}">Toyota</div>
+                                            <div class="info-card-value" th:text="${vehicle.brand ?: 'N/A'}">Toyota
+                                            </div>
                                             <div class="info-card-footer edit-actions">
                                                 <input type="text" class="form-control" name="brand"
                                                     th:value="${vehicle.brand}" placeholder="Enter brand">
@@ -436,10 +442,40 @@
                                                     <i class="mdi mdi-car-side"></i> Model
                                                 </span>
                                             </div>
-                                            <div class="info-card-value" th:text="${vehicle.model}">Camry</div>
+                                            <div class="info-card-value" th:text="${vehicle.model ?: 'N/A'}">Camry</div>
                                             <div class="info-card-footer edit-actions">
                                                 <input type="text" class="form-control" name="model"
                                                     th:value="${vehicle.model}" placeholder="Enter model">
+                                            </div>
+                                        </div>
+
+                                        <!-- Manufacturing Year Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-calendar"></i> Year
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value year-value"
+                                                th:text="${vehicle.manufacturingYear ?: 'N/A'}">2023</div>
+                                            <div class="info-card-footer edit-actions">
+                                                <input type="number" class="form-control" name="manufacturingYear"
+                                                    th:value="${vehicle.manufacturingYear}" placeholder="Enter year">
+                                            </div>
+                                        </div>
+
+                                        <!-- Registration No Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-card-text"></i> Registration
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value" th:text="${vehicle.registrationNo ?: 'N/A'}">
+                                                ABC1234</div>
+                                            <div class="info-card-footer edit-actions">
+                                                <input type="text" class="form-control" name="registrationNo"
+                                                    th:value="${vehicle.registrationNo}" placeholder="Enter reg. no.">
                                             </div>
                                         </div>
 
@@ -450,13 +486,18 @@
                                                     <i class="mdi mdi-shape"></i> Category
                                                 </span>
                                             </div>
-                                            <div class="info-card-value" th:text="${vehicle.category}">Sedan</div>
+                                            <div class="info-card-value" th:text="${vehicle.category ?: 'N/A'}">Sedan
+                                            </div>
                                             <div class="info-card-footer edit-actions">
                                                 <select class="form-control form-select" name="category">
                                                     <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">
                                                         Sedan</option>
                                                     <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV
                                                     </option>
+                                                    <option th:selected="${vehicle.category == 'MPV'}" value="MPV">MPV
+                                                    </option>
+                                                    <option th:selected="${vehicle.category == 'Hatchback'}"
+                                                        value="Hatchback">Hatchback</option>
                                                     <option th:selected="${vehicle.category == 'Luxury'}"
                                                         value="Luxury">Luxury</option>
                                                 </select>
@@ -472,13 +513,55 @@
                                             </div>
                                             <div class="info-card-value mileage-value">
                                                 <span
-                                                    th:text="${#numbers.formatInteger(vehicle.mileage, 1, 'COMMA')}">50,000</span>
-                                                <small class="text-muted"
+                                                    th:text="${vehicle.mileage != null ? #numbers.formatInteger(vehicle.mileage, 1, 'COMMA') : 'N/A'}">50,000</span>
+                                                <small th:if="${vehicle.mileage != null}" class="text-muted"
                                                     style="font-size: 0.5em; font-weight: 400;">km</small>
                                             </div>
                                             <div class="info-card-footer edit-actions">
                                                 <input type="number" class="form-control" name="mileage"
                                                     th:value="${vehicle.mileage}" placeholder="Enter mileage">
+                                            </div>
+                                        </div>
+
+                                        <!-- Fuel Type Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-gas-station"></i> Fuel Type
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value" th:text="${vehicle.fuelType ?: 'N/A'}">Petrol
+                                            </div>
+                                            <div class="info-card-footer edit-actions">
+                                                <select class="form-control form-select" name="fuelType">
+                                                    <option th:selected="${vehicle.fuelType == 'Petrol'}"
+                                                        value="Petrol">Petrol</option>
+                                                    <option th:selected="${vehicle.fuelType == 'Diesel'}"
+                                                        value="Diesel">Diesel</option>
+                                                    <option th:selected="${vehicle.fuelType == 'Hybrid'}"
+                                                        value="Hybrid">Hybrid</option>
+                                                    <option th:selected="${vehicle.fuelType == 'Electric'}"
+                                                        value="Electric">Electric</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Transmission Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-car-shift-pattern"></i> Transmission
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value" th:text="${vehicle.transmissionType ?: 'N/A'}">
+                                                Automatic</div>
+                                            <div class="info-card-footer edit-actions">
+                                                <select class="form-control form-select" name="transmissionType">
+                                                    <option th:selected="${vehicle.transmissionType == 'Automatic'}"
+                                                        value="Automatic">Automatic</option>
+                                                    <option th:selected="${vehicle.transmissionType == 'Manual'}"
+                                                        value="Manual">Manual</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -661,6 +744,13 @@
                 document.getElementById('rateDisplay').textContent = 'RM ' + val.toFixed(2);
                 document.getElementById('currentRateDisplay').textContent = 'RM ' + val.toFixed(2);
                 rateModalOverlay.classList.remove('show');
+            });
+
+            // Escape key to close modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) {
+                    rateModalOverlay.classList.remove('show');
+                }
             });
 
             // Image Logic
