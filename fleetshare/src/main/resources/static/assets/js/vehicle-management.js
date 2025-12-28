@@ -55,7 +55,7 @@
         if (visibleRows.length === 0 && rows.length > 0) {
             if (!noDataDiv) {
                 noDataDiv = document.createElement('div');
-                noDataDiv.className = 'no-data no-data-filtered';
+                noDataDiv.className = 'text-center p-5 text-muted no-data no-data-filtered';
                 noDataDiv.innerHTML = '<i class="mdi mdi-car-off mdi-48px"></i><p>No vehicles match your filters</p>';
                 table.parentElement.appendChild(noDataDiv);
             }

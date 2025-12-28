@@ -6,7 +6,7 @@
       style="font-weight: bold; font-size: 1.5rem; color: #4B49AC;">FS</a>
   </div>
   <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
-    <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+    <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize" aria-label="Toggle sidebar">
       <span class="icon-menu"></span>
     </button>
     <ul class="navbar-nav mr-lg-2">
@@ -17,7 +17,7 @@
               <i class="icon-search"></i>
             </span>
           </div>
-          <input type="text" class="form-control" id="navbar-search-input" placeholder="Search now" aria-label="search"
+          <input type="text" class="form-control" id="navbar-search-input" placeholder="Search now" aria-label="Search bookings"
             aria-describedby="search">
         </div>
       </li>
@@ -25,7 +25,7 @@
     <ul class="navbar-nav navbar-nav-right">
       <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#"
-          data-bs-toggle="dropdown">
+          data-bs-toggle="dropdown" aria-label="Notifications">
           <i class="icon-bell mx-0"></i>
           <span class="count"></span>
         </a>
@@ -71,7 +71,7 @@
         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
           <img
             th:src="${session.sessionUser?.profileImageUrl != null and !session.sessionUser.profileImageUrl.isEmpty() ? session.sessionUser.profileImageUrl : '/assets/images/faces/face28.jpg'}"
-            alt="profile" />
+            alt="User profile" />
         </a>
         <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
           <a class="dropdown-item" th:href="@{/admin/profile}"><i class="ti-settings text-primary"></i> Profile Settings
@@ -91,7 +91,7 @@
       </li>
     </ul>
     <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
-      data-toggle="offcanvas">
+      data-toggle="offcanvas" aria-label="Toggle mobile sidebar">
       <span class="icon-menu"></span>
     </button>
   </div>

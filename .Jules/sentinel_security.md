@@ -1,0 +1,32 @@
+## 2025-12-25 - CSRF Protection Re-enabled
+
+**Context:** `fleetshare/src/main/java/com/najmi/fleetshare/config/SecurityConfig.java`
+**Vulnerability:** Cross-Site Request Forgery (CSRF)
+**Severity:** High
+**Root Cause:** CSRF protection was explicitly disabled (`.csrf(csrf -> csrf.disable())`) in `SecurityConfig.java`. This allowed attackers to potentially trick authenticated users into performing unintended actions.
+**Fix Applied:**
+1.  Removed the line disabling CSRF in `SecurityConfig.java`.
+2.  Added CSRF meta tags (`_csrf` and `_csrf_header`) to all layout templates (`renter-layout.html`, `admin-layout.html`, `owner-layout.html`).
+3.  Updated all AJAX `POST` requests in `profile.html` (renter, admin, owner) and `view-vehicle.html` (admin, owner) to include the CSRF token in the request headers.
+**Prevention:** Always ensure CSRF is enabled for web applications using session-based authentication. Use Spring Security's default CSRF protection and ensure client-side code handles the token correctly.
+**References:** OWASP Top 10 - Broken Access Control
+
+## 2025-12-26 - [HTTP Security Headers Implementation]
+
+**Context:** `SecurityConfig.java` configuration
+**Vulnerability:** Missing HTTP Security Headers (CSP, HSTS, X-Frame-Options, etc.)
+**Severity:** Medium
+**Root Cause:** Spring Security default configuration was not enhanced with explicit header policies.
+**Fix Applied:** Added `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, and `Referrer-Policy` to the security filter chain.
+**Prevention:** Always configure explicit security headers in `SecurityFilterChain`.
+**References:** OWASP Secure Headers Project
+
+## 2025-12-27 - Permissions-Policy Header Implemented
+
+**Context:** `fleetshare/src/main/java/com/najmi/fleetshare/config/SecurityConfig.java`
+**Vulnerability:** Missing `Permissions-Policy` Header
+**Severity:** Medium
+**Root Cause:** The default Spring Security configuration did not restrict access to powerful browser features, potentially allowing malicious scripts or iframes to access the camera, microphone, or geolocation.
+**Fix Applied:** configured the `Permissions-Policy` header to explicitly disable access to `camera`, `microphone`, `geolocation`, and `payment` APIs.
+**Prevention:** Always restrict access to browser features that are not required by the application using the `Permissions-Policy` header.
+**References:** OWASP Secure Headers Project
