@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -61,24 +60,25 @@ public class VehicleManagementService {
 
                 // Bulk fetch prices
                 Map<Long, BigDecimal> priceMap = priceHistoryRepository.findByVehicleIdIn(vehicleIds).stream()
-                        .collect(Collectors.groupingBy(VehiclePriceHistory::getVehicleId,
-                                Collectors.collectingAndThen(
-                                        Collectors.maxBy(Comparator.comparing(VehiclePriceHistory::getEffectiveStartDate)),
-                                        opt -> opt.map(VehiclePriceHistory::getRatePerDay).orElse(BigDecimal.ZERO)
-                                )));
+                                .collect(Collectors.groupingBy(VehiclePriceHistory::getVehicleId,
+                                                Collectors.collectingAndThen(
+                                                                Collectors.maxBy(Comparator.comparing(
+                                                                                VehiclePriceHistory::getEffectiveStartDate)),
+                                                                opt -> opt.map(VehiclePriceHistory::getRatePerDay)
+                                                                                .orElse(BigDecimal.ZERO))));
 
                 // Bulk fetch owners
                 Map<Long, FleetOwner> ownerMap = fleetOwnerRepository.findAllById(fleetOwnerIds).stream()
-                        .collect(Collectors.toMap(FleetOwner::getFleetOwnerId, Function.identity()));
+                                .collect(Collectors.toMap(FleetOwner::getFleetOwnerId, Function.identity()));
 
                 // Bulk fetch addresses for owners
                 Set<Long> userIds = ownerMap.values().stream().map(FleetOwner::getUserId).collect(Collectors.toSet());
                 Map<Long, Address> addressMap = addressRepository.findByAddressUserIdIn(userIds).stream()
-                        .collect(Collectors.groupingBy(Address::getAddressUserId,
-                                Collectors.collectingAndThen(
-                                        Collectors.maxBy(Comparator.comparing(Address::getEffectiveStartDate)),
-                                        opt -> opt.orElse(null)
-                                )));
+                                .collect(Collectors.groupingBy(Address::getAddressUserId,
+                                                Collectors.collectingAndThen(
+                                                                Collectors.maxBy(Comparator.comparing(
+                                                                                Address::getEffectiveStartDate)),
+                                                                opt -> opt.orElse(null))));
 
                 List<VehicleDTO> vehicleDTOs = new ArrayList<>();
 
@@ -91,7 +91,8 @@ public class VehicleManagementService {
                         String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
                         String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
                         Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
-                        if (ownerIsVerified == null) ownerIsVerified = false; // Safety check
+                        if (ownerIsVerified == null)
+                                ownerIsVerified = false; // Safety check
 
                         // Get address information from map
                         String city = "Unknown City";
@@ -157,7 +158,8 @@ public class VehicleManagementService {
                 String ownerBusinessName = owner != null ? owner.getBusinessName() : "Unknown Owner";
                 String ownerContactPhone = owner != null ? owner.getContactPhone() : "N/A";
                 Boolean ownerIsVerified = owner != null ? owner.getIsVerified() : false;
-                if (ownerIsVerified == null) ownerIsVerified = false;
+                if (ownerIsVerified == null)
+                        ownerIsVerified = false;
 
                 // Get address information
                 String city = "Unknown City";
