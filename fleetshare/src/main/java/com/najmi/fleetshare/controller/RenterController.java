@@ -26,11 +26,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.najmi.fleetshare.entity.BookingStatusLog;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.dto.OwnerProfileDTO;
+import com.najmi.fleetshare.dto.RenterProfileUpdateDTO;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 
 @Controller
 @RequestMapping("/renter")
@@ -186,19 +189,21 @@ public class RenterController {
 
     @PostMapping("/profile")
     @ResponseBody
-    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileData, HttpSession session) {
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody RenterProfileUpdateDTO profileData,
+            BindingResult bindingResult, HttpSession session) {
+
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().get(0).getDefaultMessage();
+            return ResponseEntity.badRequest().body(Map.of("error", errorMessage));
+        }
+
         SessionUser sessionUser = SessionHelper.getCurrentUser(session);
         if (sessionUser == null || sessionUser.getRenterDetails() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
         }
 
-        String fullName = profileData.get("fullName");
-        String phoneNumber = profileData.get("phoneNumber");
-
-        // Validation
-        if (fullName == null || fullName.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Full name is required"));
-        }
+        String fullName = profileData.getFullName();
+        String phoneNumber = profileData.getPhoneNumber();
 
         // Find and update renter entity
         Renter renter = renterRepository.findByUserId(sessionUser.getUserId()).orElse(null);
