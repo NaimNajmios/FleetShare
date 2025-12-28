@@ -576,6 +576,7 @@
                                     <h4><i class="mdi mdi-chart-timeline-variant"></i> Status & Rate</h4>
                                     <input type="hidden" id="ratePerDayInput" name="ratePerDay"
                                         th:value="${vehicle.ratePerDay}">
+                                    <input type="hidden" id="effectiveDateHidden" name="effectiveDate" value="">
                                     <div class="status-rate-grid">
                                         <!-- Status Card -->
                                         <div class="info-card">
@@ -625,6 +626,21 @@
                                                     <i class="mdi mdi-pencil"></i> Manage Rate
                                                 </button>
                                             </div>
+                                            <!-- Scheduled Rates Display -->
+                                            <div th:if="${scheduledRates != null and !scheduledRates.empty}" class="scheduled-rates-section mt-3">
+                                                <div class="text-muted small mb-2">
+                                                    <i class="mdi mdi-calendar-clock"></i> Scheduled Rates
+                                                </div>
+                                                <div th:each="rate : ${scheduledRates}" class="scheduled-rate-item d-flex justify-content-between align-items-center p-2 mb-1" style="background: rgba(79, 70, 229, 0.1); border-radius: 6px; font-size: 0.85em;">
+                                                    <span>
+                                                        <strong th:text="|RM ${#numbers.formatDecimal(rate.ratePerDay, 1, 2)}|">RM 0.00</strong>
+                                                        <span class="text-muted">/day</span>
+                                                    </span>
+                                                    <span class="badge bg-info" th:text="|From: ${#temporals.format(rate.effectiveStartDate, 'dd MMM yyyy')}|">
+                                                        From: 01 Jan 2025
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -667,6 +683,13 @@
                             <input type="number" class="form-control" id="rateModalInput" step="0.01" min="0"
                                 placeholder="0.00">
                         </div>
+                    </div>
+
+                    <!-- Effective Date Input -->
+                    <div class="new-rate-input-group mt-3">
+                        <label for="effectiveDateInput">Effective From</label>
+                        <input type="datetime-local" class="form-control" id="effectiveDateInput">
+                        <small class="text-muted">Leave empty for immediate effect. Set a future date to schedule.</small>
                     </div>
                 </div>
                 <div class="rate-modal-footer p-3 border-top d-flex justify-content-end gap-2">
@@ -758,12 +781,29 @@
                 rateModalOverlay.classList.remove('show');
             });
 
+            // Store effective date for form submission
+            let pendingEffectiveDate = null;
+
             document.getElementById('saveRateModal').addEventListener('click', () => {
                 const val = parseFloat(document.getElementById('rateModalInput').value) || 0;
+                const effectiveDateInput = document.getElementById('effectiveDateInput').value;
+
+                if (val <= 0) {
+                    alert('Please enter a valid rate greater than 0');
+                    return;
+                }
+
+                // Store values locally for form submission
                 document.getElementById('ratePerDayInput').value = val.toFixed(2);
                 document.getElementById('rateDisplay').textContent = 'RM ' + val.toFixed(2);
                 document.getElementById('currentRateDisplay').textContent = 'RM ' + val.toFixed(2);
+                pendingEffectiveDate = effectiveDateInput || null;
                 rateModalOverlay.classList.remove('show');
+
+                // Show scheduled date info if future date selected
+                if (effectiveDateInput && new Date(effectiveDateInput) > new Date()) {
+                    alert('Rate will be scheduled for ' + new Date(effectiveDateInput).toLocaleDateString() + ' when you save all changes.');
+                }
             });
 
             // Escape key to close modal
@@ -885,6 +925,11 @@
             }
 
             function submitFormData() {
+                // Set effective date in hidden field before form submission
+                const effectiveDateField = document.getElementById('effectiveDateHidden');
+                if (effectiveDateField) {
+                    effectiveDateField.value = pendingEffectiveDate || '';
+                }
                 bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
                 vehicleForm.submit();
             }
@@ -918,3 +963,7 @@
 </body>
 
 </html>
+
+
+
+
