@@ -314,9 +314,6 @@ public class OwnerController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-    }
-
     }
 
     @GetMapping("/vehicles/{vehicleId}/rate-history")
