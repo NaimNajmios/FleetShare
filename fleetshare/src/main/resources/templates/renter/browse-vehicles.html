@@ -34,12 +34,17 @@
                 border-radius: 20px;
                 padding: 2rem;
                 box-shadow: var(--card-shadow);
-                position: sticky;
-                top: 100px;
-                height: fit-content;
-                max-height: calc(100vh - 120px);
-                overflow-y: auto;
                 border: 1px solid rgba(0, 0, 0, 0.02);
+            }
+
+            @media (min-width: 992px) {
+                .filter-sidebar {
+                    position: sticky;
+                    top: 100px;
+                    height: fit-content;
+                    max-height: calc(100vh - 120px);
+                    overflow-y: auto;
+                }
             }
 
             .sidebar-header {
@@ -135,7 +140,6 @@
             /* Main Content Header */
             .main-content-header {
                 margin-bottom: 2rem;
-                position: relative;
             }
 
             .search-bar-large {
@@ -158,6 +162,7 @@
                 color: var(--text-muted);
                 font-size: 1.2rem;
                 pointer-events: none;
+                z-index: 5;
             }
 
             .search-bar-large:focus {
@@ -332,12 +337,22 @@
             @media (max-width: 991px) {
                 .browse-container {
                     grid-template-columns: 1fr;
+                    gap: 1.5rem;
                 }
 
                 .filter-sidebar {
-                    position: static;
-                    margin-bottom: 2rem;
-                    max-height: none;
+                    /* Reset styles for offcanvas */
+                    margin-bottom: 0;
+                    padding: 0;
+                    box-shadow: none;
+                    background: transparent;
+                    border: none;
+                    border-radius: 0;
+                }
+
+                /* Offcanvas specific styling when open */
+                .offcanvas-body {
+                    padding: 1.5rem;
                 }
 
                 .vehicle-image-container {
@@ -352,13 +367,19 @@
     <main layout:fragment="content">
         <div class="browse-container">
             <!-- Left Sidebar: Filters -->
-            <aside class="filter-sidebar">
-                <div class="sidebar-header">
-                    <h3 class="sidebar-title">Filters</h3>
-                    <a href="#" class="clear-filters" onclick="clearAllFilters()">Clear All</a>
+            <aside class="filter-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="filterSidebar" aria-labelledby="filterSidebarLabel">
+                <div class="offcanvas-header d-lg-none border-bottom">
+                    <h5 class="offcanvas-title" id="filterSidebarLabel">Filters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filterSidebar" aria-label="Close"></button>
                 </div>
 
-                <!-- Category Filter -->
+                <div class="offcanvas-body d-block p-lg-0">
+                    <div class="sidebar-header">
+                        <h3 class="sidebar-title">Filters</h3>
+                        <a href="#" class="clear-filters" onclick="clearAllFilters()">Clear All</a>
+                    </div>
+
+                    <!-- Category Filter -->
                 <div class="filter-group">
                     <div class="filter-group-title">Category</div>
                     <label class="custom-checkbox">
@@ -400,15 +421,22 @@
                             oninput="applyFilters()">
                     </div>
                 </div>
+                </div> <!-- End offcanvas-body -->
             </aside>
 
             <!-- Right Column: Content -->
             <div class="main-content">
-                <!-- Search Bar -->
-                <div class="main-content-header">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-bar-large" placeholder="Search by model, brand, or keywords..."
-                        id="vehicleSearch">
+                <!-- Search Bar & Mobile Filter Toggle -->
+                <div class="main-content-header d-flex gap-3 align-items-center">
+                    <button class="btn btn-primary d-lg-none flex-shrink-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterSidebar" aria-controls="filterSidebar" aria-label="Toggle filters">
+                        <i class="fas fa-filter"></i>
+                    </button>
+
+                    <div class="position-relative flex-grow-1">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-bar-large" placeholder="Search by model, brand, or keywords..."
+                            id="vehicleSearch">
+                    </div>
                 </div>
 
                 <!-- Vehicle Grid -->

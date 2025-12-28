@@ -1,15 +1,14 @@
-## 2024-05-23 - Initial Setup
-**Learning:** Understanding the project structure and identifying potential improvements.
-**Action:** Explored `src/main/resources/templates` and identified `renter/my-bookings.html` as a candidate for improvement.
+# Palette - UX & Accessibility Insights
 
-## 2025-12-23 - Accessibility Improvements
-**Learning:** Icon-only buttons in the admin dashboard navigation lacked `aria-label` attributes, making them inaccessible to screen readers.
-**Action:** Added `aria-label` to sidebar toggle, notification dropdown, search input, and mobile menu toggle in `fragments/nav.html`. Improved `alt` text for user profile image.
+## Responsive Design
+- **Pattern:** Use `offcanvas-lg` for sidebars that should be visible on desktop but collapsible on mobile.
+- **Why:** It maintains context on large screens while saving space on small screens, following the "Mobile First" approach where content is king.
+- **Implementation:**
+  - Ensure the "drawer" content is wrapped in `.offcanvas-body` for proper scrolling and padding on mobile.
+  - Reset custom sidebar styles (padding, shadow, borders) when in offcanvas mode to rely on Bootstrap's native offcanvas styling, or manually adjust them.
+  - Use `d-lg-none` for toggle buttons to ensure they only appear when needed.
 
-## 2025-12-24 - Admin Table Accessibility
-**Learning:** Data tables in the admin dashboard lacked semantic structure and accessible labels. Screen reader users would struggle to understand column relationships or the purpose of identical 'View' buttons.
-**Action:** Added `scope="col"` to headers, a visually hidden `<caption>`, and dynamic `aria-label` attributes to search/filter inputs and row action buttons.
-
-## 2025-12-25 - Owner Vehicle List Accessibility
-**Learning:** Data tables should be hidden when empty to avoid showing a confusing list of headers with no data. Also, generic "View" buttons in lists are non-descriptive for screen reader users.
-**Action:** Added `th:unless="${#lists.isEmpty(vehicles)}"` to the table in `owner/vehicles.html`, added `scope="col"` to headers, added `visually-hidden` caption, and added dynamic `aria-label` to "View" buttons.
+## Accessibility
+- **Filters:** When hiding filters behind a button, ensure the button has a clear `aria-label` or visible text (icon-only buttons need `aria-label`).
+- **Focus Management:** Offcanvas components manage focus automatically (trapping focus when open), which is crucial for keyboard users.
+- **Structure:** `aside` is the correct semantic element for a sidebar filter, even when it becomes an offcanvas drawer.
