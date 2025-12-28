@@ -113,42 +113,13 @@
                 padding-bottom: 0.75rem;
                 border-bottom: 1px solid #e8ecef;
                 color: #2c2e30;
-            }
-
-            .form-row {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .form-group {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .form-group label {
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-                color: #495057;
-            }
-
-            .form-control {
-                padding: 0.75rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-                font-size: 1rem;
-            }
-
-            .manage-rate-btn {
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                width: 100%;
-                text-align: left;
-                background-color: #f8f9fa;
-                border: 1px solid #ced4da;
-                color: #495057;
+                gap: 0.5rem;
+            }
+
+            .form-section h4 i {
+                color: #6c757d;
             }
 
             .action-buttons {
@@ -160,14 +131,13 @@
             }
 
             #viewMode .form-control,
-            #viewMode .form-select,
-            #viewMode .manage-rate-btn {
+            #viewMode .form-select {
                 background: #f8f9fa;
                 pointer-events: none;
             }
 
             #viewMode .edit-actions,
-            #viewMode .manage-rate-icon {
+            #viewMode .manage-rate-btn {
                 display: none;
             }
 
@@ -176,10 +146,6 @@
             }
 
             @media (max-width: 768px) {
-                .form-row {
-                    grid-template-columns: 1fr;
-                }
-
                 .profile-header {
                     flex-direction: column;
                     text-align: center;
@@ -211,8 +177,175 @@
                 background: white;
                 border-radius: 12px;
                 width: 100%;
-                max-width: 400px;
+                max-width: 450px;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+
+            /* Cards Grid System */
+            .specs-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1rem;
+            }
+
+            .status-rate-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .info-card {
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 1.25rem;
+                border: 1px solid #e9ecef;
+                transition: all 0.2s ease;
+            }
+
+            .info-card:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+
+            .info-card.editable {
+                position: relative;
+            }
+
+            .info-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 0.75rem;
+            }
+
+            .info-card-label {
+                font-size: 0.75rem;
+                color: #6c757d;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .info-card-label i {
+                font-size: 1rem;
+            }
+
+            .info-card-value {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: #2c2e30;
+                line-height: 1.3;
+            }
+
+            .info-card-value.rate-value {
+                color: #28a745;
+                font-size: 1.5rem;
+            }
+
+            .info-card-value.mileage-value {
+                color: #007bff;
+            }
+
+            .info-card-footer {
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid #dee2e6;
+            }
+
+            .info-card-footer .form-control,
+            .info-card-footer .form-select {
+                font-size: 0.875rem;
+            }
+
+            .manage-rate-btn {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+                border-radius: 6px;
+            }
+
+            /* Rate Modal Enhancements */
+            .current-rate-display {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 10px;
+                padding: 1.25rem;
+                text-align: center;
+                margin-bottom: 1.5rem;
+                border: 1px solid #dee2e6;
+            }
+
+            .current-rate-label {
+                font-size: 0.8rem;
+                color: #6c757d;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 0.5rem;
+            }
+
+            .current-rate-value {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #28a745;
+            }
+
+            .new-rate-input-group {
+                margin-bottom: 0.5rem;
+            }
+
+            .new-rate-input-group label {
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                display: block;
+                color: #495057;
+            }
+
+            .rate-input-wrapper {
+                position: relative;
+            }
+
+            .rate-input-wrapper .currency-prefix {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                font-weight: 600;
+                color: #6c757d;
+            }
+
+            .rate-input-wrapper input {
+                padding-left: 3rem;
+                font-size: 1.25rem;
+                font-weight: 600;
+                height: 50px;
+            }
+
+            @media (max-width: 992px) {
+                .specs-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            @media (max-width: 576px) {
+                .specs-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .status-rate-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* Edit mode input styling */
+            #editMode .info-card .edit-input {
+                display: block;
+            }
+
+            #viewMode .info-card .edit-input {
+                display: none;
             }
         </style>
     </th:block>
@@ -278,69 +411,133 @@
                                     </div>
                                 </div>
 
+                                <!-- Vehicle Specifications Section -->
                                 <div class="form-section">
-                                    <h4>Vehicle Specifications</h4>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Brand</label>
-                                            <input type="text" class="form-control" name="brand"
-                                                th:value="${vehicle.brand}" readonly>
+                                    <h4><i class="mdi mdi-car-info"></i> Vehicle Specifications</h4>
+                                    <div class="specs-grid">
+                                        <!-- Brand Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-tag"></i> Brand
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value" th:text="${vehicle.brand}">Toyota</div>
+                                            <div class="info-card-footer edit-actions">
+                                                <input type="text" class="form-control" name="brand"
+                                                    th:value="${vehicle.brand}" placeholder="Enter brand">
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label>Model</label>
-                                            <input type="text" class="form-control" name="model"
-                                                th:value="${vehicle.model}" readonly>
+
+                                        <!-- Model Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-car-side"></i> Model
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value" th:text="${vehicle.model}">Camry</div>
+                                            <div class="info-card-footer edit-actions">
+                                                <input type="text" class="form-control" name="model"
+                                                    th:value="${vehicle.model}" placeholder="Enter model">
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Category</label>
-                                            <select class="form-control form-select" name="category" disabled>
-                                                <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">Sedan
-                                                </option>
-                                                <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV
-                                                </option>
-                                                <option th:selected="${vehicle.category == 'Luxury'}" value="Luxury">
-                                                    Luxury</option>
-                                            </select>
+
+                                        <!-- Category Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-shape"></i> Category
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value" th:text="${vehicle.category}">Sedan</div>
+                                            <div class="info-card-footer edit-actions">
+                                                <select class="form-control form-select" name="category">
+                                                    <option th:selected="${vehicle.category == 'Sedan'}" value="Sedan">
+                                                        Sedan</option>
+                                                    <option th:selected="${vehicle.category == 'SUV'}" value="SUV">SUV
+                                                    </option>
+                                                    <option th:selected="${vehicle.category == 'Luxury'}"
+                                                        value="Luxury">Luxury</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label>Mileage (km)</label>
-                                            <input type="number" class="form-control" name="mileage"
-                                                th:value="${vehicle.mileage}" readonly>
+
+                                        <!-- Mileage Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-speedometer"></i> Mileage
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value mileage-value">
+                                                <span
+                                                    th:text="${#numbers.formatInteger(vehicle.mileage, 1, 'COMMA')}">50,000</span>
+                                                <small class="text-muted"
+                                                    style="font-size: 0.5em; font-weight: 400;">km</small>
+                                            </div>
+                                            <div class="info-card-footer edit-actions">
+                                                <input type="number" class="form-control" name="mileage"
+                                                    th:value="${vehicle.mileage}" placeholder="Enter mileage">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                <!-- Status & Rate Section -->
                                 <div class="form-section">
-                                    <h4>Status & Rate</h4>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Availability Status</label>
-                                            <select class="form-control form-select" name="status" disabled>
-                                                <option th:selected="${vehicle.status == 'AVAILABLE'}"
-                                                    value="AVAILABLE">Available</option>
-                                                <option th:selected="${vehicle.status == 'MAINTENANCE'}"
-                                                    value="MAINTENANCE">Maintenance</option>
-                                            </select>
+                                    <h4><i class="mdi mdi-chart-timeline-variant"></i> Status & Rate</h4>
+                                    <input type="hidden" id="ratePerDayInput" name="ratePerDay"
+                                        th:value="${vehicle.ratePerDay}">
+                                    <div class="status-rate-grid">
+                                        <!-- Status Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-checkbox-marked-circle-outline"></i>
+                                                    Availability Status
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value">
+                                                <span class="status-badge"
+                                                    th:classappend="${'status-' + #strings.toLowerCase(vehicle.status)}"
+                                                    th:text="${vehicle.status}">AVAILABLE</span>
+                                            </div>
+                                            <div class="info-card-footer edit-actions">
+                                                <select class="form-control form-select" name="status">
+                                                    <option th:selected="${vehicle.status == 'AVAILABLE'}"
+                                                        value="AVAILABLE">Available</option>
+                                                    <option th:selected="${vehicle.status == 'MAINTENANCE'}"
+                                                        value="MAINTENANCE">Maintenance</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="d-flex justify-content-between align-items-center">
-                                                Rate Per Day (RM)
+
+                                        <!-- Rate Card -->
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-currency-usd"></i>
+                                                    Rate Per Day
+                                                </span>
                                                 <button type="button" class="btn btn-sm btn-link p-0"
                                                     id="viewRateHistoryBtn">
                                                     <i class="mdi mdi-history mr-1"></i>History
                                                 </button>
-                                            </label>
-                                            <input type="hidden" id="ratePerDayInput" name="ratePerDay"
-                                                th:value="${vehicle.ratePerDay}">
-                                            <button type="button" class="btn manage-rate-btn" id="openRateModal"
-                                                th:data-rate="${vehicle.ratePerDay}">
+                                            </div>
+                                            <div class="info-card-value rate-value">
                                                 <span id="rateDisplay"
-                                                    th:text="${'RM ' + vehicle.ratePerDay + ' / day'}">RM 100.00 /
-                                                    day</span>
-                                                <i class="mdi mdi-cog manage-rate-icon"></i>
-                                            </button>
+                                                    th:text="${'RM ' + #numbers.formatDecimal(vehicle.ratePerDay, 1, 2)}">RM
+                                                    100.00</span>
+                                                <small class="text-muted" style="font-size: 0.5em; font-weight: 400;">/
+                                                    day</small>
+                                            </div>
+                                            <div class="info-card-footer edit-actions">
+                                                <button type="button" class="btn btn-outline-primary manage-rate-btn"
+                                                    id="openRateModal" th:data-rate="${vehicle.ratePerDay}">
+                                                    <i class="mdi mdi-pencil"></i> Manage Rate
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -359,18 +556,36 @@
             </div>
         </div>
 
+        <!-- Manage Rate Modal -->
         <div class="rate-modal-overlay" id="rateModalOverlay">
             <div class="rate-modal">
-                <div class="rate-modal-header p-3 border-bottom d-flex justify-content-between">
-                    <h5>Update Rate</h5>
-                    <button class="rate-modal-close border-0 bg-transparent" id="closeRateModal">&times;</button>
+                <div class="rate-modal-header p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="mdi mdi-currency-usd mr-2"></i>Manage Rate</h5>
+                    <button class="rate-modal-close border-0 bg-transparent" id="closeRateModal"
+                        style="font-size: 1.5rem; line-height: 1;">&times;</button>
                 </div>
-                <div class="rate-modal-body p-3">
-                    <input type="number" class="form-control" id="rateModalInput" step="0.01">
+                <div class="rate-modal-body p-4">
+                    <!-- Current Rate Display -->
+                    <div class="current-rate-display">
+                        <div class="current-rate-label">Current Rate</div>
+                        <div class="current-rate-value" id="currentRateDisplay"
+                            th:text="${'RM ' + #numbers.formatDecimal(vehicle.ratePerDay, 1, 2)}">RM 100.00</div>
+                    </div>
+
+                    <!-- New Rate Input -->
+                    <div class="new-rate-input-group">
+                        <label for="rateModalInput">New Rate Per Day</label>
+                        <div class="rate-input-wrapper">
+                            <span class="currency-prefix">RM</span>
+                            <input type="number" class="form-control" id="rateModalInput" step="0.01" min="0"
+                                placeholder="0.00">
+                        </div>
+                    </div>
                 </div>
                 <div class="rate-modal-footer p-3 border-top d-flex justify-content-end gap-2">
                     <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
-                    <button class="btn btn-primary" id="saveRateModal">Save</button>
+                    <button class="btn btn-primary" id="saveRateModal"><i class="mdi mdi-check mr-1"></i>Update
+                        Rate</button>
                 </div>
             </div>
         </div>
@@ -432,10 +647,19 @@
                 }
             });
 
+            document.getElementById('closeRateModal').addEventListener('click', () => {
+                rateModalOverlay.classList.remove('show');
+            });
+
+            document.getElementById('cancelRateModal').addEventListener('click', () => {
+                rateModalOverlay.classList.remove('show');
+            });
+
             document.getElementById('saveRateModal').addEventListener('click', () => {
                 const val = parseFloat(document.getElementById('rateModalInput').value) || 0;
                 document.getElementById('ratePerDayInput').value = val.toFixed(2);
-                document.getElementById('rateDisplay').textContent = 'RM ' + val.toFixed(2) + ' / day';
+                document.getElementById('rateDisplay').textContent = 'RM ' + val.toFixed(2);
+                document.getElementById('currentRateDisplay').textContent = 'RM ' + val.toFixed(2);
                 rateModalOverlay.classList.remove('show');
             });
 
