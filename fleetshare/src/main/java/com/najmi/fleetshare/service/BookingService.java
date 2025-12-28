@@ -228,14 +228,29 @@ public class BookingService {
 
     public List<BookingLogDTO> getBookingStatusLogsDTO(Long bookingId) {
         List<BookingStatusLog> logs = statusLogRepository.findByBookingIdOrderByStatusTimestampDesc(bookingId);
-        List<BookingLogDTO> logDTOs = new ArrayList<>();
 
+        // Collect all actor IDs to fetch them in a single query
+        Set<Long> userIds = logs.stream()
+                .map(BookingStatusLog::getActorUserId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // Batch fetch users
+        Map<Long, String> userEmailMap = Collections.emptyMap();
+        if (!userIds.isEmpty()) {
+            userEmailMap = userRepository.findAllById(userIds).stream()
+                    .collect(Collectors.toMap(
+                        User::getUserId,
+                        user -> user.getEmail() != null ? user.getEmail() : "Unknown User",
+                        (existing, replacement) -> existing
+                    ));
+        }
+
+        List<BookingLogDTO> logDTOs = new ArrayList<>();
         for (BookingStatusLog log : logs) {
             String actorName = "System";
             if (log.getActorUserId() != null) {
-                actorName = userRepository.findById(log.getActorUserId())
-                        .map(User::getEmail)
-                        .orElse("Unknown User");
+                actorName = userEmailMap.getOrDefault(log.getActorUserId(), "Unknown User");
             }
 
             logDTOs.add(new BookingLogDTO(
