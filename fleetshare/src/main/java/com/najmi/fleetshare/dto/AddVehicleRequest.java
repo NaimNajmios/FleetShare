@@ -14,6 +14,7 @@ public class AddVehicleRequest {
     private String status;
     private BigDecimal ratePerDay;
     private String vehicleImageUrl;
+    private String effectiveDate;
 
     // Getters and Setters
     public String getBrand() {
@@ -102,5 +103,13 @@ public class AddVehicleRequest {
 
     public void setVehicleImageUrl(String vehicleImageUrl) {
         this.vehicleImageUrl = vehicleImageUrl;
+    }
+
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
     }
 }

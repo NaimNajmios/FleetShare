@@ -317,7 +317,17 @@ public class VehicleManagementService {
                                 VehiclePriceHistory priceHistory = new VehiclePriceHistory();
                                 priceHistory.setVehicleId(vehicleId);
                                 priceHistory.setRatePerDay(request.getRatePerDay());
-                                priceHistory.setEffectiveStartDate(now);
+                                // Use effective date from request if provided, otherwise use now
+                                LocalDateTime effectiveDate = now;
+                                if (request.getEffectiveDate() != null && !request.getEffectiveDate().isEmpty()) {
+                                        try {
+                                                effectiveDate = LocalDateTime.parse(request.getEffectiveDate());
+                                        } catch (Exception e) {
+                                                // Fall back to now if parsing fails
+                                                effectiveDate = now;
+                                        }
+                                }
+                                priceHistory.setEffectiveStartDate(effectiveDate);
                                 priceHistoryRepository.save(priceHistory);
                         }
                 }
@@ -357,6 +367,21 @@ public class VehicleManagementService {
          */
         public List<VehiclePriceHistory> getRateHistory(Long vehicleId) {
                 return priceHistoryRepository.findByVehicleIdOrderByEffectiveStartDateDesc(vehicleId);
+        }
+
+        /**
+         * Gets the effective rate for a vehicle on a specific date.
+         * Returns the rate with the latest effectiveStartDate that is <= the target
+         * date.
+         * 
+         * @param vehicleId Vehicle ID
+         * @param date      Target date to find effective rate for
+         * @return Rate per day, or BigDecimal.ZERO if no rate found
+         */
+        public BigDecimal getEffectiveRate(Long vehicleId, LocalDateTime date) {
+                return priceHistoryRepository.findEffectiveRateOnDate(vehicleId, date)
+                                .map(VehiclePriceHistory::getRatePerDay)
+                                .orElse(BigDecimal.ZERO);
         }
 
         /**
