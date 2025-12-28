@@ -20,3 +20,13 @@
 **Fix Applied:** Added `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, and `Referrer-Policy` to the security filter chain.
 **Prevention:** Always configure explicit security headers in `SecurityFilterChain`.
 **References:** OWASP Secure Headers Project
+
+## 2025-12-27 - Permissions-Policy Header Implemented
+
+**Context:** `fleetshare/src/main/java/com/najmi/fleetshare/config/SecurityConfig.java`
+**Vulnerability:** Missing `Permissions-Policy` Header
+**Severity:** Medium
+**Root Cause:** The default Spring Security configuration did not restrict access to powerful browser features, potentially allowing malicious scripts or iframes to access the camera, microphone, or geolocation.
+**Fix Applied:** configured the `Permissions-Policy` header to explicitly disable access to `camera`, `microphone`, `geolocation`, and `payment` APIs.
+**Prevention:** Always restrict access to browser features that are not required by the application using the `Permissions-Policy` header.
+**References:** OWASP Secure Headers Project
