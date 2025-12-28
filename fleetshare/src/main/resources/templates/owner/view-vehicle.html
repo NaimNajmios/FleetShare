@@ -626,6 +626,21 @@
                                                     <i class="mdi mdi-pencil"></i> Manage Rate
                                                 </button>
                                             </div>
+                                            <!-- Scheduled Rates Display -->
+                                            <div th:if="${scheduledRates != null and !scheduledRates.empty}" class="scheduled-rates-section mt-3">
+                                                <div class="text-muted small mb-2">
+                                                    <i class="mdi mdi-calendar-clock"></i> Scheduled Rates
+                                                </div>
+                                                <div th:each="rate : ${scheduledRates}" class="scheduled-rate-item d-flex justify-content-between align-items-center p-2 mb-1" style="background: rgba(79, 70, 229, 0.1); border-radius: 6px; font-size: 0.85em;">
+                                                    <span>
+                                                        <strong th:text="|RM ${#numbers.formatDecimal(rate.ratePerDay, 1, 2)}|">RM 0.00</strong>
+                                                        <span class="text-muted">/day</span>
+                                                    </span>
+                                                    <span class="badge bg-info" th:text="|From: ${#temporals.format(rate.effectiveStartDate, 'dd MMM yyyy')}|">
+                                                        From: 01 Jan 2025
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1038,6 +1053,8 @@
 </body>
 
 </html>
+
+
 
 
 

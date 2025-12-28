@@ -218,6 +218,18 @@ public class OwnerController {
     public String viewVehicle(@PathVariable Long vehicleId, Model model) {
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
         model.addAttribute("vehicle", vehicle);
+
+        // Get rate history and filter for scheduled (future) rates
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.util.List<com.najmi.fleetshare.entity.VehiclePriceHistory> allRates = vehicleManagementService
+                .getRateHistory(vehicleId);
+        java.util.List<com.najmi.fleetshare.entity.VehiclePriceHistory> scheduledRates = allRates.stream()
+                .filter(r -> r.getEffectiveStartDate().isAfter(now))
+                .sorted(java.util.Comparator
+                        .comparing(com.najmi.fleetshare.entity.VehiclePriceHistory::getEffectiveStartDate))
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("scheduledRates", scheduledRates);
+
         return "owner/view-vehicle";
     }
 
