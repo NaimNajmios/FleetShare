@@ -5,113 +5,130 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
+            /* KPI Cards */
             .kpi-card {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
                 border-radius: 12px;
                 padding: 1.25rem;
-                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+                position: relative;
             }
 
-            .kpi-card.pending {
-                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            }
-
-            .kpi-card.confirmed {
-                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            .kpi-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             }
 
             .kpi-card.active {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-color: white;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             }
 
-            .kpi-card.completed {
-                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            }
-
-            .kpi-card.revenue {
-                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            }
-
-            .kpi-value {
-                font-size: 1.75rem;
+            .kpi-card .kpi-value {
+                font-size: 2rem;
                 font-weight: 700;
-                margin-bottom: 0.25rem;
+                line-height: 1;
             }
 
-            .kpi-label {
-                font-size: 0.8rem;
+            .kpi-card .kpi-label {
+                font-size: 0.875rem;
+                font-weight: 500;
                 opacity: 0.9;
+                margin-top: 0.25rem;
+            }
+
+            .kpi-card .kpi-icon {
+                font-size: 2.5rem;
+                opacity: 0.3;
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .kpi-pending {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+            }
+
+            .kpi-confirmed {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+            }
+
+            .kpi-active {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .kpi-completed {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .kpi-cancelled {
+                background: linear-gradient(135deg, #adb5bd 0%, #6c757d 100%);
+                color: white;
+            }
+
+            .kpi-revenue {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: white;
+            }
+
+            /* View Toggle */
+            .view-toggle .btn.active {
+                background-color: var(--bs-primary);
+                color: white;
+            }
+
+            /* Booking Cards */
+            .booking-card {
+                border-radius: 12px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                border: 1px solid #e0e0e0;
+            }
+
+            .booking-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            }
+
+            .booking-card .card-header-custom {
+                padding: 1rem 1.25rem;
+                border-bottom: 1px solid #e0e0e0;
+                background: #f8f9fa;
+            }
+
+            .booking-card .card-body {
+                padding: 1.25rem;
+            }
+
+            .booking-card .booking-id {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #6c757d;
+            }
+
+            .booking-card .renter-name {
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            .grid-view {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .table-view {
+                display: block;
             }
 
             .chart-container {
                 height: 280px;
-            }
-
-            .search-filter-bar {
-                display: flex;
-                gap: 1rem;
-                margin-bottom: 1.5rem;
-                flex-wrap: wrap;
-                align-items: center;
-            }
-
-            .search-input {
-                flex: 1;
-                min-width: 250px;
-                padding: 0.5rem 1rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-            }
-
-            .filter-select {
-                padding: 0.5rem 1rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-                background: white;
-            }
-
-            .badge {
-                padding: 0.25rem 0.5rem;
-                border-radius: 0.25rem;
-                font-size: 0.75rem;
-                font-weight: 600;
-            }
-
-            .badge-warning {
-                background-color: #fff3cd;
-                color: #856404;
-            }
-
-            .badge-info {
-                background-color: #d1ecf1;
-                color: #0c5460;
-            }
-
-            .badge-success {
-                background-color: #d4edda;
-                color: #155724;
-            }
-
-            .badge-primary {
-                background-color: #cfe2ff;
-                color: #084298;
-            }
-
-            .badge-danger {
-                background-color: #f8d7da;
-                color: #721c24;
-            }
-
-            .badge-dark {
-                background-color: #d3d3d4;
-                color: #141619;
-            }
-
-            .no-data {
-                text-align: center;
-                padding: 3rem;
-                color: #6c757d;
             }
         </style>
     </th:block>
@@ -119,75 +136,82 @@
 
 <body>
     <div layout:fragment="content">
-        <!-- Page Header -->
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Booking Management</h3>
-                        <h6 class="font-weight-normal mb-0">Oversee all rental bookings across the platform.</h6>
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Booking Management</h3>
+                        <p class="text-muted mb-0">Oversee all rental bookings across the platform</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- KPI Cards Row -->
-        <div class="row">
-            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
-                <div class="kpi-card pending w-100">
+        <div class="row mb-4">
+            <div class="col-xl-2 col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-pending" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
                     <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
                     <div class="kpi-label">Pending</div>
+                    <i class="mdi mdi-clock-outline kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
-                <div class="kpi-card confirmed w-100">
+            <div class="col-xl-2 col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-confirmed" data-filter="CONFIRMED" onclick="filterByStatus('CONFIRMED', this)">
                     <div class="kpi-value" th:text="${confirmedCount} ?: 0">0</div>
                     <div class="kpi-label">Confirmed</div>
+                    <i class="mdi mdi-check kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
-                <div class="kpi-card active w-100">
+            <div class="col-xl-2 col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-active" data-filter="ACTIVE" onclick="filterByStatus('ACTIVE', this)">
                     <div class="kpi-value" th:text="${activeCount} ?: 0">0</div>
                     <div class="kpi-label">Active</div>
+                    <i class="mdi mdi-car kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
-                <div class="kpi-card completed w-100">
+            <div class="col-xl-2 col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-completed" data-filter="COMPLETED" onclick="filterByStatus('COMPLETED', this)">
                     <div class="kpi-value" th:text="${completedCount} ?: 0">0</div>
                     <div class="kpi-label">Completed</div>
+                    <i class="mdi mdi-check-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
-                <div class="kpi-card w-100" style="background: linear-gradient(135deg, #adb5bd 0%, #6c757d 100%);">
-                    <div class="kpi-value" th:text="${cancelledCount + disputedCount} ?: 0">0</div>
+            <div class="col-xl-2 col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-cancelled" data-filter="CANCELLED" onclick="filterByStatus('CANCELLED', this)">
+                    <div class="kpi-value" th:text="${(cancelledCount ?: 0) + (disputedCount ?: 0)}">0</div>
                     <div class="kpi-label">Cancelled/Disputed</div>
+                    <i class="mdi mdi-close-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2 grid-margin stretch-card">
-                <div class="kpi-card revenue w-100">
+            <div class="col-xl-2 col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-revenue" data-filter="all" onclick="filterByStatus('all', this)">
                     <div class="kpi-value"
-                        th:text="'RM' + ${#numbers.formatDecimal(totalRevenue ?: 0, 1, 'COMMA', 0, 'POINT')}">RM0</div>
+                        th:text="'RM ' + ${#numbers.formatDecimal(totalRevenue ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0
+                    </div>
                     <div class="kpi-label">Total Revenue</div>
+                    <i class="mdi mdi-currency-usd kpi-icon"></i>
                 </div>
             </div>
         </div>
 
         <!-- Charts Row -->
-        <div class="row">
-            <div class="col-md-5 grid-margin stretch-card">
-                <div class="card">
+        <div class="row mb-4">
+            <div class="col-md-5 mb-4 mb-md-0">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h4 class="card-title">Booking Status Distribution</h4>
+                        <h5 class="card-title mb-3">Booking Status Distribution</h5>
                         <div class="chart-container">
                             <canvas id="statusChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-7 grid-margin stretch-card">
-                <div class="card">
+            <div class="col-md-7">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h4 class="card-title">Monthly Bookings & Revenue</h4>
+                        <h5 class="card-title mb-3">Monthly Bookings & Revenue</h5>
                         <div class="chart-container">
                             <canvas id="monthlyChart"></canvas>
                         </div>
@@ -196,18 +220,15 @@
             </div>
         </div>
 
-        <!-- Bookings Table -->
-        <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
+        <!-- Filters and View Toggle -->
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">All Bookings</h4>
-
-                        <!-- Search and Filters -->
-                        <div class="search-filter-bar">
-                            <input type="text" class="search-input" id="booking-search"
-                                placeholder="Search by renter, vehicle..." aria-label="Search bookings">
-                            <select class="filter-select" id="status-filter" aria-label="Filter bookings by status">
+                    <div class="card-body py-3">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="text" class="form-control" id="booking-search"
+                                placeholder="Search renter, vehicle, owner..." style="width: 250px;">
+                            <select class="form-select" id="status-filter" style="width: 150px;">
                                 <option value="">All Status</option>
                                 <option value="PENDING">Pending</option>
                                 <option value="CONFIRMED">Confirmed</option>
@@ -216,64 +237,155 @@
                                 <option value="CANCELLED">Cancelled</option>
                                 <option value="DISPUTED">Disputed</option>
                             </select>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="bookings-table">
-                                <caption class="visually-hidden">List of all bookings with their details and status</caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Booking ID</th>
-                                        <th scope="col">Renter</th>
-                                        <th scope="col">Vehicle</th>
-                                        <th scope="col">Plate No.</th>
-                                        <th scope="col">Owner</th>
-                                        <th scope="col">Start Date</th>
-                                        <th scope="col">End Date</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="booking : ${bookings}" th:data-status="${booking.status}"
-                                        class="booking-row">
-                                        <td th:text="${booking.bookingId}">1</td>
-                                        <td th:text="${booking.renterName}" class="searchable">Herman Beck</td>
-                                        <td th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}"
-                                            class="searchable">Toyota Camry</td>
-                                        <td th:text="${booking.vehicleRegistrationNo}">WXY 1234</td>
-                                        <td th:text="${booking.ownerBusinessName}">MetroCity Car Rental</td>
-                                        <td th:text="${#temporals.format(booking.startDate, 'yyyy-MM-dd HH:mm')}">
-                                            2024-05-12 10:00</td>
-                                        <td th:text="${#temporals.format(booking.endDate, 'yyyy-MM-dd HH:mm')}">
-                                            2024-05-15 10:00</td>
-                                        <td>
-                                            <span th:if="${booking.status == 'PENDING'}"
-                                                class="badge badge-warning">Pending</span>
-                                            <span th:if="${booking.status == 'CONFIRMED'}"
-                                                class="badge badge-primary">Confirmed</span>
-                                            <span th:if="${booking.status == 'ACTIVE'}"
-                                                class="badge badge-info">Active</span>
-                                            <span th:if="${booking.status == 'COMPLETED'}"
-                                                class="badge badge-success">Completed</span>
-                                            <span th:if="${booking.status == 'CANCELLED'}"
-                                                class="badge badge-danger">Cancelled</span>
-                                            <span th:if="${booking.status == 'DISPUTED'}"
-                                                class="badge badge-dark">Disputed</span>
-                                        </td>
-                                        <td>
-                                            <a th:href="@{/admin/bookings/view/{id}(id=${booking.bookingId})}"
-                                                class="btn btn-sm btn-outline-info"
-                                                th:aria-label="'View details for booking #' + ${booking.bookingId}">View</a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div th:if="${#lists.isEmpty(bookings)}" class="no-data">
-                                <i class="mdi mdi-calendar-remove mdi-48px"></i>
-                                <p>No bookings found</p>
+                            <div class="ms-auto view-toggle btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active" id="btn-grid-view"
+                                    onclick="setView('grid')" title="Grid View">
+                                    <i class="mdi mdi-view-grid"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-table-view"
+                                    onclick="setView('table')" title="Table View">
+                                    <i class="mdi mdi-table"></i>
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Content Area -->
+        <div class="row">
+            <div class="col-12">
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(bookings)}" class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle"
+                                style="width: 100px; height: 100px;">
+                                <i class="mdi mdi-calendar-remove mdi-48px text-muted"></i>
+                            </div>
+                        </div>
+                        <h4 class="text-dark font-weight-bold">No Bookings Yet</h4>
+                        <p class="text-muted mb-0">Bookings will appear here once renters make reservations.</p>
+                    </div>
+                </div>
+
+                <!-- Grid View -->
+                <div id="grid-view-container" class="grid-view" th:unless="${#lists.isEmpty(bookings)}">
+                    <div th:each="booking : ${bookings}" class="booking-card card booking-item"
+                        th:data-status="${booking.status}"
+                        th:data-search="${booking.renterName + ' ' + booking.vehicleBrand + ' ' + booking.vehicleModel + ' ' + booking.ownerBusinessName}">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center">
+                            <span class="booking-id">Booking #<span th:text="${booking.bookingId}">1</span></span>
+                            <span th:if="${booking.status == 'PENDING'}"
+                                class="badge bg-warning text-dark">Pending</span>
+                            <span th:if="${booking.status == 'CONFIRMED'}" class="badge bg-primary">Confirmed</span>
+                            <span th:if="${booking.status == 'ACTIVE'}" class="badge bg-info">Active</span>
+                            <span th:if="${booking.status == 'COMPLETED'}" class="badge bg-success">Completed</span>
+                            <span th:if="${booking.status == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
+                            <span th:if="${booking.status == 'DISPUTED'}" class="badge bg-secondary">Disputed</span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="renter-name mb-1" th:text="${booking.renterName}">John Doe</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="mdi mdi-car me-1"></i>
+                                <span th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">Toyota Camry</span>
+                                (<span th:text="${booking.vehicleRegistrationNo}">WXY 1234</span>)
+                            </p>
+                            <p class="text-muted small mb-3">
+                                <i class="mdi mdi-domain me-1"></i>
+                                <span th:text="${booking.ownerBusinessName}">Owner Business</span>
+                            </p>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Start Date</small>
+                                    <span th:text="${#temporals.format(booking.startDate, 'MMM dd, HH:mm')}">May 12,
+                                        10:00</span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">End Date</small>
+                                    <span th:text="${#temporals.format(booking.endDate, 'MMM dd, HH:mm')}">May 15,
+                                        10:00</span>
+                                </div>
+                            </div>
+                            <a th:href="@{/admin/bookings/view/{id}(id=${booking.bookingId})}"
+                                class="btn btn-primary btn-sm w-100">
+                                <i class="mdi mdi-eye me-1"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table View -->
+                <div id="table-view-container" class="table-view" style="display: none;"
+                    th:unless="${#lists.isEmpty(bookings)}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 6%;">ID</th>
+                                            <th style="width: 13%;">Renter</th>
+                                            <th style="width: 15%;">Vehicle</th>
+                                            <th style="width: 8%;">Plate</th>
+                                            <th style="width: 14%;">Owner</th>
+                                            <th style="width: 12%;">Start Date</th>
+                                            <th style="width: 12%;">End Date</th>
+                                            <th style="width: 10%;">Status</th>
+                                            <th class="text-end" style="width: 10%;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="booking : ${bookings}" class="booking-item"
+                                            th:data-status="${booking.status}"
+                                            th:data-search="${booking.renterName + ' ' + booking.vehicleBrand + ' ' + booking.vehicleModel + ' ' + booking.ownerBusinessName}">
+                                            <td class="fw-bold">#<span th:text="${booking.bookingId}">1</span></td>
+                                            <td th:text="${booking.renterName}">John Doe</td>
+                                            <td th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">Toyota
+                                                Camry</td>
+                                            <td th:text="${booking.vehicleRegistrationNo}">WXY 1234</td>
+                                            <td th:text="${booking.ownerBusinessName}">Owner</td>
+                                            <td th:text="${#temporals.format(booking.startDate, 'yyyy-MM-dd HH:mm')}">
+                                                2024-05-12 10:00</td>
+                                            <td th:text="${#temporals.format(booking.endDate, 'yyyy-MM-dd HH:mm')}">
+                                                2024-05-15 10:00</td>
+                                            <td>
+                                                <span th:if="${booking.status == 'PENDING'}"
+                                                    class="badge bg-warning text-dark">Pending</span>
+                                                <span th:if="${booking.status == 'CONFIRMED'}"
+                                                    class="badge bg-primary">Confirmed</span>
+                                                <span th:if="${booking.status == 'ACTIVE'}"
+                                                    class="badge bg-info">Active</span>
+                                                <span th:if="${booking.status == 'COMPLETED'}"
+                                                    class="badge bg-success">Completed</span>
+                                                <span th:if="${booking.status == 'CANCELLED'}"
+                                                    class="badge bg-danger">Cancelled</span>
+                                                <span th:if="${booking.status == 'DISPUTED'}"
+                                                    class="badge bg-secondary">Disputed</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a th:href="@{/admin/bookings/view/{id}(id=${booking.bookingId})}"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="mdi mdi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Results -->
+                <div id="no-results" class="card" style="display: none;">
+                    <div class="card-body text-center py-5">
+                        <i class="mdi mdi-magnify-close mdi-48px text-muted mb-3"></i>
+                        <h5 class="text-muted">No bookings match your filters</h5>
+                        <button class="btn btn-outline-primary mt-3" onclick="clearFilters()">
+                            <i class="mdi mdi-filter-remove me-1"></i> Clear Filters
+                        </button>
                     </div>
                 </div>
             </div>
@@ -282,7 +394,9 @@
 
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
-            // Chart data from server
+            let currentView = 'grid';
+            let currentStatusFilter = 'all';
+
             const bookingStats = {
                 pending: /*[[${pendingCount} ?: 0]]*/ 0,
                 confirmed: /*[[${confirmedCount} ?: 0]]*/ 0,
@@ -295,88 +409,134 @@
                 monthlyRevenue: /*[[${monthlyRevenue}]]*/[]
             };
 
-            // Status Distribution Doughnut Chart
-            const statusCtx = document.getElementById('statusChart').getContext('2d');
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled', 'Disputed'],
-                    datasets: [{
-                        data: [bookingStats.pending, bookingStats.confirmed, bookingStats.active,
-                        bookingStats.completed, bookingStats.cancelled, bookingStats.disputed],
-                        backgroundColor: ['#f5576c', '#4facfe', '#667eea', '#43e97b', '#adb5bd', '#6c757d'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-
-            // Monthly Bookings & Revenue Bar Chart
-            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-            new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: bookingStats.monthlyLabels,
-                    datasets: [{
-                        label: 'Bookings',
-                        data: bookingStats.monthlyBookingCounts,
-                        backgroundColor: 'rgba(75, 73, 172, 0.7)',
-                        borderColor: '#4B49AC',
-                        borderWidth: 1,
-                        yAxisID: 'y'
-                    }, {
-                        label: 'Revenue (RM)',
-                        data: bookingStats.monthlyRevenue,
-                        type: 'line',
-                        borderColor: '#fa709a',
-                        backgroundColor: 'rgba(250, 112, 154, 0.2)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        yAxisID: 'y1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            position: 'left',
-                            title: { display: true, text: 'Bookings' }
-                        },
-                        y1: {
-                            beginAtZero: true,
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            title: { display: true, text: 'Revenue (RM)' }
-                        }
+            // Status Chart
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                new Chart(statusCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled', 'Disputed'],
+                        datasets: [{
+                            data: [bookingStats.pending, bookingStats.confirmed, bookingStats.active,
+                            bookingStats.completed, bookingStats.cancelled, bookingStats.disputed],
+                            backgroundColor: ['#f5576c', '#4facfe', '#667eea', '#38ef7d', '#adb5bd', '#6c757d'],
+                            borderWidth: 0
+                        }]
                     },
-                    plugins: {
-                        legend: { position: 'top' }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
                     }
+                });
+            }
+
+            // Monthly Chart
+            const monthlyCtx = document.getElementById('monthlyChart');
+            if (monthlyCtx) {
+                new Chart(monthlyCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: bookingStats.monthlyLabels,
+                        datasets: [{
+                            label: 'Bookings',
+                            data: bookingStats.monthlyBookingCounts,
+                            backgroundColor: 'rgba(75, 73, 172, 0.7)',
+                            borderColor: '#4B49AC',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Revenue (RM)',
+                            data: bookingStats.monthlyRevenue,
+                            type: 'line',
+                            borderColor: '#fa709a',
+                            backgroundColor: 'rgba(250, 112, 154, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Bookings' } },
+                            y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Revenue (RM)' } }
+                        },
+                        plugins: { legend: { position: 'top' } }
+                    }
+                });
+            }
+
+            const searchInput = document.getElementById('booking-search');
+            const statusFilter = document.getElementById('status-filter');
+            const gridContainer = document.getElementById('grid-view-container');
+            const tableContainer = document.getElementById('table-view-container');
+            const noResults = document.getElementById('no-results');
+            const kpiCards = document.querySelectorAll('.kpi-card');
+
+            function setView(view) {
+                currentView = view;
+                document.getElementById('btn-grid-view').classList.toggle('active', view === 'grid');
+                document.getElementById('btn-table-view').classList.toggle('active', view === 'table');
+                if (gridContainer) gridContainer.style.display = view === 'grid' ? 'grid' : 'none';
+                if (tableContainer) tableContainer.style.display = view === 'table' ? 'block' : 'none';
+                localStorage.setItem('adminBookingViewPreference', view);
+            }
+
+            function filterByStatus(status, element) {
+                currentStatusFilter = status;
+                kpiCards.forEach(card => card.classList.remove('active'));
+                if (element) element.classList.add('active');
+                statusFilter.value = status === 'all' ? '' : status;
+                filterBookings();
+            }
+
+            function filterBookings() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusValue = statusFilter.value || (currentStatusFilter !== 'all' ? currentStatusFilter : '');
+
+                const allItems = document.querySelectorAll('.booking-item');
+                let visibleCount = 0;
+
+                allItems.forEach(item => {
+                    const searchText = (item.dataset.search || '').toLowerCase();
+                    const itemStatus = item.dataset.status || '';
+
+                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+                    const matchesStatus = !statusValue || itemStatus === statusValue;
+
+                    const isVisible = matchesSearch && matchesStatus;
+                    item.style.display = isVisible ? '' : 'none';
+                    if (isVisible) visibleCount++;
+                });
+
+                if (noResults) {
+                    noResults.style.display = (document.querySelectorAll('.booking-item').length > 0 && visibleCount === 0) ? 'block' : 'none';
                 }
+            }
+
+            function clearFilters() {
+                searchInput.value = '';
+                statusFilter.value = '';
+                currentStatusFilter = 'all';
+                kpiCards.forEach(card => card.classList.remove('active'));
+                filterBookings();
+            }
+
+            if (searchInput) searchInput.addEventListener('input', filterBookings);
+            if (statusFilter) statusFilter.addEventListener('change', () => {
+                currentStatusFilter = statusFilter.value || 'all';
+                kpiCards.forEach(card => {
+                    card.classList.toggle('active', card.dataset.filter === currentStatusFilter);
+                });
+                filterBookings();
             });
 
-            // Filter functionality
-            document.getElementById('status-filter').addEventListener('change', function () {
-                const status = this.value;
-                document.querySelectorAll('#bookings-table tbody tr').forEach(row => {
-                    row.style.display = !status || row.dataset.status === status ? '' : 'none';
-                });
-            });
-
-            document.getElementById('booking-search').addEventListener('input', function () {
-                const term = this.value.toLowerCase();
-                document.querySelectorAll('#bookings-table tbody tr').forEach(row => {
-                    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
-                });
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedView = localStorage.getItem('adminBookingViewPreference') || 'grid';
+                setView(savedView);
             });
         </script>
     </th:block>

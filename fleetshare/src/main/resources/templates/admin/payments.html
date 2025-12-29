@@ -5,103 +5,114 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
+            /* KPI Cards */
             .kpi-card {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
                 border-radius: 12px;
                 padding: 1.25rem;
-                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+                position: relative;
             }
 
-            .kpi-card.pending {
+            .kpi-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .kpi-card.active {
+                border-color: white;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .kpi-card .kpi-value {
+                font-size: 2rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
+            .kpi-card .kpi-label {
+                font-size: 0.875rem;
+                font-weight: 500;
+                opacity: 0.9;
+                margin-top: 0.25rem;
+            }
+
+            .kpi-card .kpi-icon {
+                font-size: 2.5rem;
+                opacity: 0.3;
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .kpi-pending {
                 background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
             }
 
-            .kpi-card.verified {
-                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            .kpi-verified {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
             }
 
-            .kpi-card.failed {
+            .kpi-failed {
                 background: linear-gradient(135deg, #adb5bd 0%, #6c757d 100%);
+                color: white;
             }
 
-            .kpi-card.total {
+            .kpi-amount {
                 background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: white;
             }
 
-            .kpi-value {
+            .view-toggle .btn.active {
+                background-color: var(--bs-primary);
+                color: white;
+            }
+
+            .payment-card {
+                border-radius: 12px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                border: 1px solid #e0e0e0;
+                cursor: pointer;
+            }
+
+            .payment-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            }
+
+            .payment-card .card-header-custom {
+                padding: 1rem 1.25rem;
+                border-bottom: 1px solid #e0e0e0;
+                background: #f8f9fa;
+            }
+
+            .payment-card .card-body {
+                padding: 1.25rem;
+            }
+
+            .payment-card .payment-amount {
                 font-size: 1.5rem;
                 font-weight: 700;
-                margin-bottom: 0.25rem;
+                color: var(--bs-success);
             }
 
-            .kpi-label {
-                font-size: 0.8rem;
-                opacity: 0.9;
+            .grid-view {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .table-view {
+                display: block;
             }
 
             .chart-container {
-                height: 280px;
-            }
-
-            .search-filter-bar {
-                display: flex;
-                gap: 1rem;
-                margin-bottom: 1.5rem;
-                flex-wrap: wrap;
-                align-items: center;
-            }
-
-            .search-input {
-                flex: 1;
-                min-width: 250px;
-                padding: 0.5rem 1rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-            }
-
-            .filter-select {
-                padding: 0.5rem 1rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-                background: white;
-            }
-
-            .badge {
-                padding: 0.25rem 0.5rem;
-                border-radius: 0.25rem;
-                font-size: 0.75rem;
-                font-weight: 600;
-            }
-
-            .badge-warning {
-                background-color: #fff3cd;
-                color: #856404;
-            }
-
-            .badge-success {
-                background-color: #d4edda;
-                color: #155724;
-            }
-
-            .badge-danger {
-                background-color: #f8d7da;
-                color: #721c24;
-            }
-
-            .no-data {
-                text-align: center;
-                padding: 3rem;
-                color: #6c757d;
-            }
-
-            .payment-row {
-                cursor: pointer;
-                transition: background-color 0.15s ease-in-out;
-            }
-
-            .payment-row:hover {
-                background-color: #e9ecef !important;
+                height: 250px;
             }
         </style>
     </th:block>
@@ -109,161 +120,223 @@
 
 <body>
     <div layout:fragment="content">
-        <!-- Page Header -->
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Payment Management</h3>
-                        <h6 class="font-weight-normal mb-0">Monitor all financial transactions across the platform.</h6>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Payment Management</h3>
+                        <p class="text-muted mb-0">Monitor all financial transactions across the platform</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- KPI Cards Row -->
-        <div class="row">
-            <div class="col-6 col-md-3 grid-margin stretch-card">
-                <div class="kpi-card pending w-100">
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-pending" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
                     <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
-                    <div class="kpi-label">Pending Payments</div>
+                    <div class="kpi-label">Pending</div>
+                    <i class="mdi mdi-clock-outline kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-3 grid-margin stretch-card">
-                <div class="kpi-card verified w-100">
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-verified" data-filter="VERIFIED" onclick="filterByStatus('VERIFIED', this)">
                     <div class="kpi-value" th:text="${verifiedCount} ?: 0">0</div>
-                    <div class="kpi-label">Verified Payments</div>
+                    <div class="kpi-label">Verified</div>
+                    <i class="mdi mdi-check-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-3 grid-margin stretch-card">
-                <div class="kpi-card failed w-100">
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-failed" data-filter="FAILED" onclick="filterByStatus('FAILED', this)">
                     <div class="kpi-value" th:text="${failedCount} ?: 0">0</div>
-                    <div class="kpi-label">Failed Payments</div>
+                    <div class="kpi-label">Failed</div>
+                    <i class="mdi mdi-close-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-6 col-md-3 grid-margin stretch-card">
-                <div class="kpi-card total w-100">
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-amount" data-filter="all" onclick="filterByStatus('all', this)">
                     <div class="kpi-value"
-                        th:text="'RM' + ${#numbers.formatDecimal(verifiedAmount ?: 0, 1, 'COMMA', 0, 'POINT')}">RM0
+                        th:text="'RM ' + ${#numbers.formatDecimal(verifiedAmount ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0
                     </div>
                     <div class="kpi-label">Verified Amount</div>
+                    <i class="mdi mdi-currency-usd kpi-icon"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Row -->
-        <div class="row">
-            <div class="col-md-4 grid-margin stretch-card">
-                <div class="card">
+        <div class="row mb-4">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h4 class="card-title">Payment Status</h4>
-                        <div class="chart-container">
-                            <canvas id="statusChart"></canvas>
-                        </div>
+                        <h5 class="card-title mb-3">Payment Status</h5>
+                        <div class="chart-container"><canvas id="statusChart"></canvas></div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 grid-margin stretch-card">
-                <div class="card">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h4 class="card-title">Payment Methods</h4>
-                        <div class="chart-container">
-                            <canvas id="methodChart"></canvas>
-                        </div>
+                        <h5 class="card-title mb-3">Payment Methods</h5>
+                        <div class="chart-container"><canvas id="methodChart"></canvas></div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 grid-margin stretch-card">
-                <div class="card">
+            <div class="col-md-4">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h4 class="card-title">Monthly Trend</h4>
-                        <div class="chart-container">
-                            <canvas id="monthlyChart"></canvas>
-                        </div>
+                        <h5 class="card-title mb-3">Monthly Trend</h5>
+                        <div class="chart-container"><canvas id="monthlyChart"></canvas></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Payments Table -->
-        <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">All Payments</h4>
-
-                        <!-- Search and Filters -->
-                        <div class="search-filter-bar">
-                            <input type="text" class="search-input" id="payment-search"
-                                placeholder="Search by invoice, renter, or reference...">
-                            <select class="filter-select" id="status-filter">
+                    <div class="card-body py-3">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="text" class="form-control" id="payment-search"
+                                placeholder="Search invoice, renter, owner..." style="width: 250px;">
+                            <select class="form-select" id="status-filter" style="width: 140px;">
                                 <option value="">All Status</option>
                                 <option value="PENDING">Pending</option>
                                 <option value="VERIFIED">Verified</option>
                                 <option value="FAILED">Failed</option>
                             </select>
-                            <select class="filter-select" id="method-filter">
+                            <select class="form-select" id="method-filter" style="width: 150px;">
                                 <option value="">All Methods</option>
                                 <option value="CREDIT_CARD">Credit Card</option>
                                 <option value="BANK_TRANSFER">Bank Transfer</option>
                                 <option value="QR_PAYMENT">QR Payment</option>
                                 <option value="CASH">Cash</option>
                             </select>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="payments-table">
-                                <thead>
-                                    <tr>
-                                        <th>Payment ID</th>
-                                        <th>Invoice No.</th>
-                                        <th>Renter</th>
-                                        <th>Owner</th>
-                                        <th>Amount (RM)</th>
-                                        <th>Method</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="payment : ${payments}" th:data-status="${payment.paymentStatus}"
-                                        th:data-method="${payment.paymentMethod}"
-                                        th:data-payment-id="${payment.paymentId}" class="payment-row">
-                                        <td th:text="${payment.paymentId}">1</td>
-                                        <td th:text="${payment.invoiceNumber}" class="searchable">INV-001</td>
-                                        <td th:text="${payment.renterName}" class="searchable">Herman Beck</td>
-                                        <td th:text="${payment.ownerBusinessName}">MetroCity Car Rental</td>
-                                        <td
-                                            th:text="${#numbers.formatDecimal(payment.amount ?: 0, 1, 'COMMA', 2, 'POINT')}">
-                                            450.00</td>
-                                        <td th:text="${payment.paymentMethod}">BANK_TRANSFER</td>
-                                        <td
-                                            th:text="${payment.paymentDate != null ? #temporals.format(payment.paymentDate, 'yyyy-MM-dd HH:mm') : 'N/A'}">
-                                            2024-05-15 10:00</td>
-                                        <td>
-                                            <span th:if="${payment.paymentStatus == 'PENDING'}"
-                                                class="badge badge-warning">Pending</span>
-                                            <span
-                                                th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'COMPLETED' or payment.paymentStatus == 'PAID'}"
-                                                class="badge badge-success">Verified</span>
-                                            <span
-                                                th:if="${payment.paymentStatus == 'FAILED' or payment.paymentStatus == 'REJECTED'}"
-                                                class="badge badge-danger">Failed</span>
-                                        </td>
-                                        <td>
-                                            <a th:href="@{/admin/payment/view/{id}(id=${payment.paymentId})}"
-                                                class="btn btn-sm btn-outline-info"
-                                                onclick="event.stopPropagation()">View</a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div th:if="${#lists.isEmpty(payments)}" class="no-data">
-                                <i class="mdi mdi-cash-multiple mdi-48px"></i>
-                                <p>No payments found</p>
+                            <div class="ms-auto view-toggle btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active" id="btn-grid-view"
+                                    onclick="setView('grid')"><i class="mdi mdi-view-grid"></i></button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-table-view"
+                                    onclick="setView('table')"><i class="mdi mdi-table"></i></button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div th:if="${#lists.isEmpty(payments)}" class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle"
+                                style="width: 100px; height: 100px;"><i
+                                    class="mdi mdi-cash-multiple mdi-48px text-muted"></i></div>
+                        </div>
+                        <h4 class="text-dark font-weight-bold">No Payments Yet</h4>
+                        <p class="text-muted mb-0">Payment records will appear here.</p>
+                    </div>
+                </div>
+
+                <div id="grid-view-container" class="grid-view" th:unless="${#lists.isEmpty(payments)}">
+                    <div th:each="payment : ${payments}" class="payment-card card payment-item"
+                        th:data-status="${payment.paymentStatus}" th:data-method="${payment.paymentMethod}"
+                        th:data-payment-id="${payment.paymentId}"
+                        th:data-search="${payment.invoiceNumber + ' ' + payment.renterName + ' ' + payment.ownerBusinessName}"
+                        onclick="navigateToPayment(this)">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold text-muted" th:text="${payment.invoiceNumber}">INV-001</span>
+                            <span th:if="${payment.paymentStatus == 'PENDING'}"
+                                class="badge bg-warning text-dark">Pending</span>
+                            <span
+                                th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'COMPLETED' or payment.paymentStatus == 'PAID'}"
+                                class="badge bg-success">Verified</span>
+                            <span th:if="${payment.paymentStatus == 'FAILED' or payment.paymentStatus == 'REJECTED'}"
+                                class="badge bg-danger">Failed</span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-1" th:text="${payment.renterName}">John Doe</h6>
+                            <p class="text-muted small mb-2" th:text="${payment.ownerBusinessName}">Owner Business</p>
+                            <p class="text-muted small mb-3"><i class="mdi mdi-credit-card me-1"></i><span
+                                    th:text="${payment.paymentMethod}">Bank Transfer</span></p>
+                            <div class="row mb-3">
+                                <div class="col-6"><small class="text-muted d-block">Date</small><span
+                                        th:text="${payment.paymentDate != null ? #temporals.format(payment.paymentDate, 'MMM dd, yyyy') : 'N/A'}">Nov
+                                        20</span></div>
+                                <div class="col-6 text-end"><small class="text-muted d-block">Amount</small><span
+                                        class="payment-amount"
+                                        th:text="'RM ' + ${#numbers.formatDecimal(payment.amount ?: 0, 1, 'COMMA', 0, 'POINT')}">RM
+                                        450</span></div>
+                            </div>
+                            <a th:href="@{/admin/payment/view/{id}(id=${payment.paymentId})}"
+                                class="btn btn-primary btn-sm w-100" onclick="event.stopPropagation();"><i
+                                    class="mdi mdi-eye me-1"></i> View Details</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="table-view-container" class="table-view" style="display: none;"
+                    th:unless="${#lists.isEmpty(payments)}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Invoice</th>
+                                            <th>Renter</th>
+                                            <th>Owner</th>
+                                            <th>Amount</th>
+                                            <th>Method</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="payment : ${payments}" class="payment-item"
+                                            th:data-status="${payment.paymentStatus}"
+                                            th:data-method="${payment.paymentMethod}"
+                                            th:data-search="${payment.invoiceNumber + ' ' + payment.renterName + ' ' + payment.ownerBusinessName}">
+                                            <td class="fw-bold">#<span th:text="${payment.paymentId}">1</span></td>
+                                            <td th:text="${payment.invoiceNumber}">INV-001</td>
+                                            <td th:text="${payment.renterName}">John Doe</td>
+                                            <td th:text="${payment.ownerBusinessName}">Owner</td>
+                                            <td class="fw-bold text-success">RM <span
+                                                    th:text="${#numbers.formatDecimal(payment.amount ?: 0, 1, 'COMMA', 2, 'POINT')}">450.00</span>
+                                            </td>
+                                            <td th:text="${payment.paymentMethod}">Bank Transfer</td>
+                                            <td
+                                                th:text="${payment.paymentDate != null ? #temporals.format(payment.paymentDate, 'yyyy-MM-dd') : 'N/A'}">
+                                                2024-05-15</td>
+                                            <td>
+                                                <span th:if="${payment.paymentStatus == 'PENDING'}"
+                                                    class="badge bg-warning text-dark">Pending</span>
+                                                <span
+                                                    th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'COMPLETED' or payment.paymentStatus == 'PAID'}"
+                                                    class="badge bg-success">Verified</span>
+                                                <span
+                                                    th:if="${payment.paymentStatus == 'FAILED' or payment.paymentStatus == 'REJECTED'}"
+                                                    class="badge bg-danger">Failed</span>
+                                            </td>
+                                            <td class="text-end"><a
+                                                    th:href="@{/admin/payment/view/{id}(id=${payment.paymentId})}"
+                                                    class="btn btn-sm btn-outline-primary"><i
+                                                        class="mdi mdi-eye"></i></a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="no-results" class="card" style="display: none;">
+                    <div class="card-body text-center py-5"><i
+                            class="mdi mdi-magnify-close mdi-48px text-muted mb-3"></i>
+                        <h5 class="text-muted">No payments match your filters</h5><button
+                            class="btn btn-outline-primary mt-3" onclick="clearFilters()"><i
+                                class="mdi mdi-filter-remove me-1"></i> Clear Filters</button>
                     </div>
                 </div>
             </div>
@@ -272,7 +345,9 @@
 
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
-            // Chart data from server
+            let currentView = 'grid';
+            let currentStatusFilter = 'all';
+
             const paymentStats = {
                 pending: /*[[${pendingCount} ?: 0]]*/ 0,
                 verified: /*[[${verifiedCount} ?: 0]]*/ 0,
@@ -282,109 +357,52 @@
                 qrPayment: /*[[${qrPaymentCount} ?: 0]]*/ 0,
                 cash: /*[[${cashCount} ?: 0]]*/ 0,
                 monthlyLabels: /*[[${monthlyLabels}]]*/[],
-                monthlyPaymentCounts: /*[[${monthlyPaymentCounts}]]*/[],
                 monthlyPaymentAmounts: /*[[${monthlyPaymentAmounts}]]*/[]
             };
 
-            // Status Distribution Doughnut Chart
-            const statusCtx = document.getElementById('statusChart').getContext('2d');
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Pending', 'Verified', 'Failed'],
-                    datasets: [{
-                        data: [paymentStats.pending, paymentStats.verified, paymentStats.failed],
-                        backgroundColor: ['#f5576c', '#43e97b', '#adb5bd'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) new Chart(statusCtx.getContext('2d'), { type: 'doughnut', data: { labels: ['Pending', 'Verified', 'Failed'], datasets: [{ data: [paymentStats.pending, paymentStats.verified, paymentStats.failed], backgroundColor: ['#f5576c', '#38ef7d', '#adb5bd'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
 
-            // Payment Methods Pie Chart
-            const methodCtx = document.getElementById('methodChart').getContext('2d');
-            new Chart(methodCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Credit Card', 'Bank Transfer', 'QR Payment', 'Cash'],
-                    datasets: [{
-                        data: [paymentStats.creditCard, paymentStats.bankTransfer, paymentStats.qrPayment, paymentStats.cash],
-                        backgroundColor: ['#4facfe', '#667eea', '#fa709a', '#fee140'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
+            const methodCtx = document.getElementById('methodChart');
+            if (methodCtx) new Chart(methodCtx.getContext('2d'), { type: 'pie', data: { labels: ['Credit Card', 'Bank Transfer', 'QR Payment', 'Cash'], datasets: [{ data: [paymentStats.creditCard, paymentStats.bankTransfer, paymentStats.qrPayment, paymentStats.cash], backgroundColor: ['#4facfe', '#667eea', '#fa709a', '#fee140'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
 
-            // Monthly Trend Chart
-            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-            new Chart(monthlyCtx, {
-                type: 'line',
-                data: {
-                    labels: paymentStats.monthlyLabels,
-                    datasets: [{
-                        label: 'Amount (RM)',
-                        data: paymentStats.monthlyPaymentAmounts,
-                        borderColor: '#4B49AC',
-                        backgroundColor: 'rgba(75, 73, 172, 0.2)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
+            const monthlyCtx = document.getElementById('monthlyChart');
+            if (monthlyCtx) new Chart(monthlyCtx.getContext('2d'), { type: 'line', data: { labels: paymentStats.monthlyLabels, datasets: [{ label: 'Amount (RM)', data: paymentStats.monthlyPaymentAmounts, borderColor: '#4B49AC', backgroundColor: 'rgba(75, 73, 172, 0.2)', borderWidth: 2, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
 
-            // Filter functionality
-            function applyFilters() {
-                const status = document.getElementById('status-filter').value;
-                const method = document.getElementById('method-filter').value;
-                const search = document.getElementById('payment-search').value.toLowerCase();
+            const searchInput = document.getElementById('payment-search');
+            const statusFilter = document.getElementById('status-filter');
+            const methodFilter = document.getElementById('method-filter');
+            const gridContainer = document.getElementById('grid-view-container');
+            const tableContainer = document.getElementById('table-view-container');
+            const noResults = document.getElementById('no-results');
+            const kpiCards = document.querySelectorAll('.kpi-card');
 
-                document.querySelectorAll('#payments-table tbody tr').forEach(row => {
-                    const matchStatus = !status || row.dataset.status === status ||
-                        (status === 'VERIFIED' && ['VERIFIED', 'COMPLETED', 'PAID'].includes(row.dataset.status)) ||
-                        (status === 'FAILED' && ['FAILED', 'REJECTED'].includes(row.dataset.status));
-                    const matchMethod = !method || row.dataset.method === method;
-                    const matchSearch = row.textContent.toLowerCase().includes(search);
-                    row.style.display = matchStatus && matchMethod && matchSearch ? '' : 'none';
+            function setView(view) { currentView = view; document.getElementById('btn-grid-view').classList.toggle('active', view === 'grid'); document.getElementById('btn-table-view').classList.toggle('active', view === 'table'); if (gridContainer) gridContainer.style.display = view === 'grid' ? 'grid' : 'none'; if (tableContainer) tableContainer.style.display = view === 'table' ? 'block' : 'none'; localStorage.setItem('adminPaymentViewPreference', view); }
+            function filterByStatus(status, element) { currentStatusFilter = status; kpiCards.forEach(card => card.classList.remove('active')); if (element) element.classList.add('active'); statusFilter.value = status === 'all' ? '' : status; filterPayments(); }
+            function navigateToPayment(element) { const paymentId = element.dataset.paymentId; if (paymentId) window.location.href = '/admin/payment/view/' + paymentId; }
+            function filterPayments() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusValue = statusFilter.value || (currentStatusFilter !== 'all' ? currentStatusFilter : '');
+                const methodValue = methodFilter.value;
+                let visibleCount = 0;
+                document.querySelectorAll('.payment-item').forEach(item => {
+                    const searchText = (item.dataset.search || '').toLowerCase();
+                    const itemStatus = item.dataset.status || '';
+                    const itemMethod = item.dataset.method || '';
+                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+                    const matchesStatus = !statusValue || itemStatus === statusValue || (statusValue === 'VERIFIED' && ['VERIFIED', 'COMPLETED', 'PAID'].includes(itemStatus)) || (statusValue === 'FAILED' && ['FAILED', 'REJECTED'].includes(itemStatus));
+                    const matchesMethod = !methodValue || itemMethod === methodValue;
+                    const isVisible = matchesSearch && matchesStatus && matchesMethod;
+                    item.style.display = isVisible ? '' : 'none';
+                    if (isVisible) visibleCount++;
                 });
+                if (noResults) noResults.style.display = (document.querySelectorAll('.payment-item').length > 0 && visibleCount === 0) ? 'block' : 'none';
             }
-
-            document.getElementById('status-filter').addEventListener('change', applyFilters);
-            document.getElementById('method-filter').addEventListener('change', applyFilters);
-            document.getElementById('payment-search').addEventListener('input', applyFilters);
-
-            // Row click handler to navigate to payment details
-            document.querySelectorAll('.payment-row').forEach(row => {
-                row.addEventListener('click', function () {
-                    const paymentId = this.getAttribute('data-payment-id');
-                    if (paymentId) {
-                        window.location.href = '/admin/payment/view/' + paymentId;
-                    }
-                });
-            });
+            function clearFilters() { searchInput.value = ''; statusFilter.value = ''; methodFilter.value = ''; currentStatusFilter = 'all'; kpiCards.forEach(card => card.classList.remove('active')); filterPayments(); }
+            if (searchInput) searchInput.addEventListener('input', filterPayments);
+            if (methodFilter) methodFilter.addEventListener('change', filterPayments);
+            if (statusFilter) statusFilter.addEventListener('change', () => { currentStatusFilter = statusFilter.value || 'all'; kpiCards.forEach(card => { card.classList.toggle('active', card.dataset.filter === currentStatusFilter); }); filterPayments(); });
+            document.addEventListener('DOMContentLoaded', () => { const savedView = localStorage.getItem('adminPaymentViewPreference') || 'grid'; setView(savedView); });
         </script>
     </th:block>
 </body>
