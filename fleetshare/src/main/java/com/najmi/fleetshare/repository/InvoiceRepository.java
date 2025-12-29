@@ -13,4 +13,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByFleetOwnerId(Long fleetOwnerId);
 
     List<Invoice> findByBookingId(Long bookingId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT i FROM Invoice i WHERE i.bookingId IN :bookingIds")
+    List<Invoice> findByBookingIdIn(java.util.Collection<Long> bookingIds);
 }
