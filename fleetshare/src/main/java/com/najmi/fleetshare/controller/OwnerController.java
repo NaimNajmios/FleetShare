@@ -225,6 +225,20 @@ public class OwnerController {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
             List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
             model.addAttribute("vehicles", vehicles);
+
+            // Add counts for KPI cards
+            if (vehicles != null) {
+                long availableCount = vehicles.stream().filter(v -> "AVAILABLE".equals(v.getStatus())).count();
+                long rentedCount = vehicles.stream().filter(v -> "RENTED".equals(v.getStatus())).count();
+                long maintenanceCount = vehicles.stream().filter(v -> "MAINTENANCE".equals(v.getStatus())).count();
+                model.addAttribute("availableCount", availableCount);
+                model.addAttribute("rentedCount", rentedCount);
+                model.addAttribute("maintenanceCount", maintenanceCount);
+            } else {
+                model.addAttribute("availableCount", 0);
+                model.addAttribute("rentedCount", 0);
+                model.addAttribute("maintenanceCount", 0);
+            }
         }
         return "owner/vehicles";
     }
