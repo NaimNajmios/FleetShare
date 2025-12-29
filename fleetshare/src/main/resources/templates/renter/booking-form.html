@@ -160,6 +160,14 @@
                 margin-top: 0.5rem;
                 display: none;
             }
+
+            .total-cost-display {
+                transition: background-color 0.3s ease;
+            }
+
+            #totalCostDisplay {
+                transition: opacity 0.2s ease;
+            }
         </style>
     </th:block>
 </head>
@@ -216,13 +224,21 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Total Cost</label>
-                        <input type="text" id="totalCost" class="form-control" value="RM 0.00" readonly
-                            style="font-weight: 700; color: #0d6efd; font-size: 1.25rem;">
+                        <label class="form-label" id="totalCostLabel">Total Cost</label>
+                        <div class="total-cost-display p-3 bg-light rounded border d-flex align-items-center justify-content-between"
+                             aria-labelledby="totalCostLabel"
+                             aria-live="polite">
+                            <span class="text-muted">Estimated total</span>
+                            <span id="totalCostDisplay" class="h3 mb-0 text-primary fw-bold">RM 0.00</span>
+                        </div>
+                        <input type="hidden" id="totalCost" name="totalCost" value="0.00">
                     </div>
 
-                    <button type="submit" id="btnProceed" class="btn-proceed" disabled>
-                        PROCEED TO CONFIRMATION
+                    <button type="submit" id="btnProceed" class="btn-proceed d-flex align-items-center justify-content-center gap-2" disabled>
+                        <span>PROCEED TO CONFIRMATION</span>
+                        <div class="spinner-border spinner-border-sm d-none" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
                     </button>
                 </form>
             </div>
@@ -245,7 +261,7 @@
 
                 // Get rate per day from data attribute
                 const ratePerDay = parseFloat(document.getElementById('bookingForm').dataset.rate);
-                const totalCostInput = document.getElementById('totalCost');
+                // Total cost input reference removed as we use helper function
 
                 function updateDuration() {
                     const pickup = new Date(pickupInput.value);
@@ -266,31 +282,66 @@
 
                             // Calculate total cost
                             const totalCost = diffDays * ratePerDay;
-                            totalCostInput.value = 'RM ' + totalCost.toFixed(2);
+                            updatePriceDisplay(totalCost);
 
                             proceedBtn.disabled = false;
                             dateError.style.display = 'none';
+                            returnInput.classList.remove('is-invalid');
                         } else {
-                            durationInput.value = '0';
-                            totalCostInput.value = 'RM 0.00';
+                            resetFormState();
                             proceedBtn.disabled = true;
                             dateError.style.display = 'block';
+                            returnInput.classList.add('is-invalid');
                         }
                     } else {
-                        durationInput.value = '0';
-                        totalCostInput.value = 'RM 0.00';
+                        resetFormState();
                         proceedBtn.disabled = true;
                         dateError.style.display = 'none';
+                        returnInput.classList.remove('is-invalid');
                     }
+                }
+
+                function updatePriceDisplay(amount) {
+                    const displayEl = document.getElementById('totalCostDisplay');
+                    const hiddenInput = document.getElementById('totalCost');
+
+                    // Simple animation effect
+                    displayEl.style.opacity = '0.5';
+                    setTimeout(() => {
+                        displayEl.textContent = 'RM ' + amount.toFixed(2);
+                        hiddenInput.value = amount.toFixed(2);
+                        displayEl.style.opacity = '1';
+                    }, 150);
+                }
+
+                function resetFormState() {
+                    durationInput.value = '0';
+                    updatePriceDisplay(0);
                 }
 
                 pickupInput.addEventListener('change', function () {
                     // Update return date min value when pickup changes
                     returnInput.min = this.value;
+                    if (returnInput.value && returnInput.value < this.value) {
+                        returnInput.value = this.value;
+                    }
                     updateDuration();
                 });
 
                 returnInput.addEventListener('change', updateDuration);
+
+                // Handle Form Submission
+                const form = document.getElementById('bookingForm');
+                form.addEventListener('submit', function(e) {
+                    if (form.checkValidity()) {
+                        const btnText = proceedBtn.querySelector('span');
+                        const spinner = proceedBtn.querySelector('.spinner-border');
+
+                        proceedBtn.disabled = true;
+                        btnText.textContent = 'Processing...';
+                        spinner.classList.remove('d-none');
+                    }
+                });
             });
         </script>
     </th:block>
