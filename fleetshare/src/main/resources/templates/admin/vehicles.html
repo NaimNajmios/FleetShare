@@ -4,13 +4,131 @@
 
 <head>
     <th:block layout:fragment="extra-css">
-        <!-- Custom CSS removed in favor of Bootstrap 5 utilities -->
         <style>
-            .vehicle-image {
-                width: 50px;
-                height: 50px;
+            /* KPI Cards */
+            .kpi-card {
+                border-radius: 12px;
+                padding: 1.25rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+                position: relative;
+            }
+
+            .kpi-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .kpi-card.active {
+                border-color: white;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .kpi-card .kpi-value {
+                font-size: 2rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
+            .kpi-card .kpi-label {
+                font-size: 0.875rem;
+                font-weight: 500;
+                opacity: 0.9;
+                margin-top: 0.25rem;
+            }
+
+            .kpi-card .kpi-icon {
+                font-size: 2.5rem;
+                opacity: 0.3;
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .kpi-total {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .kpi-available {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .kpi-rented {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+            }
+
+            .kpi-maintenance {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+            }
+
+            /* View Toggle */
+            .view-toggle .btn.active {
+                background-color: var(--bs-primary);
+                color: white;
+            }
+
+            /* Vehicle Cards */
+            .vehicle-card {
+                border-radius: 12px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                border: 1px solid #e0e0e0;
+            }
+
+            .vehicle-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            }
+
+            .vehicle-card .vehicle-image {
+                height: 160px;
                 object-fit: cover;
+                width: 100%;
+            }
+
+            .vehicle-card .img-placeholder {
+                height: 160px;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .vehicle-card .img-placeholder i {
+                font-size: 3rem;
+                color: #aaa;
+            }
+
+            .vehicle-card .card-body {
+                padding: 1rem;
+            }
+
+            .vehicle-card .plate-badge {
+                position: absolute;
+                top: 0.75rem;
+                left: 0.75rem;
+                background: rgba(0, 0, 0, 0.75);
+                color: white;
+                padding: 0.25rem 0.75rem;
                 border-radius: 4px;
+                font-weight: 700;
+                font-size: 0.85rem;
+            }
+
+            .grid-view {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .table-view {
+                display: block;
             }
         </style>
     </th:block>
@@ -18,29 +136,63 @@
 
 <body>
     <div layout:fragment="content">
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="d-flex justify-content-between align-items-center">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <h3 class="font-weight-bold">Vehicle Management</h3>
-                        <h6 class="font-weight-normal mb-0">Manage all vehicles in the fleet.</h6>
+                        <h3 class="font-weight-bold mb-1">Vehicle Management</h3>
+                        <p class="text-muted mb-0">Manage all vehicles in the fleet</p>
                     </div>
-                    <a th:href="@{/admin/vehicles/add}" class="btn btn-success">
-                        <i class="mdi mdi-plus"></i> Add New Vehicle
+                    <a th:href="@{/admin/vehicles/add}" class="btn btn-primary btn-lg">
+                        <i class="mdi mdi-plus me-1"></i> Add New Vehicle
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
+        <!-- KPI Cards Row -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-total" data-filter="all" onclick="filterByStatus('all', this)">
+                    <div class="kpi-value" th:text="${#lists.size(vehicles)}">0</div>
+                    <div class="kpi-label">Total Vehicles</div>
+                    <i class="mdi mdi-car-multiple kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-available" data-filter="AVAILABLE" onclick="filterByStatus('AVAILABLE', this)">
+                    <div class="kpi-value" th:text="${availableCount != null ? availableCount : 0}">0</div>
+                    <div class="kpi-label">Available</div>
+                    <i class="mdi mdi-check-circle kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-rented" data-filter="RENTED" onclick="filterByStatus('RENTED', this)">
+                    <div class="kpi-value" th:text="${rentedCount != null ? rentedCount : 0}">0</div>
+                    <div class="kpi-label">Rented</div>
+                    <i class="mdi mdi-account-check kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-maintenance" data-filter="MAINTENANCE"
+                    onclick="filterByStatus('MAINTENANCE', this)">
+                    <div class="kpi-value" th:text="${maintenanceCount != null ? maintenanceCount : 0}">0</div>
+                    <div class="kpi-label">Maintenance</div>
+                    <i class="mdi mdi-wrench kpi-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and View Toggle -->
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="card">
-                    <div class="card-body">
-                        <!-- Search and Filters -->
-                        <div class="d-flex gap-3 mb-4 flex-wrap align-items-center">
-                            <input type="text" class="form-control w-auto flex-grow-1" id="vehicle-search"
-                                placeholder="Search by plate number, model, or brand..." style="min-width: 250px;">
-                            <select class="form-select w-auto" id="year-filter">
+                    <div class="card-body py-3">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="text" class="form-control" id="vehicle-search"
+                                placeholder="Search plate, model, brand..." style="width: 250px;">
+                            <select class="form-select" id="year-filter" style="width: 130px;">
                                 <option value="">All Years</option>
                                 <option value="2024">2024</option>
                                 <option value="2023">2023</option>
@@ -48,7 +200,7 @@
                                 <option value="2021">2021</option>
                                 <option value="2020">2020</option>
                             </select>
-                            <select class="form-select w-auto" id="category-filter">
+                            <select class="form-select" id="category-filter" style="width: 160px;">
                                 <option value="">All Categories</option>
                                 <option value="Hatchback">Hatchback</option>
                                 <option value="Sedan">Sedan</option>
@@ -57,47 +209,166 @@
                                 <option value="Luxury MPV">Luxury MPV</option>
                                 <option value="Luxury Sedan">Luxury Sedan</option>
                             </select>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="vehicles-table">
-                                <thead>
-                                    <tr>
-                                        <th>Plate No.</th>
-                                        <th>Model</th>
-                                        <th>Brand</th>
-                                        <th>Year</th>
-                                        <th>Category</th>
-                                        <th>Rate/Day (RM)</th>
-                                        <th>Owner</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="vehicle : ${vehicles}"
-                                        th:attr="data-year=${vehicle.manufacturingYear}, data-category=${vehicle.category}"
-                                        class="vehicle-row align-middle">
-                                        <td th:text="${vehicle.registrationNo}" class="searchable font-weight-bold">VHJ
-                                            8821</td>
-                                        <td th:text="${vehicle.model}" class="searchable">Myvi 1.5 AV</td>
-                                        <td th:text="${vehicle.brand}" class="searchable">Perodua</td>
-                                        <td th:text="${vehicle.manufacturingYear}">2023</td>
-                                        <td th:text="${vehicle.category}">Hatchback</td>
-                                        <td th:text="${vehicle.ratePerDay}">120.00</td>
-                                        <td th:text="${vehicle.ownerBusinessName}">MetroCity Car Rental Sdn Bhd</td>
-                                        <td>
-                                            <a th:href="@{/admin/vehicles/view/{id}(id=${vehicle.vehicleId})}"
-                                                class="btn btn-sm btn-outline-primary">View</a>
-                                            <button class="btn btn-sm btn-outline-warning">Edit</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div th:if="${#lists.isEmpty(vehicles)}" class="text-center p-5 text-muted no-data">
-                                <i class="mdi mdi-car-off mdi-48px"></i>
-                                <p>No vehicles found</p>
+                            <select class="form-select" id="status-filter" style="width: 150px;">
+                                <option value="">All Status</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="RENTED">Rented</option>
+                                <option value="MAINTENANCE">Maintenance</option>
+                                <option value="UNAVAILABLE">Unavailable</option>
+                            </select>
+                            <div class="ms-auto view-toggle btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active" id="btn-grid-view"
+                                    onclick="setView('grid')" title="Grid View">
+                                    <i class="mdi mdi-view-grid"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-table-view"
+                                    onclick="setView('table')" title="Table View">
+                                    <i class="mdi mdi-table"></i>
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicle Content Area -->
+        <div class="row">
+            <div class="col-12">
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(vehicles)}" class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-3">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle"
+                                style="width: 100px; height: 100px;">
+                                <i class="mdi mdi-car-off mdi-48px text-muted"></i>
+                            </div>
+                        </div>
+                        <h4 class="text-dark font-weight-bold">No Vehicles Found</h4>
+                        <p class="text-muted mb-4">Add your first vehicle to get started.</p>
+                        <a th:href="@{/admin/vehicles/add}" class="btn btn-primary btn-lg">
+                            <i class="mdi mdi-plus me-1"></i> Add Vehicle
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Grid View -->
+                <div id="grid-view-container" class="grid-view" th:unless="${#lists.isEmpty(vehicles)}">
+                    <div th:each="vehicle : ${vehicles}" class="vehicle-card card vehicle-item position-relative"
+                        th:data-status="${vehicle.status}" th:data-year="${vehicle.manufacturingYear}"
+                        th:data-category="${vehicle.category}"
+                        th:data-search="${vehicle.registrationNo + ' ' + vehicle.brand + ' ' + vehicle.model}">
+                        <span class="plate-badge" th:text="${vehicle.registrationNo}">VHJ 8821</span>
+                        <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                            th:src="${vehicle.vehicleImageUrl}" class="vehicle-image"
+                            th:alt="${vehicle.brand + ' ' + vehicle.model}">
+                        <div th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                            class="img-placeholder">
+                            <i class="mdi mdi-car"></i>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="mb-1 fw-bold" th:text="${vehicle.brand + ' ' + vehicle.model}">Perodua Myvi</h6>
+                            <p class="text-muted small mb-2" th:text="${vehicle.ownerBusinessName}">Owner Name</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small"
+                                    th:text="${vehicle.manufacturingYear + ' • ' + vehicle.category}">2023 •
+                                    Hatchback</span>
+                                <span th:if="${vehicle.status == 'AVAILABLE'}" class="badge bg-success">Available</span>
+                                <span th:if="${vehicle.status == 'RENTED'}"
+                                    class="badge bg-warning text-dark">Rented</span>
+                                <span th:if="${vehicle.status == 'MAINTENANCE'}"
+                                    class="badge bg-info">Maintenance</span>
+                                <span th:if="${vehicle.status == 'UNAVAILABLE'}"
+                                    class="badge bg-secondary">Unavailable</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary">RM <span
+                                        th:text="${vehicle.ratePerDay}">120</span>/day</span>
+                                <a th:href="@{/admin/vehicles/view/{id}(id=${vehicle.vehicleId})}"
+                                    class="btn btn-sm btn-outline-primary">
+                                    <i class="mdi mdi-eye me-1"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table View -->
+                <div id="table-view-container" class="table-view" style="display: none;"
+                    th:unless="${#lists.isEmpty(vehicles)}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 20%;">Vehicle</th>
+                                            <th style="width: 10%;">Plate No.</th>
+                                            <th style="width: 8%;">Year</th>
+                                            <th style="width: 10%;">Category</th>
+                                            <th style="width: 10%;">Rate/Day</th>
+                                            <th style="width: 20%;">Owner</th>
+                                            <th style="width: 10%;">Status</th>
+                                            <th class="text-end" style="width: 12%;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="vehicle : ${vehicles}" class="vehicle-item"
+                                            th:data-status="${vehicle.status}"
+                                            th:data-year="${vehicle.manufacturingYear}"
+                                            th:data-category="${vehicle.category}"
+                                            th:data-search="${vehicle.registrationNo + ' ' + vehicle.brand + ' ' + vehicle.model}">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2"
+                                                        style="width: 50px; height: 40px; overflow: hidden; border-radius: 4px; background: #f5f5f5;">
+                                                        <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                                                            th:src="${vehicle.vehicleImageUrl}"
+                                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                                    </div>
+                                                    <span class="fw-bold"
+                                                        th:text="${vehicle.brand + ' ' + vehicle.model}">Perodua
+                                                        Myvi</span>
+                                                </div>
+                                            </td>
+                                            <td class="fw-bold" th:text="${vehicle.registrationNo}">VHJ 8821</td>
+                                            <td th:text="${vehicle.manufacturingYear}">2023</td>
+                                            <td th:text="${vehicle.category}">Hatchback</td>
+                                            <td class="fw-bold text-primary">RM <span
+                                                    th:text="${vehicle.ratePerDay}">120</span></td>
+                                            <td th:text="${vehicle.ownerBusinessName}">Owner</td>
+                                            <td>
+                                                <span th:if="${vehicle.status == 'AVAILABLE'}"
+                                                    class="badge bg-success">Available</span>
+                                                <span th:if="${vehicle.status == 'RENTED'}"
+                                                    class="badge bg-warning text-dark">Rented</span>
+                                                <span th:if="${vehicle.status == 'MAINTENANCE'}"
+                                                    class="badge bg-info">Maintenance</span>
+                                                <span th:if="${vehicle.status == 'UNAVAILABLE'}"
+                                                    class="badge bg-secondary">Unavailable</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a th:href="@{/admin/vehicles/view/{id}(id=${vehicle.vehicleId})}"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    <i class="mdi mdi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Results -->
+                <div id="no-results" class="card" style="display: none;">
+                    <div class="card-body text-center py-5">
+                        <i class="mdi mdi-magnify-close mdi-48px text-muted mb-3"></i>
+                        <h5 class="text-muted">No vehicles match your filters</h5>
+                        <button class="btn btn-outline-primary mt-3" onclick="clearFilters()">
+                            <i class="mdi mdi-filter-remove me-1"></i> Clear Filters
+                        </button>
                     </div>
                 </div>
             </div>
@@ -105,7 +376,95 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <script th:src="@{/assets/js/vehicle-management.js}"></script>
+        <script>
+            let currentView = 'grid';
+            let currentStatusFilter = 'all';
+
+            const searchInput = document.getElementById('vehicle-search');
+            const yearFilter = document.getElementById('year-filter');
+            const categoryFilter = document.getElementById('category-filter');
+            const statusFilter = document.getElementById('status-filter');
+            const gridContainer = document.getElementById('grid-view-container');
+            const tableContainer = document.getElementById('table-view-container');
+            const noResults = document.getElementById('no-results');
+            const kpiCards = document.querySelectorAll('.kpi-card');
+
+            function setView(view) {
+                currentView = view;
+                document.getElementById('btn-grid-view').classList.toggle('active', view === 'grid');
+                document.getElementById('btn-table-view').classList.toggle('active', view === 'table');
+                if (gridContainer) gridContainer.style.display = view === 'grid' ? 'grid' : 'none';
+                if (tableContainer) tableContainer.style.display = view === 'table' ? 'block' : 'none';
+                localStorage.setItem('adminVehicleViewPreference', view);
+            }
+
+            function filterByStatus(status, element) {
+                currentStatusFilter = status;
+                kpiCards.forEach(card => card.classList.remove('active'));
+                if (element) element.classList.add('active');
+                statusFilter.value = status === 'all' ? '' : status;
+                filterVehicles();
+            }
+
+            function filterVehicles() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const yearValue = yearFilter.value;
+                const categoryValue = categoryFilter.value;
+                const statusValue = statusFilter.value || (currentStatusFilter !== 'all' ? currentStatusFilter : '');
+
+                const allItems = document.querySelectorAll('.vehicle-item');
+                let visibleCount = 0;
+
+                allItems.forEach(item => {
+                    const searchText = (item.dataset.search || '').toLowerCase();
+                    const itemYear = item.dataset.year || '';
+                    const itemCategory = item.dataset.category || '';
+                    const itemStatus = item.dataset.status || '';
+
+                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+                    const matchesYear = !yearValue || itemYear === yearValue;
+                    const matchesCategory = !categoryValue || itemCategory === categoryValue;
+                    const matchesStatus = !statusValue || itemStatus === statusValue;
+
+                    const isVisible = matchesSearch && matchesYear && matchesCategory && matchesStatus;
+                    item.style.display = isVisible ? '' : 'none';
+                    if (isVisible) visibleCount++;
+                });
+
+                const hasVehicles = document.querySelectorAll('.vehicle-item').length > 0;
+                if (noResults) {
+                    noResults.style.display = (hasVehicles && visibleCount === 0) ? 'block' : 'none';
+                }
+            }
+
+            function clearFilters() {
+                searchInput.value = '';
+                yearFilter.value = '';
+                categoryFilter.value = '';
+                statusFilter.value = '';
+                currentStatusFilter = 'all';
+                kpiCards.forEach(card => card.classList.remove('active'));
+                document.querySelector('.kpi-card[data-filter="all"]')?.classList.add('active');
+                filterVehicles();
+            }
+
+            if (searchInput) searchInput.addEventListener('input', filterVehicles);
+            if (yearFilter) yearFilter.addEventListener('change', filterVehicles);
+            if (categoryFilter) categoryFilter.addEventListener('change', filterVehicles);
+            if (statusFilter) statusFilter.addEventListener('change', () => {
+                currentStatusFilter = statusFilter.value || 'all';
+                kpiCards.forEach(card => {
+                    card.classList.toggle('active', card.dataset.filter === currentStatusFilter);
+                });
+                filterVehicles();
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedView = localStorage.getItem('adminVehicleViewPreference') || 'grid';
+                setView(savedView);
+                document.querySelector('.kpi-card[data-filter="all"]')?.classList.add('active');
+            });
+        </script>
     </th:block>
 </body>
 
