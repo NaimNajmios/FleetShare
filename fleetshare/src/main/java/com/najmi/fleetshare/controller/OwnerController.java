@@ -197,7 +197,20 @@ public class OwnerController {
     }
 
     @GetMapping("/customers/view/{customerId}")
-    public String viewCustomer(@PathVariable Long customerId, Model model) {
+    public String viewCustomer(@PathVariable Long customerId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        // Validate that this customer has rented from the current owner
+        Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+        List<RenterDTO> customers = userManagementService.getCustomersByOwnerId(ownerId);
+        boolean isMyCustomer = customers.stream().anyMatch(c -> c.getRenterId().equals(customerId));
+        if (!isMyCustomer) {
+            return "redirect:/owner/customers";
+        }
+
         UserDetailDTO customerDetail = userManagementService.getUserDetails(customerId, "renter");
         model.addAttribute("customerDetail", customerDetail);
         return "owner/view-customer";
@@ -215,8 +228,19 @@ public class OwnerController {
     }
 
     @GetMapping("/vehicles/view/{vehicleId}")
-    public String viewVehicle(@PathVariable Long vehicleId, Model model) {
+    public String viewVehicle(@PathVariable Long vehicleId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+
+        // Validate ownership
+        if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+            return "redirect:/owner/vehicles";
+        }
+
         model.addAttribute("vehicle", vehicle);
 
         // Get rate history and filter for scheduled (future) rates
@@ -316,6 +340,12 @@ public class OwnerController {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        // Validate ownership before allowing image upload
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+        if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You do not own this vehicle"));
         }
 
         try {
@@ -451,16 +481,25 @@ public class OwnerController {
     }
 
     @GetMapping("/maintenance/view/{maintenanceId}")
-    public String viewMaintenance(@PathVariable Long maintenanceId, Model model) {
+    public String viewMaintenance(@PathVariable Long maintenanceId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
         // Get maintenance details
         MaintenanceDTO maintenance = maintenanceService.getMaintenanceById(maintenanceId);
         if (maintenance == null) {
             return "redirect:/owner/maintenance";
         }
-        model.addAttribute("maintenance", maintenance);
 
-        // Get vehicle details
+        // Get vehicle details and validate ownership
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(maintenance.getVehicleId());
+        if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+            return "redirect:/owner/maintenance";
+        }
+
+        model.addAttribute("maintenance", maintenance);
         model.addAttribute("vehicle", vehicle);
 
         // Get status logs
@@ -471,9 +510,17 @@ public class OwnerController {
     }
 
     @GetMapping("/maintenance/vehicle/{vehicleId}")
-    public String vehicleMaintenance(@PathVariable Long vehicleId, Model model) {
-        // Get vehicle details
+    public String vehicleMaintenance(@PathVariable Long vehicleId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        // Get vehicle details and validate ownership
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);
+        if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+            return "redirect:/owner/maintenance";
+        }
         model.addAttribute("vehicle", vehicle);
 
         // Get maintenance records
@@ -595,8 +642,23 @@ public class OwnerController {
     }
 
     @GetMapping("/bookings/view/{bookingId}")
-    public String viewBooking(@PathVariable Long bookingId, Model model) {
+    public String viewBooking(@PathVariable Long bookingId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
         BookingDTO booking = bookingService.getBookingDetails(bookingId);
+        if (booking == null) {
+            return "redirect:/owner/bookings";
+        }
+
+        // Validate ownership via vehicle
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(booking.getVehicleId());
+        if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+            return "redirect:/owner/bookings";
+        }
+
         model.addAttribute("booking", booking);
 
         // Get status logs for timeline
@@ -607,8 +669,23 @@ public class OwnerController {
     }
 
     @GetMapping("/bookings/edit/{bookingId}")
-    public String editBooking(@PathVariable Long bookingId, Model model) {
+    public String editBooking(@PathVariable Long bookingId, HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
         BookingDTO booking = bookingService.getBookingDetails(bookingId);
+        if (booking == null) {
+            return "redirect:/owner/bookings";
+        }
+
+        // Validate ownership via vehicle
+        VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(booking.getVehicleId());
+        if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+            return "redirect:/owner/bookings";
+        }
+
         model.addAttribute("booking", booking);
         return "owner/edit-booking";
     }
@@ -708,6 +785,17 @@ public class OwnerController {
         com.najmi.fleetshare.dto.PaymentDetailDTO payment = paymentService.getPaymentDetailById(paymentId);
         if (payment == null) {
             return "redirect:/owner/payments";
+        }
+
+        // Validate ownership via booking and vehicle
+        if (payment.getBookingId() != null) {
+            BookingDTO booking = bookingService.getBookingDetails(payment.getBookingId());
+            if (booking != null && booking.getVehicleId() != null) {
+                VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(booking.getVehicleId());
+                if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+                    return "redirect:/owner/payments";
+                }
+            }
         }
 
         model.addAttribute("payment", payment);
