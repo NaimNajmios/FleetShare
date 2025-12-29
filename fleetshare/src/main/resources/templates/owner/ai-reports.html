@@ -5,104 +5,127 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
-            /* Layout */
-            .ai-container {
-                display: grid;
-                grid-template-columns: 1fr 1.2fr;
-                gap: 1.5rem;
-                min-height: 70vh;
+            /* Feature Cards */
+            .feature-card {
+                border-radius: 12px;
+                padding: 1rem;
+                text-align: center;
+                transition: all 0.3s ease;
             }
 
-            @media (max-width: 992px) {
-                .ai-container {
-                    grid-template-columns: 1fr;
-                }
+            .feature-card:hover {
+                transform: translateY(-3px);
             }
 
-            /* Left Panel - Query Input */
-            .query-panel {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .query-header {
-                margin-bottom: 1rem;
-            }
-
-            .query-header h5 {
-                font-weight: 600;
-                color: #495057;
+            .feature-card .feature-icon {
+                font-size: 2rem;
                 margin-bottom: 0.5rem;
+                display: block;
             }
 
-            .query-header p {
-                color: #6c757d;
-                font-size: 0.875rem;
-                margin: 0;
+            .feature-card .feature-label {
+                font-size: 0.8rem;
+                font-weight: 600;
             }
 
-            .query-input-area {
-                flex: 1;
+            .feat-revenue {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .feat-overdue {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+            }
+
+            .feat-customers {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .feat-vehicles {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+            }
+
+            .feat-maintenance {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: white;
+            }
+
+            /* AI Chat Container */
+            .ai-chat-container {
                 display: flex;
                 flex-direction: column;
-                gap: 1rem;
+                min-height: 500px;
+            }
+
+            /* Query Input Area */
+            .query-input-wrapper {
+                background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+                border: 2px solid #667eea30;
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
             }
 
             .query-textarea {
-                flex: 1;
-                min-height: 200px;
+                width: 100%;
+                min-height: 120px;
                 padding: 1rem;
-                border: 2px solid #ced4da;
-                border-radius: 0.5rem;
-                font-size: 0.875rem;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                font-size: 1rem;
                 resize: vertical;
                 font-family: inherit;
+                margin-bottom: 1rem;
             }
 
             .query-textarea:focus {
                 outline: none;
-                border-color: #007bff;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .query-textarea::placeholder {
+                color: #adb5bd;
             }
 
             /* Suggestion Chips */
-            .suggestions {
+            .suggestions-row {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 0.5rem;
                 margin-bottom: 1rem;
             }
 
-            .suggestion-label {
-                font-size: 0.75rem;
-                color: #6c757d;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-                display: block;
-            }
-
             .suggestion-chip {
                 padding: 0.5rem 1rem;
-                background: #e7f3ff;
-                border: 1px solid #b3d9ff;
-                border-radius: 1.5rem;
-                color: #004085;
-                font-size: 0.75rem;
+                background: white;
+                border: 1px solid #dee2e6;
+                border-radius: 2rem;
+                color: #495057;
+                font-size: 0.8rem;
                 cursor: pointer;
                 transition: all 0.2s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
             }
 
             .suggestion-chip:hover {
-                background: #cce5ff;
-                transform: translateY(-2px);
+                border-color: #667eea;
+                color: #667eea;
+                background: #f8f9ff;
             }
 
-            /* Generate Button with AI Sparkles */
+            /* Generate Button */
             .btn-ai-generate {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 padding: 0.875rem 2rem;
                 border: none;
-                border-radius: 0.5rem;
+                border-radius: 8px;
                 font-weight: 600;
                 cursor: pointer;
                 display: inline-flex;
@@ -110,22 +133,20 @@
                 justify-content: center;
                 gap: 0.5rem;
                 transition: all 0.3s ease;
-                box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             }
 
             .btn-ai-generate:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
             }
 
-            .btn-ai-generate i {
-                font-size: 1.25rem;
-            }
-
-            /* Right Panel - Results */
+            /* Results Panel */
             .results-panel {
-                display: flex;
-                flex-direction: column;
+                flex: 1;
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 1.5rem;
             }
 
             .results-header {
@@ -139,6 +160,9 @@
                 font-weight: 600;
                 color: #495057;
                 margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
             }
 
             .export-options {
@@ -149,10 +173,10 @@
             .export-btn {
                 padding: 0.375rem 0.75rem;
                 background: white;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
                 color: #495057;
-                font-size: 0.75rem;
+                font-size: 0.8rem;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
@@ -162,27 +186,20 @@
 
             .export-btn:hover {
                 background: #f8f9fa;
-                border-color: #6c757d;
-            }
-
-            .export-btn i {
-                font-size: 0.875rem;
+                border-color: #667eea;
+                color: #667eea;
             }
 
             /* Results Table */
-            .results-table-container {
-                flex: 1;
-                background: #f8f9fa;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                overflow: auto;
+            .results-table-wrapper {
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
             }
 
             .results-table {
                 width: 100%;
-                background: white;
-                border-radius: 0.25rem;
-                overflow: hidden;
+                margin: 0;
             }
 
             .results-table thead {
@@ -190,18 +207,16 @@
             }
 
             .results-table th {
-                padding: 0.75rem;
+                padding: 0.75rem 1rem;
                 font-weight: 600;
                 font-size: 0.875rem;
                 color: #495057;
                 text-align: left;
-                border-bottom: 2px solid #dee2e6;
             }
 
             .results-table td {
-                padding: 0.75rem;
+                padding: 0.75rem 1rem;
                 font-size: 0.875rem;
-                color: #212529;
                 border-bottom: 1px solid #dee2e6;
             }
 
@@ -211,54 +226,39 @@
 
             /* Empty State */
             .empty-state {
-                flex: 1;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                padding: 4rem 2rem;
                 color: #6c757d;
                 text-align: center;
-                padding: 3rem;
             }
 
-            .empty-state i {
-                font-size: 4rem;
-                margin-bottom: 1rem;
-                color: #ced4da;
-            }
-
-            .empty-state p {
-                margin: 0;
-                font-size: 0.875rem;
-            }
-
-            /* Switch Link */
-            .switch-mode {
-                text-align: right;
-                margin-bottom: 1rem;
-            }
-
-            .switch-mode a {
-                color: #007bff;
-                text-decoration: none;
-                font-size: 0.875rem;
-                display: inline-flex;
+            .empty-state-icon {
+                width: 80px;
+                height: 80px;
+                background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+                border-radius: 50%;
+                display: flex;
                 align-items: center;
-                gap: 0.5rem;
+                justify-content: center;
+                margin-bottom: 1rem;
             }
 
-            .switch-mode a:hover {
-                text-decoration: underline;
+            .empty-state-icon i {
+                font-size: 2.5rem;
+                color: #667eea;
             }
 
-            /* Badge for vehicle color */
+            /* Color Badge */
             .color-badge {
                 display: inline-block;
-                width: 20px;
-                height: 20px;
+                width: 16px;
+                height: 16px;
                 border-radius: 50%;
-                border: 2px solid #fff;
-                box-shadow: 0 0 0 1px #dee2e6;
+                margin-right: 0.5rem;
+                vertical-align: middle;
             }
 
             .color-red {
@@ -270,92 +270,117 @@
 
 <body>
     <div layout:fragment="content">
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">AI Data Assistant</h3>
-                        <h6 class="font-weight-normal mb-0">Ask questions in natural language to explore your data</h6>
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">
+                            <i class="mdi mdi-robot text-primary me-2"></i>AI Data Assistant
+                        </h3>
+                        <p class="text-muted mb-0">Ask questions in natural language to explore your fleet data</p>
                     </div>
-                    <div class="col-12 col-xl-4">
-                        <div class="switch-mode">
-                            <a th:href="@{/owner/reports}">
-                                <i class="mdi mdi-file-document"></i>
-                                Try Standard Report Builder
-                            </a>
-                        </div>
-                    </div>
+                    <a th:href="@{/owner/reports}" class="btn btn-outline-primary">
+                        <i class="mdi mdi-file-document me-1"></i> Standard Report Builder
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Quick Query Feature Cards -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="feature-card feat-revenue cursor-pointer" onclick="setQuery('Total revenue today')">
+                    <i class="mdi mdi-currency-usd feature-icon"></i>
+                    <span class="feature-label">Revenue Today</span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="feature-card feat-overdue cursor-pointer" onclick="setQuery('List overdue returns')">
+                    <i class="mdi mdi-alert feature-icon"></i>
+                    <span class="feature-label">Overdue Returns</span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="feature-card feat-customers cursor-pointer" onclick="setQuery('Top spending customers')">
+                    <i class="mdi mdi-account-star feature-icon"></i>
+                    <span class="feature-label">Top Customers</span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="feature-card feat-vehicles cursor-pointer"
+                    onclick="setQuery('Most rented vehicles this month')">
+                    <i class="mdi mdi-car feature-icon"></i>
+                    <span class="feature-label">Popular Vehicles</span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="feature-card feat-maintenance cursor-pointer"
+                    onclick="setQuery('Vehicles due for maintenance')">
+                    <i class="mdi mdi-wrench feature-icon"></i>
+                    <span class="feature-label">Maintenance Due</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat Interface -->
         <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="ai-container">
-                            <!-- Left Panel: Query Input -->
-                            <div class="query-panel">
-                                <div class="query-header">
-                                    <h5><i class="mdi mdi-message-question"></i> Ask a Question</h5>
-                                    <p>Type your question in plain English</p>
+                        <div class="ai-chat-container">
+                            <!-- Query Input -->
+                            <div class="query-input-wrapper">
+                                <textarea class="query-textarea" id="ai-query"
+                                    placeholder="Ask me anything about your fleet data...&#10;&#10;Examples:&#10;• How many bookings were cancelled this week?&#10;• Which vehicle generated the most revenue?&#10;• Show me all red cars rented last month"></textarea>
+
+                                <div class="suggestions-row">
+                                    <span class="text-muted small me-2">Try:</span>
+                                    <button class="suggestion-chip" onclick="setQuery('Bookings this week')">
+                                        📊 Bookings this week
+                                    </button>
+                                    <button class="suggestion-chip" onclick="setQuery('Pending payments')">
+                                        💳 Pending payments
+                                    </button>
+                                    <button class="suggestion-chip" onclick="setQuery('Available vehicles')">
+                                        🚗 Available vehicles
+                                    </button>
+                                    <button class="suggestion-chip" onclick="setQuery('Monthly revenue trend')">
+                                        📈 Monthly trend
+                                    </button>
                                 </div>
 
-                                <div class="query-input-area">
-                                    <textarea class="query-textarea" id="ai-query"
-                                        placeholder="Type your question here, e.g., 'Show me all red cars rented last month...'"></textarea>
-
-                                    <div>
-                                        <span class="suggestion-label">QUICK START SUGGESTIONS:</span>
-                                        <div class="suggestions">
-                                            <button class="suggestion-chip" data-query="Total revenue today">
-                                                💰 Total revenue today
-                                            </button>
-                                            <button class="suggestion-chip" data-query="List overdue returns">
-                                                ⚠️ List overdue returns
-                                            </button>
-                                            <button class="suggestion-chip" data-query="Top spending customers">
-                                                👥 Top spending customers
-                                            </button>
-                                            <button class="suggestion-chip"
-                                                data-query="Show me all red cars rented last month">
-                                                🚗 Red cars rented last month
-                                            </button>
-                                            <button class="suggestion-chip" data-query="Vehicles due for maintenance">
-                                                🔧 Vehicles due for maintenance
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <button class="btn-ai-generate" id="generate-ai-report">
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn-ai-generate" id="generate-ai-report"
+                                        onclick="generateAIReport()">
                                         <i class="mdi mdi-sparkles"></i>
-                                        Generate Report
+                                        Ask AI
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Right Panel: Results -->
+                            <!-- Results Panel -->
                             <div class="results-panel">
                                 <div class="results-header">
                                     <h5><i class="mdi mdi-table"></i> Results</h5>
                                     <div class="export-options" id="export-options" style="display: none;">
-                                        <button class="export-btn" title="Export to CSV">
-                                            <i class="mdi mdi-file-delimited"></i>
-                                            CSV
+                                        <button class="export-btn" onclick="exportCSV()">
+                                            <i class="mdi mdi-file-delimited"></i> CSV
                                         </button>
-                                        <button class="export-btn" title="Copy to Clipboard">
-                                            <i class="mdi mdi-content-copy"></i>
-                                            Copy
+                                        <button class="export-btn" onclick="copyResults()">
+                                            <i class="mdi mdi-content-copy"></i> Copy
                                         </button>
                                     </div>
                                 </div>
 
-                                <div class="results-table-container">
-                                    <!-- Empty State (shown initially) -->
+                                <div class="results-table-wrapper">
+                                    <!-- Empty State -->
                                     <div class="empty-state" id="empty-state">
-                                        <i class="mdi mdi-robot"></i>
-                                        <p><strong>No query yet</strong></p>
-                                        <p>Ask a question or select a suggestion to get started</p>
+                                        <div class="empty-state-icon">
+                                            <i class="mdi mdi-robot"></i>
+                                        </div>
+                                        <h5 class="mb-2">Ready to Assist</h5>
+                                        <p class="mb-0">Ask a question or click a quick query above to get started</p>
                                     </div>
 
                                     <!-- Results Table (hidden initially) -->
@@ -373,21 +398,21 @@
                                             <tr>
                                                 <td>Toyota Camry</td>
                                                 <td>2022</td>
-                                                <td><span class="color-badge color-red"></span> Red</td>
+                                                <td><span class="color-badge color-red"></span>Red</td>
                                                 <td>WXY 1234</td>
                                                 <td>2024-10-15</td>
                                             </tr>
                                             <tr>
                                                 <td>Ford Focus</td>
                                                 <td>2021</td>
-                                                <td><span class="color-badge color-red"></span> Red</td>
+                                                <td><span class="color-badge color-red"></span>Red</td>
                                                 <td>ABC 5678</td>
                                                 <td>2024-10-08</td>
                                             </tr>
                                             <tr>
                                                 <td>Honda Civic</td>
                                                 <td>2023</td>
-                                                <td><span class="color-badge color-red"></span> Red</td>
+                                                <td><span class="color-badge color-red"></span>Red</td>
                                                 <td>DEF 9012</td>
                                                 <td>2024-10-22</td>
                                             </tr>
@@ -401,16 +426,15 @@
             </div>
         </div>
 
-        <!-- Info Box -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div
-                    style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; border-radius: 0.25rem;">
-                    <p style="margin: 0; color: #856404; font-size: 0.875rem;">
-                        <i class="mdi mdi-lightbulb"></i>
-                        <strong>Pro Tip:</strong> The AI Assistant understands natural language. Try questions like "How
-                        many bookings were cancelled this week?" or "Which vehicle generated the most revenue?"
-                    </p>
+        <!-- Pro Tip -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-warning d-flex align-items-start gap-3 mb-0" role="alert">
+                    <i class="mdi mdi-lightbulb-on mdi-24px text-warning"></i>
+                    <div>
+                        <strong>Pro Tip:</strong> The AI Assistant understands natural language. Try questions like
+                        "How many bookings were cancelled this week?" or "Which vehicle generated the most revenue?"
+                    </div>
                 </div>
             </div>
         </div>
@@ -418,17 +442,14 @@
 
     <th:block layout:fragment="extra-js">
         <script>
-            // Suggestion chip click handler
-            document.querySelectorAll('.suggestion-chip').forEach(chip => {
-                chip.addEventListener('click', function () {
-                    const query = this.dataset.query;
-                    document.getElementById('ai-query').value = query;
-                });
-            });
+            function setQuery(query) {
+                document.getElementById('ai-query').value = query;
+                document.getElementById('ai-query').focus();
+            }
 
-            // Generate report button
-            document.getElementById('generate-ai-report').addEventListener('click', function () {
+            function generateAIReport() {
                 const query = document.getElementById('ai-query').value.trim();
+                const btn = document.getElementById('generate-ai-report');
 
                 if (!query) {
                     alert('Please enter a question or select a suggestion.');
@@ -436,38 +457,29 @@
                 }
 
                 // Show loading state
-                this.disabled = true;
-                this.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Generating...';
+                btn.disabled = true;
+                btn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Processing...';
 
-                // Simulate AI processing (in real implementation, this would call backend)
+                // Simulate AI processing
                 setTimeout(() => {
-                    // Hide empty state
                     document.getElementById('empty-state').style.display = 'none';
-
-                    // Show results table
                     document.getElementById('results-table').style.display = 'table';
-
-                    // Show export options
                     document.getElementById('export-options').style.display = 'flex';
 
-                    // Reset button
-                    this.disabled = false;
-                    this.innerHTML = '<i class="mdi mdi-sparkles"></i> Generate Report';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="mdi mdi-sparkles"></i> Ask AI';
 
-                    // Alert (for UI demo)
-                    alert('AI query processed! This is a UI demo. In production, this would fetch real data based on your query: "' + query + '"');
+                    alert('AI query processed!\n\nThis is a UI demo. In production, this would fetch real data based on your query:\n"' + query + '"');
                 }, 1500);
-            });
+            }
 
-            // Export to CSV
-            document.querySelector('.export-btn[title="Export to CSV"]').addEventListener('click', function () {
+            function exportCSV() {
                 alert('Export to CSV functionality will be implemented.');
-            });
+            }
 
-            // Copy to Clipboard
-            document.querySelector('.export-btn[title="Copy to Clipboard"]').addEventListener('click', function () {
+            function copyResults() {
                 alert('Copy to clipboard functionality will be implemented.');
-            });
+            }
         </script>
     </th:block>
 </body>
