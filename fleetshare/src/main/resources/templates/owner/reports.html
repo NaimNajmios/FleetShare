@@ -5,54 +5,68 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
-            /* Tab Navigation */
-            .report-tabs {
-                display: flex;
-                gap: 0.5rem;
-                margin-bottom: 2rem;
-                border-bottom: 2px solid #e9ecef;
-                flex-wrap: wrap;
-            }
-
-            .report-tab {
-                padding: 0.75rem 1.5rem;
-                background: transparent;
-                border: none;
-                border-bottom: 3px solid transparent;
-                color: #6c757d;
-                font-weight: 500;
+            /* Report Category Cards */
+            .report-category-card {
+                border-radius: 12px;
+                padding: 1.25rem;
                 cursor: pointer;
                 transition: all 0.3s ease;
+                border: 2px solid transparent;
+                position: relative;
+                text-align: center;
             }
 
-            .report-tab:hover {
-                color: #495057;
-                background: #f8f9fa;
+            .report-category-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             }
 
-            .report-tab.active {
-                color: #dc3545;
-                border-bottom-color: #dc3545;
+            .report-category-card.active {
+                border-color: white;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             }
 
-            /* Report Configuration */
+            .report-category-card .category-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+
+            .report-category-card .category-label {
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
+
+            .cat-booking {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .cat-vehicle {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .cat-payment {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: white;
+            }
+
+            .cat-maintenance {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+            }
+
+            .cat-user {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+            }
+
+            /* Config Section */
             .config-section {
                 background: #f8f9fa;
                 padding: 1.5rem;
-                border-radius: 0.5rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .config-row {
-                display: flex;
-                gap: 1.5rem;
-                margin-bottom: 1.5rem;
-                flex-wrap: wrap;
-            }
-
-            .config-group {
-                flex: 1;
-                min-width: 250px;
+                border-radius: 0.75rem;
             }
 
             .config-label {
@@ -63,89 +77,88 @@
                 font-size: 0.875rem;
             }
 
-            .config-select,
-            .config-input {
-                width: 100%;
-                padding: 0.5rem 1rem;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-                background: white;
-                font-size: 0.875rem;
-            }
-
-            /* Duration Radio Buttons */
-            .duration-options {
+            /* Duration Pills */
+            .duration-pills {
                 display: flex;
-                gap: 1rem;
+                gap: 0.5rem;
                 flex-wrap: wrap;
                 margin-bottom: 1rem;
             }
 
-            .duration-radio {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .duration-radio input[type="radio"] {
-                width: 18px;
-                height: 18px;
-                cursor: pointer;
-            }
-
-            .duration-radio label {
-                margin: 0;
+            .duration-pill {
+                padding: 0.5rem 1rem;
+                border: 1px solid #dee2e6;
+                border-radius: 2rem;
+                background: white;
                 cursor: pointer;
                 font-size: 0.875rem;
+                transition: all 0.2s ease;
             }
 
-            /* Date Range */
-            .date-range {
-                display: flex;
-                gap: 1rem;
-                flex-wrap: wrap;
+            .duration-pill:hover {
+                border-color: var(--bs-primary);
+                color: var(--bs-primary);
+            }
+
+            .duration-pill.active {
+                background: var(--bs-primary);
+                border-color: var(--bs-primary);
+                color: white;
+            }
+
+            .duration-pill input {
+                display: none;
             }
 
             /* Generate Button */
             .btn-generate {
-                background: #dc3545;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 padding: 0.75rem 2rem;
                 border: none;
-                border-radius: 0.25rem;
+                border-radius: 0.5rem;
                 font-weight: 600;
                 cursor: pointer;
                 display: inline-flex;
                 align-items: center;
                 gap: 0.5rem;
-                transition: background 0.3s ease;
+                transition: all 0.3s ease;
             }
 
             .btn-generate:hover {
-                background: #c82333;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
             }
 
-            .btn-generate i {
-                font-size: 1.25rem;
+            /* Report Types List */
+            .report-type-card {
+                padding: 1rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-bottom: 0.5rem;
             }
 
-            /* Switch to AI Assistant */
-            .switch-mode {
-                text-align: right;
-                margin-bottom: 1rem;
+            .report-type-card:hover {
+                border-color: var(--bs-primary);
+                background: #f8f9ff;
             }
 
-            .switch-mode a {
-                color: #007bff;
-                text-decoration: none;
-                font-size: 0.875rem;
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
+            .report-type-card.selected {
+                border-color: var(--bs-primary);
+                background: #f0f4ff;
             }
 
-            .switch-mode a:hover {
-                text-decoration: underline;
+            .report-type-card .report-name {
+                font-weight: 600;
+                color: #333;
+            }
+
+            .report-type-card .report-desc {
+                font-size: 0.8rem;
+                color: #6c757d;
+                margin: 0;
             }
         </style>
     </th:block>
@@ -153,139 +166,158 @@
 
 <body>
     <div layout:fragment="content">
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Standard Report Builder</h3>
-                        <h6 class="font-weight-normal mb-0">Generate structured, parameter-based reports</h6>
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Report Builder</h3>
+                        <p class="text-muted mb-0">Generate structured, parameter-based reports for your fleet</p>
                     </div>
-                    <div class="col-12 col-xl-4">
-                        <div class="switch-mode">
-                            <a th:href="@{/owner/ai-reports}">
-                                <i class="mdi mdi-sparkles"></i>
-                                Try AI Data Assistant
-                            </a>
-                        </div>
-                    </div>
+                    <a th:href="@{/owner/ai-reports}" class="btn btn-outline-primary">
+                        <i class="mdi mdi-robot me-1"></i> Try AI Data Assistant
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Report Category Cards -->
+        <div class="row mb-4">
+            <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="report-category-card cat-booking active" data-category="booking"
+                    onclick="selectCategory('booking', this)">
+                    <i class="mdi mdi-calendar-check category-icon"></i>
+                    <span class="category-label">Booking</span>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="report-category-card cat-vehicle" data-category="vehicle"
+                    onclick="selectCategory('vehicle', this)">
+                    <i class="mdi mdi-car category-icon"></i>
+                    <span class="category-label">Vehicle</span>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="report-category-card cat-payment" data-category="payment"
+                    onclick="selectCategory('payment', this)">
+                    <i class="mdi mdi-currency-usd category-icon"></i>
+                    <span class="category-label">Payment</span>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="report-category-card cat-maintenance" data-category="maintenance"
+                    onclick="selectCategory('maintenance', this)">
+                    <i class="mdi mdi-wrench category-icon"></i>
+                    <span class="category-label">Maintenance</span>
+                </div>
+            </div>
+            <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+                <div class="report-category-card cat-user" data-category="user" onclick="selectCategory('user', this)">
+                    <i class="mdi mdi-account-group category-icon"></i>
+                    <span class="category-label">User</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Builder -->
         <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
+            <!-- Report Types -->
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Report Templates</h5>
+                        <div id="report-types-container">
+                            <!-- Booking Reports (Default) -->
+                            <div class="report-type-card selected" data-report="monthly-revenue">
+                                <div class="report-name">Monthly Revenue</div>
+                                <p class="report-desc">Revenue breakdown by month</p>
+                            </div>
+                            <div class="report-type-card" data-report="utilization-rate">
+                                <div class="report-name">Utilization Rate</div>
+                                <p class="report-desc">Fleet utilization analysis</p>
+                            </div>
+                            <div class="report-type-card" data-report="booking-summary">
+                                <div class="report-name">Booking Summary</div>
+                                <p class="report-desc">All bookings overview</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration -->
+            <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
-                        <!-- Report Category Tabs -->
-                        <div class="report-tabs">
-                            <button class="report-tab active" data-tab="booking">
-                                <i class="mdi mdi-calendar-check"></i> Booking Reports
-                            </button>
-                            <button class="report-tab" data-tab="vehicle">
-                                <i class="mdi mdi-car"></i> Vehicle Reports
-                            </button>
-                            <button class="report-tab" data-tab="payment">
-                                <i class="mdi mdi-currency-usd"></i> Payment Reports
-                            </button>
-                            <button class="report-tab" data-tab="maintenance">
-                                <i class="mdi mdi-wrench"></i> Maintenance Reports
-                            </button>
-                            <button class="report-tab" data-tab="user">
-                                <i class="mdi mdi-account-group"></i> User Reports
-                            </button>
-                        </div>
+                        <h5 class="card-title mb-3">Report Configuration</h5>
 
-                        <!-- Report Configuration -->
-                        <div class="config-section">
-                            <div class="config-row">
-                                <div class="config-group">
-                                    <label class="config-label">Report Type</label>
-                                    <select class="config-select" id="report-type">
-                                        <option value="">Select Report Template</option>
-                                        <option value="monthly-revenue">Monthly Revenue</option>
-                                        <option value="utilization-rate">Utilization Rate</option>
-                                        <option value="booking-summary">Booking Summary</option>
-                                        <option value="vehicle-performance">Vehicle Performance</option>
-                                    </select>
-                                </div>
+                        <div class="config-section mb-4">
+                            <label class="config-label">Duration</label>
+                            <div class="duration-pills">
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="today">
+                                    Today
+                                </label>
+                                <label class="duration-pill active">
+                                    <input type="radio" name="duration" value="last7" checked>
+                                    Last 7 Days
+                                </label>
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="thisMonth">
+                                    This Month
+                                </label>
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="lastMonth">
+                                    Last Month
+                                </label>
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="custom">
+                                    Custom Range
+                                </label>
                             </div>
 
-                            <div class="config-row">
-                                <div class="config-group" style="flex: 2;">
-                                    <label class="config-label">Duration</label>
-                                    <div class="duration-options">
-                                        <div class="duration-radio">
-                                            <input type="radio" name="duration" id="today" value="today">
-                                            <label for="today">Today</label>
-                                        </div>
-                                        <div class="duration-radio">
-                                            <input type="radio" name="duration" id="last7" value="last7" checked>
-                                            <label for="last7">Last 7 Days</label>
-                                        </div>
-                                        <div class="duration-radio">
-                                            <input type="radio" name="duration" id="thisMonth" value="thisMonth">
-                                            <label for="thisMonth">This Month</label>
-                                        </div>
-                                        <div class="duration-radio">
-                                            <input type="radio" name="duration" id="lastMonth" value="lastMonth">
-                                            <label for="lastMonth">Last Month</label>
-                                        </div>
-                                        <div class="duration-radio">
-                                            <input type="radio" name="duration" id="custom" value="custom">
-                                            <label for="custom">Custom Range</label>
-                                        </div>
-                                    </div>
-                                    <div class="date-range">
-                                        <div style="flex: 1;">
-                                            <label class="config-label">Start Date</label>
-                                            <input type="date" class="config-input" id="start-date">
-                                        </div>
-                                        <div style="flex: 1;">
-                                            <label class="config-label">End Date</label>
-                                            <input type="date" class="config-input" id="end-date">
-                                        </div>
-                                    </div>
+                            <div class="row date-range" style="display: none;">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label class="config-label">Start Date</label>
+                                    <input type="date" class="form-control" id="start-date">
                                 </div>
-                            </div>
-
-                            <div class="config-row">
-                                <div class="config-group">
-                                    <label class="config-label">Booking Status</label>
-                                    <select class="config-select" id="booking-status">
-                                        <option value="">All Status</option>
-                                        <option value="confirmed">Confirmed</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="cancelled">Cancelled</option>
-                                    </select>
+                                <div class="col-md-6">
+                                    <label class="config-label">End Date</label>
+                                    <input type="date" class="form-control" id="end-date">
                                 </div>
-                                <div class="config-group">
-                                    <label class="config-label">Vehicle</label>
-                                    <select class="config-select" id="vehicle-filter">
-                                        <option value="">All Vehicles</option>
-                                        <option value="perodua-myvi">Perodua Myvi</option>
-                                        <option value="toyota-camry">Toyota Camry</option>
-                                        <option value="honda-civic">Honda Civic</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div style="text-align: right; margin-top: 1rem;">
-                                <button class="btn-generate">
-                                    <i class="mdi mdi-file-document"></i>
-                                    Generate Report
-                                </button>
                             </div>
                         </div>
 
-                        <!-- Info Box -->
-                        <div
-                            style="background: #e7f3ff; border-left: 4px solid #007bff; padding: 1rem; border-radius: 0.25rem;">
-                            <p style="margin: 0; color: #004085; font-size: 0.875rem;">
-                                <i class="mdi mdi-information"></i>
-                                <strong>Tip:</strong> Reports will be generated as PDF or Excel files. For quick data
-                                exploration without parameters, try our <a th:href="@{/owner/ai-reports}"
-                                    style="color: #007bff; text-decoration: underline;">AI Data Assistant</a>.
-                            </p>
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="config-label">Status Filter</label>
+                                <select class="form-select" id="status-filter">
+                                    <option value="">All Status</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="config-label">Vehicle</label>
+                                <select class="form-select" id="vehicle-filter">
+                                    <option value="">All Vehicles</option>
+                                    <option th:each="vehicle : ${vehicles}" th:value="${vehicle.vehicleId}"
+                                        th:text="${vehicle.brand + ' ' + vehicle.model + ' (' + vehicle.registrationNo + ')'}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                <i class="mdi mdi-information-outline me-1"></i>
+                                Reports will be generated as PDF or Excel files
+                            </div>
+                            <button class="btn-generate" onclick="generateReport()">
+                                <i class="mdi mdi-file-document"></i>
+                                Generate Report
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -295,73 +327,80 @@
 
     <th:block layout:fragment="extra-js">
         <script>
-            // Tab switching functionality
-            document.querySelectorAll('.report-tab').forEach(tab => {
-                tab.addEventListener('click', function () {
-                    document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+            let currentCategory = 'booking';
+            let currentReport = 'monthly-revenue';
+
+            const reportTemplates = {
+                booking: [
+                    { id: 'monthly-revenue', name: 'Monthly Revenue', desc: 'Revenue breakdown by month' },
+                    { id: 'utilization-rate', name: 'Utilization Rate', desc: 'Fleet utilization analysis' },
+                    { id: 'booking-summary', name: 'Booking Summary', desc: 'All bookings overview' }
+                ],
+                vehicle: [
+                    { id: 'vehicle-performance', name: 'Vehicle Performance', desc: 'Performance metrics per vehicle' },
+                    { id: 'fleet-status', name: 'Fleet Status', desc: 'Current fleet status overview' },
+                    { id: 'maintenance-due', name: 'Maintenance Due', desc: 'Upcoming maintenance schedule' }
+                ],
+                payment: [
+                    { id: 'payment-summary', name: 'Payment Summary', desc: 'Payment transactions summary' },
+                    { id: 'outstanding-payments', name: 'Outstanding Payments', desc: 'Pending payment list' },
+                    { id: 'revenue-analysis', name: 'Revenue Analysis', desc: 'Detailed revenue breakdown' }
+                ],
+                maintenance: [
+                    { id: 'maintenance-history', name: 'Maintenance History', desc: 'Past maintenance records' },
+                    { id: 'cost-analysis', name: 'Cost Analysis', desc: 'Maintenance cost breakdown' },
+                    { id: 'upcoming-maintenance', name: 'Upcoming Maintenance', desc: 'Scheduled maintenance' }
+                ],
+                user: [
+                    { id: 'user-activity', name: 'User Activity', desc: 'Customer booking activity' },
+                    { id: 'top-customers', name: 'Top Customers', desc: 'Most active customers' },
+                    { id: 'user-demographics', name: 'User Demographics', desc: 'Customer demographics' }
+                ]
+            };
+
+            function selectCategory(category, element) {
+                currentCategory = category;
+
+                // Update active state
+                document.querySelectorAll('.report-category-card').forEach(card => card.classList.remove('active'));
+                element.classList.add('active');
+
+                // Update report types
+                const container = document.getElementById('report-types-container');
+                const templates = reportTemplates[category];
+
+                container.innerHTML = templates.map((t, i) => `
+                    <div class="report-type-card ${i === 0 ? 'selected' : ''}" data-report="${t.id}" onclick="selectReport('${t.id}', this)">
+                        <div class="report-name">${t.name}</div>
+                        <p class="report-desc">${t.desc}</p>
+                    </div>
+                `).join('');
+
+                currentReport = templates[0].id;
+            }
+
+            function selectReport(reportId, element) {
+                currentReport = reportId;
+                document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('selected'));
+                element.classList.add('selected');
+            }
+
+            // Duration pills
+            document.querySelectorAll('.duration-pill').forEach(pill => {
+                pill.addEventListener('click', function () {
+                    document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active'));
                     this.classList.add('active');
 
-                    // Update report type options based on selected tab
-                    const reportType = document.getElementById('report-type');
-                    const tabName = this.dataset.tab;
-
-                    // Clear and update options (placeholder functionality)
-                    reportType.innerHTML = '<option value="">Select Report Template</option>';
-
-                    // Add tab-specific options
-                    if (tabName === 'booking') {
-                        reportType.innerHTML += `
-                            <option value="monthly-revenue">Monthly Revenue</option>
-                            <option value="utilization-rate">Utilization Rate</option>
-                            <option value="booking-summary">Booking Summary</option>
-                        `;
-                    } else if (tabName === 'vehicle') {
-                        reportType.innerHTML += `
-                            <option value="vehicle-performance">Vehicle Performance</option>
-                            <option value="fleet-status">Fleet Status</option>
-                            <option value="maintenance-due">Maintenance Due</option>
-                        `;
-                    } else if (tabName === 'payment') {
-                        reportType.innerHTML += `
-                            <option value="payment-summary">Payment Summary</option>
-                            <option value="outstanding-payments">Outstanding Payments</option>
-                            <option value="revenue-analysis">Revenue Analysis</option>
-                        `;
-                    } else if (tabName === 'maintenance') {
-                        reportType.innerHTML += `
-                            <option value="maintenance-history">Maintenance History</option>
-                            <option value="cost-analysis">Cost Analysis</option>
-                            <option value="upcoming-maintenance">Upcoming Maintenance</option>
-                        `;
-                    } else if (tabName === 'user') {
-                        reportType.innerHTML += `
-                            <option value="user-activity">User Activity</option>
-                            <option value="top-customers">Top Customers</option>
-                            <option value="user-demographics">User Demographics</option>
-                        `;
-                    }
-                });
-            });
-
-            // Date range visibility based on duration selection
-            document.querySelectorAll('input[name="duration"]').forEach(radio => {
-                radio.addEventListener('change', function () {
                     const dateRange = document.querySelector('.date-range');
-                    if (this.value === 'custom') {
-                        dateRange.style.display = 'flex';
-                    } else {
-                        dateRange.style.display = 'none';
-                    }
+                    const value = this.querySelector('input').value;
+                    dateRange.style.display = value === 'custom' ? 'flex' : 'none';
                 });
             });
 
-            // Initialize date range visibility
-            document.querySelector('.date-range').style.display = 'none';
-
-            // Generate Report button
-            document.querySelector('.btn-generate').addEventListener('click', function () {
-                alert('Report generation functionality will be implemented. This is UI only.');
-            });
+            function generateReport() {
+                const duration = document.querySelector('.duration-pill.active input').value;
+                alert(`Generating ${currentReport} report for ${currentCategory} category.\n\nDuration: ${duration}\n\nThis is a UI preview. Report generation will be implemented.`);
+            }
         </script>
     </th:block>
 </body>
