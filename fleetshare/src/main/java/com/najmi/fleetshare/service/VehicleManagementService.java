@@ -54,18 +54,30 @@ public class VehicleManagementService {
                 return mapVehiclesToDTOs(vehicles);
         }
 
+        /**
+         * Fetches only available vehicles.
+         * Optimized to fetch only what is needed.
+         *
+         * @return List of VehicleDTO objects
+         */
+        public List<VehicleDTO> getAvailableVehicles() {
+                List<Vehicle> vehicles = vehicleRepository.findByStatusAndIsDeletedFalse(Vehicle.VehicleStatus.AVAILABLE);
+                if (vehicles.isEmpty()) {
+                        return Collections.emptyList();
+                }
+                return mapVehiclesToDTOs(vehicles);
+        }
+
         private List<VehicleDTO> mapVehiclesToDTOs(List<Vehicle> vehicles) {
                 Set<Long> vehicleIds = vehicles.stream().map(Vehicle::getVehicleId).collect(Collectors.toSet());
                 Set<Long> fleetOwnerIds = vehicles.stream().map(Vehicle::getFleetOwnerId).collect(Collectors.toSet());
 
-                // Bulk fetch prices
-                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findByVehicleIdIn(vehicleIds).stream()
-                                .collect(Collectors.groupingBy(VehiclePriceHistory::getVehicleId,
-                                                Collectors.collectingAndThen(
-                                                                Collectors.maxBy(Comparator.comparing(
-                                                                                VehiclePriceHistory::getEffectiveStartDate)),
-                                                                opt -> opt.map(VehiclePriceHistory::getRatePerDay)
-                                                                                .orElse(BigDecimal.ZERO))));
+                // Bulk fetch prices (Optimized)
+                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findLatestPricesForVehicles(vehicleIds).stream()
+                                .collect(Collectors.toMap(
+                                        VehiclePriceHistory::getVehicleId,
+                                        VehiclePriceHistory::getRatePerDay,
+                                        (existing, replacement) -> existing)); // Handle duplicates if any (shouldn't be with correct logic)
 
                 // Bulk fetch owners
                 Map<Long, FleetOwner> ownerMap = fleetOwnerRepository.findAllById(fleetOwnerIds).stream()

@@ -64,11 +64,8 @@ public class RenterController {
             }
         }
 
-        // Fetch all vehicles and filter to show only available ones
-        List<VehicleDTO> allVehicles = vehicleManagementService.getAllVehicles();
-        List<VehicleDTO> availableVehicles = allVehicles.stream()
-                .filter(vehicle -> "AVAILABLE".equals(vehicle.getStatus()))
-                .collect(Collectors.toList());
+        // Fetch only available vehicles (Optimized)
+        List<VehicleDTO> availableVehicles = vehicleManagementService.getAvailableVehicles();
 
         model.addAttribute("vehicles", availableVehicles);
         return "renter/browse-vehicles";
