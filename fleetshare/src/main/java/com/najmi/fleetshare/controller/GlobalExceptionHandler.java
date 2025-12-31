@@ -94,6 +94,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle validation exceptions (400 Bad Request) for API calls
+     */
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @org.springframework.web.bind.annotation.ResponseBody
+    public java.util.Map<String, String> handleValidationExceptions(
+            org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((org.springframework.validation.FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put("error", errorMessage); // Simplified for this app's existing frontend expectations
+        });
+        return errors;
+    }
+
+    /**
      * Handle all other unhandled exceptions (500 Internal Server Error)
      */
     @ExceptionHandler(Exception.class)
