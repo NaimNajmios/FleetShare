@@ -32,14 +32,19 @@
                 <p class="auth-subtitle">Please sign in to continue to your account</p>
             </div>
 
-            <!-- Error Messages -->
-            <div th:if="${param.error}" class="form-error mb-4" role="alert">
-                <i class="mdi mdi-alert-circle" aria-hidden="true"></i>
-                <span>Invalid email or password. Please try again.</span>
-            </div>
-            <div th:if="${param.logout}" class="form-helper text-success mb-4" role="status">
-                You have been logged out successfully.
-            </div>
+            <!-- Toast Notification Fragment -->
+            <div th:replace="~{fragments/toast :: toast}"></div>
+
+            <!-- SSR Fallback for No-JS users -->
+            <noscript>
+                <div th:if="${param.error}" class="form-error mb-4" role="alert">
+                    <i class="mdi mdi-alert-circle" aria-hidden="true"></i>
+                    <span>Invalid email or password. Please try again.</span>
+                </div>
+                <div th:if="${param.logout}" class="form-helper text-success mb-4" role="status">
+                    You have been logged out successfully.
+                </div>
+            </noscript>
 
             <!-- Login Form -->
             <form class="auth-form" id="loginForm" th:action="@{/login}" method="post">
@@ -93,6 +98,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Handle URL Parameters for Toast
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                window.showToast('Invalid email or password. Please try again.', 'error', 'Login Failed');
+            }
+            if (urlParams.has('logout')) {
+                window.showToast('You have been logged out successfully.', 'success', 'Logged Out');
+            }
+            if (urlParams.has('registered')) {
+                window.showToast('Registration successful! Please sign in.', 'success', 'Welcome');
+            }
+
             // Password Toggle
             const togglePassword = document.querySelector('#togglePassword');
             const password = document.querySelector('#password');
