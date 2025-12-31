@@ -441,6 +441,9 @@
 
                 <!-- Vehicle Grid -->
                 <div class="vehicle-grid-container">
+                    <!-- Active Filters Container -->
+                    <div id="activeFilters" class="d-flex flex-wrap gap-2 mb-3" aria-live="polite"></div>
+
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="section-title mb-0" style="font-size: 1.5rem; font-weight: 700; color: #2C3E50;">
                             Available Vehicles</h2>
@@ -457,7 +460,7 @@
                                       data-model=${vehicle.model.toLowerCase()}">
 
                             <div class="vehicle-image-container">
-                                <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}"
+                                <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}" class="stretched-link"
                                     style="display: block; width: 100%; height: 100%; text-decoration: none;">
                                     <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
                                         th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image">
@@ -474,7 +477,7 @@
                                     <div class="owner-avatar">
                                         <i class="fas fa-store"></i>
                                     </div>
-                                    <a th:href="@{/renter/owners/{id}(id=${vehicle.fleetOwnerId})}" class="text-muted"
+                                    <a th:href="@{/renter/owners/{id}(id=${vehicle.fleetOwnerId})}" class="text-muted position-relative z-2"
                                         style="font-size: 0.85rem; font-weight: 500; text-decoration: none;"
                                         onmouseover="this.style.textDecoration='underline'; this.style.color='#4B49AC';"
                                         onmouseout="this.style.textDecoration='none'; this.style.color='#6c757d';"
@@ -508,7 +511,7 @@
                                     </div>
                                 </div>
 
-                                <a href="#" class="book-now-btn"
+                                <a href="#" class="book-now-btn position-relative z-2"
                                     th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}">
                                     View Details
                                 </a>
@@ -549,21 +552,89 @@
     <th:block layout:fragment="extra-js">
         <script>
             // ... existing JS ...
+            function removeFilter(type, value) {
+                if (type === 'category') {
+                    const el = document.querySelector(`input[name="category"][value="${value}"]`);
+                    if (el) el.checked = false;
+                } else if (type === 'transmission') {
+                    const el = document.querySelector(`input[name="transmission"][value="${value}"]`);
+                    if (el) el.checked = false;
+                } else if (type === 'price') {
+                    const min = document.getElementById('minPrice');
+                    const max = document.getElementById('maxPrice');
+                    if (min) min.value = '';
+                    if (max) max.value = '';
+                } else if (type === 'search') {
+                    const el = document.getElementById('vehicleSearch');
+                    if (el) el.value = '';
+                }
+                applyFilters();
+            }
+
+            function addFilterChip(type, value, label) {
+                const chip = document.createElement('span');
+                chip.className = 'badge bg-primary d-flex align-items-center gap-2 py-2 px-3 rounded-pill';
+                chip.style.fontSize = '0.9rem';
+
+                // Safe text insertion to prevent XSS
+                const textNode = document.createTextNode(label);
+                chip.appendChild(textNode);
+
+                // Add remove icon
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-times';
+                icon.style.cursor = 'pointer';
+                icon.setAttribute('aria-label', 'Remove filter ' + label);
+                icon.onclick = function() { removeFilter(type, value); };
+                chip.appendChild(icon);
+
+                document.getElementById('activeFilters').appendChild(chip);
+            }
+
             function applyFilters() {
                 const cards = document.querySelectorAll('.vehicle-card');
                 const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
+                const activeFiltersContainer = document.getElementById('activeFilters');
+                activeFiltersContainer.innerHTML = ''; // Clear existing chips
 
                 // Get checked categories
-                const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
-                    .map(cb => cb.value);
+                const checkedCategoriesInputs = Array.from(document.querySelectorAll('input[name="category"]:checked'));
+                const checkedCategories = checkedCategoriesInputs.map(cb => cb.value);
+
+                // Add chips for categories
+                checkedCategoriesInputs.forEach(cb => {
+                    const label = cb.parentNode.textContent.trim();
+                    addFilterChip('category', cb.value, label);
+                });
 
                 // Get checked transmissions
-                const checkedTransmissions = Array.from(document.querySelectorAll('input[name="transmission"]:checked'))
-                    .map(cb => cb.value);
+                const checkedTransmissionsInputs = Array.from(document.querySelectorAll('input[name="transmission"]:checked'));
+                const checkedTransmissions = checkedTransmissionsInputs.map(cb => cb.value);
+
+                // Add chips for transmission
+                checkedTransmissionsInputs.forEach(cb => {
+                    const label = cb.parentNode.textContent.trim();
+                    addFilterChip('transmission', cb.value, label);
+                });
 
                 // Get price range
-                const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
-                const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+                const minPriceStr = document.getElementById('minPrice').value;
+                const maxPriceStr = document.getElementById('maxPrice').value;
+                const minPrice = parseFloat(minPriceStr) || 0;
+                const maxPrice = parseFloat(maxPriceStr) || Infinity;
+
+                if (minPriceStr || maxPriceStr) {
+                    let label = 'Price: ';
+                    if (minPriceStr && maxPriceStr) label += `RM${minPriceStr} - RM${maxPriceStr}`;
+                    else if (minPriceStr) label += `Min RM${minPriceStr}`;
+                    else if (maxPriceStr) label += `Max RM${maxPriceStr}`;
+                    addFilterChip('price', 'price', label);
+                }
+
+                // Search chip
+                if (searchInput) {
+                    addFilterChip('search', 'search', `Search: "${document.getElementById('vehicleSearch').value}"`);
+                }
 
                 let visibleCount = 0;
 
@@ -573,7 +644,7 @@
                     const price = parseFloat(card.dataset.price);
                     const brand = card.dataset.brand;
                     const model = card.dataset.model;
-                    const title = brand + ' ' + model;
+                    const title = (brand + ' ' + model).toLowerCase();
 
                     const matchesCategory = checkedCategories.length === 0 || checkedCategories.includes(category);
                     const matchesTransmission = checkedTransmissions.length === 0 || checkedTransmissions.includes(transmission);
