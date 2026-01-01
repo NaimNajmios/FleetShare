@@ -1,13 +1,14 @@
-## 2025-12-30 - [Input Validation Improvement]
+## 2024-12-31 - [Insecure File Upload]
 
-**Context:** `RenterController.updateProfile`
-**Vulnerability:** Weak input validation (Manual map parsing)
-**Severity:** Medium
-**Root Cause:** The controller was manually extracting and validating fields from a `Map<String, String>` payload, which is error-prone and bypasses standard Spring Validation mechanisms.
+**Context:** `AdminController` and `OwnerController` implemented duplicate, manual file upload logic for vehicle images.
+**Vulnerability:** Arbitrary File Upload / Remote Code Execution (RCE)
+**Severity:** High
+**Root Cause:** The controllers relied solely on the client-provided `Content-Type` header (MIME sniffing) and the file extension without verifying the actual file content (Magic Bytes). This allowed attackers to upload malicious scripts (e.g., PHP, JSP) disguised as images.
 **Fix Applied:**
-1. Introduced `RenterProfileUpdateRequest` DTO with JSR-380 Bean Validation annotations (`@NotBlank`, `@Pattern`, `@Size`).
-2. Updated `RenterController.updateProfile` to use `@Valid @RequestBody RenterProfileUpdateRequest`.
-3. Added `handleValidationExceptions` to `GlobalExceptionHandler` to return structured JSON errors for validation failures.
-4. Added `spring-boot-starter-validation` dependency to `pom.xml`.
-**Prevention:** Always use `@Valid` annotated DTOs for request bodies in Controllers. Avoid using `Map<String, Object>` for structured data.
-**References:** CWE-20: Improper Input Validation
+1.  Enhanced `FileStorageService` to include robust validation:
+    *   **Magic Byte Validation:** Reads the first few bytes of the file stream to verify it matches known signatures for JPEG, PNG, GIF, WEBP, and PDF.
+    *   **Extension Whitelisting:** Strictly enforces allowed extensions (`.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.pdf`).
+    *   **Filename Sanitization:** Generates a unique filename (UUID + Timestamp) to prevent path traversal and overwrites.
+2.  Refactored `AdminController` and `OwnerController` to delegate file upload handling to `FileStorageService.storeVehicleImage()`.
+**Prevention:** Always validate file content server-side using file signatures (Magic Bytes), never trust client headers, and use a centralized service for file operations.
+**References:** CWE-434: Unrestricted Upload of File with Dangerous Type

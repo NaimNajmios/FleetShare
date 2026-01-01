@@ -70,6 +70,9 @@ public class AdminController {
     @Autowired
     private com.najmi.fleetshare.repository.UserRepository userRepository;
 
+    @Autowired
+    private com.najmi.fleetshare.service.FileStorageService fileStorageService;
+
     @GetMapping("/")
     public String index() {
         return "redirect:/admin/dashboard";
@@ -522,35 +525,20 @@ public class AdminController {
     public ResponseEntity<?> uploadAdminVehicleImage(@PathVariable Long vehicleId,
             @RequestParam("image") org.springframework.web.multipart.MultipartFile file) {
         try {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "No file uploaded"));
-            }
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Only image files are allowed"));
-            }
-            String uploadDir = "C:/fleetshare-uploads/vehicles";
-            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-            if (!java.nio.file.Files.exists(uploadPath)) {
-                java.nio.file.Files.createDirectories(uploadPath);
-            }
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename != null && originalFilename.contains(".")
-                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                    : ".jpg";
-            String uniqueFilename = "vehicle_" + vehicleId + "_"
-                    + java.util.UUID.randomUUID().toString().substring(0, 8) + extension;
-            java.nio.file.Path filePath = uploadPath.resolve(uniqueFilename);
-            java.nio.file.Files.copy(file.getInputStream(), filePath);
             VehicleDTO existing = vehicleManagementService.getVehicleDetails(vehicleId);
-            String imageUrl = "/uploads/vehicles/" + uniqueFilename;
+            if (existing == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Vehicle not found"));
+            }
+
+            String imageUrl = fileStorageService.storeVehicleImage(file, vehicleId);
             vehicleManagementService.updateVehicleImage(vehicleId, existing.getFleetOwnerId(), imageUrl);
+
             return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
-        } catch (java.io.IOException e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload: " + e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
