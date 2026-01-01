@@ -15,6 +15,9 @@ public class UserDetailDTO {
     private String businessName;
     private Boolean isVerified;
 
+    // Profile image
+    private String profileImageUrl;
+
     // Address info
     private String addressLine1;
     private String addressLine2;
@@ -89,6 +92,14 @@ public class UserDetailDTO {
 
     public void setIsVerified(Boolean isVerified) {
         this.isVerified = isVerified;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getAddressLine1() {
