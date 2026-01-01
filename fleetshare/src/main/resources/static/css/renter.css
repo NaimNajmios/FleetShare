@@ -151,11 +151,14 @@ h6 {
     transform: rotate(10deg) scale(1.1);
 }
 
+/* Desktop Menu Styles */
 .nav-menu {
     display: flex;
     gap: 2rem;
     list-style: none;
     align-items: center;
+    margin-bottom: 0;
+    padding-left: 0;
 }
 
 .nav-link {
@@ -167,6 +170,7 @@ h6 {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     position: relative;
+    display: block; /* Ensure full width on mobile */
 }
 
 .nav-link::before {
@@ -240,6 +244,92 @@ h6 {
     transform: scale(1.1) rotate(5deg);
     box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.4);
 }
+
+/* === Mobile Navigation === */
+.mobile-nav-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--gray-700);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color var(--transition-base);
+}
+
+.mobile-nav-toggle:hover {
+    color: var(--primary-mid);
+}
+
+/* Mobile Menu Specifics */
+.nav-menu-mobile {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-menu-mobile .nav-link {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+}
+
+.nav-menu-mobile .nav-link:hover,
+.nav-menu-mobile .nav-link.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%);
+    color: var(--primary-mid);
+    padding-left: 1.25rem; /* Slight indentation on hover/active */
+}
+
+.nav-menu-mobile .nav-link::before {
+    display: none; /* Remove bottom bar for mobile links */
+}
+
+/* Offcanvas Customization */
+.offcanvas {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+}
+
+.avatar-circle-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.btn-logout-mobile {
+    background: var(--gray-200);
+    color: var(--gray-700);
+    border: none;
+    font-weight: 600;
+    transition: all var(--transition-base);
+}
+
+.btn-logout-mobile:hover {
+    background: var(--error-light);
+    color: var(--error);
+}
+
+.opacity-10 {
+    opacity: 0.1;
+}
+
+/* Show toggle only on mobile */
+@media (max-width: 991px) { /* Changed from 768px to 991px to match Bootstrap lg breakpoint */
+    .mobile-nav-toggle {
+        display: block;
+    }
+}
+
 
 /* === Search & Filter Section === */
 .search-filter-section {
