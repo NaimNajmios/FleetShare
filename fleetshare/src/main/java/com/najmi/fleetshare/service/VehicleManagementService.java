@@ -58,14 +58,12 @@ public class VehicleManagementService {
                 Set<Long> vehicleIds = vehicles.stream().map(Vehicle::getVehicleId).collect(Collectors.toSet());
                 Set<Long> fleetOwnerIds = vehicles.stream().map(Vehicle::getFleetOwnerId).collect(Collectors.toSet());
 
-                // Bulk fetch prices
-                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findByVehicleIdIn(vehicleIds).stream()
-                                .collect(Collectors.groupingBy(VehiclePriceHistory::getVehicleId,
-                                                Collectors.collectingAndThen(
-                                                                Collectors.maxBy(Comparator.comparing(
-                                                                                VehiclePriceHistory::getEffectiveStartDate)),
-                                                                opt -> opt.map(VehiclePriceHistory::getRatePerDay)
-                                                                                .orElse(BigDecimal.ZERO))));
+                // Bulk fetch prices - Optimized to only fetch latest prices
+                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findLatestPricesForVehicles(vehicleIds).stream()
+                                .collect(Collectors.toMap(
+                                                VehiclePriceHistory::getVehicleId,
+                                                VehiclePriceHistory::getRatePerDay,
+                                                (existing, replacement) -> existing)); // Handle duplicates if any (shouldn't be with correct query)
 
                 // Bulk fetch owners
                 Map<Long, FleetOwner> ownerMap = fleetOwnerRepository.findAllById(fleetOwnerIds).stream()
