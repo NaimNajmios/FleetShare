@@ -54,6 +54,12 @@ public class RenterController {
     @Autowired
     private RenterRepository renterRepository;
 
+    @Autowired
+    private com.najmi.fleetshare.repository.UserRepository userRepository;
+
+    @Autowired
+    private com.najmi.fleetshare.service.FileStorageService fileStorageService;
+
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -186,7 +192,9 @@ public class RenterController {
 
     @PostMapping("/profile")
     @ResponseBody
-    public ResponseEntity<?> updateProfile(@jakarta.validation.Valid @RequestBody com.najmi.fleetshare.dto.RenterProfileUpdateRequest request, HttpSession session) {
+    public ResponseEntity<?> updateProfile(
+            @jakarta.validation.Valid @RequestBody com.najmi.fleetshare.dto.RenterProfileUpdateRequest request,
+            HttpSession session) {
         SessionUser sessionUser = SessionHelper.getCurrentUser(session);
         if (sessionUser == null || sessionUser.getRenterDetails() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
@@ -206,11 +214,89 @@ public class RenterController {
         renter.setUpdatedAt(LocalDateTime.now());
         renterRepository.save(renter);
 
+        // Update Address
+        String addressLine1 = request.getAddressLine1();
+        if (addressLine1 != null && !addressLine1.trim().isEmpty()) {
+            Address address = addressRepository
+                    .findLatestAddressByUserId(sessionUser.getUserId())
+                    .orElse(new Address());
+
+            if (address.getAddressId() == null) {
+                address.setAddressUserId(sessionUser.getUserId());
+                address.setCreatedAt(LocalDateTime.now());
+                address.setEffectiveStartDate(java.time.LocalDate.now());
+            }
+
+            address.setAddressLine1(addressLine1.trim());
+            address.setAddressLine2(request.getAddressLine2() != null ? request.getAddressLine2().trim() : null);
+            address.setCity(request.getCity() != null ? request.getCity().trim() : null);
+            address.setState(request.getState() != null ? request.getState().trim() : null);
+            address.setPostalCode(request.getPostalCode() != null ? request.getPostalCode().trim() : null);
+
+            String latitudeStr = request.getLatitude();
+            if (latitudeStr != null && !latitudeStr.isEmpty()) {
+                try {
+                    address.setLatitude(Double.parseDouble(latitudeStr));
+                } catch (NumberFormatException e) {
+                    // Ignore invalid lat
+                }
+            }
+
+            String longitudeStr = request.getLongitude();
+            if (longitudeStr != null && !longitudeStr.isEmpty()) {
+                try {
+                    address.setLongitude(Double.parseDouble(longitudeStr));
+                } catch (NumberFormatException e) {
+                    // Ignore invalid lng
+                }
+            }
+
+            address.setUpdatedAt(LocalDateTime.now());
+            addressRepository.save(address);
+        }
+
         // Update session
         sessionUser.getRenterDetails().setFullName(fullName.trim());
         sessionUser.getRenterDetails().setPhoneNumber(phoneNumber != null ? phoneNumber.trim() : null);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
+    }
+
+    @PostMapping("/profile/image")
+    @ResponseBody
+    public ResponseEntity<?> uploadProfileImage(
+            @org.springframework.web.bind.annotation.RequestParam("image") org.springframework.web.multipart.MultipartFile file,
+            HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            // Store the profile image
+            String imageUrl = fileStorageService.storeProfileImage(file, sessionUser.getUserId());
+
+            // Update user profile image URL
+            com.najmi.fleetshare.entity.User user = userRepository.findById(sessionUser.getUserId()).orElse(null);
+
+            if (user == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+            }
+
+            user.setProfileImageUrl(imageUrl);
+            userRepository
+                    .save(user);
+
+            // Update session
+            sessionUser.setProfileImageUrl(imageUrl);
+
+            return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/bookings/{id}")

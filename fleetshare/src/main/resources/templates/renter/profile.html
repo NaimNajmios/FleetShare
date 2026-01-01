@@ -562,6 +562,7 @@
     <th:block layout:fragment="extra-js">
         <script>
             let isEditMode = false;
+            let selectedImageFile = null;
 
             const fullNameInput = document.getElementById('fullName');
             const phoneNumberInput = document.getElementById('phoneNumber');
@@ -579,10 +580,10 @@
 
             // Profile fields (editable)
             const profileFields = [fullNameInput, phoneNumberInput];
-            // Address fields (read-only - separate table)
+            // Address fields (now editable)
             const addressFields = [addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
             // All fields for reference
-            const editableFields = profileFields;
+            const editableFields = [...profileFields, ...addressFields];
 
             let originalValues = {};
             editableFields.forEach(field => {
@@ -602,17 +603,46 @@
                 exitEditMode(true);
             });
 
-            btnSave.addEventListener('click', async function () {
-                const profileData = {
-                    fullName: fullNameInput.value,
-                    phoneNumber: phoneNumberInput.value
-                };
+            // Helper to upload profile image
+            async function uploadProfileImage(csrfToken, csrfHeader) {
+                if (!selectedImageFile) return true;
+                const formData = new FormData();
+                formData.append('image', selectedImageFile);
+                const response = await fetch('/renter/profile/image', {
+                    method: 'POST',
+                    headers: { [csrfHeader]: csrfToken },
+                    body: formData
+                });
+                const result = await response.json();
+                return response.ok && result.success;
+            }
 
+            btnSave.addEventListener('click', async function () {
                 // CSRF Protection
                 const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
                 try {
+                    // Upload profile image first if selected
+                    if (selectedImageFile) {
+                        const imageUploaded = await uploadProfileImage(csrfToken, csrfHeader);
+                        if (!imageUploaded) {
+                            showToast('Failed to upload profile image', 'error');
+                            return;
+                        }
+                        selectedImageFile = null;
+                    }
+
+                    const profileData = {
+                        fullName: fullNameInput.value,
+                        phoneNumber: phoneNumberInput.value,
+                        addressLine1: addressLine1Input.value,
+                        addressLine2: addressLine2Input.value,
+                        city: cityInput.value,
+                        state: stateInput.value,
+                        postalCode: postalCodeInput.value
+                    };
+
                     const response = await fetch('/renter/profile', {
                         method: 'POST',
                         headers: {
@@ -625,10 +655,14 @@
                     const result = await response.json();
 
                     if (response.ok && result.success) {
-                        originalValues['fullName'] = fullNameInput.value;
-                        originalValues['phoneNumber'] = phoneNumberInput.value;
+                        editableFields.forEach(field => {
+                            if (field) originalValues[field.id] = field.value;
+                        });
                         showToast('Profile updated successfully!', 'success');
                         exitEditMode(false);
+
+                        // Reload to show new image if uploaded
+                        setTimeout(() => location.reload(), 1000);
                     } else {
                         showToast(result.error || 'Failed to update profile', 'error');
                     }
@@ -657,6 +691,7 @@
                     editableFields.forEach(field => {
                         if (field) field.value = originalValues[field.id];
                     });
+                    selectedImageFile = null; // Reset image selection
                 }
                 editableFields.forEach(field => { if (field) field.disabled = true; });
                 btnUpload.classList.add('hidden');
@@ -664,8 +699,55 @@
                 viewActions.classList.remove('hidden');
             }
 
+            // Image Upload Handling
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
             btnUpload.addEventListener('click', function () {
-                alert('Image upload functionality will be implemented in the backend.');
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please select an image file', 'error');
+                    return;
+                }
+
+                if (file.size > 2 * 1024 * 1024) {
+                    showToast('Image must be less than 2MB', 'error');
+                    return;
+                }
+
+                selectedImageFile = file;
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const avatarCircle = document.querySelector('.avatar-circle');
+                    const existingImg = avatarCircle.querySelector('img');
+                    const existingIcon = avatarCircle.querySelector('i');
+
+                    if (existingIcon) existingIcon.style.display = 'none';
+
+                    if (existingImg) {
+                        existingImg.src = event.target.result;
+                        existingImg.style.display = 'block';
+                    } else {
+                        const newImg = document.createElement('img');
+                        newImg.src = event.target.result;
+                        newImg.alt = 'Profile Preview';
+                        avatarCircle.appendChild(newImg);
+                    }
+                };
+                reader.readAsDataURL(file);
+
+                showToast('Image selected. Click Save to apply.', 'success');
             });
 
             document.getElementById('btn-change-password').addEventListener('click', function () {
