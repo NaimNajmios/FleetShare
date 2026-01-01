@@ -93,6 +93,7 @@
         .toast-success {
             border-left-color: #10b981;
         }
+
         .toast-success .toast-icon {
             color: #10b981;
         }
@@ -101,6 +102,7 @@
         .toast-error {
             border-left-color: #ef4444;
         }
+
         .toast-error .toast-icon {
             color: #ef4444;
         }
@@ -109,6 +111,7 @@
         .toast-info {
             border-left-color: #3b82f6;
         }
+
         .toast-info .toast-icon {
             color: #3b82f6;
         }
@@ -117,6 +120,7 @@
         .toast-warning {
             border-left-color: #f59e0b;
         }
+
         .toast-warning .toast-icon {
             color: #f59e0b;
         }
@@ -125,7 +129,7 @@
     <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
     <script th:inline="javascript">
-        (function() {
+        (function () {
             const Toast = {
                 container: document.getElementById('toast-container'),
 
@@ -135,7 +139,7 @@
                     let iconClass = 'mdi-information';
                     let defaultTitle = 'Info';
 
-                    switch(type) {
+                    switch (type) {
                         case 'success':
                             iconClass = 'mdi-check-circle';
                             defaultTitle = 'Success';
@@ -199,23 +203,27 @@
 
             window.showToast = (msg, type, title) => Toast.show(msg, type, title);
 
-            document.addEventListener('DOMContentLoaded', function() {
-                // Flash Attributes
-                /*[[${successMessage}]]*/
-                const successMsg = [[${successMessage}]];
+            document.addEventListener('DOMContentLoaded', function () {
+                // Flash Attributes - check if variables exist before using
+                /*[# th:if="${successMessage != null}"]*/
+                const successMsg = /*[[${successMessage}]]*/ null;
                 if (successMsg) Toast.show(successMsg, 'success');
+                /*[/]*/
 
-                /*[[${errorMessage}]]*/
-                const errorMsg = [[${errorMessage}]];
+                /*[# th:if="${errorMessage != null}"]*/
+                const errorMsg = /*[[${errorMessage}]]*/ null;
                 if (errorMsg) Toast.show(errorMsg, 'error');
+                /*[/]*/
 
-                /*[[${infoMessage}]]*/
-                const infoMsg = [[${infoMessage}]];
+                /*[# th:if="${infoMessage != null}"]*/
+                const infoMsg = /*[[${infoMessage}]]*/ null;
                 if (infoMsg) Toast.show(infoMsg, 'info');
+                /*[/]*/
 
-                /*[[${warningMessage}]]*/
-                const warningMsg = [[${warningMessage}]];
+                /*[# th:if="${warningMessage != null}"]*/
+                const warningMsg = /*[[${warningMessage}]]*/ null;
                 if (warningMsg) Toast.show(warningMsg, 'warning');
+                /*[/]*/
             });
         })();
     </script>
