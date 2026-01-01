@@ -2,7 +2,8 @@
 (function () {
     'use strict';
 
-    const container = document.querySelector('.profile-container');
+    // Container is the row element with id viewMode/editMode
+    const container = document.getElementById('viewMode') || document.getElementById('editMode');
     const editBtn = document.getElementById('editBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const saveBtn = document.getElementById('saveBtn');

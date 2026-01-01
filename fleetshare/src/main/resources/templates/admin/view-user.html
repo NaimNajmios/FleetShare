@@ -5,27 +5,23 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
-            .profile-container {
+            /* Profile Card Styles */
+            .profile-card {
                 background: white;
-                border-radius: 8px;
+                border-radius: 12px;
                 padding: 2rem;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                text-align: center;
+                height: fit-content;
             }
 
-            .profile-header {
-                display: flex;
-                align-items: center;
-                gap: 2rem;
-                padding-bottom: 2rem;
-                border-bottom: 2px solid #e8ecef;
-                margin-bottom: 2rem;
-            }
-
-            .profile-avatar {
+            .profile-card .avatar-wrapper {
                 position: relative;
+                display: inline-block;
+                margin-bottom: 1.5rem;
             }
 
-            .avatar-circle {
+            .profile-card .avatar-circle {
                 width: 120px;
                 height: 120px;
                 border-radius: 50%;
@@ -36,41 +32,61 @@
                 color: white;
                 font-size: 3rem;
                 font-weight: bold;
+                margin: 0 auto;
+            }
+
+            .profile-card .avatar-image {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 4px solid #f8f9fa;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
 
             .avatar-controls {
                 margin-top: 1rem;
                 display: none;
-                /* Hidden in view mode */
             }
 
             #editMode .avatar-controls {
                 display: flex;
+                justify-content: center;
                 gap: 0.5rem;
             }
 
-            .profile-info h2 {
-                margin: 0 0 0.5rem 0;
-                font-size: 1.75rem;
+            .profile-card .user-name {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin: 0 0 0.25rem 0;
+                color: #2c2e30;
             }
 
-            .profile-info .user-email {
+            .profile-card .user-email {
                 color: #6c757d;
-                font-size: 1rem;
+                font-size: 0.95rem;
+                margin-bottom: 1rem;
             }
 
-            .mode-toggle {
-                margin-left: auto;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
+            .profile-card .user-role-badge {
+                display: inline-block;
+                padding: 0.35rem 1rem;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                margin-bottom: 1rem;
             }
 
             .status-badge {
-                padding: 0.5rem 1rem;
+                display: inline-block;
+                padding: 0.4rem 1rem;
                 border-radius: 20px;
                 font-weight: 600;
-                font-size: 0.875rem;
+                font-size: 0.85rem;
             }
 
             .status-active {
@@ -83,22 +99,68 @@
                 color: #721c24;
             }
 
-            .form-section {
-                margin-bottom: 2rem;
+            .profile-card .quick-stats {
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #e8ecef;
             }
 
-            .form-section h4 {
+            .profile-card .stat-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+                font-size: 0.9rem;
+            }
+
+            .profile-card .stat-label {
+                color: #6c757d;
+            }
+
+            .profile-card .stat-value {
+                font-weight: 600;
+                color: #2c2e30;
+            }
+
+            .profile-actions {
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #e8ecef;
+            }
+
+            /* Info Cards */
+            .info-card {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
                 margin-bottom: 1.5rem;
-                padding-bottom: 0.75rem;
-                border-bottom: 1px solid #e8ecef;
+            }
+
+            .info-card .card-header-title {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid #f0f0f0;
+            }
+
+            .info-card .card-header-title i {
+                font-size: 1.5rem;
+                color: #667eea;
+            }
+
+            .info-card .card-header-title h5 {
+                margin: 0;
+                font-weight: 600;
                 color: #2c2e30;
             }
 
             .form-row {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
-                margin-bottom: 1.5rem;
+                gap: 1.25rem;
+                margin-bottom: 1rem;
             }
 
             .form-group {
@@ -110,56 +172,47 @@
                 font-weight: 600;
                 margin-bottom: 0.5rem;
                 color: #495057;
+                font-size: 0.875rem;
             }
 
             .form-control {
                 padding: 0.75rem;
                 border: 1px solid #ced4da;
-                border-radius: 0.25rem;
-                font-size: 1rem;
+                border-radius: 8px;
+                font-size: 0.95rem;
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+
+            .form-control:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+                outline: none;
             }
 
             .form-control-plaintext {
                 padding: 0.75rem;
                 background: #f8f9fa;
                 border: 1px solid #e9ecef;
-                border-radius: 0.25rem;
+                border-radius: 8px;
                 color: #495057;
             }
 
-            .form-control:disabled,
-            .form-control [readonly] {
-                background-color: #e9ecef;
-                opacity: 1;
-            }
-
-            .action-buttons {
-                display: flex;
-                justify-content: flex-end;
-                gap: 1rem;
-                padding-top: 2rem;
-                border-top: 2px solid #e8ecef;
-            }
-
-            /* View Mode: Hide edit controls */
+            /* View/Edit Mode */
             #viewMode .form-control {
                 background: #f8f9fa;
                 border-color: #e9ecef;
                 pointer-events: none;
             }
 
-            #viewMode .edit-actions {
+            #viewMode .edit-actions,
+            #viewMode .view-actions-hide {
                 display: none;
             }
 
-            #viewMode .view-actions {
-                display: flex;
-            }
-
-            /* Edit Mode: Show editable fields */
             #editMode .form-control {
                 background: white;
                 border-color: #ced4da;
+                pointer-events: auto;
             }
 
             #editMode .edit-actions {
@@ -170,18 +223,27 @@
                 display: none;
             }
 
-            @media (max-width: 768px) {
+            .action-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1rem;
+            }
+
+            .empty-address {
+                text-align: center;
+                padding: 2rem;
+                color: #6c757d;
+            }
+
+            .empty-address i {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+                opacity: 0.5;
+            }
+
+            @media (max-width: 992px) {
                 .form-row {
                     grid-template-columns: 1fr;
-                }
-
-                .profile-header {
-                    flex-direction: column;
-                    text-align: center;
-                }
-
-                .mode-toggle {
-                    margin-left: 0;
                 }
             }
         </style>
@@ -190,6 +252,7 @@
 
 <body>
     <div layout:fragment="content">
+        <!-- Page Header -->
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
@@ -204,140 +267,158 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="profile-container" id="viewMode">
-                            <!-- Hidden fields for form submission -->
-                            <input type="hidden" id="userId" th:value="${userDetail.userId}">
-                            <input type="hidden" id="userType" th:value="${userType}">
+        <!-- Hidden fields -->
+        <input type="hidden" id="userId" th:value="${userDetail.userId}">
+        <input type="hidden" id="userType" th:value="${userType}">
 
-                            <!-- Profile Header -->
-                            <div class="profile-header">
-                                <div class="profile-avatar">
-                                    <img th:if="${userDetail.profileImageUrl != null}" th:src="@{${userDetail.profileImageUrl}}" class="avatar-image" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
-                                    <div class="avatar-circle" th:if="${userDetail.profileImageUrl == null}"
-                                        th:text="${#strings.substring(userDetail.fullName ?: 'U', 0, 1)}">
-                                        U
-                                    </div>
-                                    <div class="avatar-controls">
-                                        <input type="file" id="profileImageInput" accept="image/*"
-                                            style="display: none;">
-                                        <button type="button" class="btn btn-sm btn-primary" id="changeImageBtn">
-                                            <i class="mdi mdi-camera"></i> Change
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-secondary">Reset</button>
-                                    </div>
-                                </div>
-                                <div class="profile-info">
-                                    <h2 th:text="${userDetail.fullName ?: 'N/A'}">User Name</h2>
-                                    <p class="user-email" th:text="${userDetail.email}">user@example.com</p>
-                                    <span class="status-badge"
-                                        th:classappend="${userDetail.isActive} ? 'status-active' : 'status-inactive'"
-                                        th:text="${userDetail.isActive} ? 'Active' : 'Inactive'">
-                                        Active
-                                    </span>
-                                </div>
-                                <div class="mode-toggle">
-                                    <button id="editBtn" class="btn btn-primary view-actions">
-                                        <i class="mdi mdi-pencil"></i> Edit Profile
-                                    </button>
-                                </div>
+        <div class="row" id="viewMode">
+            <!-- Left Column: Profile Card -->
+            <div class="col-lg-4 col-md-5">
+                <div class="profile-card">
+                    <!-- Avatar -->
+                    <div class="avatar-wrapper">
+                        <img th:if="${userDetail.profileImageUrl != null}" th:src="@{${userDetail.profileImageUrl}}"
+                            class="avatar-image" alt="Profile">
+                        <div class="avatar-circle" th:if="${userDetail.profileImageUrl == null}"
+                            th:text="${#strings.substring(userDetail.fullName ?: 'U', 0, 1)}">U</div>
+                        <div class="avatar-controls">
+                            <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                            <button type="button" class="btn btn-sm btn-primary" id="changeImageBtn">
+                                <i class="mdi mdi-camera"></i> Change
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- User Info -->
+                    <h4 class="user-name" th:text="${userDetail.fullName ?: 'N/A'}">User Name</h4>
+                    <p class="user-email" th:text="${userDetail.email}">user@example.com</p>
+
+                    <span class="user-role-badge">
+                        <i class="mdi" th:classappend="${userType == 'owner'} ? 'mdi-briefcase' : 'mdi-account'"></i>
+                        <span th:text="${userType == 'owner'} ? 'Fleet Owner' : 'Renter'">Role</span>
+                    </span>
+
+                    <div>
+                        <span class="status-badge"
+                            th:classappend="${userDetail.isActive} ? 'status-active' : 'status-inactive'"
+                            th:text="${userDetail.isActive} ? 'Active' : 'Inactive'">Active</span>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Client ID</span>
+                            <span class="stat-value" th:text="${userDetail.userId}">#123</span>
+                        </div>
+                        <div class="stat-item" th:if="${userType == 'owner'}">
+                            <span class="stat-label">Verified</span>
+                            <span class="stat-value">
+                                <i class="mdi"
+                                    th:classappend="${userDetail.isVerified} ? 'mdi-check-circle text-success' : 'mdi-close-circle text-danger'"></i>
+                                <span th:text="${userDetail.isVerified} ? 'Yes' : 'No'">No</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Profile Actions -->
+                    <div class="profile-actions">
+                        <button id="editBtn" class="btn btn-primary btn-block view-actions">
+                            <i class="mdi mdi-pencil"></i> Edit Profile
+                        </button>
+                        <div class="edit-actions action-buttons">
+                            <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                            <button id="saveBtn" class="btn btn-success">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Info Cards -->
+            <div class="col-lg-8 col-md-7">
+                <!-- Personal Information Card -->
+                <div class="info-card">
+                    <div class="card-header-title">
+                        <i class="mdi mdi-account-card-details"></i>
+                        <h5>Personal Information</h5>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                <span th:if="${userType == 'owner'}">Business Name</span>
+                                <span th:if="${userType == 'renter'}">Full Name</span>
+                            </label>
+                            <input type="text" class="form-control" id="fullName" name="fullName"
+                                th:value="${userDetail.fullName}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                th:value="${userDetail.email}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
+                                th:value="${userDetail.phoneNumber ?: ''}" readonly>
+                        </div>
+                        <div class="form-group" th:if="${userType == 'owner'}">
+                            <label>Verification Status</label>
+                            <select class="form-control" id="isVerified" name="isVerified" disabled>
+                                <option value="true" th:selected="${userDetail.isVerified == true}">Verified</option>
+                                <option value="false" th:selected="${userDetail.isVerified != true}">Not Verified
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Card -->
+                <div class="info-card">
+                    <div class="card-header-title">
+                        <i class="mdi mdi-map-marker"></i>
+                        <h5>Address Information</h5>
+                    </div>
+
+                    <div th:if="${userDetail.addressLine1 != null}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Address Line 1</label>
+                                <input type="text" class="form-control" id="addressLine1" name="addressLine1"
+                                    th:value="${userDetail.addressLine1}" readonly>
                             </div>
-
-                            <!-- Personal Information -->
-                            <div class="form-section">
-                                <h4>Personal Information</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Client ID</label>
-                                        <input type="text" class="form-control-plaintext"
-                                            th:value="${userDetail.userId}" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            <span th:if="${userType == 'owner'}">Business Name</span>
-                                            <span th:if="${userType == 'renter'}">Full Name</span>
-                                        </label>
-                                        <input type="text" class="form-control" id="fullName" name="fullName"
-                                            th:value="${userDetail.fullName}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Email</label>
-                                        <input type="email" class="form-control" id="email" name="email"
-                                            th:value="${userDetail.email}" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Phone Number</label>
-                                        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
-                                            th:value="${userDetail.phoneNumber ?: ''}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row" th:if="${userType == 'owner'}">
-                                    <div class="form-group">
-                                        <label>User Role</label>
-                                        <input type="text" class="form-control-plaintext"
-                                            th:value="${userDetail.userRole}" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Verification Status</label>
-                                        <select class="form-control" id="isVerified" name="isVerified" disabled>
-                                            <option value="true" th:selected="${userDetail.isVerified == true}">Verified
-                                            </option>
-                                            <option value="false" th:selected="${userDetail.isVerified != true}">Not
-                                                Verified</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Address Details -->
-                            <div class="form-section" th:if="${userDetail.addressLine1}">
-                                <h4>Address Details</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Address Line 1</label>
-                                        <input type="text" class="form-control" id="addressLine1" name="addressLine1"
-                                            th:value="${userDetail.addressLine1}" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Address Line 2</label>
-                                        <input type="text" class="form-control" id="addressLine2" name="addressLine2"
-                                            th:value="${userDetail.addressLine2 ?: ''}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>City</label>
-                                        <input type="text" class="form-control" id="city" name="city"
-                                            th:value="${userDetail.city}" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>State</label>
-                                        <input type="text" class="form-control" id="state" name="state"
-                                            th:value="${userDetail.state}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Postal Code</label>
-                                        <input type="text" class="form-control" id="postalCode" name="postalCode"
-                                            th:value="${userDetail.postalCode}" readonly style="width: 50%;">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="action-buttons">
-                                <div class="edit-actions">
-                                    <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
-                                    <button id="saveBtn" class="btn btn-success">Save Changes</button>
-                                </div>
+                            <div class="form-group">
+                                <label>Address Line 2</label>
+                                <input type="text" class="form-control" id="addressLine2" name="addressLine2"
+                                    th:value="${userDetail.addressLine2 ?: ''}" readonly>
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>City</label>
+                                <input type="text" class="form-control" id="city" name="city"
+                                    th:value="${userDetail.city}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>State</label>
+                                <input type="text" class="form-control" id="state" name="state"
+                                    th:value="${userDetail.state}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Postal Code</label>
+                                <input type="text" class="form-control" id="postalCode" name="postalCode"
+                                    th:value="${userDetail.postalCode}" readonly style="max-width: 200px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${userDetail.addressLine1 == null}" class="empty-address">
+                        <i class="mdi mdi-map-marker-off"></i>
+                        <p>No address on file</p>
+                        <p class="text-muted small">Click "Edit Profile" to add address information</p>
                     </div>
                 </div>
             </div>
