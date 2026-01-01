@@ -5,23 +5,23 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
-            .profile-container {
+            /* Profile Card Styles */
+            .profile-card {
                 background: white;
-                border-radius: 8px;
+                border-radius: 12px;
                 padding: 2rem;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                text-align: center;
+                height: fit-content;
             }
 
-            .profile-header {
-                display: flex;
-                align-items: center;
-                gap: 2rem;
-                padding-bottom: 2rem;
-                border-bottom: 2px solid #e8ecef;
-                margin-bottom: 2rem;
+            .profile-card .avatar-wrapper {
+                position: relative;
+                display: inline-block;
+                margin-bottom: 1.5rem;
             }
 
-            .avatar-circle {
+            .profile-card .avatar-circle {
                 width: 120px;
                 height: 120px;
                 border-radius: 50%;
@@ -32,23 +32,50 @@
                 color: white;
                 font-size: 3rem;
                 font-weight: bold;
+                margin: 0 auto;
             }
 
-            .profile-info h2 {
-                margin: 0 0 0.5rem 0;
-                font-size: 1.75rem;
+            .profile-card .avatar-image {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 4px solid #f8f9fa;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
 
-            .profile-info .user-email {
+            .profile-card .user-name {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin: 0 0 0.25rem 0;
+                color: #2c2e30;
+            }
+
+            .profile-card .user-email {
                 color: #6c757d;
-                font-size: 1rem;
+                font-size: 0.95rem;
+                margin-bottom: 1rem;
+            }
+
+            .profile-card .user-role-badge {
+                display: inline-block;
+                padding: 0.35rem 1rem;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+                margin-bottom: 1rem;
             }
 
             .status-badge {
-                padding: 0.5rem 1rem;
+                display: inline-block;
+                padding: 0.4rem 1rem;
                 border-radius: 20px;
                 font-weight: 600;
-                font-size: 0.875rem;
+                font-size: 0.85rem;
             }
 
             .status-active {
@@ -61,22 +88,62 @@
                 color: #721c24;
             }
 
-            .form-section {
-                margin-bottom: 2rem;
+            .profile-card .quick-stats {
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #e8ecef;
             }
 
-            .form-section h4 {
+            .profile-card .stat-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+                font-size: 0.9rem;
+            }
+
+            .profile-card .stat-label {
+                color: #6c757d;
+            }
+
+            .profile-card .stat-value {
+                font-weight: 600;
+                color: #2c2e30;
+            }
+
+            /* Info Cards */
+            .info-card {
+                background: white;
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
                 margin-bottom: 1.5rem;
-                padding-bottom: 0.75rem;
-                border-bottom: 1px solid #e8ecef;
+            }
+
+            .info-card .card-header-title {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid #f0f0f0;
+            }
+
+            .info-card .card-header-title i {
+                font-size: 1.5rem;
+                color: #667eea;
+            }
+
+            .info-card .card-header-title h5 {
+                margin: 0;
+                font-weight: 600;
                 color: #2c2e30;
             }
 
             .form-row {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
-                margin-bottom: 1.5rem;
+                gap: 1.25rem;
+                margin-bottom: 1rem;
             }
 
             .form-group {
@@ -88,24 +155,32 @@
                 font-weight: 600;
                 margin-bottom: 0.5rem;
                 color: #495057;
+                font-size: 0.875rem;
             }
 
             .form-control-plaintext {
                 padding: 0.75rem;
                 background: #f8f9fa;
                 border: 1px solid #e9ecef;
-                border-radius: 0.25rem;
+                border-radius: 8px;
                 color: #495057;
             }
 
-            @media (max-width: 768px) {
+            .empty-address {
+                text-align: center;
+                padding: 2rem;
+                color: #6c757d;
+            }
+
+            .empty-address i {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+                opacity: 0.5;
+            }
+
+            @media (max-width: 992px) {
                 .form-row {
                     grid-template-columns: 1fr;
-                }
-
-                .profile-header {
-                    flex-direction: column;
-                    text-align: center;
                 }
             }
         </style>
@@ -114,6 +189,7 @@
 
 <body>
     <div layout:fragment="content">
+        <!-- Page Header -->
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
@@ -129,92 +205,111 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="profile-container">
-                            <!-- Profile Header -->
-                            <div class="profile-header">
-                                <div class="profile-avatar">
-                                    <div class="avatar-circle"
-                                        th:text="${#strings.substring(customerDetail.fullName ?: 'U', 0, 1)}">
-                                        U
-                                    </div>
-                                </div>
-                                <div class="profile-info">
-                                    <h2 th:text="${customerDetail.fullName ?: 'N/A'}">Customer Name</h2>
-                                    <p class="user-email" th:text="${customerDetail.email}">customer@example.com</p>
-                                    <span class="status-badge"
-                                        th:classappend="${customerDetail.isActive} ? 'status-active' : 'status-inactive'"
-                                        th:text="${customerDetail.isActive} ? 'Active' : 'Inactive'">
-                                        Active
-                                    </span>
-                                </div>
-                            </div>
+            <!-- Left Column: Profile Card -->
+            <div class="col-lg-4 col-md-5">
+                <div class="profile-card">
+                    <!-- Avatar -->
+                    <div class="avatar-wrapper">
+                        <img th:if="${customerDetail.profileImageUrl != null}"
+                            th:src="@{${customerDetail.profileImageUrl}}" class="avatar-image" alt="Profile">
+                        <div class="avatar-circle" th:if="${customerDetail.profileImageUrl == null}"
+                            th:text="${#strings.substring(customerDetail.fullName ?: 'U', 0, 1)}">U</div>
+                    </div>
 
-                            <!-- Personal Information -->
-                            <div class="form-section">
-                                <h4>Personal Information</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Customer ID</label>
-                                        <div class="form-control-plaintext" th:text="${customerDetail.userId}">ID</div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Full Name</label>
-                                        <div class="form-control-plaintext" th:text="${customerDetail.fullName}">Name
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Email</label>
-                                        <div class="form-control-plaintext" th:text="${customerDetail.email}">Email
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Phone Number</label>
-                                        <div class="form-control-plaintext"
-                                            th:text="${customerDetail.phoneNumber ?: 'N/A'}">Phone</div>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- User Info -->
+                    <h4 class="user-name" th:text="${customerDetail.fullName ?: 'N/A'}">Customer Name</h4>
+                    <p class="user-email" th:text="${customerDetail.email}">customer@example.com</p>
 
-                            <!-- Address Details -->
-                            <div class="form-section" th:if="${customerDetail.addressLine1}">
-                                <h4>Address Details</h4>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Address Line 1</label>
-                                        <div class="form-control-plaintext" th:text="${customerDetail.addressLine1}">
-                                            Address</div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Address Line 2</label>
-                                        <div class="form-control-plaintext"
-                                            th:text="${customerDetail.addressLine2 ?: 'N/A'}">Address Line 2</div>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>City</label>
-                                        <div class="form-control-plaintext" th:text="${customerDetail.city}">City</div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>State</label>
-                                        <div class="form-control-plaintext" th:text="${customerDetail.state}">State
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Postal Code</label>
-                                        <div class="form-control-plaintext" th:text="${customerDetail.postalCode}"
-                                            style="width: 50%;">Postal Code</div>
-                                    </div>
-                                </div>
+                    <span class="user-role-badge">
+                        <i class="mdi mdi-account"></i> Customer
+                    </span>
+
+                    <div>
+                        <span class="status-badge"
+                            th:classappend="${customerDetail.isActive} ? 'status-active' : 'status-inactive'"
+                            th:text="${customerDetail.isActive} ? 'Active' : 'Inactive'">Active</span>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Customer ID</span>
+                            <span class="stat-value" th:text="${customerDetail.userId}">#123</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Info Cards -->
+            <div class="col-lg-8 col-md-7">
+                <!-- Personal Information Card -->
+                <div class="info-card">
+                    <div class="card-header-title">
+                        <i class="mdi mdi-account-card-details"></i>
+                        <h5>Personal Information</h5>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <div class="form-control-plaintext" th:text="${customerDetail.fullName ?: 'N/A'}">Name</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <div class="form-control-plaintext" th:text="${customerDetail.email}">Email</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <div class="form-control-plaintext" th:text="${customerDetail.phoneNumber ?: 'N/A'}">Phone
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Address Card -->
+                <div class="info-card">
+                    <div class="card-header-title">
+                        <i class="mdi mdi-map-marker"></i>
+                        <h5>Address Information</h5>
+                    </div>
+
+                    <div th:if="${customerDetail.addressLine1 != null}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Address Line 1</label>
+                                <div class="form-control-plaintext" th:text="${customerDetail.addressLine1}">Address
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Address Line 2</label>
+                                <div class="form-control-plaintext" th:text="${customerDetail.addressLine2 ?: 'N/A'}">
+                                    Address Line 2</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>City</label>
+                                <div class="form-control-plaintext" th:text="${customerDetail.city}">City</div>
+                            </div>
+                            <div class="form-group">
+                                <label>State</label>
+                                <div class="form-control-plaintext" th:text="${customerDetail.state}">State</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Postal Code</label>
+                                <div class="form-control-plaintext" th:text="${customerDetail.postalCode}"
+                                    style="max-width: 200px;">Postal Code</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${customerDetail.addressLine1 == null}" class="empty-address">
+                        <i class="mdi mdi-map-marker-off"></i>
+                        <p>No address on file</p>
                     </div>
                 </div>
             </div>
