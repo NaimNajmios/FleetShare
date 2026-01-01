@@ -455,6 +455,24 @@ public class AdminController {
         return "admin/view-user";
     }
 
+    @PostMapping("/users/update/{userId}")
+    @ResponseBody
+    public ResponseEntity<?> updateUser(@PathVariable Long userId,
+            @RequestParam String type,
+            @RequestBody UserDetailDTO userData) {
+        try {
+            boolean success = userManagementService.updateUser(userId, type, userData);
+            if (success) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "User updated successfully"));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to update user: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/vehicles/view/{vehicleId}")
     public String viewVehicle(@PathVariable Long vehicleId, Model model) {
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);

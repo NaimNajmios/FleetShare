@@ -209,6 +209,10 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="profile-container" id="viewMode">
+                            <!-- Hidden fields for form submission -->
+                            <input type="hidden" id="userId" th:value="${userDetail.userId}">
+                            <input type="hidden" id="userType" th:value="${userType}">
+
                             <!-- Profile Header -->
                             <div class="profile-header">
                                 <div class="profile-avatar">
@@ -251,20 +255,20 @@
                                             <span th:if="${userType == 'owner'}">Business Name</span>
                                             <span th:if="${userType == 'renter'}">Full Name</span>
                                         </label>
-                                        <input type="text" class="form-control" th:value="${userDetail.fullName}"
-                                            readonly>
+                                        <input type="text" class="form-control" id="fullName" name="fullName"
+                                            th:value="${userDetail.fullName}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Email</label>
-                                        <input type="email" class="form-control" th:value="${userDetail.email}"
-                                            readonly>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                            th:value="${userDetail.email}" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>Phone Number</label>
-                                        <input type="tel" class="form-control"
-                                            th:value="${userDetail.phoneNumber ?: 'N/A'}" readonly>
+                                        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
+                                            th:value="${userDetail.phoneNumber ?: ''}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-row" th:if="${userType == 'owner'}">
@@ -275,8 +279,12 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Verification Status</label>
-                                        <input type="text" class="form-control-plaintext"
-                                            th:value="${userDetail.isVerified} ? 'Verified' : 'Not Verified'" readonly>
+                                        <select class="form-control" id="isVerified" name="isVerified" disabled>
+                                            <option value="true" th:selected="${userDetail.isVerified == true}">Verified
+                                            </option>
+                                            <option value="false" th:selected="${userDetail.isVerified != true}">Not
+                                                Verified</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -287,30 +295,32 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Address Line 1</label>
-                                        <input type="text" class="form-control" th:value="${userDetail.addressLine1}"
-                                            readonly>
+                                        <input type="text" class="form-control" id="addressLine1" name="addressLine1"
+                                            th:value="${userDetail.addressLine1}" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>Address Line 2</label>
-                                        <input type="text" class="form-control"
+                                        <input type="text" class="form-control" id="addressLine2" name="addressLine2"
                                             th:value="${userDetail.addressLine2 ?: ''}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>City</label>
-                                        <input type="text" class="form-control" th:value="${userDetail.city}" readonly>
+                                        <input type="text" class="form-control" id="city" name="city"
+                                            th:value="${userDetail.city}" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>State</label>
-                                        <input type="text" class="form-control" th:value="${userDetail.state}" readonly>
+                                        <input type="text" class="form-control" id="state" name="state"
+                                            th:value="${userDetail.state}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>Postal Code</label>
-                                        <input type="text" class="form-control" th:value="${userDetail.postalCode}"
-                                            readonly style="width: 50%;">
+                                        <input type="text" class="form-control" id="postalCode" name="postalCode"
+                                            th:value="${userDetail.postalCode}" readonly style="width: 50%;">
                                     </div>
                                 </div>
                             </div>

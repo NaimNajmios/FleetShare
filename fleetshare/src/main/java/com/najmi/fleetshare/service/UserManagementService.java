@@ -8,6 +8,8 @@ import com.najmi.fleetshare.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -201,5 +203,82 @@ public class UserManagementService {
         }
 
         return customers;
+    }
+
+    /**
+     * Updates user information based on user type
+     * 
+     * @param userId   User ID
+     * @param userType "owner" or "renter"
+     * @param dto      UserDetailDTO with updated information
+     * @return true if update successful, false otherwise
+     */
+    public boolean updateUser(Long userId, String userType, UserDetailDTO dto) {
+        // Get user entity
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return false;
+        }
+
+        // Update user fields
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            user.setEmail(dto.getEmail().trim());
+        }
+        if (dto.getIsActive() != null) {
+            user.setIsActive(dto.getIsActive());
+        }
+        userRepository.save(user);
+
+        // Update role-specific fields
+        if ("owner".equalsIgnoreCase(userType)) {
+            FleetOwner owner = fleetOwnerRepository.findByUserId(userId).orElse(null);
+            if (owner != null) {
+                if (dto.getBusinessName() != null && !dto.getBusinessName().trim().isEmpty()) {
+                    owner.setBusinessName(dto.getBusinessName().trim());
+                }
+                if (dto.getPhoneNumber() != null) {
+                    owner.setContactPhone(dto.getPhoneNumber().trim());
+                }
+                if (dto.getIsVerified() != null) {
+                    owner.setIsVerified(dto.getIsVerified());
+                }
+                owner.setUpdatedAt(LocalDateTime.now());
+                fleetOwnerRepository.save(owner);
+            }
+        } else if ("renter".equalsIgnoreCase(userType)) {
+            Renter renter = renterRepository.findByUserId(userId).orElse(null);
+            if (renter != null) {
+                if (dto.getFullName() != null && !dto.getFullName().trim().isEmpty()) {
+                    renter.setFullName(dto.getFullName().trim());
+                }
+                if (dto.getPhoneNumber() != null) {
+                    renter.setPhoneNumber(dto.getPhoneNumber().trim());
+                }
+                renter.setUpdatedAt(LocalDateTime.now());
+                renterRepository.save(renter);
+            }
+        }
+
+        // Update or create address if address fields provided
+        if (dto.getAddressLine1() != null && !dto.getAddressLine1().trim().isEmpty()) {
+            Address address = addressRepository.findLatestAddressByUserId(userId).orElse(null);
+            if (address == null) {
+                // Create new address
+                address = new Address();
+                address.setAddressUserId(userId);
+                address.setEffectiveStartDate(LocalDate.now());
+                address.setCreatedAt(LocalDateTime.now());
+            }
+
+            address.setAddressLine1(dto.getAddressLine1().trim());
+            address.setAddressLine2(dto.getAddressLine2() != null ? dto.getAddressLine2().trim() : null);
+            address.setCity(dto.getCity() != null ? dto.getCity().trim() : address.getCity());
+            address.setState(dto.getState() != null ? dto.getState().trim() : address.getState());
+            address.setPostalCode(dto.getPostalCode() != null ? dto.getPostalCode().trim() : address.getPostalCode());
+            address.setUpdatedAt(LocalDateTime.now());
+            addressRepository.save(address);
+        }
+
+        return true;
     }
 }
