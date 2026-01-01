@@ -38,10 +38,20 @@ public class UserManagementService {
      */
     public List<FleetOwnerDTO> getAllFleetOwners() {
         List<FleetOwner> fleetOwners = fleetOwnerRepository.findAll();
+
+        // Collect all user IDs to fetch in a single query
+        Set<Long> userIds = fleetOwners.stream()
+                .map(FleetOwner::getUserId)
+                .collect(Collectors.toSet());
+
+        // Batch fetch users
+        java.util.Map<Long, User> userMap = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getUserId, java.util.function.Function.identity()));
+
         List<FleetOwnerDTO> fleetOwnerDTOs = new ArrayList<>();
 
         for (FleetOwner owner : fleetOwners) {
-            User user = userRepository.findById(owner.getUserId()).orElse(null);
+            User user = userMap.get(owner.getUserId());
             if (user != null) {
                 FleetOwnerDTO dto = new FleetOwnerDTO(
                         user.getUserId(),
@@ -65,10 +75,20 @@ public class UserManagementService {
      */
     public List<RenterDTO> getAllRenters() {
         List<Renter> renters = renterRepository.findAll();
+
+        // Collect all user IDs to fetch in a single query
+        Set<Long> userIds = renters.stream()
+                .map(Renter::getUserId)
+                .collect(Collectors.toSet());
+
+        // Batch fetch users
+        java.util.Map<Long, User> userMap = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getUserId, java.util.function.Function.identity()));
+
         List<RenterDTO> renterDTOs = new ArrayList<>();
 
         for (Renter renter : renters) {
-            User user = userRepository.findById(renter.getUserId()).orElse(null);
+            User user = userMap.get(renter.getUserId());
             if (user != null) {
                 RenterDTO dto = new RenterDTO(
                         renter.getRenterId(),
@@ -151,23 +171,32 @@ public class UserManagementService {
                 .map(Booking::getRenterId)
                 .collect(Collectors.toSet());
 
-        // 3. Fetch renter details and convert to DTOs
+        // 3. Batch fetch renters
+        List<Renter> renters = renterRepository.findAllById(renterIds);
+
+        // 4. Collect user IDs for batch fetching
+        Set<Long> userIds = renters.stream()
+                .map(Renter::getUserId)
+                .collect(Collectors.toSet());
+
+        // 5. Batch fetch users
+        java.util.Map<Long, User> userMap = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getUserId, java.util.function.Function.identity()));
+
+        // 6. Map to DTOs
         List<RenterDTO> customers = new ArrayList<>();
-        for (Long renterId : renterIds) {
-            Renter renter = renterRepository.findById(renterId).orElse(null);
-            if (renter != null) {
-                User user = userRepository.findById(renter.getUserId()).orElse(null);
-                if (user != null) {
-                    RenterDTO dto = new RenterDTO(
-                            renter.getRenterId(),
-                            user.getUserId(),
-                            user.getEmail(),
-                            renter.getFullName(),
-                            renter.getPhoneNumber(),
-                            user.getIsActive(),
-                            user.getCreatedAt());
-                    customers.add(dto);
-                }
+        for (Renter renter : renters) {
+            User user = userMap.get(renter.getUserId());
+            if (user != null) {
+                RenterDTO dto = new RenterDTO(
+                        renter.getRenterId(),
+                        user.getUserId(),
+                        user.getEmail(),
+                        renter.getFullName(),
+                        renter.getPhoneNumber(),
+                        user.getIsActive(),
+                        user.getCreatedAt());
+                customers.add(dto);
             }
         }
 
