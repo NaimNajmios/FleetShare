@@ -475,9 +475,14 @@
                             selectedImageFile = null;
                         }
 
-                        const profileData = {
+                                                const profileData = {
                             businessName: businessNameInput ? businessNameInput.value : '',
-                            contactPhone: contactPhoneInput ? contactPhoneInput.value : ''
+                            contactPhone: contactPhoneInput ? contactPhoneInput.value : '',
+                            addressLine1: addressLine1Input ? addressLine1Input.value : '',
+                            addressLine2: addressLine2Input ? addressLine2Input.value : '',
+                            city: cityInput ? cityInput.value : '',
+                            state: stateInput ? stateInput.value : '',
+                            postalCode: postalCodeInput ? postalCodeInput.value : ''
                         };
 
                         console.log('Saving profile data...', profileData);
