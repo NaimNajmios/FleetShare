@@ -152,21 +152,31 @@
                 z-index: 1;
             }
 
-            .quick-select-btn {
-                font-size: 0.8rem;
+            /* Quick Select Pills */
+            .quick-select-pills {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+                flex-wrap: wrap;
+            }
+
+            .quick-select-pill {
+                font-size: 0.75rem;
                 padding: 0.25rem 0.75rem;
                 border-radius: 20px;
                 border: 1px solid #dee2e6;
-                background: white;
+                background: #f8f9fa;
                 color: #6c757d;
                 cursor: pointer;
                 transition: all 0.2s ease;
+                font-weight: 500;
             }
 
-            .quick-select-btn:hover {
-                background: #f8f9fa;
+            .quick-select-pill:hover {
+                background: #e9ecef;
                 border-color: #4B49AC;
                 color: #4B49AC;
+                transform: translateY(-1px);
             }
 
             .form-title {
@@ -187,24 +197,32 @@
                 margin-bottom: 0.5rem;
             }
 
-            .form-control {
-                width: 100%;
-                padding: 0.75rem 1rem;
-                font-size: 1rem;
-                border: 1px solid #ced4da;
+            /* Duration Display */
+            .duration-display {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 1rem;
+                background-color: #f0fdf4; /* Light green bg */
+                border: 1px solid #bbf7d0;
                 border-radius: 0.5rem;
-                transition: border-color 0.2s ease;
+                color: #166534;
+                font-weight: 600;
             }
 
-            .form-control:focus {
-                border-color: #0d6efd;
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+            .duration-display i {
+                font-size: 1.1rem;
             }
 
-            .form-control[readonly] {
-                background-color: #e9ecef;
-                cursor: not-allowed;
+            /* Animation */
+            @keyframes pulse-highlight {
+                0% { background-color: #f8f9fa; transform: scale(1); }
+                50% { background-color: #e0f2fe; transform: scale(1.02); }
+                100% { background-color: #f8f9fa; transform: scale(1); }
+            }
+
+            .pulse-highlight {
+                animation: pulse-highlight 0.4s ease-out;
             }
 
             .btn-proceed {
@@ -238,14 +256,6 @@
                 font-size: 0.875rem;
                 margin-top: 0.5rem;
                 display: none;
-            }
-
-            .total-cost-display {
-                transition: background-color 0.3s ease;
-            }
-
-            #totalCostDisplay {
-                transition: opacity 0.2s ease;
             }
         </style>
     </th:block>
@@ -305,33 +315,44 @@
                 <form id="bookingForm" th:action="@{/renter/vehicles/{id}/book/review(id=${vehicle.vehicleId})}"
                     method="POST" th:data-rate="${vehicle.ratePerDay}">
 
-                    <div class="form-group">
-                        <label class="form-label" for="pickupDate">Pickup Date</label>
-                        <input type="date" id="pickupDate" name="pickupDate" class="form-control" required aria-required="true">
+                    <!-- Floating Labels for Pickup -->
+                    <div class="form-floating mb-3">
+                        <input type="date" id="pickupDate" name="pickupDate" class="form-control" placeholder="Select date" required aria-required="true">
+                        <label for="pickupDate">Pickup Date</label>
                     </div>
 
-                    <div class="form-group">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label mb-0" for="returnDate">Return Date</label>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="quick-select-btn" onclick="addDays(3)">+3 Days</button>
-                                <button type="button" class="quick-select-btn" onclick="addDays(7)">+1 Week</button>
-                            </div>
+                    <!-- Floating Labels for Return -->
+                    <div class="form-group mb-4">
+                        <div class="form-floating">
+                            <input type="date" id="returnDate" name="returnDate" class="form-control" placeholder="Select date" required aria-required="true" aria-describedby="dateError">
+                            <label for="returnDate">Return Date</label>
                         </div>
-                        <input type="date" id="returnDate" name="returnDate" class="form-control" required aria-required="true" aria-describedby="dateError">
+
+                        <!-- Quick Select Pills -->
+                        <div class="quick-select-pills">
+                            <span class="text-muted small align-self-center me-1">Quick Select:</span>
+                            <button type="button" class="quick-select-pill" onclick="addDays(1)">+1 Day</button>
+                            <button type="button" class="quick-select-pill" onclick="addDays(3)">+3 Days</button>
+                            <button type="button" class="quick-select-pill" onclick="addDays(7)">+1 Week</button>
+                        </div>
+
                         <div id="dateError" class="date-error" role="alert" aria-live="assertive">
                             <i class="fas fa-exclamation-circle me-1"></i> Return date must be equal to or after pickup date.
                         </div>
                     </div>
 
+                    <!-- Duration Badge (Replaces Text Input) -->
                     <div class="form-group">
-                        <label class="form-label" for="duration">Duration (Days)</label>
-                        <input type="text" id="duration" class="form-control" value="0" readonly aria-readonly="true">
+                        <label class="form-label text-muted small mb-1">Duration</label>
+                        <div id="durationDisplay" class="duration-display" role="status">
+                            <i class="fas fa-clock"></i>
+                            <span id="durationText">0 Days</span>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" id="totalCostLabel">Total Cost</label>
-                        <div class="total-cost-display p-3 bg-light rounded border d-flex align-items-center justify-content-between"
+                        <div id="totalCostContainer" class="p-3 bg-light rounded border d-flex align-items-center justify-content-between"
                              aria-labelledby="totalCostLabel"
                              aria-live="polite">
                             <span class="text-muted">Estimated total</span>
@@ -356,9 +377,10 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const pickupInput = document.getElementById('pickupDate');
                 const returnInput = document.getElementById('returnDate');
-                const durationInput = document.getElementById('duration');
+                const durationText = document.getElementById('durationText');
                 const proceedBtn = document.getElementById('btnProceed');
                 const dateError = document.getElementById('dateError');
+                const totalCostContainer = document.getElementById('totalCostContainer');
 
                 // Set min date to today
                 const today = new Date().toISOString().split('T')[0];
@@ -367,14 +389,11 @@
 
                 // Get rate per day from data attribute
                 const ratePerDay = parseFloat(document.getElementById('bookingForm').dataset.rate);
-                // Total cost input reference removed as we use helper function
 
-                // Make addDays available globally for the inline onclick handlers
+                // Make addDays available globally
                 window.addDays = function(days) {
                     if (!pickupInput.value) {
-                        // If no pickup date, set to today
                         pickupInput.value = new Date().toISOString().split('T')[0];
-                        // Trigger change event to set min return date
                         pickupInput.dispatchEvent(new Event('change'));
                     }
 
@@ -392,16 +411,11 @@
 
                     if (pickupInput.value && returnInput.value) {
                         if (returnDate >= pickup) {
-                            // Calculate difference in days
                             const diffTime = Math.abs(returnDate - pickup);
                             let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            if (diffDays === 0) diffDays = 1;
 
-                            // If same day, count as 1 day
-                            if (diffDays === 0) {
-                                diffDays = 1;
-                            }
-
-                            durationInput.value = diffDays;
+                            durationText.textContent = diffDays + (diffDays === 1 ? ' Day' : ' Days');
 
                             // Calculate total cost
                             const totalCost = diffDays * ratePerDay;
@@ -428,22 +442,22 @@
                     const displayEl = document.getElementById('totalCostDisplay');
                     const hiddenInput = document.getElementById('totalCost');
 
-                    // Simple animation effect
-                    displayEl.style.opacity = '0.5';
-                    setTimeout(() => {
-                        displayEl.textContent = 'RM ' + amount.toFixed(2);
-                        hiddenInput.value = amount.toFixed(2);
-                        displayEl.style.opacity = '1';
-                    }, 150);
+                    // Animation
+                    totalCostContainer.classList.remove('pulse-highlight');
+                    void totalCostContainer.offsetWidth; // Trigger reflow
+                    totalCostContainer.classList.add('pulse-highlight');
+
+                    displayEl.textContent = 'RM ' + amount.toFixed(2);
+                    hiddenInput.value = amount.toFixed(2);
                 }
 
                 function resetFormState() {
-                    durationInput.value = '0';
+                    durationText.textContent = '0 Days';
                     updatePriceDisplay(0);
+                    // Remove pulse if reset happens (optional)
                 }
 
                 pickupInput.addEventListener('change', function () {
-                    // Update return date min value when pickup changes
                     returnInput.min = this.value;
                     if (returnInput.value && returnInput.value < this.value) {
                         returnInput.value = this.value;
