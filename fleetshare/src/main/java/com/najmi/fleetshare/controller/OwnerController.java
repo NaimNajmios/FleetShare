@@ -848,6 +848,51 @@ public class OwnerController {
         owner.setUpdatedAt(LocalDateTime.now());
         fleetOwnerRepository.save(owner);
 
+        // Update Address
+        String addressLine1 = profileData.get("addressLine1");
+        String addressLine2 = profileData.get("addressLine2");
+        String city = profileData.get("city");
+        String state = profileData.get("state");
+        String postalCode = profileData.get("postalCode");
+        String latitudeStr = profileData.get("latitude");
+        String longitudeStr = profileData.get("longitude");
+
+        if (addressLine1 != null && !addressLine1.trim().isEmpty()) {
+            com.najmi.fleetshare.entity.Address address = addressRepository
+                    .findLatestAddressByUserId(sessionUser.getUserId())
+                    .orElse(new com.najmi.fleetshare.entity.Address());
+
+            if (address.getAddressId() == null) {
+                address.setAddressUserId(sessionUser.getUserId());
+                address.setCreatedAt(LocalDateTime.now());
+            }
+
+            address.setAddressLine1(addressLine1.trim());
+            address.setAddressLine2(addressLine2 != null ? addressLine2.trim() : null);
+            address.setCity(city != null ? city.trim() : null);
+            address.setState(state != null ? state.trim() : null);
+            address.setPostalCode(postalCode != null ? postalCode.trim() : null);
+
+            if (latitudeStr != null && !latitudeStr.isEmpty()) {
+                try {
+                    address.setLatitude(Double.parseDouble(latitudeStr));
+                } catch (NumberFormatException e) {
+                    // Ignore invalid lat
+                }
+            }
+
+            if (longitudeStr != null && !longitudeStr.isEmpty()) {
+                try {
+                    address.setLongitude(Double.parseDouble(longitudeStr));
+                } catch (NumberFormatException e) {
+                    // Ignore invalid lng
+                }
+            }
+
+            address.setUpdatedAt(LocalDateTime.now());
+            addressRepository.save(address);
+        }
+
         // Update session
         sessionUser.getOwnerDetails().setBusinessName(businessName.trim());
         sessionUser.getOwnerDetails().setContactPhone(contactPhone != null ? contactPhone.trim() : null);
