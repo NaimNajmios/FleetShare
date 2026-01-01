@@ -49,6 +49,7 @@ public class FileStorageService {
      * @return The relative URL path to access the image
      */
     public String storeVehicleImage(MultipartFile file, Long vehicleId) throws IOException {
+        validateImageFile(file);
         String filename = generateFilename("vehicle", vehicleId, getFileExtension(file.getOriginalFilename()));
         Path targetPath = Paths.get(vehicleImagesDir).resolve(filename);
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
@@ -63,6 +64,7 @@ public class FileStorageService {
      * @return The relative URL path to access the image
      */
     public String storeProfileImage(MultipartFile file, Long userId) throws IOException {
+        validateImageFile(file);
         String filename = generateFilename("profile", userId, getFileExtension(file.getOriginalFilename()));
         Path targetPath = Paths.get(profileImagesDir).resolve(filename);
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
@@ -77,6 +79,10 @@ public class FileStorageService {
      * @return The relative URL path to access the document
      */
     public String storePaymentProof(MultipartFile file, Long bookingId) throws IOException {
+        // Payment proofs can be images or PDFs
+        if (!isValidDocumentFile(file)) {
+             throw new IllegalArgumentException("Invalid document type. Allowed: PDF, JPG, PNG");
+        }
         String filename = generateFilename("payment", bookingId, getFileExtension(file.getOriginalFilename()));
         Path targetPath = Paths.get(paymentProofsDir).resolve(filename);
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
@@ -112,33 +118,106 @@ public class FileStorageService {
     }
 
     /**
-     * Extract file extension from filename
+     * Extract file extension from filename and normalize
      */
     private String getFileExtension(String filename) {
         if (filename == null || !filename.contains(".")) {
-            return "";
+            return ".jpg"; // Default to safe extension if none provided
         }
-        return filename.substring(filename.lastIndexOf("."));
+        return filename.substring(filename.lastIndexOf(".")).toLowerCase();
     }
 
     /**
      * Validate if file is an allowed image type
      */
     public boolean isValidImageFile(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && (contentType.equals("image/jpeg") ||
-                contentType.equals("image/png") ||
-                contentType.equals("image/gif") ||
-                contentType.equals("image/webp"));
+        try {
+            validateImageFile(file);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Validates image file content using magic bytes and extension
+     */
+    private void validateImageFile(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        String extension = getFileExtension(file.getOriginalFilename());
+        if (!isAllowedImageExtension(extension)) {
+            throw new IllegalArgumentException("Invalid file extension. Allowed: .jpg, .jpeg, .png, .gif, .webp");
+        }
+
+        if (!hasValidImageSignature(file)) {
+            throw new IllegalArgumentException("Invalid file content. Not a valid image.");
+        }
+    }
+
+    private boolean isAllowedImageExtension(String extension) {
+        return extension.equals(".jpg") || extension.equals(".jpeg") ||
+               extension.equals(".png") || extension.equals(".gif") ||
+               extension.equals(".webp");
+    }
+
+    private boolean hasValidImageSignature(MultipartFile file) throws IOException {
+        try (java.io.InputStream is = file.getInputStream()) {
+            byte[] header = new byte[8];
+            if (is.read(header) < 4) return false;
+
+            // JPEG: FF D8 FF
+            if (header[0] == (byte) 0xFF && header[1] == (byte) 0xD8 && header[2] == (byte) 0xFF) return true;
+            // PNG: 89 50 4E 47
+            if (header[0] == (byte) 0x89 && header[1] == (byte) 0x50 && header[2] == (byte) 0x4E && header[3] == (byte) 0x47) return true;
+            // GIF: 47 49 46 38
+            if (header[0] == (byte) 0x47 && header[1] == (byte) 0x49 && header[2] == (byte) 0x46 && header[3] == (byte) 0x38) return true;
+             // WEBP (RIFF...WEBP)
+            if (header[0] == (byte) 0x52 && header[1] == (byte) 0x49 && header[2] == (byte) 0x46 && header[3] == (byte) 0x46) return true;
+
+            return false;
+        }
     }
 
     /**
      * Validate if file is an allowed document type (for payment proofs)
      */
     public boolean isValidDocumentFile(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && (contentType.equals("image/jpeg") ||
-                contentType.equals("image/png") ||
-                contentType.equals("application/pdf"));
+        try {
+            if (file.isEmpty()) {
+                return false;
+            }
+
+            // Check extension
+            String extension = getFileExtension(file.getOriginalFilename());
+            boolean isImage = isAllowedImageExtension(extension);
+            boolean isPdf = extension.equals(".pdf");
+
+            if (!isImage && !isPdf) {
+                return false;
+            }
+
+            // Check magic bytes
+            if (isImage) {
+                return hasValidImageSignature(file);
+            } else {
+                return hasValidPdfSignature(file);
+            }
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private boolean hasValidPdfSignature(MultipartFile file) throws IOException {
+        try (java.io.InputStream is = file.getInputStream()) {
+            byte[] header = new byte[4];
+            if (is.read(header) < 4) return false;
+
+            // PDF: 25 50 44 46 (%PDF)
+            return header[0] == (byte) 0x25 && header[1] == (byte) 0x50 &&
+                   header[2] == (byte) 0x44 && header[3] == (byte) 0x46;
+        }
     }
 }
