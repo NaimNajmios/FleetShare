@@ -854,4 +854,39 @@ public class OwnerController {
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
     }
+
+    @PostMapping("/profile/image")
+    @ResponseBody
+    public ResponseEntity<?> uploadProfileImage(
+            @RequestParam("image") MultipartFile file,
+            HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            // Store the profile image
+            String imageUrl = fileStorageService.storeProfileImage(file, sessionUser.getUserId());
+
+            // Update user profile image URL
+            com.najmi.fleetshare.entity.User user = userRepository.findById(sessionUser.getUserId()).orElse(null);
+            if (user == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+            }
+
+            user.setProfileImageUrl(imageUrl);
+            userRepository.save(user);
+
+            // Update session
+            sessionUser.setProfileImageUrl(imageUrl);
+
+            return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload: " + e.getMessage()));
+        }
+    }
 }
