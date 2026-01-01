@@ -1,80 +1,222 @@
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="toast">
     <style>
-        .toast-notification {
+        .toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            color: white;
-            font-weight: 500;
-            z-index: 9999;
+            top: 24px;
+            right: 24px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast-notification {
+            pointer-events: auto;
+            min-width: 320px;
+            max-width: 420px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: white;
+            color: #1f2937;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
             opacity: 0;
             transform: translateX(100px);
-            transition: all 0.3s;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-left: 5px solid transparent;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
             display: flex;
             align-items: center;
+            justify-content: center;
+            margin-top: 2px;
         }
 
+        .toast-icon i {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+            line-height: 1.4;
+            color: #111827;
+        }
+
+        .toast-message {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .toast-close {
+            flex-shrink: 0;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            margin-top: -4px;
+            margin-right: -4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            color: #4b5563;
+            background-color: #f3f4f6;
+        }
+
+        /* Success Variant */
         .toast-success {
-            background: linear-gradient(135deg, #10b981, #059669);
+            border-left-color: #10b981;
+        }
+        .toast-success .toast-icon {
+            color: #10b981;
         }
 
+        /* Error Variant */
         .toast-error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-left-color: #ef4444;
+        }
+        .toast-error .toast-icon {
+            color: #ef4444;
         }
 
-        .toast-notification i {
-            font-size: 1.25rem;
-            margin-right: 0.5rem;
+        /* Info Variant */
+        .toast-info {
+            border-left-color: #3b82f6;
+        }
+        .toast-info .toast-icon {
+            color: #3b82f6;
+        }
+
+        /* Warning Variant */
+        .toast-warning {
+            border-left-color: #f59e0b;
+        }
+        .toast-warning .toast-icon {
+            color: #f59e0b;
         }
     </style>
 
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
     <script th:inline="javascript">
-        function showToast(message, type) {
-            const existing = document.querySelector('.toast-notification');
-            if (existing) existing.remove();
+        (function() {
+            const Toast = {
+                container: document.getElementById('toast-container'),
 
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+                show(message, type = 'info', title = '') {
+                    if (!this.container) return;
 
-            // Use MDI icons if available, otherwise fallback to Font Awesome
-            let iconClass = type === 'success' ? 'mdi mdi-check-circle' : 'mdi mdi-alert-circle';
+                    let iconClass = 'mdi-information';
+                    let defaultTitle = 'Info';
 
-            // Simple check if we are on renter side (which might use FA)
-            // But we will ensure MDI is loaded on all layouts for consistency
+                    switch(type) {
+                        case 'success':
+                            iconClass = 'mdi-check-circle';
+                            defaultTitle = 'Success';
+                            break;
+                        case 'error':
+                            iconClass = 'mdi-alert-circle';
+                            defaultTitle = 'Error';
+                            break;
+                        case 'warning':
+                            iconClass = 'mdi-alert';
+                            defaultTitle = 'Warning';
+                            break;
+                    }
 
-            toast.innerHTML = `<i class="${iconClass}"></i>${message}`;
-            document.body.appendChild(toast);
+                    if (!title) title = defaultTitle;
 
-            // Trigger reflow
-            toast.offsetHeight;
+                    const toast = document.createElement('div');
+                    toast.className = `toast-notification toast-${type}`;
+                    toast.setAttribute('role', 'alert');
 
-            setTimeout(() => {
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateX(0)';
-            }, 10);
+                    toast.innerHTML = `
+                        <div class="toast-icon">
+                            <i class="mdi ${iconClass}"></i>
+                        </div>
+                        <div class="toast-content">
+                            <div class="toast-title">${title}</div>
+                            <div class="toast-message">${message}</div>
+                        </div>
+                        <button class="toast-close" aria-label="Close">
+                            <i class="mdi mdi-close" style="font-size: 1.2rem;"></i>
+                        </button>
+                    `;
 
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+                    const closeBtn = toast.querySelector('.toast-close');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            this.dismiss(toast);
+                        });
+                    }
 
-        // Check for flash messages on load
-        document.addEventListener('DOMContentLoaded', function () {
-            /*[[${successMessage}]]*/
-            const successMsg = [[${ successMessage }]];
-            /*[[${errorMessage}]]*/
-            const errorMsg = [[${ errorMessage }]];
+                    this.container.appendChild(toast);
 
-            if (successMsg) {
-                showToast(successMsg, 'success');
-            }
-            if (errorMsg) {
-                showToast(errorMsg, 'error');
-            }
-        });
+                    requestAnimationFrame(() => {
+                        toast.classList.add('show');
+                    });
+
+                    const duration = type === 'error' ? 6000 : 4000;
+                    setTimeout(() => {
+                        this.dismiss(toast);
+                    }, duration);
+                },
+
+                dismiss(toast) {
+                    if (!toast) return;
+                    toast.classList.remove('show');
+                    toast.addEventListener('transitionend', () => {
+                        if (toast.parentNode) toast.parentNode.removeChild(toast);
+                    });
+                }
+            };
+
+            window.showToast = (msg, type, title) => Toast.show(msg, type, title);
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Flash Attributes
+                /*[[${successMessage}]]*/
+                const successMsg = [[${successMessage}]];
+                if (successMsg) Toast.show(successMsg, 'success');
+
+                /*[[${errorMessage}]]*/
+                const errorMsg = [[${errorMessage}]];
+                if (errorMsg) Toast.show(errorMsg, 'error');
+
+                /*[[${infoMessage}]]*/
+                const infoMsg = [[${infoMessage}]];
+                if (infoMsg) Toast.show(infoMsg, 'info');
+
+                /*[[${warningMessage}]]*/
+                const warningMsg = [[${warningMessage}]];
+                if (warningMsg) Toast.show(warningMsg, 'warning');
+            });
+        })();
     </script>
 </th:block>
