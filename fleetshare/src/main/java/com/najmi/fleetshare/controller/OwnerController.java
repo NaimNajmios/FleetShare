@@ -82,6 +82,9 @@ public class OwnerController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private com.najmi.fleetshare.service.FileStorageService fileStorageService;
+
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -365,47 +368,16 @@ public class OwnerController {
         }
 
         try {
-            // Validate file
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "No file uploaded"));
-            }
-
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Only image files are allowed"));
-            }
-
-            // Create uploads directory if it doesn't exist (external to src for runtime
-            // access)
-            String uploadDir = "C:/fleetshare-uploads/vehicles";
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            // Generate unique filename
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename != null && originalFilename.contains(".")
-                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                    : ".jpg";
-            String uniqueFilename = "vehicle_" + vehicleId + "_" + UUID.randomUUID().toString().substring(0, 8)
-                    + extension;
-
-            // Save file
-            Path filePath = uploadPath.resolve(uniqueFilename);
-            Files.copy(file.getInputStream(), filePath);
-
-            // Update database with new image URL
-            String imageUrl = "/uploads/vehicles/" + uniqueFilename;
+            String imageUrl = fileStorageService.storeVehicleImage(file, vehicleId);
             Long fleetOwnerId = user.getOwnerDetails().getFleetOwnerId();
             vehicleManagementService.updateVehicleImage(vehicleId, fleetOwnerId, imageUrl);
 
             return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
-        } catch (IOException e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload image: " + e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

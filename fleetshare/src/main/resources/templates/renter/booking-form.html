@@ -90,11 +90,100 @@
                 padding: 2rem;
             }
 
+            /* Progress Stepper */
+            .stepper {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 2rem;
+                position: relative;
+            }
+
+            .step {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                z-index: 2;
+                position: relative;
+            }
+
+            .step-circle {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #e9ecef;
+                color: #6c757d;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                transition: all 0.3s ease;
+            }
+
+            .step.active .step-circle {
+                background: #4B49AC;
+                color: white;
+                box-shadow: 0 0 0 4px rgba(75, 73, 172, 0.2);
+            }
+
+            .step.completed .step-circle {
+                background: #10b981;
+                color: white;
+            }
+
+            .step-label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #6c757d;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .step.active .step-label {
+                color: #4B49AC;
+            }
+
+            .step-line {
+                flex: 1;
+                height: 2px;
+                background: #e9ecef;
+                margin: 0 10px 18px 10px;
+                z-index: 1;
+            }
+
+            /* Quick Select Pills */
+            .quick-select-pills {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+                flex-wrap: wrap;
+            }
+
+            .quick-select-pill {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                border: 1px solid #dee2e6;
+                background: #f8f9fa;
+                color: #6c757d;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                font-weight: 500;
+            }
+
+            .quick-select-pill:hover {
+                background: #e9ecef;
+                border-color: #4B49AC;
+                color: #4B49AC;
+                transform: translateY(-1px);
+            }
+
             .form-title {
                 font-size: 1.5rem;
                 font-weight: 700;
                 color: #212529;
-                margin-bottom: 2rem;
+                margin-bottom: 1.5rem;
             }
 
             .form-group {
@@ -108,24 +197,32 @@
                 margin-bottom: 0.5rem;
             }
 
-            .form-control {
-                width: 100%;
-                padding: 0.75rem 1rem;
-                font-size: 1rem;
-                border: 1px solid #ced4da;
+            /* Duration Display */
+            .duration-display {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 1rem;
+                background-color: #f0fdf4; /* Light green bg */
+                border: 1px solid #bbf7d0;
                 border-radius: 0.5rem;
-                transition: border-color 0.2s ease;
+                color: #166534;
+                font-weight: 600;
             }
 
-            .form-control:focus {
-                border-color: #0d6efd;
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+            .duration-display i {
+                font-size: 1.1rem;
             }
 
-            .form-control[readonly] {
-                background-color: #e9ecef;
-                cursor: not-allowed;
+            /* Animation */
+            @keyframes pulse-highlight {
+                0% { background-color: #f8f9fa; transform: scale(1); }
+                50% { background-color: #e0f2fe; transform: scale(1.02); }
+                100% { background-color: #f8f9fa; transform: scale(1); }
+            }
+
+            .pulse-highlight {
+                animation: pulse-highlight 0.4s ease-out;
             }
 
             .btn-proceed {
@@ -195,34 +292,80 @@
 
             <!-- Right: Booking Form -->
             <div class="booking-form-card">
+                <!-- Progress Stepper -->
+                <div class="stepper" role="list" aria-label="Booking Progress">
+                    <div class="step active" role="listitem" aria-current="step">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Select Dates</div>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" role="listitem">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Review</div>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" role="listitem">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Payment</div>
+                    </div>
+                </div>
+
                 <h1 class="form-title">Select Rental Dates</h1>
 
                 <form id="bookingForm" th:action="@{/renter/vehicles/{id}/book/review(id=${vehicle.vehicleId})}"
                     method="POST" th:data-rate="${vehicle.ratePerDay}">
+
+                    <!-- Floating Labels for Pickup -->
+                    <div class="form-floating mb-3">
+                        <input type="date" id="pickupDate" name="pickupDate" class="form-control" placeholder="Select date" required aria-required="true">
+                        <label for="pickupDate">Pickup Date</label>
+                    </div>
+
+                    <!-- Floating Labels for Return -->
+                    <div class="form-group mb-4">
+                        <div class="form-floating">
+                            <input type="date" id="returnDate" name="returnDate" class="form-control" placeholder="Select date" required aria-required="true" aria-describedby="dateError">
+                            <label for="returnDate">Return Date</label>
+                        </div>
+
+                        <!-- Quick Select Pills -->
+                        <div class="quick-select-pills">
+                            <span class="text-muted small align-self-center me-1">Quick Select:</span>
+                            <button type="button" class="quick-select-pill" onclick="addDays(1)">+1 Day</button>
+                            <button type="button" class="quick-select-pill" onclick="addDays(3)">+3 Days</button>
+                            <button type="button" class="quick-select-pill" onclick="addDays(7)">+1 Week</button>
+                        </div>
+
+                        <div id="dateError" class="date-error" role="alert" aria-live="assertive">
+                            <i class="fas fa-exclamation-circle me-1"></i> Return date must be equal to or after pickup date.
+                        </div>
+                    </div>
+
+                    <!-- Duration Badge (Replaces Text Input) -->
                     <div class="form-group">
-                        <label class="form-label">Pickup Date</label>
-                        <input type="date" id="pickupDate" name="pickupDate" class="form-control" required>
+                        <label class="form-label text-muted small mb-1">Duration</label>
+                        <div id="durationDisplay" class="duration-display" role="status">
+                            <i class="fas fa-clock"></i>
+                            <span id="durationText">0 Days</span>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Return Date</label>
-                        <input type="date" id="returnDate" name="returnDate" class="form-control" required>
-                        <div id="dateError" class="date-error">Return date must be equal to or after pickup date.</div>
+                        <label class="form-label" id="totalCostLabel">Total Cost</label>
+                        <div id="totalCostContainer" class="p-3 bg-light rounded border d-flex align-items-center justify-content-between"
+                             aria-labelledby="totalCostLabel"
+                             aria-live="polite">
+                            <span class="text-muted">Estimated total</span>
+                            <span id="totalCostDisplay" class="h3 mb-0 text-primary fw-bold">RM 0.00</span>
+                        </div>
+                        <input type="hidden" id="totalCost" name="totalCost" value="0.00">
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Duration (Days)</label>
-                        <input type="text" id="duration" class="form-control" value="0" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Total Cost</label>
-                        <input type="text" id="totalCost" class="form-control" value="RM 0.00" readonly
-                            style="font-weight: 700; color: #0d6efd; font-size: 1.25rem;">
-                    </div>
-
-                    <button type="submit" id="btnProceed" class="btn-proceed" disabled>
-                        PROCEED TO CONFIRMATION
+                    <button type="submit" id="btnProceed" class="btn-proceed d-flex align-items-center justify-content-center gap-2" disabled>
+                        <span>PROCEED TO REVIEW</span>
+                        <div class="spinner-border spinner-border-sm d-none" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
                     </button>
                 </form>
             </div>
@@ -234,9 +377,10 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const pickupInput = document.getElementById('pickupDate');
                 const returnInput = document.getElementById('returnDate');
-                const durationInput = document.getElementById('duration');
+                const durationText = document.getElementById('durationText');
                 const proceedBtn = document.getElementById('btnProceed');
                 const dateError = document.getElementById('dateError');
+                const totalCostContainer = document.getElementById('totalCostContainer');
 
                 // Set min date to today
                 const today = new Date().toISOString().split('T')[0];
@@ -245,7 +389,21 @@
 
                 // Get rate per day from data attribute
                 const ratePerDay = parseFloat(document.getElementById('bookingForm').dataset.rate);
-                const totalCostInput = document.getElementById('totalCost');
+
+                // Make addDays available globally
+                window.addDays = function(days) {
+                    if (!pickupInput.value) {
+                        pickupInput.value = new Date().toISOString().split('T')[0];
+                        pickupInput.dispatchEvent(new Event('change'));
+                    }
+
+                    const pickup = new Date(pickupInput.value);
+                    const newReturn = new Date(pickup);
+                    newReturn.setDate(pickup.getDate() + days);
+
+                    returnInput.value = newReturn.toISOString().split('T')[0];
+                    updateDuration();
+                };
 
                 function updateDuration() {
                     const pickup = new Date(pickupInput.value);
@@ -253,44 +411,74 @@
 
                     if (pickupInput.value && returnInput.value) {
                         if (returnDate >= pickup) {
-                            // Calculate difference in days
                             const diffTime = Math.abs(returnDate - pickup);
                             let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            if (diffDays === 0) diffDays = 1;
 
-                            // If same day, count as 1 day
-                            if (diffDays === 0) {
-                                diffDays = 1;
-                            }
-
-                            durationInput.value = diffDays;
+                            durationText.textContent = diffDays + (diffDays === 1 ? ' Day' : ' Days');
 
                             // Calculate total cost
                             const totalCost = diffDays * ratePerDay;
-                            totalCostInput.value = 'RM ' + totalCost.toFixed(2);
+                            updatePriceDisplay(totalCost);
 
                             proceedBtn.disabled = false;
                             dateError.style.display = 'none';
+                            returnInput.classList.remove('is-invalid');
                         } else {
-                            durationInput.value = '0';
-                            totalCostInput.value = 'RM 0.00';
+                            resetFormState();
                             proceedBtn.disabled = true;
                             dateError.style.display = 'block';
+                            returnInput.classList.add('is-invalid');
                         }
                     } else {
-                        durationInput.value = '0';
-                        totalCostInput.value = 'RM 0.00';
+                        resetFormState();
                         proceedBtn.disabled = true;
                         dateError.style.display = 'none';
+                        returnInput.classList.remove('is-invalid');
                     }
                 }
 
+                function updatePriceDisplay(amount) {
+                    const displayEl = document.getElementById('totalCostDisplay');
+                    const hiddenInput = document.getElementById('totalCost');
+
+                    // Animation
+                    totalCostContainer.classList.remove('pulse-highlight');
+                    void totalCostContainer.offsetWidth; // Trigger reflow
+                    totalCostContainer.classList.add('pulse-highlight');
+
+                    displayEl.textContent = 'RM ' + amount.toFixed(2);
+                    hiddenInput.value = amount.toFixed(2);
+                }
+
+                function resetFormState() {
+                    durationText.textContent = '0 Days';
+                    updatePriceDisplay(0);
+                    // Remove pulse if reset happens (optional)
+                }
+
                 pickupInput.addEventListener('change', function () {
-                    // Update return date min value when pickup changes
                     returnInput.min = this.value;
+                    if (returnInput.value && returnInput.value < this.value) {
+                        returnInput.value = this.value;
+                    }
                     updateDuration();
                 });
 
                 returnInput.addEventListener('change', updateDuration);
+
+                // Handle Form Submission
+                const form = document.getElementById('bookingForm');
+                form.addEventListener('submit', function(e) {
+                    if (form.checkValidity()) {
+                        const btnText = proceedBtn.querySelector('span');
+                        const spinner = proceedBtn.querySelector('.spinner-border');
+
+                        proceedBtn.disabled = true;
+                        btnText.textContent = 'Processing...';
+                        spinner.classList.remove('d-none');
+                    }
+                });
             });
         </script>
     </th:block>

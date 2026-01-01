@@ -186,19 +186,14 @@ public class RenterController {
 
     @PostMapping("/profile")
     @ResponseBody
-    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileData, HttpSession session) {
+    public ResponseEntity<?> updateProfile(@jakarta.validation.Valid @RequestBody com.najmi.fleetshare.dto.RenterProfileUpdateRequest request, HttpSession session) {
         SessionUser sessionUser = SessionHelper.getCurrentUser(session);
         if (sessionUser == null || sessionUser.getRenterDetails() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
         }
 
-        String fullName = profileData.get("fullName");
-        String phoneNumber = profileData.get("phoneNumber");
-
-        // Validation
-        if (fullName == null || fullName.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Full name is required"));
-        }
+        String fullName = request.getFullName();
+        String phoneNumber = request.getPhoneNumber();
 
         // Find and update renter entity
         Renter renter = renterRepository.findByUserId(sessionUser.getUserId()).orElse(null);
