@@ -127,6 +127,7 @@ public class UserManagementService {
         dto.setEmail(user.getEmail());
         dto.setUserRole(user.getUserRole().name());
         dto.setIsActive(user.getIsActive());
+        dto.setProfileImageUrl(user.getProfileImageUrl());
 
         // Get role-specific info
         if ("owner".equalsIgnoreCase(userType)) {
@@ -259,24 +260,41 @@ public class UserManagementService {
             }
         }
 
-        // Update or create address if address fields provided
+        // Create new address record if address fields changed (maintains history with
+        // effective dates)
         if (dto.getAddressLine1() != null && !dto.getAddressLine1().trim().isEmpty()) {
-            Address address = addressRepository.findLatestAddressByUserId(userId).orElse(null);
-            if (address == null) {
-                // Create new address
-                address = new Address();
-                address.setAddressUserId(userId);
-                address.setEffectiveStartDate(LocalDate.now());
-                address.setCreatedAt(LocalDateTime.now());
-            }
+            Address existingAddress = addressRepository.findLatestAddressByUserId(userId).orElse(null);
 
-            address.setAddressLine1(dto.getAddressLine1().trim());
-            address.setAddressLine2(dto.getAddressLine2() != null ? dto.getAddressLine2().trim() : null);
-            address.setCity(dto.getCity() != null ? dto.getCity().trim() : address.getCity());
-            address.setState(dto.getState() != null ? dto.getState().trim() : address.getState());
-            address.setPostalCode(dto.getPostalCode() != null ? dto.getPostalCode().trim() : address.getPostalCode());
-            address.setUpdatedAt(LocalDateTime.now());
-            addressRepository.save(address);
+            // Check if address actually changed (to avoid duplicate records)
+            boolean addressChanged = existingAddress == null ||
+                    !dto.getAddressLine1().trim().equals(existingAddress.getAddressLine1()) ||
+                    !String.valueOf(dto.getAddressLine2()).equals(String.valueOf(existingAddress.getAddressLine2())) ||
+                    !String.valueOf(dto.getCity()).equals(String.valueOf(existingAddress.getCity())) ||
+                    !String.valueOf(dto.getState()).equals(String.valueOf(existingAddress.getState())) ||
+                    !String.valueOf(dto.getPostalCode()).equals(String.valueOf(existingAddress.getPostalCode()));
+
+            if (addressChanged) {
+                // Always create a new address record with new effective date
+                Address newAddress = new Address();
+                newAddress.setAddressUserId(userId);
+                newAddress.setAddressLine1(dto.getAddressLine1().trim());
+                newAddress.setAddressLine2(dto.getAddressLine2() != null ? dto.getAddressLine2().trim() : null);
+                newAddress.setCity(dto.getCity() != null ? dto.getCity().trim()
+                        : (existingAddress != null ? existingAddress.getCity() : ""));
+                newAddress.setState(dto.getState() != null ? dto.getState().trim()
+                        : (existingAddress != null ? existingAddress.getState() : ""));
+                newAddress.setPostalCode(dto.getPostalCode() != null ? dto.getPostalCode().trim()
+                        : (existingAddress != null ? existingAddress.getPostalCode() : ""));
+                newAddress.setEffectiveStartDate(LocalDate.now());
+                newAddress.setCreatedAt(LocalDateTime.now());
+                newAddress.setUpdatedAt(LocalDateTime.now());
+                // Copy existing coordinates if available
+                if (existingAddress != null) {
+                    newAddress.setLatitude(existingAddress.getLatitude());
+                    newAddress.setLongitude(existingAddress.getLongitude());
+                }
+                addressRepository.save(newAddress);
+            }
         }
 
         return true;

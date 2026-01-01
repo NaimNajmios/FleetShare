@@ -216,13 +216,18 @@
                             <!-- Profile Header -->
                             <div class="profile-header">
                                 <div class="profile-avatar">
-                                    <div class="avatar-circle"
+                                    <img th:if="${userDetail.profileImageUrl != null}" th:src="@{${userDetail.profileImageUrl}}" class="avatar-image" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                                    <div class="avatar-circle" th:if="${userDetail.profileImageUrl == null}"
                                         th:text="${#strings.substring(userDetail.fullName ?: 'U', 0, 1)}">
                                         U
                                     </div>
                                     <div class="avatar-controls">
-                                        <button class="btn btn-sm btn-danger">Change Picture</button>
-                                        <button class="btn btn-sm btn-secondary">Reset</button>
+                                        <input type="file" id="profileImageInput" accept="image/*"
+                                            style="display: none;">
+                                        <button type="button" class="btn btn-sm btn-primary" id="changeImageBtn">
+                                            <i class="mdi mdi-camera"></i> Change
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-secondary">Reset</button>
                                     </div>
                                 </div>
                                 <div class="profile-info">

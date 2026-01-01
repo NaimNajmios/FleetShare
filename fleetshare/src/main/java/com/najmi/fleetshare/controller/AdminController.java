@@ -473,6 +473,32 @@ public class AdminController {
         }
     }
 
+    @PostMapping("/users/{userId}/profile-image")
+    @ResponseBody
+    public ResponseEntity<?> uploadUserProfileImage(@PathVariable Long userId,
+            @RequestParam("image") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            // Store the profile image
+            String imageUrl = fileStorageService.storeProfileImage(file, userId);
+
+            // Update user profile image URL
+            com.najmi.fleetshare.entity.User user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+            }
+
+            user.setProfileImageUrl(imageUrl);
+            userRepository.save(user);
+
+            return ResponseEntity.ok(Map.of("success", true, "imageUrl", imageUrl));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/vehicles/view/{vehicleId}")
     public String viewVehicle(@PathVariable Long vehicleId, Model model) {
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(vehicleId);

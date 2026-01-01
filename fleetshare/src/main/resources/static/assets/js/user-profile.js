@@ -9,6 +9,9 @@
     const formControls = document.querySelectorAll('.form-control');
     const selectControls = document.querySelectorAll('select.form-control');
 
+    // Profile image file to be uploaded on save
+    let selectedImageFile = null;
+
     // Store original values
     const originalValues = {};
     formControls.forEach((input, index) => {
@@ -84,6 +87,16 @@
                 const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
+                // Upload profile image first if one was selected
+                if (selectedImageFile) {
+                    const imageUploaded = await uploadProfileImage(userId, csrfToken, csrfHeader);
+                    if (!imageUploaded) {
+                        showNotification('Failed to upload profile image', 'error');
+                        return;
+                    }
+                    selectedImageFile = null; // Clear after successful upload
+                }
+
                 const response = await fetch(`/admin/users/update/${userId}?type=${userType}`, {
                     method: 'POST',
                     headers: {
@@ -97,6 +110,8 @@
 
                 if (response.ok && result.success) {
                     showNotification(result.message || 'User updated successfully!', 'success');
+                    // Reload page after short delay to show updated data
+                    setTimeout(() => location.reload(), 1000);
 
                     // Switch back to view mode
                     container.id = 'viewMode';
@@ -121,21 +136,106 @@
         });
     }
 
-    // Notification helper function
+    // Notification helper function using toast (matches admin profile.html pattern)
     function showNotification(message, type) {
-        // Check if toastr is available (common notification library)
-        if (typeof toastr !== 'undefined') {
-            if (type === 'success') {
-                toastr.success(message);
-            } else if (type === 'error') {
-                toastr.error(message);
-            } else {
-                toastr.info(message);
+        // Remove any existing toast
+        const existing = document.querySelector('.toast-notification');
+        if (existing) existing.remove();
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:1rem 1.5rem;border-radius:0.75rem;color:white;font-weight:500;z-index:9999;opacity:0;transform:translateX(100px);transition:all 0.3s;box-shadow:0 10px 25px rgba(0,0,0,0.2);background:' + (type === 'success' ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#ef4444,#dc2626)');
+        toast.innerHTML = '<i class="mdi ' + (type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle') + ' mr-2"></i>' + message;
+        document.body.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(0)'; }, 10);
+        // Remove after 3 seconds
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    // Profile Image - Preview and upload on save
+    const changeImageBtn = document.getElementById('changeImageBtn');
+    const profileImageInput = document.getElementById('profileImageInput');
+    // Find avatar by class since it doesn't have an ID
+    const avatarCircle = document.querySelector('.avatar-circle');
+    const profileAvatar = document.querySelector('.profile-avatar');
+
+    if (changeImageBtn && profileImageInput) {
+        changeImageBtn.addEventListener('click', function () {
+            profileImageInput.click();
+        });
+
+        profileImageInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showNotification('Please select an image file', 'error');
+                return;
             }
-        } else {
-            // Fallback to alert
-            alert(message);
-        }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('Image size must be less than 5MB', 'error');
+                return;
+            }
+
+            // Store the file for later upload
+            selectedImageFile = file;
+
+            // Show preview in avatar
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                // Hide the letter avatar if exists
+                if (avatarCircle) {
+                    avatarCircle.style.display = 'none';
+                }
+
+                // Also hide existing profile image if any
+                const existingImg = document.querySelector('.profile-avatar > img:not(#avatarPreview)');
+                if (existingImg) {
+                    existingImg.style.display = 'none';
+                }
+
+                // Check if preview image already exists
+                let previewImg = document.getElementById('avatarPreview');
+                if (!previewImg) {
+                    previewImg = document.createElement('img');
+                    previewImg.id = 'avatarPreview';
+                    previewImg.style.cssText = 'width: 120px; height: 120px; border-radius: 50%; object-fit: cover;';
+                    // Insert at start of profile-avatar div
+                    if (profileAvatar) {
+                        profileAvatar.insertBefore(previewImg, profileAvatar.firstChild);
+                    }
+                }
+                previewImg.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            showNotification('Image selected. Click "Save Changes" to apply.', 'success');
+        });
+    }
+
+    // Helper function to upload profile image
+    async function uploadProfileImage(userId, csrfToken, csrfHeader) {
+        if (!selectedImageFile) return true; // No image to upload
+
+        const formData = new FormData();
+        formData.append('image', selectedImageFile);
+
+        const response = await fetch(`/admin/users/${userId}/profile-image`, {
+            method: 'POST',
+            headers: {
+                [csrfHeader]: csrfToken
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+        return response.ok && result.success;
     }
 
 })();
