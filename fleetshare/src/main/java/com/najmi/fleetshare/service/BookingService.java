@@ -63,7 +63,7 @@ public class BookingService {
         Set<Long> fleetOwnerIds = bookings.stream().map(Booking::getFleetOwnerId).collect(Collectors.toSet());
         Set<Long> bookingIds = bookings.stream().map(Booking::getBookingId).collect(Collectors.toSet());
 
-        // Bulk fetch related entities
+        // Bulk fetch related entities to booking services
         Map<Long, Renter> renterMap = renterRepository.findAllById(renterIds).stream()
                 .collect(Collectors.toMap(Renter::getRenterId, Function.identity()));
 
@@ -88,7 +88,8 @@ public class BookingService {
         // Bulk fetch invoices
         Map<Long, Invoice> invoiceMap = invoiceRepository.findByBookingIdIn(bookingIds).stream()
                 .collect(Collectors.groupingBy(Invoice::getBookingId,
-                        Collectors.collectingAndThen(Collectors.toList(), list -> list.isEmpty() ? null : list.get(0))));
+                        Collectors.collectingAndThen(Collectors.toList(),
+                                list -> list.isEmpty() ? null : list.get(0))));
 
         Set<Long> invoiceIds = invoiceMap.values().stream()
                 .filter(java.util.Objects::nonNull)
@@ -98,7 +99,8 @@ public class BookingService {
         // Bulk fetch payments
         Map<Long, Payment> paymentMap = paymentRepository.findByInvoiceIdIn(invoiceIds).stream()
                 .collect(Collectors.groupingBy(Payment::getInvoiceId,
-                        Collectors.collectingAndThen(Collectors.toList(), list -> list.isEmpty() ? null : list.get(0))));
+                        Collectors.collectingAndThen(Collectors.toList(),
+                                list -> list.isEmpty() ? null : list.get(0))));
 
         List<BookingDTO> bookingDTOs = new ArrayList<>();
 
@@ -240,10 +242,9 @@ public class BookingService {
         if (!userIds.isEmpty()) {
             userEmailMap = userRepository.findAllById(userIds).stream()
                     .collect(Collectors.toMap(
-                        User::getUserId,
-                        user -> user.getEmail() != null ? user.getEmail() : "Unknown User",
-                        (existing, replacement) -> existing
-                    ));
+                            User::getUserId,
+                            user -> user.getEmail() != null ? user.getEmail() : "Unknown User",
+                            (existing, replacement) -> existing));
         }
 
         List<BookingLogDTO> logDTOs = new ArrayList<>();
