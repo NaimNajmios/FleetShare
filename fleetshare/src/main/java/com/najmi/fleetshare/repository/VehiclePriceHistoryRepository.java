@@ -32,4 +32,16 @@ public interface VehiclePriceHistoryRepository extends JpaRepository<VehiclePric
 
     @Query("SELECT vph FROM VehiclePriceHistory vph WHERE vph.vehicleId IN :vehicleIds")
     List<VehiclePriceHistory> findByVehicleIdIn(java.util.Collection<Long> vehicleIds);
+
+    /**
+     * Finds the latest effective price for a list of vehicles in a single query.
+     * This avoids N+1 queries and loading the entire history into memory.
+     * Uses Window Function for optimal performance.
+     */
+    @Query(value = "SELECT * FROM (" +
+            "  SELECT *, ROW_NUMBER() OVER (PARTITION BY vehicle_id ORDER BY effective_start_date DESC) as rn " +
+            "  FROM vehiclepricehistory " +
+            "  WHERE vehicle_id IN :vehicleIds AND effective_start_date <= CURRENT_TIMESTAMP" +
+            ") t WHERE t.rn = 1", nativeQuery = true)
+    List<VehiclePriceHistory> findLatestPricesForVehicles(@Param("vehicleIds") java.util.Collection<Long> vehicleIds);
 }
