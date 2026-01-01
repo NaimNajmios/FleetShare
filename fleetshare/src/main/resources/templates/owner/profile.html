@@ -118,7 +118,7 @@
 
                         <!-- Avatar -->
                         <div class="d-flex align-items-center mb-4">
-                            <div class="avatar-circle mr-3">
+                            <div class="avatar-circle mr-3" id="avatar-container">
                                 <img th:if="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
                                     th:src="${user.profileImageUrl}" alt="Profile Photo">
                                 <i th:unless="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
@@ -133,6 +133,12 @@
                                 <span th:unless="${ownerDetails != null and ownerDetails.isVerified}"
                                     class="text-muted small">Not yet verified</span>
                             </div>
+                                <div class="mt-2 hidden" id="change-photo-btn">
+                                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('profileImageInput').click()">
+                                        <i class="mdi mdi-camera"></i> Change Photo
+                                    </button>
+                                </div>
                         </div>
 
                         <form id="profile-form">
@@ -354,7 +360,11 @@
     </div>
 
     <th:block layout:fragment="extra-js">
-        <script>
+                <script>
+            // Global variables
+            let selectedImageFile = null;
+            let originalValues = {};
+
             // Form elements
             const businessNameInput = document.getElementById('businessName');
             const contactPhoneInput = document.getElementById('contactPhone');
@@ -370,64 +380,30 @@
 
             const editableFields = [businessNameInput, contactPhoneInput, addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
 
-            let originalValues = {};
+            // Payment fields
+            const toyyibpaySecretKeyInput = document.getElementById('toyyibpaySecretKey');
+            const toyyibpayCategoryCodeInput = document.getElementById('toyyibpayCategoryCode');
+            const qrCodeUploadInput = document.getElementById('qrCodeUpload');
+            const paymentFields = [toyyibpaySecretKeyInput, toyyibpayCategoryCodeInput, qrCodeUploadInput].filter(f => f);
+
+            // Initialize original values
             editableFields.forEach(field => {
-                originalValues[field.id] = field.value;
+                if (field) originalValues[field.id] = field.value;
             });
 
-            btnEdit.addEventListener('click', function () {
-                editableFields.forEach(field => field.disabled = false);
-                btnEdit.classList.add('hidden');
-                btnSave.classList.remove('hidden');
-                btnCancel.classList.remove('hidden');
-            });
-
-            btnCancel.addEventListener('click', function () {
-                editableFields.forEach(field => {
-                    field.value = originalValues[field.id];
-                    field.disabled = true;
+            // Helper to upload profile image
+            async function uploadProfileImage(csrfToken, csrfHeader) {
+                if (!selectedImageFile) return true;
+                const formData = new FormData();
+                formData.append('image', selectedImageFile);
+                const response = await fetch('/owner/profile/image', {
+                    method: 'POST',
+                    headers: { [csrfHeader]: csrfToken },
+                    body: formData
                 });
-                btnEdit.classList.remove('hidden');
-                btnSave.classList.add('hidden');
-                btnCancel.classList.add('hidden');
-            });
-
-            btnSave.addEventListener('click', async function () {
-                const profileData = {
-                    businessName: businessNameInput.value,
-                    contactPhone: contactPhoneInput.value
-                };
-
-                try {
-                    // CSRF Protection
-                    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
-                    const response = await fetch('/owner/profile', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            [csrfHeader]: csrfToken
-                        },
-                        body: JSON.stringify(profileData)
-                    });
-                    const result = await response.json();
-                    if (response.ok && result.success) {
-                        originalValues['businessName'] = businessNameInput.value;
-                        originalValues['contactPhone'] = contactPhoneInput.value;
-                        showToast('Profile updated successfully!', 'success');
-                        editableFields.forEach(field => field.disabled = true);
-                        btnEdit.classList.remove('hidden');
-                        btnSave.classList.add('hidden');
-                        btnCancel.classList.add('hidden');
-                    } else {
-                        showToast(result.error || 'Failed to update profile', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showToast('An error occurred', 'error');
-                }
-            });
+                const result = await response.json();
+                return response.ok && result.success;
+            }
 
             function showToast(message, type) {
                 const existing = document.querySelector('.toast-notification');
@@ -441,123 +417,251 @@
                 setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
             }
 
-            document.getElementById('btn-change-password').addEventListener('click', function () {
-                alert('Change password modal will be implemented.');
-            });
-
-            document.getElementById('btn-logout').addEventListener('click', function () {
-                if (confirm('Are you sure you want to logout?')) {
-                    window.location.href = '/logout';
-                }
-            });
-
-        // Leaflet Map Initialization
-        (function initMap() {
-            var mapEl = document.getElementById('business-map');
-            if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
-                var lat = parseFloat(mapEl.dataset.lat);
-                var lng = parseFloat(mapEl.dataset.lng);
-                var businessName = mapEl.dataset.name || 'Business Location';
-                
-                // Load Leaflet CSS dynamically
-                var leafletCSS = document.createElement('link');
-                leafletCSS.rel = 'stylesheet';
-                leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-                document.head.appendChild(leafletCSS);
-                
-                // Load Leaflet JS dynamically
-                var leafletJS = document.createElement('script');
-                leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-                leafletJS.onload = function() {
-                    var map = L.map('business-map').setView([lat, lng], 15);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-                    L.marker([lat, lng])
-                        .addTo(map)
-                        .bindPopup('<strong>' + businessName + '</strong>')
-                        .openPopup();
-                    setTimeout(function() { map.invalidateSize(); }, 200);
-                };
-                document.head.appendChild(leafletJS);
-            }
-
-            // Payment Settings - Toggle Secret Key Visibility
-            const toggleSecretKeyBtn = document.getElementById('toggleSecretKey');
-            const secretKeyInput = document.getElementById('toyyibpaySecretKey');
-            if (toggleSecretKeyBtn && secretKeyInput) {
-                toggleSecretKeyBtn.addEventListener('click', function() {
-                    const icon = this.querySelector('i');
-                    if (secretKeyInput.type === 'password') {
-                        secretKeyInput.type = 'text';
-                        icon.classList.remove('ti-eye');
-                        icon.classList.add('ti-eye-off');
-                    } else {
-                        secretKeyInput.type = 'password';
-                        icon.classList.remove('ti-eye-off');
-                        icon.classList.add('ti-eye');
-                    }
+            // Event Listeners
+            if (btnEdit) {
+                btnEdit.addEventListener('click', function () {
+                    editableFields.forEach(field => { if (field) field.disabled = false; });
+                    paymentFields.forEach(field => { if (field) field.disabled = false; });
+                    btnEdit.classList.add('hidden');
+                    btnSave.classList.remove('hidden');
+                    btnCancel.classList.remove('hidden');
+                    const changePhotoBtn = document.getElementById('change-photo-btn');
+                    if (changePhotoBtn) changePhotoBtn.classList.remove('hidden');
                 });
             }
 
-            // Payment Settings - QR Code Preview
-            const qrCodeUpload = document.getElementById('qrCodeUpload');
-            const qrCodePreview = document.getElementById('qrCodePreview');
-            if (qrCodeUpload && qrCodePreview) {
-                qrCodeUpload.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        // Validate file size (max 2MB)
-                        if (file.size > 2 * 1024 * 1024) {
-                            alert('File size must be less than 2MB');
-                            this.value = '';
-                            return;
+            if (btnCancel) {
+                btnCancel.addEventListener('click', function () {
+                    editableFields.forEach(field => {
+                        if (field) {
+                            field.value = originalValues[field.id];
+                            field.disabled = true;
+                        }
+                    });
+                    paymentFields.forEach(field => { if (field) field.disabled = true; });
+                    btnEdit.classList.remove('hidden');
+                    btnSave.classList.add('hidden');
+                    btnCancel.classList.add('hidden');
+                    const changePhotoBtn = document.getElementById('change-photo-btn');
+                    if (changePhotoBtn) changePhotoBtn.classList.add('hidden');
+                    selectedImageFile = null; // Reset selected image
+                });
+            }
+
+            if (btnSave) {
+                btnSave.addEventListener('click', async function () {
+                    try {
+                        console.log('Save button clicked');
+                        
+                        // CSRF Protection
+                        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+                        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+                        
+                        if (!csrfTokenMeta || !csrfHeaderMeta) {
+                            throw new Error('CSRF tokens not found');
                         }
                         
-                        // Validate file type
-                        if (!file.type.startsWith('image/')) {
-                            alert('Please upload an image file');
-                            this.value = '';
-                            return;
+                        const csrfToken = csrfTokenMeta.getAttribute('content');
+                        const csrfHeader = csrfHeaderMeta.getAttribute('content');
+
+                        // Upload profile image first if selected
+                        if (selectedImageFile) {
+                            console.log('Uploading image...');
+                            const imageUploaded = await uploadProfileImage(csrfToken, csrfHeader);
+                            if (!imageUploaded) {
+                                showToast('Failed to upload profile image', 'error');
+                                return;
+                            }
+                            selectedImageFile = null;
                         }
-                        
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            qrCodePreview.innerHTML = '<img src="' + event.target.result + '" alt="Payment QR Code" style="max-width: 100%; max-height: 200px; border-radius: 8px;">';
+
+                        const profileData = {
+                            businessName: businessNameInput ? businessNameInput.value : '',
+                            contactPhone: contactPhoneInput ? contactPhoneInput.value : ''
                         };
-                        reader.readAsDataURL(file);
+
+                        console.log('Saving profile data...', profileData);
+                        const response = await fetch('/owner/profile', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                [csrfHeader]: csrfToken
+                            },
+                            body: JSON.stringify(profileData)
+                        });
                         
-                        // Update file label
-                        const label = document.querySelector('.custom-file-label');
-                        if (label) label.textContent = file.name;
+                        const result = await response.json();
+                        if (response.ok && result.success) {
+                            if (businessNameInput) originalValues['businessName'] = businessNameInput.value;
+                            if (contactPhoneInput) originalValues['contactPhone'] = contactPhoneInput.value;
+                            
+                            showToast('Profile updated successfully!', 'success');
+                            
+                            editableFields.forEach(field => { if (field) field.disabled = true; });
+                            paymentFields.forEach(field => { if (field) field.disabled = true; });
+                            
+                            btnEdit.classList.remove('hidden');
+                            btnSave.classList.add('hidden');
+                            btnCancel.classList.add('hidden');
+                            
+                            const changePhotoBtn = document.getElementById('change-photo-btn');
+                            if (changePhotoBtn) changePhotoBtn.classList.add('hidden');
+                            
+                            // Reload to show new image if uploaded
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast(result.error || 'Failed to update profile', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error saving profile:', error);
+                        showToast('An error occurred: ' + error.message, 'error');
                     }
                 });
             }
 
-            // Add payment fields to editable fields list
-            const toyyibpaySecretKeyInput = document.getElementById('toyyibpaySecretKey');
-            const toyyibpayCategoryCodeInput = document.getElementById('toyyibpayCategoryCode');
-            const qrCodeUploadInput = document.getElementById('qrCodeUpload');
-            
-            const paymentFields = [toyyibpaySecretKeyInput, toyyibpayCategoryCodeInput, qrCodeUploadInput].filter(f => f);
-            
-            // Extend edit functionality to include payment fields
-            const originalBtnEditHandler = btnEdit.onclick;
-            btnEdit.addEventListener('click', function() {
-                paymentFields.forEach(field => field.disabled = false);
-            });
-            
-            const originalBtnCancelHandler = btnCancel.onclick;
-            btnCancel.addEventListener('click', function() {
-                paymentFields.forEach(field => field.disabled = true);
-            });
-            
-            const originalBtnSaveHandler = btnSave.onclick;
-            btnSave.addEventListener('click', function() {
-                paymentFields.forEach(field => field.disabled = true);
-            });
-        })();
+            // Profile Image Input Handler
+            const profileImageInput = document.getElementById('profileImageInput');
+            if (profileImageInput) {
+                profileImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    if (!file.type.startsWith('image/')) {
+                        showToast('Please select an image file', 'error');
+                        return;
+                    }
+                    
+                    if (file.size > 5 * 1024 * 1024) {
+                        showToast('Image must be less than 5MB', 'error');
+                        return;
+                    }
+                    
+                    // Store file for upload on save
+                    selectedImageFile = file;
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const avatarContainer = document.getElementById('avatar-container');
+                        if (avatarContainer) {
+                            const existingIcon = avatarContainer.querySelector('.ti-user');
+                            const existingImg = avatarContainer.querySelector('img');
+                            
+                            if (existingIcon) existingIcon.style.display = 'none';
+                            if (existingImg) existingImg.style.display = 'none';
+                            
+                            let previewImg = document.getElementById('avatar-preview');
+                            if (!previewImg) {
+                                previewImg = document.createElement('img');
+                                previewImg.id = 'avatar-preview';
+                                previewImg.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+                                avatarContainer.insertBefore(previewImg, avatarContainer.firstChild);
+                            }
+                            previewImg.src = event.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    showToast('Image selected. Click Save to apply.', 'success');
+                });
+            }
+
+            // Other Event Listeners
+            const btnChangePassword = document.getElementById('btn-change-password');
+            if (btnChangePassword) {
+                btnChangePassword.addEventListener('click', function () {
+                    alert('Change password modal will be implemented.');
+                });
+            }
+
+            const btnLogout = document.getElementById('btn-logout');
+            if (btnLogout) {
+                btnLogout.addEventListener('click', function () {
+                    if (confirm('Are you sure you want to logout?')) {
+                        window.location.href = '/logout';
+                    }
+                });
+            }
+
+            // Leaflet Map Initialization
+            (function initMap() {
+                var mapEl = document.getElementById('business-map');
+                if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
+                    var lat = parseFloat(mapEl.dataset.lat);
+                    var lng = parseFloat(mapEl.dataset.lng);
+                    var businessName = mapEl.dataset.name || 'Business Location';
+                    
+                    // Load Leaflet JS dynamically
+                    var leafletJS = document.createElement('script');
+                    leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                    leafletJS.onload = function() {
+                        var map = L.map('business-map').setView([lat, lng], 15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors'
+                        }).addTo(map);
+                        L.marker([lat, lng])
+                            .addTo(map)
+                            .bindPopup('<strong>' + businessName + '</strong>')
+                            .openPopup();
+                        setTimeout(function() { map.invalidateSize(); }, 200);
+                    };
+                    document.head.appendChild(leafletJS);
+                }
+
+                // Payment Settings - Toggle Secret Key Visibility
+                const toggleSecretKeyBtn = document.getElementById('toggleSecretKey');
+                const secretKeyInput = document.getElementById('toyyibpaySecretKey');
+                if (toggleSecretKeyBtn && secretKeyInput) {
+                    toggleSecretKeyBtn.addEventListener('click', function() {
+                        const icon = this.querySelector('i');
+                        if (secretKeyInput.type === 'password') {
+                            secretKeyInput.type = 'text';
+                            icon.classList.remove('ti-eye');
+                            icon.classList.add('ti-eye-off');
+                        } else {
+                            secretKeyInput.type = 'password';
+                            icon.classList.remove('ti-eye-off');
+                            icon.classList.add('ti-eye');
+                        }
+                    });
+                }
+
+                // Payment Settings - QR Code Preview
+                const qrCodeUpload = document.getElementById('qrCodeUpload');
+                const qrCodePreview = document.getElementById('qrCodePreview');
+                if (qrCodeUpload && qrCodePreview) {
+                    qrCodeUpload.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            // Validate file size (max 2MB)
+                            if (file.size > 2 * 1024 * 1024) {
+                                alert('File size must be less than 2MB');
+                                this.value = '';
+                                return;
+                            }
+                            
+                            // Validate file type
+                            if (!file.type.startsWith('image/')) {
+                                alert('Please upload an image file');
+                                this.value = '';
+                                return;
+                            }
+                            
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                qrCodePreview.innerHTML = '<img src="' + event.target.result + '" alt="Payment QR Code" style="max-width: 100%; max-height: 200px; border-radius: 8px;">';
+                            };
+                            reader.readAsDataURL(file);
+                            
+                            // Update file label
+                            const label = document.querySelector('.custom-file-label');
+                            if (label) label.textContent = file.name;
+                        }
+                    });
+                }
+            })();
         </script></th:block>
 </body>
 
 </html>
+
