@@ -1,14 +1,11 @@
-## 2024-12-31 - [Insecure File Upload]
+## 2026-01-01 - Input Validation Pattern
 
-**Context:** `AdminController` and `OwnerController` implemented duplicate, manual file upload logic for vehicle images.
-**Vulnerability:** Arbitrary File Upload / Remote Code Execution (RCE)
-**Severity:** High
-**Root Cause:** The controllers relied solely on the client-provided `Content-Type` header (MIME sniffing) and the file extension without verifying the actual file content (Magic Bytes). This allowed attackers to upload malicious scripts (e.g., PHP, JSP) disguised as images.
+**Context:** `OwnerController` endpoints for creating and updating vehicles (`/owner/vehicles/add`, `/owner/vehicles/update/{id}`).
+**Vulnerability:** Insecure Design / Lack of Input Validation. The controller was accepting `AddVehicleRequest` DTOs without any validation annotations, relying solely on business logic which could be bypassed or fail on unexpected input types (e.g. negative numbers, massive strings).
+**Severity:** Medium
+**Root Cause:** Missing Bean Validation annotations on DTOs and missing `@Valid` checks in Controller methods.
 **Fix Applied:**
-1.  Enhanced `FileStorageService` to include robust validation:
-    *   **Magic Byte Validation:** Reads the first few bytes of the file stream to verify it matches known signatures for JPEG, PNG, GIF, WEBP, and PDF.
-    *   **Extension Whitelisting:** Strictly enforces allowed extensions (`.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.pdf`).
-    *   **Filename Sanitization:** Generates a unique filename (UUID + Timestamp) to prevent path traversal and overwrites.
-2.  Refactored `AdminController` and `OwnerController` to delegate file upload handling to `FileStorageService.storeVehicleImage()`.
-**Prevention:** Always validate file content server-side using file signatures (Magic Bytes), never trust client headers, and use a centralized service for file operations.
-**References:** CWE-434: Unrestricted Upload of File with Dangerous Type
+1. Annotated `AddVehicleRequest` with strict constraints (`@NotBlank`, `@Size`, `@Min`, `@Max`, `@PositiveOrZero`, `@DecimalMin`).
+2. Updated `OwnerController` to use `@Valid` on request bodies and check `BindingResult`.
+3. Implemented defensive error handling that redirects back to the form with a validation summary if errors occur.
+**Prevention:** Always use `@Valid` and Bean Validation annotations on all input DTOs.
