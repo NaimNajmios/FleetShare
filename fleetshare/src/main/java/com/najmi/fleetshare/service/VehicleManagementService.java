@@ -59,13 +59,12 @@ public class VehicleManagementService {
                 Set<Long> fleetOwnerIds = vehicles.stream().map(Vehicle::getFleetOwnerId).collect(Collectors.toSet());
 
                 // Bulk fetch prices
-                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findByVehicleIdIn(vehicleIds).stream()
-                                .collect(Collectors.groupingBy(VehiclePriceHistory::getVehicleId,
-                                                Collectors.collectingAndThen(
-                                                                Collectors.maxBy(Comparator.comparing(
-                                                                                VehiclePriceHistory::getEffectiveStartDate)),
-                                                                opt -> opt.map(VehiclePriceHistory::getRatePerDay)
-                                                                                .orElse(BigDecimal.ZERO))));
+                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findLatestPricesForVehicles(vehicleIds).stream()
+                                .collect(Collectors.toMap(
+                                                VehiclePriceHistory::getVehicleId,
+                                                VehiclePriceHistory::getRatePerDay,
+                                                (existing, replacement) -> existing // Should not happen with current query logic, but safe fallback
+                                ));
 
                 // Bulk fetch owners
                 Map<Long, FleetOwner> ownerMap = fleetOwnerRepository.findAllById(fleetOwnerIds).stream()
