@@ -28,7 +28,7 @@
 
             <!-- Header -->
             <div class="auth-header">
-                <h1 class="auth-title">Welcome Back to FleetShare</h1>
+                <h1 class="auth-title">Welcome Back</h1>
                 <p class="auth-subtitle">Please sign in to continue to your account</p>
             </div>
 
@@ -48,27 +48,35 @@
 
             <!-- Login Form -->
             <form class="auth-form" id="loginForm" th:action="@{/login}" method="post">
-                <!-- Email (Spring Security uses 'username' as default) -->
-                <div class="form-group">
-                    <label class="form-label" for="username">Email</label>
-                    <input type="text" class="form-input" id="username" name="username" placeholder="Enter your email"
-                        required autocomplete="username">
+                <!-- Email -->
+                <div class="form-group mb-4">
+                    <div class="form-floating">
+                        <input type="email" class="form-control" id="username" name="username"
+                            placeholder="name@example.com" required autocomplete="username">
+                        <label for="username">Email address</label>
+                    </div>
                 </div>
 
                 <!-- Password -->
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <div class="input-wrapper">
-                        <input type="password" class="form-input form-input-with-icon" id="password" name="password"
-                            placeholder="Enter your password" required autocomplete="current-password">
-                        <i class="mdi mdi-eye-off-outline input-icon-right" id="togglePassword" role="button"
-                           aria-label="Show password" tabindex="0"></i>
+                <div class="form-group mb-2">
+                    <div class="input-wrapper position-relative">
+                        <div class="form-floating">
+                            <input type="password" class="form-control form-input-with-icon" id="password" name="password"
+                                placeholder="Password" required autocomplete="current-password">
+                            <label for="password">Password</label>
+                        </div>
+                        <span class="input-icon-right toggle-password" data-target="password" role="button" aria-label="Show password" tabindex="0">
+                            <i class="mdi mdi-eye-off-outline"></i>
+                        </span>
                     </div>
-                    <a href="#" class="auth-link forgot-password-link">Forgot Password?</a>
+                </div>
+
+                <div class="form-group d-flex justify-content-end mb-4">
+                    <a href="#" class="auth-link forgot-password-link m-0">Forgot Password?</a>
                 </div>
 
                 <!-- Keep me signed in -->
-                <div class="form-group">
+                <div class="form-group mb-4">
                     <div class="form-checkbox-wrapper">
                         <input type="checkbox" class="form-checkbox" id="remember-me" name="remember-me">
                         <label class="form-checkbox-label" for="remember-me">
@@ -79,7 +87,7 @@
 
                 <!-- Login Button -->
                 <div class="form-group mb-0">
-                    <button type="submit" class="btn btn-primary" id="loginButton">
+                    <button type="submit" class="btn btn-primary btn-loading-inline" id="loginButton">
                         <span class="btn-text">Login</span>
                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
@@ -96,70 +104,8 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle URL Parameters for Toast
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('error')) {
-                window.showToast('Invalid email or password. Please try again.', 'error', 'Login Failed');
-            }
-            if (urlParams.has('logout')) {
-                window.showToast('You have been logged out successfully.', 'success', 'Logged Out');
-            }
-            if (urlParams.has('registered')) {
-                window.showToast('Registration successful! Please sign in.', 'success', 'Welcome');
-            }
-
-            // Password Toggle
-            const togglePassword = document.querySelector('#togglePassword');
-            const password = document.querySelector('#password');
-
-            if (togglePassword && password) {
-                togglePassword.addEventListener('click', function (e) {
-                    // toggle the type attribute
-                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                    password.setAttribute('type', type);
-
-                    // toggle the eye icon
-                    this.classList.toggle('mdi-eye-outline');
-                    this.classList.toggle('mdi-eye-off-outline');
-
-                    // update aria-label
-                    this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
-                });
-
-                // Add keyboard support for accessibility
-                togglePassword.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.click();
-                    }
-                });
-            }
-
-            // Form Loading State
-            const loginForm = document.getElementById('loginForm');
-            const loginButton = document.getElementById('loginButton');
-
-            if (loginForm && loginButton) {
-                loginForm.addEventListener('submit', function() {
-                    if (loginForm.checkValidity()) {
-                        loginButton.classList.add('btn-loading-inline');
-                        loginButton.disabled = true;
-
-                        // Show spinner
-                        const spinner = loginButton.querySelector('.spinner-border');
-                        if (spinner) {
-                            spinner.classList.remove('d-none');
-                        }
-
-                        // Ensure button maintains width
-                        loginButton.style.width = loginButton.offsetWidth + 'px';
-                    }
-                });
-            }
-        });
-    </script>
+    <!-- Auth JavaScript -->
+    <script src="/js/auth.js"></script>
 </body>
 
 </html>
