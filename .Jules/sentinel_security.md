@@ -1,11 +1,12 @@
-## 2026-01-01 - Input Validation Pattern
+## 2026-01-02 - Insecure Input Handling in Owner Profile Update
 
-**Context:** `OwnerController` endpoints for creating and updating vehicles (`/owner/vehicles/add`, `/owner/vehicles/update/{id}`).
-**Vulnerability:** Insecure Design / Lack of Input Validation. The controller was accepting `AddVehicleRequest` DTOs without any validation annotations, relying solely on business logic which could be bypassed or fail on unexpected input types (e.g. negative numbers, massive strings).
+**Context:** `OwnerController.java`, method `updateProfile`.
+**Vulnerability:** Input Validation / Mass Assignment.
 **Severity:** Medium
-**Root Cause:** Missing Bean Validation annotations on DTOs and missing `@Valid` checks in Controller methods.
+**Root Cause:** The endpoint was accepting a raw `Map<String, String>` and manually parsing values without strong type checking or validation. It also bypassed the standard Bean Validation framework.
 **Fix Applied:**
-1. Annotated `AddVehicleRequest` with strict constraints (`@NotBlank`, `@Size`, `@Min`, `@Max`, `@PositiveOrZero`, `@DecimalMin`).
-2. Updated `OwnerController` to use `@Valid` on request bodies and check `BindingResult`.
-3. Implemented defensive error handling that redirects back to the form with a validation summary if errors occur.
-**Prevention:** Always use `@Valid` and Bean Validation annotations on all input DTOs.
+1.  Created `OwnerProfileUpdateRequest` DTO with strict validation annotations (`@NotBlank`, `@Size`, `@Pattern`).
+2.  Refactored `updateProfile` to accept `@Valid OwnerProfileUpdateRequest` instead of `Map`.
+3.  Leveraged existing `GlobalExceptionHandler` to handle `MethodArgumentNotValidException` and return consistent JSON error responses.
+**Prevention:** Always use `@Valid` annotated DTOs for `@RequestBody` inputs. Avoid using `Map` or `JsonNode` for request bodies unless absolutely necessary and strictly validated.
+**References:** OWASP Top 10: A03:2021 – Injection.
