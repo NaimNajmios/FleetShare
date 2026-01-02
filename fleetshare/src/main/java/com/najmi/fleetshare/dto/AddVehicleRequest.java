@@ -1,18 +1,52 @@
 package com.najmi.fleetshare.dto;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 public class AddVehicleRequest {
+    @NotBlank(message = "Brand is required")
+    @Size(max = 50, message = "Brand name too long")
     private String brand;
+
+    @NotBlank(message = "Model is required")
+    @Size(max = 50, message = "Model name too long")
     private String model;
+
+    @NotNull(message = "Manufacturing year is required")
+    @Min(value = 1900, message = "Manufacturing year must be valid")
+    @Max(value = 2100, message = "Manufacturing year cannot be in the distant future")
     private Integer manufacturingYear;
+
+    @NotBlank(message = "Registration number is required")
+    @Size(min = 2, max = 20, message = "Registration number length must be between 2 and 20")
     private String registrationNo;
+
+    @NotBlank(message = "Category is required")
     private String category;
+
+    @NotBlank(message = "Fuel type is required")
     private String fuelType;
+
+    @NotBlank(message = "Transmission type is required")
     private String transmissionType;
+
+    @NotNull(message = "Mileage is required")
+    @PositiveOrZero(message = "Mileage must be zero or positive")
     private Integer mileage;
+
+    @NotBlank(message = "Status is required")
     private String status;
+
+    @NotNull(message = "Rate per day is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Rate per day must be non-negative")
     private BigDecimal ratePerDay;
+
     private String vehicleImageUrl;
     private String effectiveDate;
 

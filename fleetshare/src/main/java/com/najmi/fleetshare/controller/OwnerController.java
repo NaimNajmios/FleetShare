@@ -21,6 +21,8 @@ import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -283,12 +285,20 @@ public class OwnerController {
     }
 
     @PostMapping("/vehicles/add")
-    public String createVehicle(@ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+    public String createVehicle(@Valid @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            BindingResult bindingResult,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder("Validation failed: ");
+            bindingResult.getAllErrors().forEach(error -> errorMsg.append(error.getDefaultMessage()).append("; "));
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg.toString());
+            return "redirect:/owner/vehicles/add";
         }
 
         try {
@@ -304,12 +314,20 @@ public class OwnerController {
 
     @PostMapping("/vehicles/update/{vehicleId}")
     public String updateVehicle(@PathVariable Long vehicleId,
-            @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            @Valid @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            BindingResult bindingResult,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder("Validation failed: ");
+            bindingResult.getAllErrors().forEach(error -> errorMsg.append(error.getDefaultMessage()).append("; "));
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg.toString());
+            return "redirect:/owner/vehicles/view/" + vehicleId;
         }
 
         try {
