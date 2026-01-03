@@ -4,6 +4,20 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ============================================
+    // Toast Notification from URL
+    // ============================================
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
+        showToast('Invalid email or password. Please try again.', 'error');
+    }
+    if (urlParams.has('logout')) {
+        showToast('You have been logged out successfully.', 'success');
+    }
+    if (urlParams.has('registered')) {
+        showToast('Registration successful! Please sign in.', 'success');
+    }
     
     // ============================================
     // Password Toggle Functionality
@@ -165,23 +179,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Show loading state
                 const submitButton = form.querySelector('button[type="submit"]');
                 if (submitButton) {
-                    submitButton.classList.add('btn-loading');
-                    submitButton.disabled = true;
+                    // Check for inline loading style
+                    if (submitButton.classList.contains('btn-loading-inline')) {
+                        submitButton.disabled = true;
+                        const spinner = submitButton.querySelector('.spinner-border');
+                        if (spinner) {
+                            spinner.classList.remove('d-none');
+                        }
+                        // Maintain width
+                        submitButton.style.width = submitButton.offsetWidth + 'px';
+                    } else {
+                        // Default loading style
+                        submitButton.classList.add('btn-loading');
+                        submitButton.disabled = true;
+                    }
                 }
                 
-                // Submit the form (in real implementation, this would be an AJAX call or form.submit())
-                console.log('Form is valid, submitting...');
+                // Submit the form
+                // In a real Spring Boot app, we let the form submit naturally
+                // providing the 'action' attribute is set.
+                // However, for demo/simulation purposes or if we want to show the spinner for a bit:
                 
-                // For demo purposes, uncomment the line below to actually submit
-                // form.submit();
-                
-                // Remove loading state after 2 seconds (for demo)
-                setTimeout(() => {
-                    if (submitButton) {
-                        submitButton.classList.remove('btn-loading');
-                        submitButton.disabled = false;
-                    }
-                }, 2000);
+                if (form.getAttribute('action')) {
+                   form.submit();
+                } else {
+                    console.log('Form is valid, simulating submission...');
+                    // Remove loading state after 2 seconds (for demo)
+                     setTimeout(() => {
+                        if (submitButton) {
+                            if (submitButton.classList.contains('btn-loading-inline')) {
+                                submitButton.disabled = false;
+                                const spinner = submitButton.querySelector('.spinner-border');
+                                if (spinner) spinner.classList.add('d-none');
+                                submitButton.style.width = '';
+                            } else {
+                                submitButton.classList.remove('btn-loading');
+                                submitButton.disabled = false;
+                            }
+                        }
+                    }, 2000);
+                }
             } else {
                 // Scroll to first error
                 const firstError = form.querySelector('.error');
