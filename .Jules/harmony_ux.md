@@ -33,3 +33,40 @@
     </div>
 </aside>
 ```
+
+## 2024-05-23 - Delightful Booking Date Selection
+
+**Context:** The "Book Vehicle" page (`booking-form.html`) where users select their rental dates.
+**User Need:** Users need to clearly see the rental period, duration, and total cost in an intuitive and responsive way.
+**Observation:** The original form used standard vertical date inputs, providing no visual indication of a "range". The duration was just text, and the cost update was instant but lifeless, lacking the "delight" of a modern booking experience.
+**Solution Implemented:**
+- **Visual Grouping:** Moved Pickup and Return dates to a side-by-side grid layout to visually imply a range.
+- **Enhanced Inputs:** Added icons (`calendar-alt`, `calendar-check`) within the inputs using Bootstrap input groups for better affordance.
+- **Quick Select Chips:** Transformed plain buttons into styled "chips" with icons, making them feel like actionable tools.
+- **Duration Visualizer:** Added a "Duration Bar" that fills up based on the length of the rental, providing immediate visual feedback on the scale of the booking.
+- **Cost Animation:** Implemented a "Count Up" animation for the total price, turning a dry calculation into a micro-interaction that draws attention to the value.
+- **Accessibility:** Ensured the cost container uses `aria-live="polite"` so screen readers announce the price change.
+
+**Impact:**
+- **Clarity:** The relationship between start and end dates is visually reinforced.
+- **Delight:** The animations (price count-up, duration bar) make the form feel responsive and polished.
+- **Efficiency:** Quick select chips allow users to book standard durations with a single click.
+
+**Code Pattern:**
+```html
+<!-- Duration Visualizer -->
+<div id="durationDisplay" class="duration-display hidden">
+    <div class="d-flex align-items-center gap-2">
+        <i class="fas fa-hourglass-half"></i>
+        <span id="durationText">3 Days</span>
+    </div>
+    <div class="duration-bar">
+        <div id="durationProgress" class="duration-progress" style="width: 21%;"></div>
+    </div>
+</div>
+
+<!-- Animated Cost Display -->
+<div id="totalCostContainer" class="cost-card pulse-highlight" aria-live="polite">
+    <span id="totalCostDisplay">RM 360.00</span>
+</div>
+```

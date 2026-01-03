@@ -28,6 +28,12 @@
                 text-decoration: none;
                 display: block;
                 color: inherit;
+                animation: fadeIn 0.4s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
             }
 
             .booking-card:hover {
@@ -183,19 +189,103 @@
             .max-w-sm {
                 max-width: 200px;
             }
+
+            /* Filter Tabs Styles */
+            .filter-tabs {
+                display: flex;
+                gap: 0.5rem;
+                margin-bottom: 2rem;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none; /* Firefox */
+            }
+
+            .filter-tabs::-webkit-scrollbar {
+                display: none; /* Chrome/Safari */
+            }
+
+            .filter-tab {
+                padding: 0.6rem 1.25rem;
+                border-radius: 50px;
+                background: white;
+                border: 1px solid #e9ecef;
+                color: #6c757d;
+                font-weight: 500;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .filter-tab:hover {
+                background: #f8f9fa;
+                color: var(--primary-color);
+                border-color: #dee2e6;
+            }
+
+            .filter-tab.active {
+                background: var(--primary-color);
+                color: white;
+                border-color: var(--primary-color);
+                box-shadow: 0 4px 10px rgba(75, 73, 172, 0.2);
+            }
+
+            .filter-empty-state {
+                text-align: center;
+                padding: 3rem 1rem;
+                display: none;
+                background: #f8f9fa;
+                border-radius: 1rem;
+                margin-top: 1rem;
+            }
+
+            .filter-empty-state i {
+                font-size: 3rem;
+                color: #dee2e6;
+                margin-bottom: 1rem;
+            }
         </style>
     </th:block>
 </head>
 
 <body>
     <main layout:fragment="content">
-        <div class="vehicle-grid-container booking-list-container">
-            <h2 class="section-title">My Bookings</h2>
+        <div class="booking-list-container">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h2 class="section-title mb-0">My Bookings</h2>
+                <div class="text-muted small" th:unless="${#lists.isEmpty(bookings)}">
+                    <span id="showingCount" th:text="${#lists.size(bookings)}">0</span> bookings
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs" role="tablist" aria-label="Booking Status Filters" th:if="${!#lists.isEmpty(bookings)}">
+                <button class="filter-tab active" role="tab" aria-selected="true" data-filter="all" onclick="filterBookings('all', this)">
+                    All
+                </button>
+                <button class="filter-tab" role="tab" aria-selected="false" data-filter="upcoming" onclick="filterBookings('upcoming', this)">
+                    Upcoming
+                </button>
+                <button class="filter-tab" role="tab" aria-selected="false" data-filter="active" onclick="filterBookings('active', this)">
+                    Active
+                </button>
+                <button class="filter-tab" role="tab" aria-selected="false" data-filter="completed" onclick="filterBookings('completed', this)">
+                    Completed
+                </button>
+                <button class="filter-tab" role="tab" aria-selected="false" data-filter="cancelled" onclick="filterBookings('cancelled', this)">
+                    Cancelled
+                </button>
+            </div>
 
             <!-- Booking Cards -->
-            <div th:if="${!#lists.isEmpty(bookings)}">
+            <div id="bookingList" th:if="${!#lists.isEmpty(bookings)}">
                 <a th:each="booking : ${bookings}" th:href="@{/renter/bookings/{id}(id=${booking.bookingId})}"
-                    class="booking-card">
+                    class="booking-card"
+                    th:data-status="${booking.status}">
                     <!-- Booking Header -->
                     <div class="booking-header">
                         <span class="booking-id" th:text="'Booking #' + ${booking.bookingId}">Booking #1</span>
@@ -283,7 +373,17 @@
                 </a>
             </div>
 
-            <!-- Empty State -->
+            <!-- Filter Empty State -->
+            <div id="filterEmptyState" class="filter-empty-state">
+                <i class="fas fa-filter"></i>
+                <h4 class="h5 text-muted">No bookings found</h4>
+                <p class="text-muted small">No bookings match the selected status.</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="filterBookings('all', document.querySelector('[data-filter=all]'))" style="border-radius: 50px; padding: 0.5rem 1.5rem;">
+                    View All Bookings
+                </button>
+            </div>
+
+            <!-- Global Empty State (No bookings at all) -->
             <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
                 <i class="fas fa-calendar-alt"></i>
                 <h3>No Bookings Yet</h3>
@@ -294,6 +394,89 @@
             </div>
         </div>
     </main>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            function filterBookings(filterType, tabElement) {
+                // Update active tab
+                const tabs = document.querySelectorAll('.filter-tab');
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+
+                if (tabElement) {
+                    tabElement.classList.add('active');
+                    tabElement.setAttribute('aria-selected', 'true');
+                }
+
+                // Filter logic
+                const cards = document.querySelectorAll('.booking-card');
+                const emptyState = document.getElementById('filterEmptyState');
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const status = (card.getAttribute('data-status') || '').toUpperCase();
+                    let isVisible = false;
+
+                    switch(filterType) {
+                        case 'all':
+                            isVisible = true;
+                            break;
+                        case 'upcoming':
+                            // PENDING or CONFIRMED are usually upcoming
+                            isVisible = status === 'PENDING' || status === 'CONFIRMED';
+                            break;
+                        case 'active':
+                            // IN_PROGRESS or ACTIVE
+                            isVisible = status === 'IN_PROGRESS' || status === 'ACTIVE';
+                            break;
+                        case 'completed':
+                            isVisible = status === 'COMPLETED';
+                            break;
+                        case 'cancelled':
+                            isVisible = status === 'CANCELLED';
+                            break;
+                        default:
+                            isVisible = true;
+                    }
+
+                    if (isVisible) {
+                        card.style.display = 'block';
+                        // Trigger reflow for animation if needed
+                        card.style.animation = 'none';
+                        card.offsetHeight; /* trigger reflow */
+                        card.style.animation = 'fadeIn 0.4s ease-out';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Update count text
+                const countSpan = document.getElementById('showingCount');
+                if (countSpan) countSpan.textContent = visibleCount;
+
+                // Show/Hide Empty State
+                if (visibleCount === 0 && cards.length > 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
+
+            // Accessibility: Keyboard navigation for tabs
+            document.addEventListener('DOMContentLoaded', function() {
+                const tabContainer = document.querySelector('.filter-tabs');
+                if (tabContainer) {
+                    tabContainer.addEventListener('keydown', function(e) {
+                        // Implement arrow key navigation if needed,
+                        // but buttons are natively focusable.
+                    });
+                }
+            });
+        </script>
+    </th:block>
 </body>
 
 </html>

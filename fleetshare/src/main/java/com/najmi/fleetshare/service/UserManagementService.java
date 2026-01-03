@@ -166,15 +166,12 @@ public class UserManagementService {
      * @return List of RenterDTO objects representing the owner's customers
      */
     public List<RenterDTO> getCustomersByOwnerId(Long ownerId) {
-        // 1. Get all bookings for this owner
-        List<Booking> ownerBookings = bookingRepository.findByFleetOwnerId(ownerId);
+        // 1. Get distinct renter IDs directly from DB (Optimized)
+        List<Long> renterIdsList = bookingRepository.findDistinctRenterIdsByFleetOwnerId(ownerId);
+        Set<Long> renterIds = new java.util.HashSet<>(renterIdsList);
+        renterIds.remove(null); // Ensure no nulls are passed to findAllById
 
-        // 2. Extract distinct renter IDs
-        Set<Long> renterIds = ownerBookings.stream()
-                .map(Booking::getRenterId)
-                .collect(Collectors.toSet());
-
-        // 3. Batch fetch renters
+        // 2. Batch fetch renters
         List<Renter> renters = renterRepository.findAllById(renterIds);
 
         // 4. Collect user IDs for batch fetching
