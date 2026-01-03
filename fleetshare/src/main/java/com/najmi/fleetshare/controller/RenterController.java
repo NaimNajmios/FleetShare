@@ -399,8 +399,48 @@ public class RenterController {
     }
 
     @GetMapping("/home")
-    public String home() {
-        // Redirect to vehicles page for now
-        return "redirect:/renter/vehicles";
+    public String home(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        // Add user info
+        model.addAttribute("user", user);
+        model.addAttribute("userName", user.getRenterDetails().getFullName());
+
+        // Greeting based on time of day
+        int hour = java.time.LocalTime.now().getHour();
+        String greeting;
+        if (hour < 12) {
+            greeting = "Good Morning";
+        } else if (hour < 18) {
+            greeting = "Good Afternoon";
+        } else {
+            greeting = "Good Evening";
+        }
+        model.addAttribute("greeting", greeting);
+
+        // Fetch bookings for stats
+        Long renterId = user.getRenterDetails().getRenterId();
+        List<BookingDTO> allBookings = bookingService.getBookingsByRenterId(renterId);
+
+        // Calculate stats
+        model.addAttribute("totalBookings", allBookings.size());
+        model.addAttribute("activeBookings", allBookings.stream()
+                .filter(b -> "ACTIVE".equals(b.getStatus())).count());
+        model.addAttribute("completedBookings", allBookings.stream()
+                .filter(b -> "COMPLETED".equals(b.getStatus())).count());
+        model.addAttribute("pendingBookings", allBookings.stream()
+                .filter(b -> "PENDING".equals(b.getStatus())).count());
+
+        // Get recent bookings (latest 3)
+        List<BookingDTO> recentBookings = allBookings.stream()
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .limit(3)
+                .collect(Collectors.toList());
+        model.addAttribute("recentBookings", recentBookings);
+
+        return "renter/home";
     }
 }
