@@ -91,9 +91,9 @@ public class RegistrationService {
 
         // 7. Create role-specific profile
         if (role == UserRole.RENTER) {
-            createRenterProfile(savedUser.getUserId(), dto.getFullName());
+            createRenterProfile(savedUser.getUserId(), dto.getFullName(), dto.getPhoneNumber());
         } else if (role == UserRole.FLEET_OWNER) {
-            createFleetOwnerProfile(savedUser.getUserId(), dto.getFullName());
+            createFleetOwnerProfile(savedUser.getUserId(), dto.getFullName(), dto.getPhoneNumber());
         }
     }
 
@@ -115,10 +115,11 @@ public class RegistrationService {
     /**
      * Create a Renter profile for the new user.
      */
-    private void createRenterProfile(Long userId, String fullName) {
+    private void createRenterProfile(Long userId, String fullName, String phoneNumber) {
         Renter renter = new Renter();
         renter.setUserId(userId);
         renter.setFullName(fullName);
+        renter.setPhoneNumber(phoneNumber);
         renter.setUpdatedAt(LocalDateTime.now());
         renterRepository.save(renter);
     }
@@ -127,10 +128,11 @@ public class RegistrationService {
      * Create a Fleet Owner profile for the new user.
      * Uses full name as initial business name (can be updated later).
      */
-    private void createFleetOwnerProfile(Long userId, String fullName) {
+    private void createFleetOwnerProfile(Long userId, String fullName, String phoneNumber) {
         FleetOwner fleetOwner = new FleetOwner();
         fleetOwner.setUserId(userId);
         fleetOwner.setBusinessName(fullName); // Default to user's name
+        fleetOwner.setContactPhone(phoneNumber);
         fleetOwner.setIsVerified(false); // New owners start unverified
         fleetOwner.setUpdatedAt(LocalDateTime.now());
         fleetOwnerRepository.save(fleetOwner);
