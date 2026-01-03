@@ -44,6 +44,9 @@ public class RegistrationDTO {
     @NotBlank(message = "Please select a role")
     private String userRole;
 
+    // Phone Number (optional)
+    private String phoneNumber;
+
     // Terms Acceptance
     private boolean agreeTerms;
 
@@ -130,6 +133,14 @@ public class RegistrationDTO {
 
     public void setUserRole(String userRole) {
         this.userRole = userRole;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public boolean isAgreeTerms() {
