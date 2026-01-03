@@ -28,37 +28,52 @@
 
             <!-- Header -->
             <div class="auth-header">
-                <h1 class="auth-title">Welcome Back to FleetShare</h1>
-                <p class="auth-subtitle">Please sign in to continue to your account</p>
+                <h1 class="auth-title">Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to continue to your account</p>
             </div>
 
             <!-- Error Messages -->
-            <div th:if="${param.error}" class="form-error" style="margin-bottom: 1.5rem;">
+            <div th:if="${param.error}" class="alert alert-error">
                 <i class="mdi mdi-alert-circle"></i>
                 <span>Invalid email or password. Please try again.</span>
             </div>
-            <div th:if="${param.logout}" class="form-helper" style="color: var(--fs-success); margin-bottom: 1.5rem;">
-                You have been logged out successfully.
+            <div th:if="${param.logout}" class="alert alert-success">
+                <i class="mdi mdi-check-circle"></i>
+                <span>You have been logged out successfully.</span>
             </div>
 
             <!-- Login Form -->
             <form class="auth-form" id="loginForm" th:action="@{/login}" method="post">
-                <!-- Email (Spring Security uses 'username' as default) -->
+                <!-- Email -->
                 <div class="form-group">
-                    <label class="form-label" for="username">Email</label>
-                    <input type="text" class="form-input" id="username" name="username" placeholder="Enter your email"
+                    <label class="form-label" for="username">
+                        <i class="mdi mdi-email-outline label-icon"></i>
+                        Email Address
+                    </label>
+                    <input type="email" class="form-input" id="username" name="username" placeholder="Enter your email"
                         required autocomplete="username">
                 </div>
 
                 <!-- Password -->
                 <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <input type="password" class="form-input" id="password" name="password"
-                        placeholder="Enter your password" required autocomplete="current-password">
-                    <a href="#" class="auth-link forgot-password-link">Forgot Password?</a>
+                    <label class="form-label" for="password">
+                        <i class="mdi mdi-lock-outline label-icon"></i>
+                        Password
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="password" class="form-input form-input-with-icon" id="password" name="password"
+                            placeholder="Enter your password" required autocomplete="current-password">
+                        <span class="input-icon-right toggle-password" data-target="password"
+                            onclick="togglePassword('password')">
+                            <i class="mdi mdi-eye-outline"></i>
+                        </span>
+                    </div>
+                    <div class="form-group-footer">
+                        <a href="#" class="auth-link forgot-link">Forgot Password?</a>
+                    </div>
                 </div>
 
-                <!-- Keep me signed in -->
+                <!-- Remember Me -->
                 <div class="form-group">
                     <div class="form-checkbox-wrapper">
                         <input type="checkbox" class="form-checkbox" id="remember-me" name="remember-me">
@@ -70,8 +85,11 @@
 
                 <!-- Login Button -->
                 <div class="form-group mb-0">
-                    <button type="submit" class="btn btn-primary">
-                        Login
+                    <button type="submit" class="btn btn-primary" id="loginBtn">
+                        <span class="btn-text">Sign In</span>
+                        <span class="btn-loader d-none">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </span>
                     </button>
                 </div>
             </form>
@@ -80,11 +98,50 @@
             <div class="auth-footer">
                 <p class="auth-footer-text">
                     Don't have an account?
-                    <a href="/register" class="auth-link">Sign up</a>
+                    <a href="/register" class="auth-link">Create Account</a>
                 </p>
             </div>
         </div>
     </div>
+
+    <script>
+        // Password Toggle
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.querySelector(`[data-target="${inputId}"] i`);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('mdi-eye-outline');
+                icon.classList.add('mdi-eye-off-outline');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('mdi-eye-off-outline');
+                icon.classList.add('mdi-eye-outline');
+            }
+        }
+
+        // Form Submit Loading State
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            const btn = document.getElementById('loginBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoader = btn.querySelector('.btn-loader');
+
+            btnText.classList.add('d-none');
+            btnLoader.classList.remove('d-none');
+            btn.disabled = true;
+        });
+
+        // Input Focus Animation
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function () {
+                this.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', function () {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+    </script>
 </body>
 
 </html>
