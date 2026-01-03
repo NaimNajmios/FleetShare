@@ -15,3 +15,25 @@
 **Learnings:**
 - Correlated subqueries can be very slow without proper indexing.
 - For "latest record per group" problems, a subquery with an index is often more scalable than fetching all data, even if simple "fetch all" approaches seem fast on small datasets in-memory.
+
+## 2026-01-02 - UserManagementService Optimization
+
+**Context:** `UserManagementService.getCustomersByOwnerId(Long ownerId)` endpoint used to fetch all bookings for a fleet owner to identify their unique customers.
+**Symptoms:** High memory usage and potential performance degradation when a fleet owner has a large number of bookings (e.g., thousands of bookings) but only a few unique customers. The application was fetching all full Booking entities into memory.
+**Root Cause:** The method was performing an inefficient "fetch all and filter in memory" operation:
+1. `bookingRepository.findByFleetOwnerId(ownerId)` -> Loaded ALL booking entities.
+2. `bookings.stream().map(Booking::getRenterId).collect(Collectors.toSet())` -> Extracted IDs in memory.
+
+**Solution:** Implemented a new JPQL query in `BookingRepository` to fetch only the distinct Renter IDs directly from the database.
+```java
+@Query("SELECT DISTINCT b.renterId FROM Booking b WHERE b.fleetOwnerId = :fleetOwnerId")
+List<Long> findDistinctRenterIdsByFleetOwnerId(@Param("fleetOwnerId") Long fleetOwnerId);
+```
+Updated `UserManagementService` to use this efficient query.
+
+**Impact:**
+- **Database Query:** Replaced `SELECT * FROM bookings WHERE fleet_owner_id = ?` with `SELECT DISTINCT renter_id FROM bookings WHERE fleet_owner_id = ?`.
+- **Memory Usage:** Drastically reduced. Instead of creating thousands of Booking entity objects, we now only load a small list of Long IDs.
+- **Scalability:** The operation complexity now depends on the number of *unique customers* rather than the *total number of bookings*.
+
+**Learnings:** Always prefer database-level aggregation and distinct filtering over application-level filtering for potentially large datasets.
