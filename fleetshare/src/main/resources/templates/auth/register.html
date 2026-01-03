@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="utf-8">
@@ -20,7 +20,7 @@
 
 <body class="auth-page">
     <div class="auth-container">
-        <div class="auth-card">
+        <div class="auth-card auth-card-lg">
             <!-- Brand Logo -->
             <div class="auth-brand">
                 <div class="auth-brand-logo">🚗 FleetShare</div>
@@ -32,41 +32,104 @@
                 <p class="auth-subtitle">Join FleetShare to start renting or sharing vehicles</p>
             </div>
 
+            <!-- Progress Steps -->
+            <div class="form-steps">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Account</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Address</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Role</span>
+                </div>
+            </div>
+
             <!-- Registration Form -->
-            <form class="auth-form" id="registerForm">
-                <!-- Personal Information -->
-                <div class="form-group">
-                    <label class="form-label" for="fullName">Full Name</label>
-                    <input type="text" class="form-input" id="fullName" name="fullName"
-                        placeholder="Enter your full name" required autocomplete="name">
-                </div>
+            <form class="auth-form" id="registerForm" th:action="@{/register}" method="post">
 
-                <div class="form-group">
-                    <label class="form-label" for="email">Email Address</label>
-                    <input type="email" class="form-input" id="email" name="email"
-                        placeholder="Enter your email address" required autocomplete="email">
-                    <small class="form-helper">We'll never share your email with anyone else.</small>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="registerPassword">Password</label>
-                    <div class="input-wrapper">
-                        <input type="password" class="form-input form-input-with-icon" id="registerPassword"
-                            name="password" placeholder="Create a strong password" required data-validate="true"
-                            autocomplete="new-password">
-                        <span class="input-icon-right toggle-password" data-target="registerPassword">
-                            <i class="mdi mdi-eye-outline"></i>
-                        </span>
+                <!-- Step 1: Account Info -->
+                <div class="form-step-content active" data-step="1">
+                    <div class="form-group">
+                        <label class="form-label" for="fullName">
+                            <i class="mdi mdi-account-outline label-icon"></i>
+                            Full Name
+                        </label>
+                        <input type="text" class="form-input" id="fullName" name="fullName"
+                            placeholder="Enter your full name" required autocomplete="name">
                     </div>
-                    <small class="form-helper">Password must be at least 8 characters long</small>
-                </div>
-
-                <!-- Address Section -->
-                <div class="address-section">
-                    <h3 class="address-section-title">Address Information</h3>
 
                     <div class="form-group">
-                        <label class="form-label" for="addressLine1">Address Line 1</label>
+                        <label class="form-label" for="email">
+                            <i class="mdi mdi-email-outline label-icon"></i>
+                            Email Address
+                        </label>
+                        <input type="email" class="form-input" id="email" name="email"
+                            placeholder="Enter your email address" required autocomplete="email">
+                        <small class="form-helper">We'll never share your email with anyone else.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="registerPassword">
+                            <i class="mdi mdi-lock-outline label-icon"></i>
+                            Password
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" class="form-input form-input-with-icon" id="registerPassword"
+                                name="password" placeholder="Create a strong password" required
+                                autocomplete="new-password" minlength="8">
+                            <span class="input-icon-right toggle-password" data-target="registerPassword"
+                                onclick="togglePassword('registerPassword')">
+                                <i class="mdi mdi-eye-outline"></i>
+                            </span>
+                        </div>
+                        <!-- Password Strength Indicator -->
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText">Password strength</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">
+                            <i class="mdi mdi-lock-check-outline label-icon"></i>
+                            Confirm Password
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" class="form-input form-input-with-icon" id="confirmPassword"
+                                name="confirmPassword" placeholder="Confirm your password" required
+                                autocomplete="new-password">
+                            <span class="input-icon-right toggle-password" data-target="confirmPassword"
+                                onclick="togglePassword('confirmPassword')">
+                                <i class="mdi mdi-eye-outline"></i>
+                            </span>
+                        </div>
+                        <div class="form-error d-none" id="passwordMatchError">
+                            <i class="mdi mdi-alert-circle"></i>
+                            Passwords do not match
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                        Continue
+                        <i class="mdi mdi-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Step 2: Address Info -->
+                <div class="form-step-content" data-step="2">
+                    <div class="form-group">
+                        <label class="form-label" for="addressLine1">
+                            <i class="mdi mdi-map-marker-outline label-icon"></i>
+                            Address Line 1
+                        </label>
                         <input type="text" class="form-input" id="addressLine1" name="addressLine1"
                             placeholder="Street address, P.O. box" required autocomplete="address-line1">
                     </div>
@@ -77,7 +140,7 @@
                             <span class="form-label-optional">(Optional)</span>
                         </label>
                         <input type="text" class="form-input" id="addressLine2" name="addressLine2"
-                            placeholder="Apartment, suite, unit, building, floor, etc." autocomplete="address-line2">
+                            placeholder="Apartment, suite, unit, building" autocomplete="address-line2">
                     </div>
 
                     <div class="form-row form-row-3">
@@ -99,64 +162,87 @@
                                 required autocomplete="postal-code">
                         </div>
                     </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(1)">
+                            <i class="mdi mdi-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                            Continue
+                            <i class="mdi mdi-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Role Selection -->
-                <div class="form-group mt-4">
-                    <label class="form-label" id="roleLabel">User Role</label>
-                    <div class="role-selection-group" role="radiogroup" aria-labelledby="roleLabel">
-                        <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="renter">
-                            <div class="role-icon">
-                                <i class="mdi mdi-car-key"></i>
+                <!-- Step 3: Role Selection -->
+                <div class="form-step-content" data-step="3">
+                    <div class="form-group">
+                        <label class="form-label" id="roleLabel">Select Your Role</label>
+                        <div class="role-selection-group" role="radiogroup" aria-labelledby="roleLabel">
+                            <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="renter"
+                                onclick="selectRole(this)">
+                                <div class="role-icon">
+                                    <i class="mdi mdi-car-key"></i>
+                                </div>
+                                <div class="role-content">
+                                    <div class="role-title">Renter</div>
+                                    <div class="role-description">I want to rent vehicles from fleet owners</div>
+                                </div>
+                                <div class="role-check">
+                                    <i class="mdi mdi-check-circle"></i>
+                                </div>
                             </div>
-                            <div class="role-content">
-                                <div class="role-title">Renter</div>
-                                <div class="role-description">I want to rent vehicles</div>
-                            </div>
-                            <div class="role-check">
-                                <i class="mdi mdi-check-circle"></i>
+
+                            <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="owner"
+                                onclick="selectRole(this)">
+                                <div class="role-icon">
+                                    <i class="mdi mdi-car-multiple"></i>
+                                </div>
+                                <div class="role-content">
+                                    <div class="role-title">Fleet Owner</div>
+                                    <div class="role-description">I want to share my vehicles and earn money</div>
+                                </div>
+                                <div class="role-check">
+                                    <i class="mdi mdi-check-circle"></i>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="owner">
-                            <div class="role-icon">
-                                <i class="mdi mdi-car-multiple"></i>
-                            </div>
-                            <div class="role-content">
-                                <div class="role-title">Vehicle Owner</div>
-                                <div class="role-description">I want to share my vehicles</div>
-                            </div>
-                            <div class="role-check">
-                                <i class="mdi mdi-check-circle"></i>
-                            </div>
+                        <select class="form-select visually-hidden" id="userRole" name="userRole" required
+                            tabindex="-1">
+                            <option value="">Select your role</option>
+                            <option value="renter">Renter</option>
+                            <option value="owner">Vehicle Owner</option>
+                        </select>
+                        <div class="form-error d-none" id="roleError">
+                            <i class="mdi mdi-alert-circle"></i> Please select a role
                         </div>
                     </div>
 
-                    <select class="form-select visually-hidden" id="userRole" name="userRole" required tabindex="-1">
-                        <option value="">Select your role</option>
-                        <option value="renter">Renter</option>
-                        <option value="owner">Vehicle Owner</option>
-                    </select>
-                    <div class="form-error d-none" id="roleError">
-                        <i class="mdi mdi-alert-circle"></i> Please select a role
+                    <!-- Terms and Conditions -->
+                    <div class="form-group">
+                        <div class="form-checkbox-wrapper">
+                            <input type="checkbox" class="form-checkbox" id="agreeTerms" name="agreeTerms" required>
+                            <label class="form-checkbox-label" for="agreeTerms">
+                                I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#"
+                                    class="auth-link">Privacy Policy</a>
+                            </label>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Terms and Conditions -->
-                <div class="form-group">
-                    <div class="form-checkbox-wrapper">
-                        <input type="checkbox" class="form-checkbox" id="agreeTerms" name="agreeTerms" required>
-                        <label class="form-checkbox-label" for="agreeTerms">
-                            I agree to all <a href="#" class="auth-link">Terms & Conditions</a>
-                        </label>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                            <i class="mdi mdi-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="registerBtn">
+                            <span class="btn-text">Create Account</span>
+                            <span class="btn-loader d-none">
+                                <span class="spinner-border spinner-border-sm"></span>
+                            </span>
+                        </button>
                     </div>
-                </div>
-
-                <!-- Create Account Button -->
-                <div class="form-group mb-0">
-                    <button type="submit" class="btn btn-primary">
-                        Create Account
-                    </button>
                 </div>
             </form>
 
@@ -164,14 +250,166 @@
             <div class="auth-footer">
                 <p class="auth-footer-text">
                     Already have an account?
-                    <a href="/login" class="auth-link">Login</a>
+                    <a href="/login" class="auth-link">Sign In</a>
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- Auth JavaScript -->
-    <script src="/js/auth.js"></script>
+    <script>
+        // Password Toggle
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.querySelector(`[data-target="${inputId}"] i`);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('mdi-eye-outline');
+                icon.classList.add('mdi-eye-off-outline');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('mdi-eye-off-outline');
+                icon.classList.add('mdi-eye-outline');
+            }
+        }
+
+        // Password Strength Checker
+        document.getElementById('registerPassword').addEventListener('input', function () {
+            const password = this.value;
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            const levels = [
+                { width: '0%', color: '#e5e7eb', text: 'Password strength' },
+                { width: '20%', color: '#dc2626', text: 'Very Weak' },
+                { width: '40%', color: '#f97316', text: 'Weak' },
+                { width: '60%', color: '#eab308', text: 'Fair' },
+                { width: '80%', color: '#22c55e', text: 'Strong' },
+                { width: '100%', color: '#16a34a', text: 'Very Strong' }
+            ];
+
+            strengthFill.style.width = levels[strength].width;
+            strengthFill.style.backgroundColor = levels[strength].color;
+            strengthText.textContent = levels[strength].text;
+            strengthText.style.color = levels[strength].color;
+        });
+
+        // Password Match Validation
+        document.getElementById('confirmPassword').addEventListener('input', function () {
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = this.value;
+            const error = document.getElementById('passwordMatchError');
+
+            if (confirmPassword && password !== confirmPassword) {
+                error.classList.remove('d-none');
+                this.classList.add('error');
+            } else {
+                error.classList.add('d-none');
+                this.classList.remove('error');
+            }
+        });
+
+        // Multi-Step Form Navigation
+        function nextStep(step) {
+            // Validate current step
+            const currentStep = document.querySelector('.form-step-content.active');
+            const inputs = currentStep.querySelectorAll('input[required]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('error');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+
+            // Check password match on step 1
+            if (currentStep.dataset.step === '1') {
+                const password = document.getElementById('registerPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                if (password !== confirmPassword) {
+                    isValid = false;
+                    document.getElementById('passwordMatchError').classList.remove('d-none');
+                }
+            }
+
+            if (!isValid) return;
+
+            // Hide current, show next
+            currentStep.classList.remove('active');
+            document.querySelector(`.form-step-content[data-step="${step}"]`).classList.add('active');
+
+            // Update progress
+            document.querySelectorAll('.form-steps .step').forEach((s, i) => {
+                if (i + 1 <= step) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+        }
+
+        function prevStep(step) {
+            document.querySelector('.form-step-content.active').classList.remove('active');
+            document.querySelector(`.form-step-content[data-step="${step}"]`).classList.add('active');
+
+            document.querySelectorAll('.form-steps .step').forEach((s, i) => {
+                if (i + 1 <= step) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+        }
+
+        // Role Selection
+        function selectRole(card) {
+            document.querySelectorAll('.role-card').forEach(c => {
+                c.classList.remove('selected');
+                c.setAttribute('aria-checked', 'false');
+            });
+            card.classList.add('selected');
+            card.setAttribute('aria-checked', 'true');
+            document.getElementById('userRole').value = card.dataset.value;
+            document.getElementById('roleError').classList.add('d-none');
+        }
+
+        // Form Submit Validation
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            const role = document.getElementById('userRole').value;
+            const terms = document.getElementById('agreeTerms').checked;
+
+            if (!role) {
+                e.preventDefault();
+                document.getElementById('roleError').classList.remove('d-none');
+                return;
+            }
+
+            if (!terms) {
+                e.preventDefault();
+                return;
+            }
+
+            // Show loading
+            const btn = document.getElementById('registerBtn');
+            btn.querySelector('.btn-text').classList.add('d-none');
+            btn.querySelector('.btn-loader').classList.remove('d-none');
+            btn.disabled = true;
+        });
+
+        // Keyboard accessibility for role cards
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectRole(this);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
