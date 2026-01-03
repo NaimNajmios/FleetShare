@@ -1,14 +1,12 @@
-## 2024-12-31 - [Insecure File Upload]
+## 2026-01-02 - Insecure Input Handling in Owner Profile Update
 
-**Context:** `AdminController` and `OwnerController` implemented duplicate, manual file upload logic for vehicle images.
-**Vulnerability:** Arbitrary File Upload / Remote Code Execution (RCE)
-**Severity:** High
-**Root Cause:** The controllers relied solely on the client-provided `Content-Type` header (MIME sniffing) and the file extension without verifying the actual file content (Magic Bytes). This allowed attackers to upload malicious scripts (e.g., PHP, JSP) disguised as images.
+**Context:** `OwnerController.java`, method `updateProfile`.
+**Vulnerability:** Input Validation / Mass Assignment.
+**Severity:** Medium
+**Root Cause:** The endpoint was accepting a raw `Map<String, String>` and manually parsing values without strong type checking or validation. It also bypassed the standard Bean Validation framework.
 **Fix Applied:**
-1.  Enhanced `FileStorageService` to include robust validation:
-    *   **Magic Byte Validation:** Reads the first few bytes of the file stream to verify it matches known signatures for JPEG, PNG, GIF, WEBP, and PDF.
-    *   **Extension Whitelisting:** Strictly enforces allowed extensions (`.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.pdf`).
-    *   **Filename Sanitization:** Generates a unique filename (UUID + Timestamp) to prevent path traversal and overwrites.
-2.  Refactored `AdminController` and `OwnerController` to delegate file upload handling to `FileStorageService.storeVehicleImage()`.
-**Prevention:** Always validate file content server-side using file signatures (Magic Bytes), never trust client headers, and use a centralized service for file operations.
-**References:** CWE-434: Unrestricted Upload of File with Dangerous Type
+1.  Created `OwnerProfileUpdateRequest` DTO with strict validation annotations (`@NotBlank`, `@Size`, `@Pattern`).
+2.  Refactored `updateProfile` to accept `@Valid OwnerProfileUpdateRequest` instead of `Map`.
+3.  Leveraged existing `GlobalExceptionHandler` to handle `MethodArgumentNotValidException` and return consistent JSON error responses.
+**Prevention:** Always use `@Valid` annotated DTOs for `@RequestBody` inputs. Avoid using `Map` or `JsonNode` for request bodies unless absolutely necessary and strictly validated.
+**References:** OWASP Top 10: A03:2021 – Injection.

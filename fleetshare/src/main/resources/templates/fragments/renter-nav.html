@@ -1,29 +1,77 @@
 <nav class="renter-nav" th:fragment="renter-nav" xmlns:th="http://www.thymeleaf.org"
     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <div class="nav-container">
+        <!-- Brand -->
         <a href="/renter/vehicles" class="nav-brand">
             <i class="fas fa-car"></i>
             FleetShare
         </a>
 
-        <ul class="nav-menu">
-            <li><a href="/renter/home" class="nav-link" th:classappend="${activePage == 'home'} ? 'active'">Home</a>
-            </li>
-            <li><a href="/renter/vehicles" class="nav-link"
-                    th:classappend="${activePage == 'vehicles'} ? 'active'">Vehicles</a></li>
-            <li><a href="/renter/bookings" class="nav-link" th:classappend="${activePage == 'bookings'} ? 'active'">My
-                    Bookings</a></li>
-            <li><a href="/renter/profile" class="nav-link"
-                    th:classappend="${activePage == 'profile'} ? 'active'">Profile</a></li>
-        </ul>
+        <!-- Desktop Menu (Visible on LG and up) -->
+        <div class="d-none d-lg-flex align-items-center" style="gap: 2rem;">
+            <ul class="nav-menu">
+                <th:block th:replace="~{fragments/renter-nav :: nav-items}"></th:block>
+            </ul>
 
-        <div class="nav-profile">
-            <span class="nav-username" sec:authentication="principal.fullName">User</span>
-            <form th:action="@{/logout}" method="post" class="logout-form">
-                <button type="submit" class="logout-btn" title="Logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </form>
+            <div class="nav-profile">
+                <span class="nav-username" sec:authentication="principal.fullName">User</span>
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="logout-btn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Mobile Toggle (Visible < LG) -->
+        <button class="mobile-nav-toggle d-lg-none" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#renterMobileNav" aria-controls="renterMobileNav" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Mobile Offcanvas Menu -->
+        <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="renterMobileNav"
+            aria-labelledby="renterMobileNavLabel">
+            <div class="offcanvas-header border-bottom">
+                <h5 class="offcanvas-title fw-bold text-gradient" id="renterMobileNavLabel">
+                    <i class="fas fa-car me-2"></i>FleetShare
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column">
+                <!-- Mobile Navigation Links -->
+                <ul class="nav-menu-mobile">
+                    <th:block th:replace="~{fragments/renter-nav :: nav-items}"></th:block>
+                </ul>
+
+                <hr class="my-4 opacity-10">
+
+                <!-- Mobile Profile Section -->
+                <div class="mobile-profile-section mt-auto">
+                    <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
+                        <div class="avatar-circle-sm">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark" sec:authentication="principal.fullName">User</div>
+                            <small class="text-muted">Renter Account</small>
+                        </div>
+                    </div>
+                    <form th:action="@{/logout}" method="post" class="w-100">
+                        <button type="submit" class="btn w-100 btn-logout-mobile">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
+
+<!-- Reusable Nav Items Fragment -->
+<th:block th:fragment="nav-items" xmlns:th="http://www.thymeleaf.org">
+    <li><a href="/renter/home" class="nav-link" th:classappend="${activePage == 'home'} ? 'active'">Home</a></li>
+    <li><a href="/renter/vehicles" class="nav-link" th:classappend="${activePage == 'vehicles'} ? 'active'">Vehicles</a></li>
+    <li><a href="/renter/bookings" class="nav-link" th:classappend="${activePage == 'bookings'} ? 'active'">My Bookings</a></li>
+    <li><a href="/renter/profile" class="nav-link" th:classappend="${activePage == 'profile'} ? 'active'">Profile</a></li>
+</th:block>

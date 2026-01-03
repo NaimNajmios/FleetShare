@@ -21,6 +21,8 @@ import com.najmi.fleetshare.service.UserManagementService;
 import com.najmi.fleetshare.service.VehicleManagementService;
 import com.najmi.fleetshare.util.SessionHelper;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -283,12 +285,20 @@ public class OwnerController {
     }
 
     @PostMapping("/vehicles/add")
-    public String createVehicle(@ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+    public String createVehicle(@Valid @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            BindingResult bindingResult,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder("Validation failed: ");
+            bindingResult.getAllErrors().forEach(error -> errorMsg.append(error.getDefaultMessage()).append("; "));
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg.toString());
+            return "redirect:/owner/vehicles/add";
         }
 
         try {
@@ -304,12 +314,20 @@ public class OwnerController {
 
     @PostMapping("/vehicles/update/{vehicleId}")
     public String updateVehicle(@PathVariable Long vehicleId,
-            @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            @Valid @ModelAttribute com.najmi.fleetshare.dto.AddVehicleRequest request,
+            BindingResult bindingResult,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder("Validation failed: ");
+            bindingResult.getAllErrors().forEach(error -> errorMsg.append(error.getDefaultMessage()).append("; "));
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg.toString());
+            return "redirect:/owner/vehicles/view/" + vehicleId;
         }
 
         try {
@@ -823,18 +841,10 @@ public class OwnerController {
 
     @PostMapping("/profile")
     @ResponseBody
-    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> profileData, HttpSession session) {
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody com.najmi.fleetshare.dto.OwnerProfileUpdateRequest request, HttpSession session) {
         SessionUser sessionUser = SessionHelper.getCurrentUser(session);
         if (sessionUser == null || sessionUser.getOwnerDetails() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
-        }
-
-        String businessName = profileData.get("businessName");
-        String contactPhone = profileData.get("contactPhone");
-
-        // Validation
-        if (businessName == null || businessName.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Business name is required"));
         }
 
         // Find and update owner entity
@@ -843,21 +853,13 @@ public class OwnerController {
             return ResponseEntity.badRequest().body(Map.of("error", "Owner not found"));
         }
 
-        owner.setBusinessName(businessName.trim());
-        owner.setContactPhone(contactPhone != null ? contactPhone.trim() : null);
+        owner.setBusinessName(request.getBusinessName().trim());
+        owner.setContactPhone(request.getContactPhone() != null ? request.getContactPhone().trim() : null);
         owner.setUpdatedAt(LocalDateTime.now());
         fleetOwnerRepository.save(owner);
 
         // Update Address
-        String addressLine1 = profileData.get("addressLine1");
-        String addressLine2 = profileData.get("addressLine2");
-        String city = profileData.get("city");
-        String state = profileData.get("state");
-        String postalCode = profileData.get("postalCode");
-        String latitudeStr = profileData.get("latitude");
-        String longitudeStr = profileData.get("longitude");
-
-        if (addressLine1 != null && !addressLine1.trim().isEmpty()) {
+        if (request.getAddressLine1() != null && !request.getAddressLine1().trim().isEmpty()) {
             com.najmi.fleetshare.entity.Address address = addressRepository
                     .findLatestAddressByUserId(sessionUser.getUserId())
                     .orElse(new com.najmi.fleetshare.entity.Address());
@@ -867,23 +869,23 @@ public class OwnerController {
                 address.setCreatedAt(LocalDateTime.now());
             }
 
-            address.setAddressLine1(addressLine1.trim());
-            address.setAddressLine2(addressLine2 != null ? addressLine2.trim() : null);
-            address.setCity(city != null ? city.trim() : null);
-            address.setState(state != null ? state.trim() : null);
-            address.setPostalCode(postalCode != null ? postalCode.trim() : null);
+            address.setAddressLine1(request.getAddressLine1().trim());
+            address.setAddressLine2(request.getAddressLine2() != null ? request.getAddressLine2().trim() : null);
+            address.setCity(request.getCity() != null ? request.getCity().trim() : null);
+            address.setState(request.getState() != null ? request.getState().trim() : null);
+            address.setPostalCode(request.getPostalCode() != null ? request.getPostalCode().trim() : null);
 
-            if (latitudeStr != null && !latitudeStr.isEmpty()) {
+            if (request.getLatitude() != null && !request.getLatitude().isEmpty()) {
                 try {
-                    address.setLatitude(Double.parseDouble(latitudeStr));
+                    address.setLatitude(Double.parseDouble(request.getLatitude()));
                 } catch (NumberFormatException e) {
                     // Ignore invalid lat
                 }
             }
 
-            if (longitudeStr != null && !longitudeStr.isEmpty()) {
+            if (request.getLongitude() != null && !request.getLongitude().isEmpty()) {
                 try {
-                    address.setLongitude(Double.parseDouble(longitudeStr));
+                    address.setLongitude(Double.parseDouble(request.getLongitude()));
                 } catch (NumberFormatException e) {
                     // Ignore invalid lng
                 }
@@ -894,8 +896,8 @@ public class OwnerController {
         }
 
         // Update session
-        sessionUser.getOwnerDetails().setBusinessName(businessName.trim());
-        sessionUser.getOwnerDetails().setContactPhone(contactPhone != null ? contactPhone.trim() : null);
+        sessionUser.getOwnerDetails().setBusinessName(request.getBusinessName().trim());
+        sessionUser.getOwnerDetails().setContactPhone(request.getContactPhone() != null ? request.getContactPhone().trim() : null);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
     }
