@@ -359,6 +359,61 @@
                     height: 200px;
                 }
             }
+
+            /* Quick View Button */
+            .quick-view-btn {
+                position: absolute;
+                bottom: 1rem;
+                right: 1rem;
+                background: white;
+                color: var(--text-dark);
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                opacity: 0;
+                transform: translateY(10px);
+                transition: all 0.3s ease;
+                cursor: pointer;
+                border: none;
+                z-index: 3;
+            }
+
+            .vehicle-card:hover .quick-view-btn {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* Always visible on touch devices or smaller screens */
+            @media (hover: none), (max-width: 991px) {
+                .quick-view-btn {
+                    opacity: 1;
+                    transform: translateY(0);
+                    bottom: 0.5rem;
+                    right: 0.5rem;
+                    width: 36px;
+                    height: 36px;
+                }
+            }
+
+            .quick-view-btn:hover {
+                background: var(--primary-color);
+                color: white;
+            }
+
+            .quick-view-btn:focus {
+                opacity: 1;
+                transform: translateY(0);
+                outline: 2px solid var(--primary-color);
+            }
+
+            /* Modal Gradient */
+            .bg-gradient-dark {
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            }
         </style>
     </th:block>
 </head>
@@ -457,11 +512,20 @@
                                       data-transmission=${vehicle.transmissionType != null ? vehicle.transmissionType.toLowerCase() : 'auto'},
                                       data-price=${vehicle.ratePerDay},
                                       data-brand=${vehicle.brand.toLowerCase()},
-                                      data-model=${vehicle.model.toLowerCase()}">
+                                      data-model=${vehicle.model.toLowerCase()},
+                                      data-fuel=${vehicle.fuelType},
+                                      data-year=${vehicle.manufacturingYear},
+                                      data-seats=${vehicle.category == 'MPV' ? '7 Seats' : (vehicle.category == 'Coupe' ? '2 Seats' : '5 Seats')},
+                                      data-mileage=${vehicle.mileage != null ? vehicle.mileage + ' km' : 'N/A'},
+                                      data-image=${vehicle.vehicleImageUrl},
+                                      data-owner=${vehicle.ownerBusinessName},
+                                      data-location=${(vehicle.city != null ? vehicle.city : '') + (vehicle.city != null and vehicle.state != null ? ', ' : '') + (vehicle.state != null ? vehicle.state : '')},
+                                      data-id=${vehicle.vehicleId}">
 
                             <div class="vehicle-image-container">
                                 <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}" class="stretched-link"
-                                    style="display: block; width: 100%; height: 100%; text-decoration: none;">
+                                    style="display: block; width: 100%; height: 100%; text-decoration: none;"
+                                    aria-hidden="true" tabindex="-1">
                                     <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
                                         th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image">
                                     <div th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
@@ -469,6 +533,10 @@
                                         <i class="fas fa-car"></i>
                                     </div>
                                 </a>
+                                <button type="button" class="quick-view-btn" onclick="openQuickView(this)"
+                                    aria-label="Quick View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                                 <div class="price-badge" th:text="'RM' + ${vehicle.ratePerDay} + '/day'">RM55/day</div>
                             </div>
 
@@ -543,6 +611,94 @@
                             filters. Try adjusting your criteria.</p>
                         <button class="btn btn-outline-primary mt-4" onclick="clearAllFilters()"
                             style="border-radius: 50px; padding: 0.6rem 2rem;">Clear Filters</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick View Modal -->
+        <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 rounded-4 overflow-hidden">
+                    <div class="modal-body p-0">
+                        <button type="button"
+                            class="btn-close position-absolute top-0 end-0 m-3 z-3 bg-white p-2 rounded-circle shadow-sm opacity-100"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="row g-0">
+                            <div class="col-lg-6 bg-light position-relative" style="min-height: 300px;">
+                                <img id="qvImage" src="" alt="Vehicle"
+                                    class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
+                                <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white">
+                                    <h4 id="qvPrice" class="mb-0 fw-bold"></h4>
+                                    <small class="opacity-75">per day</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 p-4 d-flex flex-column">
+                                <div class="mb-auto">
+                                    <span id="qvCategory" class="badge bg-light text-primary mb-2"></span>
+                                    <h3 id="qvTitle" class="fw-bold mb-1 text-dark"></h3>
+                                    <p id="qvOwner" class="text-muted small mb-3"><i class="fas fa-store me-1"></i>
+                                        <span></span></p>
+
+                                    <div class="row g-2 mb-4">
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center p-2 rounded bg-light">
+                                                <i class="fas fa-cog text-primary me-2"></i>
+                                                <div>
+                                                    <small class="d-block text-muted"
+                                                        style="font-size: 0.7rem;">Transmission</small>
+                                                    <span id="qvTransmission" class="fw-semibold small"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center p-2 rounded bg-light">
+                                                <i class="fas fa-gas-pump text-primary me-2"></i>
+                                                <div>
+                                                    <small class="d-block text-muted" style="font-size: 0.7rem;">Fuel
+                                                        Type</small>
+                                                    <span id="qvFuel" class="fw-semibold small"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center p-2 rounded bg-light">
+                                                <i class="fas fa-calendar text-primary me-2"></i>
+                                                <div>
+                                                    <small class="d-block text-muted"
+                                                        style="font-size: 0.7rem;">Year</small>
+                                                    <span id="qvYear" class="fw-semibold small"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center p-2 rounded bg-light">
+                                                <i class="fas fa-users text-primary me-2"></i>
+                                                <div>
+                                                    <small class="d-block text-muted"
+                                                        style="font-size: 0.7rem;">Seats</small>
+                                                    <span id="qvSeats" class="fw-semibold small"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <i class="fas fa-map-marker-alt text-danger mt-1 me-2"></i>
+                                        <div>
+                                            <small class="d-block text-muted">Location</small>
+                                            <span id="qvLocation" class="fw-medium text-dark"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <a id="qvDetailsLink" href="#" class="btn btn-primary rounded-pill py-2">
+                                        View Full Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -687,6 +843,61 @@
 
             // Search listener
             document.getElementById('vehicleSearch').addEventListener('input', applyFilters);
+
+            // Quick View Functionality
+            function openQuickView(btn) {
+                // Get the card element (parent of the button's container)
+                const card = btn.closest('.vehicle-card');
+
+                // Extract data from attributes
+                const data = {
+                    title: card.dataset.brand + ' ' + card.dataset.model,
+                    category: card.dataset.category,
+                    price: card.dataset.price,
+                    transmission: card.dataset.transmission,
+                    fuel: card.dataset.fuel,
+                    year: card.dataset.year,
+                    seats: card.dataset.seats,
+                    image: card.dataset.image,
+                    owner: card.dataset.owner,
+                    location: card.dataset.location,
+                    id: card.dataset.id
+                };
+
+                // Populate Modal Elements
+                document.getElementById('qvTitle').textContent = data.title;
+                document.getElementById('qvCategory').textContent = data.category.toUpperCase();
+                document.getElementById('qvPrice').textContent = 'RM ' + data.price;
+                document.getElementById('qvTransmission').textContent = data.transmission;
+                document.getElementById('qvFuel').textContent = data.fuel || 'N/A';
+                document.getElementById('qvYear').textContent = data.year || 'N/A';
+                document.getElementById('qvSeats').textContent = data.seats || '5 Seats';
+                document.getElementById('qvOwner').querySelector('span').textContent = data.owner;
+                document.getElementById('qvLocation').textContent = data.location;
+
+                const imgEl = document.getElementById('qvImage');
+                if (data.image) {
+                    imgEl.src = data.image;
+                    imgEl.style.display = 'block';
+                } else {
+                    // Fallback if no image
+                    imgEl.src = '';
+                    imgEl.style.display = 'none';
+                    imgEl.parentElement.style.backgroundColor = '#e9ecef';
+                }
+
+                document.getElementById('qvDetailsLink').href = '/renter/vehicles/' + data.id;
+
+                // Open Modal
+                const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+                modal.show();
+
+                // Manage focus: return focus to button when closed
+                const modalEl = document.getElementById('quickViewModal');
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    btn.focus();
+                }, { once: true });
+            }
         </script>
     </th:block>
 </body>
