@@ -423,22 +423,17 @@ public class RenterController {
 
         // Fetch bookings for stats
         Long renterId = user.getRenterDetails().getRenterId();
-        List<BookingDTO> allBookings = bookingService.getBookingsByRenterId(renterId);
 
-        // Calculate stats
-        model.addAttribute("totalBookings", allBookings.size());
-        model.addAttribute("activeBookings", allBookings.stream()
-                .filter(b -> "ACTIVE".equals(b.getStatus())).count());
-        model.addAttribute("completedBookings", allBookings.stream()
-                .filter(b -> "COMPLETED".equals(b.getStatus())).count());
-        model.addAttribute("pendingBookings", allBookings.stream()
-                .filter(b -> "PENDING".equals(b.getStatus())).count());
+        // Optimized: Get counts directly from DB
+        com.najmi.fleetshare.dto.BookingCountDTO counts = bookingService.getBookingCountsByRenterId(renterId);
 
-        // Get recent bookings (latest 3)
-        List<BookingDTO> recentBookings = allBookings.stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .limit(3)
-                .collect(Collectors.toList());
+        model.addAttribute("totalBookings", counts.getTotal());
+        model.addAttribute("activeBookings", counts.getActive());
+        model.addAttribute("completedBookings", counts.getCompleted());
+        model.addAttribute("pendingBookings", counts.getPending());
+
+        // Optimized: Get only recent bookings (latest 3)
+        List<BookingDTO> recentBookings = bookingService.getRecentBookingsByRenterId(renterId, 3);
         model.addAttribute("recentBookings", recentBookings);
 
         return "renter/home";
