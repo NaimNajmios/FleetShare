@@ -1,27 +1,32 @@
-## 2026-01-03 - Quick View Modal for Vehicle Browsing
+## 2024-05-23 - Enhanced Booking Date Selection & Empty States
 
-**Context:** Renter Browsing Flow (`browse-vehicles.html`)
-**User Need:** Users need to quickly compare vehicle details (specs, price, location) without navigating away from the search results and losing their filter/scroll context.
-**Observation:** The previous flow required clicking "View Details" -> Page Load -> Back -> Restore Context. This was high friction for browsing.
-**Solution Implemented:** Implemented a lightweight "Quick View" modal.
--   Added `data-*` attributes to vehicle cards to store details (Fuel, Year, Seats, Owner, Location) without extra DB calls.
--   Added a floating "Eye" icon button on vehicle cards.
--   Used Bootstrap 5 Modal API to show details instantly via JavaScript.
-**Impact:** Eliminates page loads for initial screening. Keeps user in the "flow" of browsing.
+**Context:** Renter Booking Flow (`booking-form.html`) and My Bookings Dashboard (`my-bookings.html`)
+**User Need:**
+1. Users need clear visual feedback when selecting dates to ensure availability and cost are calculated correctly without "jumping" UI.
+2. Users encountering empty states need a clear path forward.
+
+**Observation:**
+- The booking form date inputs were visually disconnected and lacked immediate feedback during the "calculation" phase, making the interface feel static and unresponsive until the final price popped in.
+- The "My Bookings" page had a dead-end empty state with no button to browse vehicles.
+
+**Solution Implemented:**
+1. **Visual Connection:** Rearranged Date Inputs to be side-by-side with a directional arrow (`->`), reinforcing the concept of a range.
+2. **Micro-Interaction:** Added a simulated "Checking availability..." state (400ms delay with visual opacity change) when dates are modified. This builds trust that the system is actually validating the dates and provides a smoother transition for price updates.
+3. **Empty State CTA:** Added a "Browse Vehicles" button to the empty bookings list to close the loop.
+
+**Impact:**
+- The date selection feels more solid and "application-like" rather than just a form.
+- Users are guided out of empty states effectively.
+
 **Code Pattern:**
-```html
-<!-- Trigger -->
-<button class="quick-view-btn" onclick="openQuickView(this)" data-id="1" data-fuel="Petrol" ...>
-    <i class="fas fa-eye"></i>
-</button>
+```javascript
+// Simulated Availability Check Pattern
+totalCostContainer.classList.add('loading');
+proceedBtn.disabled = true;
 
-<!-- JS Populator -->
-<script>
-function openQuickView(btn) {
-    const card = btn.closest('.vehicle-card');
-    // ... extract data ...
-    document.getElementById('qvTitle').textContent = data.title;
-    new bootstrap.Modal(document.getElementById('quickViewModal')).show();
-}
-</script>
+clearTimeout(checkTimer);
+checkTimer = setTimeout(() => {
+    totalCostContainer.classList.remove('loading');
+    // ... update logic
+}, 400);
 ```
