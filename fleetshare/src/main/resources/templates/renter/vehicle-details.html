@@ -7,308 +7,272 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
         <style>
-            .vehicle-details-container {
+            :root {
+                --primary-color: #4B49AC;
+                --text-dark: #2C3E50;
+                --text-muted: #6c757d;
+                --bg-light: #F4F7FA;
+            }
+
+            body {
+                background-color: var(--bg-light);
+            }
+
+            .details-container {
                 max-width: 1200px;
                 margin: 0 auto;
-                padding: 2rem 1.5rem;
+                padding: 2rem 1rem;
+            }
+
+            .back-nav {
+                margin-bottom: 1.5rem;
             }
 
             .back-link {
-                color: #8b5cf6;
+                color: var(--text-muted);
                 text-decoration: none;
-                font-size: 0.875rem;
                 font-weight: 500;
+                transition: color 0.2s;
                 display: inline-flex;
                 align-items: center;
                 gap: 0.5rem;
-                margin-bottom: 1.5rem;
-                transition: color 0.2s ease;
             }
 
             .back-link:hover {
-                color: #7c3aed;
+                color: var(--primary-color);
             }
 
-            /* Hero Card */
-            .hero-card {
+            /* Image Gallery/Hero */
+            .hero-image-card {
                 background: white;
                 border-radius: 1rem;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
                 overflow: hidden;
-                display: grid;
-                grid-template-columns: 1.2fr 1fr;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.04);
                 margin-bottom: 2rem;
-            }
-
-            @media (max-width: 992px) {
-                .hero-card {
-                    grid-template-columns: 1fr;
-                }
-            }
-
-            .vehicle-image-container {
-                background: #f8f9fa;
                 position: relative;
-                min-height: 400px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                overflow: hidden;
+                height: 400px;
+                background-color: #e9ecef;
             }
 
-            .vehicle-image {
+            .hero-image {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: transform 0.3s ease;
-            }
-
-            .vehicle-image:hover {
-                transform: scale(1.02);
-            }
-
-            .vehicle-info-container {
-                padding: 2.5rem;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .vehicle-title {
-                font-size: 2rem;
-                font-weight: 700;
-                color: #212529;
-                margin-bottom: 0.5rem;
-                line-height: 1.2;
-            }
-
-            .vehicle-brand {
-                font-size: 1rem;
-                color: #6c757d;
-                font-weight: 500;
-                margin-bottom: 2rem;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
-
-            .specs-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1.5rem 2rem;
-                margin-bottom: 2.5rem;
-            }
-
-            .spec-item {
-                display: flex;
-                flex-direction: column;
-                gap: 0.25rem;
-            }
-
-            .spec-label {
-                font-size: 0.875rem;
-                color: #6c757d;
-                font-weight: 500;
-            }
-
-            .spec-value {
-                font-size: 1.125rem;
-                color: #8b5cf6;
-                font-weight: 700;
-            }
-
-            .price-section {
-                margin-top: auto;
-                padding-top: 2rem;
-                border-top: 1px solid #e9ecef;
-                display: flex;
-                align-items: flex-end;
-                justify-content: space-between;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-
-            .price-display {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .price-label {
-                font-size: 0.875rem;
-                color: #6c757d;
-                margin-bottom: 0.25rem;
-            }
-
-            .price-amount {
-                font-size: 2rem;
-                font-weight: 700;
-                color: #212529;
-            }
-
-            .btn-book-now {
-                background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-                color: white;
-                border: none;
-                padding: 1rem 2.5rem;
-                font-size: 1rem;
-                font-weight: 600;
-                border-radius: 0.75rem;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                text-decoration: none;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                min-width: 200px;
-                box-shadow: 0 4px 15px -3px rgba(139, 92, 246, 0.4);
-            }
-
-            .btn-book-now:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px -5px rgba(139, 92, 246, 0.5);
-                color: white;
-            }
-
-            /* Owner Section - Grid Layout */
-            .owner-section {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1.5rem;
-            }
-
-            @media (max-width: 992px) {
-                .owner-section {
-                    grid-template-columns: 1fr;
-                }
-            }
-
-            .owner-card {
-                background: white;
-                border-radius: 1rem;
-                padding: 2rem;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                display: flex;
-                align-items: center;
-                gap: 1.5rem;
-                flex-wrap: wrap;
-            }
-
-            .owner-icon {
-                width: 60px;
-                height: 60px;
-                background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                color: white;
-            }
-
-            .owner-info {
-                flex: 1;
-            }
-
-            .owner-name {
-                font-size: 1.25rem;
-                font-weight: 600;
-                color: #212529;
-                margin-bottom: 0.25rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .verified-badge {
-                font-size: 0.75rem;
-                background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-                color: #166534;
-                padding: 0.25rem 0.5rem;
-                border-radius: 1rem;
-                font-weight: 600;
-                display: inline-flex;
-                align-items: center;
-                gap: 0.25rem;
-            }
-
-            .owner-contact {
-                color: #6c757d;
-                font-size: 0.95rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .location-card {
-                background: white;
-                border-radius: 1rem;
-                padding: 1.5rem;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            }
-
-            .location-card-header {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                margin-bottom: 1rem;
-            }
-
-            .location-card-header i {
-                color: #8b5cf6;
-                font-size: 1.25rem;
-            }
-
-            .location-card-header h4 {
-                margin: 0;
-                font-size: 1rem;
-                font-weight: 600;
-                color: #212529;
-            }
-
-            #owner-map {
-                height: 200px;
-                border-radius: 0.75rem;
-                z-index: 1;
-                border: 2px solid rgba(139, 92, 246, 0.1);
-            }
-
-            .map-placeholder {
-                height: 200px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: linear-gradient(135deg, #f0f9ff 0%, #fdf4ff 100%);
-                border-radius: 0.75rem;
-                color: #6c757d;
-                flex-direction: column;
-                gap: 0.5rem;
-                border: 2px dashed rgba(139, 92, 246, 0.2);
-            }
-
-            .map-placeholder i {
-                font-size: 2rem;
-                color: #8b5cf6;
-                opacity: 0.5;
             }
 
             .status-badge {
                 position: absolute;
                 top: 1rem;
-                right: 1rem;
+                left: 1rem;
                 padding: 0.5rem 1rem;
-                border-radius: 2rem;
+                border-radius: 50px;
                 font-weight: 600;
-                font-size: 0.875rem;
+                font-size: 0.85rem;
                 z-index: 10;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             }
 
             .status-available {
-                background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+                background: #dcfce7;
                 color: #166534;
             }
 
             .status-unavailable {
-                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+                background: #fee2e2;
                 color: #b91c1c;
+            }
+
+            /* Section Cards */
+            .info-card {
+                background: white;
+                border-radius: 1rem;
+                padding: 2rem;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+                margin-bottom: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--text-dark);
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            /* Specs Grid */
+            .specs-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .spec-box {
+                background: #f8f9fa;
+                padding: 1rem;
+                border-radius: 0.75rem;
+                text-align: center;
+                transition: transform 0.2s;
+            }
+
+            .spec-box:hover {
+                transform: translateY(-2px);
+                background: #fff;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+
+            .spec-icon {
+                font-size: 1.25rem;
+                color: var(--primary-color);
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+
+            .spec-label {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+
+            .spec-value {
+                font-weight: 600;
+                color: var(--text-dark);
+                font-size: 0.95rem;
+            }
+
+            /* Owner & Location */
+            .owner-preview {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .owner-avatar {
+                width: 56px;
+                height: 56px;
+                background: #e0e7ff;
+                color: var(--primary-color);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .map-container {
+                height: 250px;
+                border-radius: 0.75rem;
+                overflow: hidden;
+                border: 1px solid #e9ecef;
+            }
+
+            /* Booking Sidebar (Sticky) */
+            .booking-sidebar {
+                position: sticky;
+                top: 100px;
+                z-index: 100;
+            }
+
+            .price-tag {
+                font-size: 2.5rem;
+                font-weight: 800;
+                color: var(--primary-color);
+                line-height: 1;
+                margin-bottom: 0.5rem;
+            }
+
+            .price-period {
+                font-size: 1rem;
+                color: var(--text-muted);
+                font-weight: 500;
+            }
+
+            .feature-list {
+                list-style: none;
+                padding: 0;
+                margin: 1.5rem 0;
+            }
+
+            .feature-list li {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin-bottom: 0.75rem;
+                color: #495057;
+                font-size: 0.95rem;
+            }
+
+            .feature-list i {
+                color: #10b981;
+            }
+
+            .book-btn {
+                display: block;
+                width: 100%;
+                padding: 1rem;
+                background: var(--primary-color);
+                color: white;
+                text-align: center;
+                text-decoration: none;
+                border-radius: 0.75rem;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.2s;
+                box-shadow: 0 4px 12px rgba(75, 73, 172, 0.2);
+            }
+
+            .book-btn:hover {
+                background: #3f3e91;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(75, 73, 172, 0.3);
+                color: white;
+            }
+
+            /* Mobile Bottom Bar */
+            .mobile-bottom-bar {
+                display: none;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 1rem 1.5rem;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+                z-index: 1000;
+                align-items: center;
+                justify-content: space-between;
+                border-top: 1px solid #e9ecef;
+            }
+
+            @media (max-width: 991px) {
+                .hero-image-card {
+                    height: 250px;
+                    border-radius: 0;
+                    margin: -2rem -1.5rem 1.5rem -1.5rem;
+                    width: calc(100% + 3rem);
+                }
+
+                .details-container {
+                    padding-bottom: 100px; /* Space for bottom bar */
+                }
+
+                .booking-sidebar {
+                    display: none; /* Hide sidebar on mobile */
+                }
+
+                .mobile-bottom-bar {
+                    display: flex;
+                }
+
+                .status-badge {
+                    top: 1rem;
+                    left: 2.5rem; /* Adjust for container padding */
+                }
             }
         </style>
     </th:block>
@@ -316,125 +280,164 @@
 
 <body>
     <main layout:fragment="content">
-        <div class="vehicle-details-container">
-            <!-- Back Link -->
-            <a href="/renter/vehicles" class="back-link">
-                <i class="fas fa-arrow-left"></i> Back to Browse
-            </a>
+        <div class="details-container">
+            <!-- Breadcrumb -->
+            <nav class="back-nav" aria-label="Breadcrumb">
+                <a href="/renter/vehicles" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Browse Vehicles
+                </a>
+            </nav>
 
-            <!-- Hero Card -->
-            <div class="hero-card">
-                <!-- Left: Image -->
-                <div class="vehicle-image-container">
-                    <span class="status-badge"
-                        th:classappend="${vehicle.status == 'AVAILABLE' ? 'status-available' : 'status-unavailable'}"
-                        th:text="${vehicle.status}">
-                        AVAILABLE
-                    </span>
-                    <img th:if="${vehicle.vehicleImageUrl != null}" th:src="${vehicle.vehicleImageUrl}"
-                        alt="Vehicle Image" class="vehicle-image">
-                    <div th:unless="${vehicle.vehicleImageUrl != null}" class="text-muted">
-                        <i class="fas fa-car fa-4x"></i>
-                    </div>
-                </div>
+            <div class="row g-4">
+                <!-- Left Column: Content -->
+                <div class="col-lg-8">
+                    <!-- Hero Image -->
+                    <div class="hero-image-card">
+                        <span class="status-badge"
+                            th:classappend="${vehicle.status == 'AVAILABLE' ? 'status-available' : 'status-unavailable'}"
+                            th:text="${vehicle.status}">
+                            AVAILABLE
+                        </span>
 
-                <!-- Right: Details -->
-                <div class="vehicle-info-container">
-                    <div class="vehicle-brand" th:text="${vehicle.brand}">PERODUA</div>
-                    <h1 class="vehicle-title" th:text="${vehicle.model}">Myvi 1.5 AV</h1>
-
-                    <div class="specs-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Category</span>
-                            <span class="spec-value" th:text="${vehicle.category}">Hatchback</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Fuel Type</span>
-                            <span class="spec-value" th:text="${vehicle.fuelType}">Petrol</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Transmission</span>
-                            <span class="spec-value" th:text="${vehicle.transmissionType}">Automatic</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Year</span>
-                            <span class="spec-value" th:text="${vehicle.manufacturingYear}">2023</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Mileage</span>
-                            <span class="spec-value" th:text="${vehicle.mileage + ' km'}">15,000 km</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Registration No</span>
-                            <span class="spec-value" th:text="${vehicle.registrationNo}">WUX 5815</span>
+                        <img th:if="${vehicle.vehicleImageUrl != null}" th:src="${vehicle.vehicleImageUrl}"
+                            alt="Vehicle Image" class="hero-image">
+                        <div th:unless="${vehicle.vehicleImageUrl != null}"
+                             class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
+                            <i class="fas fa-car fa-4x"></i>
                         </div>
                     </div>
 
-                    <div class="price-section">
-                        <div class="price-display">
-                            <span class="price-label">Rate per Day</span>
-                            <div>
-                                <span class="price-amount" th:text="${'RM ' + vehicle.ratePerDay}">RM 120.00</span>
+                    <!-- Header (Mobile/Tablet View mostly, but good for structure) -->
+                    <div class="mb-4">
+                        <h4 class="text-muted mb-1 text-uppercase" style="letter-spacing: 1px; font-size: 0.9rem;" th:text="${vehicle.brand}">Brand</h4>
+                        <h1 class="fw-bold text-dark mb-0" th:text="${vehicle.model}">Model Name</h1>
+                        <div class="d-flex align-items-center gap-2 mt-2 text-muted">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            <span th:text="${vehicle.city + ', ' + vehicle.state}">Location</span>
+                        </div>
+                    </div>
+
+                    <!-- Specifications -->
+                    <div class="info-card">
+                        <h3 class="section-title"><i class="fas fa-cogs text-primary"></i> Vehicle Specifications</h3>
+                        <div class="specs-grid">
+                            <div class="spec-box">
+                                <i class="fas fa-car-side spec-icon"></i>
+                                <span class="spec-label">Category</span>
+                                <span class="spec-value" th:text="${vehicle.category}">Sedan</span>
+                            </div>
+                            <div class="spec-box">
+                                <i class="fas fa-gas-pump spec-icon"></i>
+                                <span class="spec-label">Fuel Type</span>
+                                <span class="spec-value" th:text="${vehicle.fuelType}">Petrol</span>
+                            </div>
+                            <div class="spec-box">
+                                <i class="fas fa-cog spec-icon"></i>
+                                <span class="spec-label">Transmission</span>
+                                <span class="spec-value" th:text="${vehicle.transmissionType}">Auto</span>
+                            </div>
+                            <div class="spec-box">
+                                <i class="fas fa-calendar spec-icon"></i>
+                                <span class="spec-label">Year</span>
+                                <span class="spec-value" th:text="${vehicle.manufacturingYear}">2022</span>
+                            </div>
+                            <div class="spec-box">
+                                <i class="fas fa-tachometer-alt spec-icon"></i>
+                                <span class="spec-label">Mileage</span>
+                                <span class="spec-value" th:text="${vehicle.mileage + ' km'}">20k km</span>
+                            </div>
+                            <div class="spec-box">
+                                <i class="fas fa-users spec-icon"></i>
+                                <span class="spec-label">Capacity</span>
+                                <!-- Logic for seats based on category -->
+                                <span class="spec-value" th:with="cat=${vehicle.category}"
+                                      th:text="${cat == 'MPV' ? '7 Seats' : (cat == 'Coupe' ? '2 Seats' : '5 Seats')}">
+                                    5 Seats
+                                </span>
                             </div>
                         </div>
-                        <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}" class="btn-book-now">
-                            BOOK NOW
-                        </a>
+                    </div>
+
+                    <!-- Owner & Location -->
+                    <div class="info-card">
+                        <h3 class="section-title"><i class="fas fa-store text-primary"></i> Fleet Owner & Location</h3>
+
+                        <div class="owner-preview">
+                            <div class="owner-avatar">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">
+                                    <a th:href="@{/renter/owners/{id}(id=${vehicle.fleetOwnerId})}" class="text-dark text-decoration-none fw-bold"
+                                       th:text="${vehicle.ownerBusinessName}">Owner Name</a>
+                                    <i th:if="${vehicle.ownerIsVerified}" class="fas fa-check-circle text-success ms-1" title="Verified Owner"></i>
+                                </h5>
+                                <div class="text-muted small">
+                                    <i class="fas fa-phone-alt me-1"></i>
+                                    <span th:text="${vehicle.ownerContactPhone}">Contact</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Map -->
+                        <div th:if="${vehicle.ownerLatitude != null and vehicle.ownerLongitude != null}" class="map-container">
+                             <div id="owner-map" class="h-100 w-100"
+                                  th:data-lat="${vehicle.ownerLatitude}"
+                                  th:data-lng="${vehicle.ownerLongitude}"
+                                  th:data-name="${vehicle.ownerBusinessName}">
+                            </div>
+                        </div>
+                        <div th:unless="${vehicle.ownerLatitude != null and vehicle.ownerLongitude != null}"
+                             class="map-container d-flex align-items-center justify-content-center bg-light text-muted">
+                            <span><i class="fas fa-map-marker-slash me-2"></i> Location map unavailable</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Sticky Booking Card -->
+                <div class="col-lg-4">
+                    <div class="booking-sidebar">
+                        <div class="info-card">
+                            <div class="d-flex align-items-baseline gap-2 mb-3">
+                                <div class="price-tag" th:text="'RM' + ${vehicle.ratePerDay}">RM120</div>
+                                <span class="price-period">/ day</span>
+                            </div>
+
+                            <hr class="text-muted opacity-25">
+
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check-circle"></i> Instant Confirmation</li>
+                                <li><i class="fas fa-check-circle"></i> Free Cancellation (24h)</li>
+                                <li><i class="fas fa-check-circle"></i> Basic Insurance Included</li>
+                                <li><i class="fas fa-check-circle"></i> 24/7 Roadside Support</li>
+                            </ul>
+
+                            <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}"
+                               class="book-btn pulse-button">
+                                Choose Dates & Book
+                            </a>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted">No payment required today</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Fleet Owner Section with Map -->
-            <div class="owner-section">
-                <!-- Owner Info Card -->
-                <div class="owner-card">
-                    <div class="owner-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="owner-info">
-                        <div class="owner-name">
-                            <a th:href="@{/renter/owners/{id}(id=${vehicle.fleetOwnerId})}"
-                                style="color: #212529; text-decoration: none;"
-                                onmouseover="this.style.textDecoration='underline'; this.style.color='#8b5cf6';"
-                                onmouseout="this.style.textDecoration='none'; this.style.color='#212529';"
-                                th:text="${vehicle.ownerBusinessName}">FleetCo Rentals</a>
-                            <span class="verified-badge" th:if="${vehicle.ownerIsVerified}">
-                                <i class="fas fa-check-circle"></i> Verified
-                            </span>
-                        </div>
-                        <div class="owner-contact">
-                            <i class="fas fa-phone-alt"></i>
-                            <span th:text="${vehicle.ownerContactPhone}">+60 12-345 6789</span>
-                        </div>
-                        <div class="owner-contact" style="margin-top: 0.5rem;">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span th:text="${vehicle.city + ', ' + vehicle.state}">City, State</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Business Location Map -->
-                <div class="location-card">
-                    <div class="location-card-header">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <h4>Business Location</h4>
-                    </div>
-
-                    <!-- Map Container -->
-                    <div th:if="${vehicle.ownerLatitude != null and vehicle.ownerLongitude != null}">
-                        <div id="owner-map" th:data-lat="${vehicle.ownerLatitude}"
-                            th:data-lng="${vehicle.ownerLongitude}" th:data-name="${vehicle.ownerBusinessName}">
-                        </div>
-                    </div>
-
-                    <!-- Placeholder when no coordinates -->
-                    <div th:unless="${vehicle.ownerLatitude != null and vehicle.ownerLongitude != null}"
-                        class="map-placeholder">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <p style="margin: 0; font-weight: 500;">Location not available</p>
-                    </div>
+        <!-- Mobile Bottom Bar -->
+        <div class="mobile-bottom-bar">
+            <div>
+                <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Daily Rate</small>
+                <div class="d-flex align-items-baseline gap-1">
+                    <span class="fw-bold text-primary h4 m-0" th:text="'RM' + ${vehicle.ratePerDay}">RM120</span>
+                    <small class="text-muted">/day</small>
                 </div>
             </div>
+            <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                Book Now
+            </a>
         </div>
     </main>
 
@@ -449,7 +452,7 @@
                     var lng = parseFloat(mapEl.dataset.lng);
                     var businessName = mapEl.dataset.name || 'Business Location';
 
-                    var map = L.map('owner-map').setView([lat, lng], 14);
+                    var map = L.map('owner-map', { scrollWheelZoom: false }).setView([lat, lng], 14);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '© OpenStreetMap contributors'
                     }).addTo(map);
@@ -458,6 +461,7 @@
                         .bindPopup('<strong>' + businessName + '</strong><br>Business Location')
                         .openPopup();
 
+                    // Fix map rendering issues in tabs/modals or initially hidden containers
                     setTimeout(function () { map.invalidateSize(); }, 200);
                 }
             })();
