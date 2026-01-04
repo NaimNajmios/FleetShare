@@ -299,12 +299,36 @@
                 border: 1px solid #fed7d7;
             }
 
+            .date-connector-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #adb5bd;
+                font-size: 1.2rem;
+                height: 100%;
+                padding-top: 1rem;
+            }
+
+            @media (max-width: 768px) {
+                .date-connector-icon {
+                    padding: 0;
+                    margin: 0.5rem 0;
+                    transform: rotate(90deg);
+                }
+            }
+
             .cost-card {
                 background: #f8f9fa;
                 border-radius: 0.75rem;
                 padding: 1.25rem;
                 border: 1px solid #e9ecef;
                 transition: all 0.3s ease;
+            }
+
+            .cost-card.loading {
+                opacity: 0.7;
+                background: #e9ecef;
+                pointer-events: none;
             }
 
             .input-group-text {
@@ -391,8 +415,8 @@
                     method="POST" th:data-rate="${vehicle.ratePerDay}">
 
                     <!-- Date Selection Row -->
-                    <div class="row g-3 mb-2">
-                        <div class="col-md-6">
+                    <div class="row g-2 mb-2 align-items-center">
+                        <div class="col-md-5">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                                 <div class="form-floating">
@@ -401,7 +425,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-2 text-center">
+                            <div class="date-connector-icon">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
                                 <div class="form-floating">
@@ -533,34 +562,46 @@
                     updateDuration();
                 };
 
+                // Debounce timer for simulated availability check
+                let checkTimer;
+
                 function updateDuration() {
+                    // Always clear any pending check first to avoid race conditions
+                    clearTimeout(checkTimer);
+
                     const pickup = new Date(pickupInput.value);
                     const returnDate = new Date(returnInput.value);
 
                     if (pickupInput.value && returnInput.value) {
                         if (returnDate >= pickup) {
-                            const diffTime = Math.abs(returnDate - pickup);
-                            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            // If same day, count as 1 day rental usually, or 0?
-                            // Let's assume min 1 day if dates are same, or 0 days?
-                            // Usually car rental is per 24h block.
-                            // If same date selected: 1 day?
-                            if (diffDays === 0) diffDays = 1;
+                            // Show loading state
+                            totalCostContainer.classList.add('loading');
+                            proceedBtn.disabled = true;
 
-                            durationText.textContent = diffDays + (diffDays === 1 ? ' Day' : ' Days');
-                            durationDisplay.classList.remove('hidden');
+                            // Simulate availability check (micro-interaction)
+                            checkTimer = setTimeout(() => {
+                                totalCostContainer.classList.remove('loading');
 
-                            // Visual bar progress (cap at 14 days for 100%)
-                            const percentage = Math.min((diffDays / 14) * 100, 100);
-                            durationProgress.style.width = percentage + '%';
+                                const diffTime = Math.abs(returnDate - pickup);
+                                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                if (diffDays === 0) diffDays = 1;
 
-                            // Calculate total cost
-                            const totalCost = diffDays * ratePerDay;
-                            updatePriceDisplay(totalCost);
+                                durationText.textContent = diffDays + (diffDays === 1 ? ' Day' : ' Days');
+                                durationDisplay.classList.remove('hidden');
 
-                            proceedBtn.disabled = false;
-                            dateError.style.display = 'none';
-                            returnInput.classList.remove('is-invalid');
+                                // Visual bar progress (cap at 14 days for 100%)
+                                const percentage = Math.min((diffDays / 14) * 100, 100);
+                                durationProgress.style.width = percentage + '%';
+
+                                // Calculate total cost
+                                const totalCost = diffDays * ratePerDay;
+                                updatePriceDisplay(totalCost);
+
+                                proceedBtn.disabled = false;
+                                dateError.style.display = 'none';
+                                returnInput.classList.remove('is-invalid');
+                            }, 400); // 400ms delay for "checking" feel
+
                         } else {
                             resetFormState();
                             proceedBtn.disabled = true;
