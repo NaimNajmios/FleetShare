@@ -90,6 +90,18 @@ body.auth-page {
     }
 }
 
+/* Shake Animation for Errors */
+.shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
 /* ============================================
    Branding
    ============================================ */
@@ -188,33 +200,6 @@ body.auth-page {
 
 .form-input::placeholder {
     color: var(--fs-text-muted);
-}
-
-/* Input with Icon */
-.input-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.input-icon-right {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: var(--fs-text-muted);
-    transition: color 0.2s ease;
-    font-size: 1.1rem;
-    z-index: 1;
-}
-
-.input-icon-right:hover {
-    color: var(--fs-text-secondary);
-}
-
-.form-input-with-icon {
-    padding-right: 3rem;
-    box-sizing: border-box;
 }
 
 /* Input with Icon */
@@ -1065,6 +1050,47 @@ body.auth-page {
 
 .form-group.focused .form-label {
     color: var(--fs-primary);
+}
+
+/* ============================================
+   Toast Notifications
+   ============================================ */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: var(--fs-radius-md);
+    box-shadow: var(--fs-shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateX(120%);
+    transition: transform 0.3s ease-out;
+    z-index: 1000;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast-success i {
+    color: var(--fs-success);
+    font-size: 1.25rem;
+}
+
+.toast-error i {
+    color: var(--fs-error);
+    font-size: 1.25rem;
+}
+
+.toast-success {
+    border-left: 4px solid var(--fs-success);
+}
+
+.toast-error {
+    border-left: 4px solid var(--fs-error);
 }
 
 /* ============================================

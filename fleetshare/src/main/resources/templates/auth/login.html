@@ -32,7 +32,7 @@
                 <p class="auth-subtitle">Sign in to continue to your account</p>
             </div>
 
-            <!-- Error Messages -->
+            <!-- Error Messages (Handled by JS Toast as well for delight, but kept for fallback) -->
             <div th:if="${param.error}" class="alert alert-error">
                 <i class="mdi mdi-alert-circle"></i>
                 <span>Invalid email or password. Please try again.</span>
@@ -43,7 +43,7 @@
             </div>
 
             <!-- Login Form -->
-            <form class="auth-form" id="loginForm" th:action="@{/login}" method="post">
+            <form class="auth-form" id="loginForm" th:action="@{/login}" method="post" novalidate>
                 <!-- Email -->
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="username" name="username" placeholder="Enter your email"
@@ -58,7 +58,8 @@
                             placeholder="Enter your password" required autocomplete="current-password" style="padding-right: 2.5rem;">
                         <label for="password">Password</label>
                     </div>
-                    <span class="toggle-password" data-target="password" onclick="togglePassword('password')">
+                    <!-- Added aria-label and role for accessibility -->
+                    <span class="toggle-password" data-target="password" role="button" aria-label="Show password" tabindex="0">
                         <i class="mdi mdi-eye-outline"></i>
                     </span>
                     <div class="form-group-footer mt-2">
@@ -97,44 +98,8 @@
         </div>
     </div>
 
-    <script>
-        // Password Toggle
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = document.querySelector(`[data-target="${inputId}"] i`);
-
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('mdi-eye-outline');
-                icon.classList.add('mdi-eye-off-outline');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('mdi-eye-off-outline');
-                icon.classList.add('mdi-eye-outline');
-            }
-        }
-
-        // Form Submit Loading State
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            const btn = document.getElementById('loginBtn');
-            const btnText = btn.querySelector('.btn-text');
-            const btnLoader = btn.querySelector('.btn-loader');
-
-            btnText.classList.add('d-none');
-            btnLoader.classList.remove('d-none');
-            btn.disabled = true;
-        });
-
-        // Input Focus Animation
-        document.querySelectorAll('.form-input').forEach(input => {
-            input.addEventListener('focus', function () {
-                this.parentElement.classList.add('focused');
-            });
-            input.addEventListener('blur', function () {
-                this.parentElement.classList.remove('focused');
-            });
-        });
-    </script>
+    <!-- Centralized Auth Logic -->
+    <script src="/js/auth.js"></script>
 </body>
 
 </html>

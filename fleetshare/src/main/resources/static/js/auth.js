@@ -11,6 +11,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('error')) {
         showToast('Invalid email or password. Please try again.', 'error');
+
+        // Shake animation for login card
+        const authCard = document.querySelector('.auth-card');
+        if (authCard) {
+            authCard.classList.add('shake');
+            setTimeout(() => {
+                authCard.classList.remove('shake');
+            }, 500);
+        }
+
+        // Focus on email field to try again
+        const emailInput = document.querySelector('input[type="email"]');
+        if (emailInput) emailInput.focus();
     }
     if (urlParams.has('logout')) {
         showToast('You have been logged out successfully.', 'success');
@@ -31,16 +44,35 @@ document.addEventListener('DOMContentLoaded', function() {
             const passwordInput = document.getElementById(targetId);
             const icon = this.querySelector('i');
             
+            // Check for aria-pressed
+            const isPressed = this.getAttribute('aria-pressed') === 'true';
+            this.setAttribute('aria-pressed', !isPressed);
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.classList.remove('mdi-eye-outline');
                 icon.classList.add('mdi-eye-off-outline');
+                this.setAttribute('aria-label', 'Hide password');
             } else {
                 passwordInput.type = 'password';
                 icon.classList.remove('mdi-eye-off-outline');
                 icon.classList.add('mdi-eye-outline');
+                this.setAttribute('aria-label', 'Show password');
             }
         });
+
+        // Add keyboard support
+        button.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+
+        // Add tabindex if not present
+        if (!button.getAttribute('tabindex')) {
+            button.setAttribute('tabindex', '0');
+        }
     });
     
     // ============================================
@@ -141,13 +173,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     authForms.forEach(form => {
         form.addEventListener('submit', function(e) {
-            e.preventDefault();
+            // If already handling submit or invalid, stop
+            if (form.classList.contains('submitting')) return;
             
             let isValid = true;
             const requiredInputs = form.querySelectorAll('[required]');
             
             // Validate all required fields
             requiredInputs.forEach(input => {
+                // Skip if not visible
+                if (input.offsetParent === null) return;
+
                 if (!validateRequired(input)) {
                     isValid = false;
                 }
@@ -175,19 +211,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            if (isValid) {
+            if (!isValid) {
+                e.preventDefault();
+                // Scroll to first error
+                const firstError = form.querySelector('.error, .form-error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (firstError.tagName === 'INPUT' || firstError.tagName === 'SELECT') {
+                        firstError.focus();
+                    }
+                }
+            } else {
                 // Show loading state
                 const submitButton = form.querySelector('button[type="submit"]');
                 if (submitButton) {
                     // Check for inline loading style
-                    if (submitButton.classList.contains('btn-loading-inline')) {
+                    const btnLoader = submitButton.querySelector('.btn-loader');
+                    const btnText = submitButton.querySelector('.btn-text');
+
+                    if (btnLoader && btnText) {
+                        btnText.classList.add('d-none');
+                        btnLoader.classList.remove('d-none');
                         submitButton.disabled = true;
-                        const spinner = submitButton.querySelector('.spinner-border');
-                        if (spinner) {
-                            spinner.classList.remove('d-none');
-                        }
-                        // Maintain width
-                        submitButton.style.width = submitButton.offsetWidth + 'px';
+                    } else if (submitButton.classList.contains('btn-loading-inline')) {
+                         // ... existing inline logic if any
                     } else {
                         // Default loading style
                         submitButton.classList.add('btn-loading');
@@ -195,37 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
-                // Submit the form
-                // In a real Spring Boot app, we let the form submit naturally
-                // providing the 'action' attribute is set.
-                // However, for demo/simulation purposes or if we want to show the spinner for a bit:
-                
-                if (form.getAttribute('action')) {
-                   form.submit();
-                } else {
-                    console.log('Form is valid, simulating submission...');
-                    // Remove loading state after 2 seconds (for demo)
-                     setTimeout(() => {
-                        if (submitButton) {
-                            if (submitButton.classList.contains('btn-loading-inline')) {
-                                submitButton.disabled = false;
-                                const spinner = submitButton.querySelector('.spinner-border');
-                                if (spinner) spinner.classList.add('d-none');
-                                submitButton.style.width = '';
-                            } else {
-                                submitButton.classList.remove('btn-loading');
-                                submitButton.disabled = false;
-                            }
-                        }
-                    }, 2000);
-                }
-            } else {
-                // Scroll to first error
-                const firstError = form.querySelector('.error');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstError.focus();
-                }
+                form.classList.add('submitting');
+                // Allow form to submit naturally
             }
         });
     });
@@ -254,10 +272,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Smart Form Field Focus
     // ============================================
     
-    // Auto-focus first input field
-    const firstInput = document.querySelector('.auth-form input:not([type="hidden"])');
-    if (firstInput) {
-        firstInput.focus();
+    // Auto-focus first input field (if no error param, as error param handles focus)
+    if (!urlParams.has('error')) {
+        const firstInput = document.querySelector('.auth-form input:not([type="hidden"]):not([disabled])');
+        if (firstInput) {
+            firstInput.focus();
+        }
     }
     
     // ============================================
@@ -333,6 +353,10 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param {string} type - 'success' or 'error'
  */
 function showToast(message, type = 'success') {
+    // Check if toast already exists
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) existingToast.remove();
+
     // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -345,11 +369,13 @@ function showToast(message, type = 'success') {
     document.body.appendChild(toast);
     
     // Trigger animation
-    setTimeout(() => toast.classList.add('show'), 100);
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
     
     // Remove after 3 seconds
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
 }
