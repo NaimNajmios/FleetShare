@@ -58,9 +58,9 @@
                             placeholder="Enter your password" required autocomplete="current-password" style="padding-right: 2.5rem;">
                         <label for="password">Password</label>
                     </div>
-                    <span class="toggle-password" data-target="password" onclick="togglePassword('password')">
+                    <button type="button" class="toggle-password" data-toggle="password" data-target="password" aria-label="Show password">
                         <i class="mdi mdi-eye-outline"></i>
-                    </span>
+                    </button>
                     <div class="form-group-footer mt-2">
                         <a href="#" class="auth-link forgot-link">Forgot Password?</a>
                     </div>
@@ -97,44 +97,8 @@
         </div>
     </div>
 
-    <script>
-        // Password Toggle
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = document.querySelector(`[data-target="${inputId}"] i`);
-
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('mdi-eye-outline');
-                icon.classList.add('mdi-eye-off-outline');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('mdi-eye-off-outline');
-                icon.classList.add('mdi-eye-outline');
-            }
-        }
-
-        // Form Submit Loading State
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            const btn = document.getElementById('loginBtn');
-            const btnText = btn.querySelector('.btn-text');
-            const btnLoader = btn.querySelector('.btn-loader');
-
-            btnText.classList.add('d-none');
-            btnLoader.classList.remove('d-none');
-            btn.disabled = true;
-        });
-
-        // Input Focus Animation
-        document.querySelectorAll('.form-input').forEach(input => {
-            input.addEventListener('focus', function () {
-                this.parentElement.classList.add('focused');
-            });
-            input.addEventListener('blur', function () {
-                this.parentElement.classList.remove('focused');
-            });
-        });
-    </script>
+    <!-- Auth Logic -->
+    <script src="/js/auth.js"></script>
 </body>
 
 </html>
