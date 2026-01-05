@@ -21,11 +21,11 @@ public interface BookingStatusLogRepository extends JpaRepository<BookingStatusL
 
     @Query("SELECT bsl.statusValue, COUNT(bsl) " +
             "FROM BookingStatusLog bsl " +
-            "WHERE bsl.bookingId IN (SELECT b.bookingId FROM Booking b WHERE b.renterId = :renterId) " +
-            "AND bsl.statusTimestamp = (" +
-            "    SELECT MAX(bsl2.statusTimestamp) " +
+            "WHERE (bsl.bookingId, bsl.statusTimestamp) IN (" +
+            "    SELECT bsl2.bookingId, MAX(bsl2.statusTimestamp) " +
             "    FROM BookingStatusLog bsl2 " +
-            "    WHERE bsl2.bookingId = bsl.bookingId" +
+            "    WHERE bsl2.bookingId IN (SELECT b.bookingId FROM Booking b WHERE b.renterId = :renterId) " +
+            "    GROUP BY bsl2.bookingId" +
             ") " +
             "GROUP BY bsl.statusValue")
     List<Object[]> countBookingsByStatusForRenter(@org.springframework.data.repository.query.Param("renterId") Long renterId);
