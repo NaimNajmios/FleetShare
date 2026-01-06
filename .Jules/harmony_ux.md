@@ -1,32 +1,39 @@
-## 2024-05-23 - Enhanced Booking Date Selection & Empty States
+## 2026-01-06 - Client-Side Sorting & Animation
 
-**Context:** Renter Booking Flow (`booking-form.html`) and My Bookings Dashboard (`my-bookings.html`)
-**User Need:**
-1. Users need clear visual feedback when selecting dates to ensure availability and cost are calculated correctly without "jumping" UI.
-2. Users encountering empty states need a clear path forward.
-
-**Observation:**
-- The booking form date inputs were visually disconnected and lacked immediate feedback during the "calculation" phase, making the interface feel static and unresponsive until the final price popped in.
-- The "My Bookings" page had a dead-end empty state with no button to browse vehicles.
-
+**Context:** Renter Browse Vehicles Page (`browse-vehicles.html`)
+**User Need:** Users want to sort vehicles by price or newness to find the best deal or latest model quickly, but the previous interface only supported filtering (hide/show), not reordering.
+**Observation:** The vehicle list was static (server order). While filters were instant (JS), finding the "cheapest" required scrolling and manually comparing.
 **Solution Implemented:**
-1. **Visual Connection:** Rearranged Date Inputs to be side-by-side with a directional arrow (`->`), reinforcing the concept of a range.
-2. **Micro-Interaction:** Added a simulated "Checking availability..." state (400ms delay with visual opacity change) when dates are modified. This builds trust that the system is actually validating the dates and provides a smoother transition for price updates.
-3. **Empty State CTA:** Added a "Browse Vehicles" button to the empty bookings list to close the loop.
+1.  Added a "Sort" dropdown with options: Recommended, Price (Low-High/High-Low), Newest.
+2.  Implemented JS logic to reorder DOM elements based on `data-*` attributes (`data-price`, `data-year`).
+3.  Added a `data-original-index` on load to allow resetting to server order.
+4.  Added a CSS animation (`fadeIn`) that triggers when items are re-appended/shown to smooth the transition.
 
-**Impact:**
-- The date selection feels more solid and "application-like" rather than just a form.
-- Users are guided out of empty states effectively.
+**Impact:** Immediate, responsive sorting without server round-trips for the current page set. The animation provides delightful feedback that the list has updated.
 
 **Code Pattern:**
 ```javascript
-// Simulated Availability Check Pattern
-totalCostContainer.classList.add('loading');
-proceedBtn.disabled = true;
+// Sorting Logic
+cards.sort((a, b) => {
+    if (currentSort === 'price-asc') {
+        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+    }
+    // ...
+});
 
-clearTimeout(checkTimer);
-checkTimer = setTimeout(() => {
-    totalCostContainer.classList.remove('loading');
-    // ... update logic
-}, 400);
+// Re-append to DOM
+cards.forEach(card => {
+    container.appendChild(card);
+    card.classList.add('animate-fade-in'); // Trigger animation
+});
+```
+
+```css
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 ```
