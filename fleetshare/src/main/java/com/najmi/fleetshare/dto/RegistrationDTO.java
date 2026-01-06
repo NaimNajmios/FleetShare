@@ -1,5 +1,7 @@
 package com.najmi.fleetshare.dto;
 
+import com.najmi.fleetshare.validation.StrongPassword;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -19,7 +21,7 @@ public class RegistrationDTO {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @StrongPassword
     private String password;
 
     @NotBlank(message = "Please confirm your password")
@@ -48,6 +50,7 @@ public class RegistrationDTO {
     private String phoneNumber;
 
     // Terms Acceptance
+    @AssertTrue(message = "You must agree to the terms and conditions")
     private boolean agreeTerms;
 
     // Constructors
