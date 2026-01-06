@@ -20,3 +20,25 @@
     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
 </button>
 ```
+
+## 2026-01-06 - Booking Cost Transparency
+
+**Context:** Booking Form (`booking-form.html`, `booking-enhancements.css`)
+**Challenge:** Users were presented with only a "Total Cost" without understanding the breakdown (daily rate * duration, fees, discounts). This lack of transparency could lead to trust issues or cart abandonment. The initial state was also "RM 0.00" which felt broken.
+**Solution:**
+1.  Implemented a dynamic JS-driven cost breakdown section.
+2.  Added an "Empty State" for the cost card that guides the user to select dates.
+3.  Introduced a "Weekly Discount" logic (client-side simulation for delight) that visually highlights savings with a pill badge.
+4.  Used vanilla JS to calculate and animate the values instantly as dates change.
+**Impact:** Increased transparency and trust; clearer value proposition with the discount visual.
+**Code Example:**
+```html
+<!-- Dynamic Discount Row -->
+<div id="discountRow" class="breakdown-row text-success d-none">
+    <span>
+        <i class="fas fa-tag me-1"></i>Weekly Discount (10%)
+        <span class="discount-pill">SAVED</span>
+    </span>
+    <span id="discountAmount">- RM 0.00</span>
+</div>
+```

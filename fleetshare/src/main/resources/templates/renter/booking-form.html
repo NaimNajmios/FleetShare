@@ -4,6 +4,7 @@
 
 <head>
     <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" href="/css/booking-enhancements.css">
         <style>
             .booking-container {
                 max-width: 1200px;
@@ -475,17 +476,45 @@
                         </div>
                     </div>
 
-                    <!-- Total Cost -->
+                    <!-- Cost Breakdown -->
                     <div class="form-group">
-                        <label class="form-label" id="totalCostLabel">Total Cost</label>
-                        <div id="totalCostContainer" class="cost-card d-flex align-items-center justify-content-between"
-                             aria-labelledby="totalCostLabel"
-                             aria-live="polite">
-                            <div>
-                                <span class="d-block text-muted small">Estimated total</span>
-                                <small class="text-muted" style="font-size: 0.75rem;">Excludes tax & fees</small>
+                        <label class="form-label" id="totalCostLabel">Cost Summary</label>
+
+                        <!-- Initial Empty State -->
+                        <div id="costEmptyState" class="cost-card empty-state">
+                            <i class="fas fa-calculator"></i>
+                            <p class="mb-0 small">Select pickup and return dates to calculate price.</p>
+                        </div>
+
+                        <!-- Active Cost Card (Hidden Initially) -->
+                        <div id="totalCostContainer" class="cost-card d-none" aria-labelledby="totalCostLabel" aria-live="polite">
+                            <div class="breakdown-row">
+                                <span id="baseRateLabel">RM 0.00 x 0 Days</span>
+                                <span id="baseRateTotal">RM 0.00</span>
                             </div>
-                            <span id="totalCostDisplay" class="h2 mb-0 text-primary fw-bold">RM 0.00</span>
+
+                            <!-- Dynamic Discount Row -->
+                            <div id="discountRow" class="breakdown-row text-success d-none">
+                                <span>
+                                    <i class="fas fa-tag me-1"></i>Weekly Discount (10%)
+                                    <span class="discount-pill">SAVED</span>
+                                </span>
+                                <span id="discountAmount">- RM 0.00</span>
+                            </div>
+
+                            <div class="breakdown-row">
+                                <span>Service Fee <i class="fas fa-info-circle text-muted small" title="Processing & Platform fees"></i></span>
+                                <span id="serviceFeeDisplay">RM 0.00</span>
+                            </div>
+
+                            <div class="breakdown-row total-row">
+                                <span>Total Estimate</span>
+                                <span id="totalCostDisplay" class="h3 mb-0 text-primary fw-bold">RM 0.00</span>
+                            </div>
+
+                            <div class="mt-2 text-end">
+                                <small class="text-muted" style="font-size: 0.75rem;">Includes taxes and fees</small>
+                            </div>
                         </div>
                         <input type="hidden" id="totalCost" name="totalCost" value="0.00">
                     </div>
@@ -593,9 +622,19 @@
                                 const percentage = Math.min((diffDays / 14) * 100, 100);
                                 durationProgress.style.width = percentage + '%';
 
-                                // Calculate total cost
-                                const totalCost = diffDays * ratePerDay;
-                                updatePriceDisplay(totalCost);
+                                // Calculate costs
+                                const baseTotal = diffDays * ratePerDay;
+                                let discount = 0;
+
+                                // Apply 10% discount for bookings >= 7 days
+                                if (diffDays >= 7) {
+                                    discount = baseTotal * 0.10;
+                                }
+
+                                const serviceFee = baseTotal * 0.05; // 5% service fee
+                                const totalCost = baseTotal - discount + serviceFee;
+
+                                updatePriceDisplay(diffDays, ratePerDay, baseTotal, discount, serviceFee, totalCost);
 
                                 proceedBtn.disabled = false;
                                 dateError.style.display = 'none';
@@ -617,27 +656,58 @@
                 }
 
                 let currentCost = 0;
+                const costEmptyState = document.getElementById('costEmptyState');
+                const baseRateLabel = document.getElementById('baseRateLabel');
+                const baseRateTotal = document.getElementById('baseRateTotal');
+                const discountRow = document.getElementById('discountRow');
+                const discountAmount = document.getElementById('discountAmount');
+                const serviceFeeDisplay = document.getElementById('serviceFeeDisplay');
 
-                function updatePriceDisplay(amount) {
+                function updatePriceDisplay(days, rate, baseTotal, discount, fee, total) {
                     const hiddenInput = document.getElementById('totalCost');
+
+                    // Switch from empty state to active state
+                    if (totalCostContainer.classList.contains('d-none')) {
+                        costEmptyState.classList.add('d-none');
+                        totalCostContainer.classList.remove('d-none');
+                    }
+
+                    // Update Breakdown details
+                    baseRateLabel.textContent = `RM ${rate.toFixed(2)} x ${days} ${days === 1 ? 'Day' : 'Days'}`;
+                    baseRateTotal.textContent = `RM ${baseTotal.toFixed(2)}`;
+                    serviceFeeDisplay.textContent = `RM ${fee.toFixed(2)}`;
+
+                    // Handle Discount
+                    if (discount > 0) {
+                        discountRow.classList.remove('d-none');
+                        discountRow.classList.add('d-flex'); // Ensure flex display
+                        discountAmount.textContent = `- RM ${discount.toFixed(2)}`;
+                    } else {
+                        discountRow.classList.add('d-none');
+                        discountRow.classList.remove('d-flex');
+                    }
 
                     // Trigger Pulse Animation
                     totalCostContainer.classList.remove('pulse-highlight');
                     void totalCostContainer.offsetWidth; // Trigger reflow
                     totalCostContainer.classList.add('pulse-highlight');
 
-                    // Animate the number
-                    animateValue(totalCostDisplay, currentCost, amount, 500);
-                    currentCost = amount;
+                    // Animate the total
+                    animateValue(totalCostDisplay, currentCost, total, 500);
+                    currentCost = total;
 
-                    hiddenInput.value = amount.toFixed(2);
+                    hiddenInput.value = total.toFixed(2);
                 }
 
                 function resetFormState() {
                     durationText.textContent = '0 Days';
                     durationDisplay.classList.add('hidden');
                     durationProgress.style.width = '0%';
-                    updatePriceDisplay(0);
+
+                    // Show empty state, hide cost container
+                    costEmptyState.classList.remove('d-none');
+                    totalCostContainer.classList.add('d-none');
+                    currentCost = 0;
                 }
 
                 pickupInput.addEventListener('change', function () {
