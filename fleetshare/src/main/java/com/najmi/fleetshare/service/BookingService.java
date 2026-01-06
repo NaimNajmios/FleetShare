@@ -146,54 +146,33 @@ public class BookingService {
     }
 
     public BookingDTO getBookingDetails(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElse(null);
-        if (booking == null)
+        BookingDTO dto = bookingRepository.findBookingDetailsById(bookingId).orElse(null);
+        if (dto == null) {
             return null;
+        }
 
-        Renter renter = renterRepository.findById(booking.getRenterId()).orElse(null);
-        User renterUser = renter != null ? userRepository.findById(renter.getUserId()).orElse(null) : null;
-        Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
-        FleetOwner owner = fleetOwnerRepository.findById(booking.getFleetOwnerId()).orElse(null);
+        // Fetch Status (Latest)
+        statusLogRepository.findLatestStatusByBookingId(bookingId)
+                .ifPresent(log -> dto.setStatus(log.getStatusValue().name()));
 
-        String status = statusLogRepository.findLatestStatusByBookingId(booking.getBookingId())
-                .map(log -> log.getStatusValue().name())
-                .orElse("PENDING");
-
+        // Fetch Invoice
         List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
-        Invoice invoice = invoices.isEmpty() ? null : invoices.get(0);
+        if (!invoices.isEmpty()) {
+            Invoice invoice = invoices.get(0);
+            dto.setTotalCost(invoice.getTotalAmount());
+            dto.setInvoiceNumber(invoice.getInvoiceNumber());
 
-        Payment payment = null;
-        if (invoice != null) {
+            // Fetch Payment
             List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
             if (!payments.isEmpty()) {
-                payment = payments.get(0);
+                Payment payment = payments.get(0);
+                dto.setPaymentMethod(payment.getPaymentMethod().name());
+                dto.setPaymentStatus(payment.getPaymentStatus().name());
+                dto.setProofOfPaymentUrl(payment.getVerificationProofUrl());
             }
         }
 
-        return new BookingDTO(
-                booking.getBookingId(),
-                renter != null ? renter.getRenterId() : null,
-                renter != null ? renter.getFullName() : "Unknown",
-                renterUser != null ? renterUser.getEmail() : "N/A",
-                vehicle != null ? vehicle.getVehicleId() : null,
-                vehicle != null ? vehicle.getModel() : "Unknown",
-                vehicle != null ? vehicle.getBrand() : "Unknown",
-                vehicle != null ? vehicle.getRegistrationNo() : "Unknown",
-                vehicle != null ? vehicle.getVehicleImageUrl() : null,
-                owner != null ? owner.getBusinessName() : "Unknown Owner",
-                booking.getStartDate(),
-                booking.getEndDate(),
-                status,
-                invoice != null ? invoice.getTotalAmount() : null,
-                payment != null ? payment.getPaymentMethod().name() : null,
-                payment != null ? payment.getPaymentStatus().name() : null,
-                invoice != null ? invoice.getInvoiceNumber() : null,
-                payment != null ? payment.getVerificationProofUrl() : null,
-                booking.getCreatedAt(),
-                vehicle != null ? vehicle.getFuelType() : null,
-                vehicle != null ? vehicle.getTransmissionType() : null,
-                vehicle != null ? vehicle.getCategory() : null,
-                null); // Rate is stored in VehiclePriceHistory, not directly on Vehicle
+        return dto;
     }
 
     /**
