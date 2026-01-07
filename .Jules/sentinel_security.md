@@ -1,9 +1,15 @@
-## 2026-01-03 - [Missing Input Validation in Registration]
+## 2026-01-07 - Strong Password Validation
 
-**Context:** `AuthController.java`, `RegistrationDTO`
-**Vulnerability:** Missing Input Validation (Improper Input Validation)
-**Severity:** High
-**Root Cause:** The `RegistrationDTO` had validation annotations, but the `AuthController`'s `processRegistration` method was missing the `@Valid` annotation on the `ModelAttribute`, causing validation logic to be skipped entirely.
-**Fix Applied:** Added `@Valid` annotation to the `RegistrationDTO` parameter and implemented `BindingResult` checking in `AuthController`.
-**Prevention:** Ensure all controller methods accepting user input (DTOs) use `@Valid` or `@Validated` and handle `BindingResult` errors.
-**References:** CWE-20: Improper Input Validation
+**Context:** User Registration Form (`RegistrationDTO`)
+**Vulnerability:** Weak Password Policy
+**Severity:** Medium
+**Root Cause:** The application was only checking for a minimum password length of 8 characters, allowing weak passwords like "password" or "12345678".
+**Fix Applied:** Implemented a custom `@StrongPassword` annotation and `StrongPasswordValidator` that enforces:
+- Minimum 8 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one digit
+- At least one special character
+- No whitespace
+**Prevention:** Use the `@StrongPassword` annotation on all password fields in DTOs.
+**References:** CWE-521: Weak Password Requirements
