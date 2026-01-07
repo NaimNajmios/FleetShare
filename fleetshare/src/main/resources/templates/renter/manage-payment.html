@@ -544,8 +544,8 @@
                 </button>
 
                 <!-- Button: Cash -->
-                <form th:action="@{/renter/bookings/{id}/payment/cash(id=${booking.bookingId})}" method="POST"
-                    style="display: contents;">
+                <form id="cashPaymentForm" th:action="@{/renter/bookings/{id}/payment/cash(id=${booking.bookingId})}"
+                    method="POST" style="display: contents;">
                     <button id="btn-cash" type="submit" class="btn-primary-action btn-pay-later hidden">
                         CONFIRM PAY LATER
                     </button>
@@ -555,6 +555,7 @@
     </main>
 
     <th:block layout:fragment="extra-js">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const methodSelect = document.getElementById('paymentMethod');
@@ -623,7 +624,37 @@
                 // Button Actions (Mock)
                 btnCard.addEventListener('click', () => alert('Redirecting to Payment Gateway...'));
                 btnTransfer.addEventListener('click', () => alert('Submitting Receipt...'));
-                // btnCash.addEventListener('click', () => alert('Confirming Pay Later...'));
+
+                // Cash Payment Confirmation
+                const cashForm = document.getElementById('cashPaymentForm');
+                if (cashForm) {
+                    cashForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+
+                        Swal.fire({
+                            title: 'Confirm Cash Payment?',
+                            text: "You are choosing to pay at the counter. Please ensure you arrive on time.",
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#198754',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, Confirm',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire({
+                                    title: 'Processing...',
+                                    text: 'Please wait while we confirm your option.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
+                                this.submit();
+                            }
+                        });
+                    });
+                }
             });
         </script>
     </th:block>

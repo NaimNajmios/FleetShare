@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Dec 28, 2025 at 09:03 AM
+-- Generation Time: Jan 07, 2026 at 09:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -48,14 +48,19 @@ CREATE TABLE `addresses` (
 
 INSERT INTO `addresses` (`address_id`, `address_user_id`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `effective_start_date`, `created_at`, `updated_at`, `latitude`, `longitude`) VALUES
 (1, 1, 'Level 20, Menara TM', 'Jalan Pantai Baharu', 'Kuala Lumpur', 'Wilayah Persekutuan', '50672', '2023-01-01', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
-(2, 2, '41, Jalan Tun Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2023-02-15', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(2, 2, '41, Jalan Tun Abdul Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2023-02-15', '2025-11-24 02:56:19', '2026-01-01 10:37:24', 5.40716132, 103.08794840),
 (3, 3, 'Lot 5, Jalan Pantai', 'Tanjung Aru', 'Kota Kinabalu', 'Sabah', '88100', '2023-03-10', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
 (4, 4, '15, Persiaran Gurney', 'George Town', 'George Town', 'Pulau Pinang', '10250', '2023-04-05', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
-(5, 5, '12, Kolej Kediaman', 'Universiti Malaya', 'Kuala Lumpur', 'Wilayah Persekutuan', '50603', '2024-01-10', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(5, 5, '12, Kolej Kediaman', 'Universiti Malaya', 'Kuala Lumpur', 'Wilayah Persekutuan', '50603', '2024-01-10', '2025-11-24 02:56:19', '2026-01-01 12:28:54', 5.40716132, 103.08794840),
 (6, 6, 'B-12-1, Pavilion Residences', 'Jalan Bukit Bintang', 'Kuala Lumpur', 'Wilayah Persekutuan', '55100', '2024-01-12', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
 (7, 7, '45, Jalan Gasing', 'Section 10', 'Petaling Jaya', 'Selangor', '46000', '2024-02-01', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
 (8, 8, 'Shangri-La Hotel', '11 Jalan Sultan Ismail', 'Kuala Lumpur', 'Wilayah Persekutuan', '50250', '2024-03-15', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
-(9, 9, 'Kg Air', 'Jalan Tuaran', 'Kota Kinabalu', 'Sabah', '88450', '2024-04-20', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840);
+(9, 9, 'Kg Air', 'Jalan Tuaran', 'Kota Kinabalu', 'Sabah', '88450', '2024-04-20', '2025-11-24 02:56:19', '2025-12-16 08:14:06', 5.40716132, 103.08794840),
+(10, 2, '41, Jalan Tun Abdul Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2026-01-01', '2026-01-01 11:01:21', '2026-01-01 12:15:50', 5.40716132, 103.08794840),
+(11, 2, '41, Jalan Abdul Tun Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2026-01-01', '2026-01-01 11:04:47', '2026-01-01 11:04:47', 5.40716132, 103.08794840),
+(12, 2, '41, Jalan Tun Abdul Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2026-01-01', '2026-01-01 11:12:05', '2026-01-01 11:12:05', 5.40716132, 103.08794840),
+(13, 10, 'No. 247', 'Jalan Sultan Mahmud', 'Kuala Terengganu', 'Terengganu', '20000', '2026-01-03', '2026-01-03 03:26:12', '2026-01-03 03:46:00', NULL, NULL),
+(14, 11, '41, Jalan Tun Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2026-01-06', '2026-01-06 03:19:07', '2026-01-06 03:20:17', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -106,7 +111,8 @@ INSERT INTO `bookings` (`booking_id`, `renter_id`, `vehicle_id`, `fleet_owner_id
 (102, 2, 4, 2, '2025-06-06 08:00:00', '2025-06-09 20:00:00', '2025-05-20 06:00:00'),
 (103, 4, 2, 1, '2025-01-05 12:00:00', '2025-01-19 12:00:00', '2024-12-20 02:00:00'),
 (104, 1, 1, 1, '2025-05-15 09:00:00', '2025-05-16 09:00:00', '2025-05-10 00:00:00'),
-(105, 5, 5, 2, '2025-08-30 14:00:00', '2025-09-01 12:00:00', '2025-08-15 03:00:00');
+(105, 5, 5, 2, '2025-08-30 14:00:00', '2025-09-01 12:00:00', '2025-08-15 03:00:00'),
+(107, 1, 11, 1, '2026-01-07 00:00:00', '2026-01-10 23:59:59', '2026-01-07 08:09:55');
 
 -- --------------------------------------------------------
 
@@ -145,7 +151,8 @@ INSERT INTO `bookingstatuslog` (`booking_log_id`, `booking_id`, `status_value`, 
 (15, 104, 'ACTIVE', 2, '2025-05-15 01:10:00', 'Vehicle collected'),
 (16, 104, 'COMPLETED', 2, '2025-05-16 01:20:00', 'Returned on time'),
 (17, 105, 'PENDING', 9, '2025-08-15 03:00:00', 'Booking initiated'),
-(18, 105, 'PENDING', 9, '2025-08-15 03:01:00', 'Waiting for transfer');
+(18, 105, 'PENDING', 9, '2025-08-15 03:01:00', 'Waiting for transfer'),
+(20, 107, 'PENDING', 5, '2026-01-07 08:09:55', 'Booking initiated by renter');
 
 -- --------------------------------------------------------
 
@@ -167,7 +174,7 @@ CREATE TABLE `fleetowners` (
 --
 
 INSERT INTO `fleetowners` (`fleet_owner_id`, `user_id`, `business_name`, `contact_phone`, `is_verified`, `updated_at`) VALUES
-(1, 2, 'MetroCity Car Rental Corps Sdn Bhd', '+603-77214000', 1, '2025-12-23 02:40:56'),
+(1, 2, 'MetroCity Car Rental Sdn Bhd', '+603-77214000', 1, '2026-01-01 12:15:50'),
 (2, 3, 'Borneo 4x4 Expeditions Ent', '+6088-234567', 1, '2025-11-24 02:55:07'),
 (3, 4, 'Prestige Limousines PLT', '+604-2267890', 1, '2025-11-24 02:55:07');
 
@@ -199,7 +206,8 @@ INSERT INTO `invoices` (`invoice_id`, `booking_id`, `fleet_owner_id`, `renter_id
 (2, 102, 2, 2, 'INV-2025-002', '2025-05-20', '2025-05-20', 1350.00, 'Sabah Trip', 'PAID'),
 (3, 103, 1, 4, 'INV-2024-099', '2024-12-20', '2024-12-20', 1610.00, 'January Holiday', 'PAID'),
 (4, 104, 1, 1, 'INV-2025-045', '2025-05-10', '2025-05-10', 120.00, 'Student Rental', 'PAID'),
-(5, 105, 2, 5, 'INV-2025-088', '2025-08-15', '2025-08-20', 900.00, 'Merdeka Weekend', 'ISSUED');
+(5, 105, 2, 5, 'INV-2025-088', '2025-08-15', '2025-08-20', 900.00, 'Merdeka Weekend', 'ISSUED'),
+(7, 107, 1, 1, 'INV-1767773395649', '2026-01-07', '2026-01-14', 300.00, 'Auto-generated invoice for Booking #107', 'ISSUED');
 
 -- --------------------------------------------------------
 
@@ -227,7 +235,8 @@ INSERT INTO `payments` (`payment_id`, `invoice_id`, `payment_date`, `amount`, `p
 (1, 1, '2025-03-01 01:05:00', 1760.00, 'BANK_TRANSFER', 'VERIFIED', 'FPX_99887711', 'https://receipts/1.pdf', 1),
 (2, 2, '2025-05-20 06:05:00', 1350.00, 'CREDIT_CARD', 'VERIFIED', 'ch_3Lz9922aa', 'https://receipts/2.pdf', 1),
 (3, 3, '2024-12-20 02:05:00', 1610.00, 'CREDIT_CARD', 'VERIFIED', 'tx_int_8877', 'https://receipts/3.pdf', 1),
-(4, 4, '2025-05-10 00:05:00', 120.00, 'QR_PAYMENT', 'VERIFIED', 'tng_223344', 'https://receipts/4.pdf', 1);
+(4, 4, '2025-05-10 00:05:00', 120.00, 'QR_PAYMENT', 'VERIFIED', 'tng_223344', 'https://receipts/4.pdf', 1),
+(7, 7, '2026-01-07 08:29:50', 300.00, 'CASH', 'PENDING', 'CASH-1767774590370', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -240,22 +249,24 @@ CREATE TABLE `paymentstatuslog` (
   `payment_id` int(11) NOT NULL,
   `status_value` enum('PENDING','VERIFIED','FAILED') NOT NULL,
   `actor_user_id` int(11) DEFAULT NULL,
-  `status_timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+  `status_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `remarks` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `paymentstatuslog`
 --
 
-INSERT INTO `paymentstatuslog` (`payment_log_id`, `payment_id`, `status_value`, `actor_user_id`, `status_timestamp`) VALUES
-(1, 1, 'PENDING', 7, '2025-03-01 01:05:00'),
-(2, 1, 'VERIFIED', 1, '2025-03-01 01:06:00'),
-(3, 2, 'PENDING', 6, '2025-05-20 06:05:00'),
-(4, 2, 'VERIFIED', 1, '2025-05-20 06:10:00'),
-(5, 3, 'PENDING', 8, '2024-12-20 02:05:00'),
-(6, 3, 'VERIFIED', 1, '2024-12-20 02:06:00'),
-(7, 4, 'PENDING', 5, '2025-05-10 00:05:00'),
-(8, 4, 'VERIFIED', 1, '2025-05-10 00:05:30');
+INSERT INTO `paymentstatuslog` (`payment_log_id`, `payment_id`, `status_value`, `actor_user_id`, `status_timestamp`, `remarks`) VALUES
+(1, 1, 'PENDING', 7, '2025-03-01 01:05:00', NULL),
+(2, 1, 'VERIFIED', 1, '2025-03-01 01:06:00', NULL),
+(3, 2, 'PENDING', 6, '2025-05-20 06:05:00', NULL),
+(4, 2, 'VERIFIED', 1, '2025-05-20 06:10:00', NULL),
+(5, 3, 'PENDING', 8, '2024-12-20 02:05:00', NULL),
+(6, 3, 'VERIFIED', 1, '2024-12-20 02:06:00', NULL),
+(7, 4, 'PENDING', 5, '2025-05-10 00:05:00', NULL),
+(8, 4, 'VERIFIED', 1, '2025-05-10 00:05:30', NULL),
+(9, 7, 'PENDING', 5, '2026-01-07 08:29:50', 'Cash payment option selected by renter');
 
 -- --------------------------------------------------------
 
@@ -275,7 +286,7 @@ CREATE TABLE `platformadmins` (
 --
 
 INSERT INTO `platformadmins` (`admin_id`, `user_id`, `full_name`, `updated_at`) VALUES
-(1, 1, 'Azman bin Khalid Ibrahim', '2025-12-23 02:40:13');
+(1, 1, 'Azman bin Khalid Ibrahim', '2026-01-01 11:49:08');
 
 -- --------------------------------------------------------
 
@@ -296,11 +307,13 @@ CREATE TABLE `renters` (
 --
 
 INSERT INTO `renters` (`renter_id`, `user_id`, `full_name`, `phone_number`, `updated_at`) VALUES
-(1, 5, 'Nurul Izzah binti Ahmad', '+6011-22334455', '2025-12-23 03:03:40'),
+(1, 5, 'Nurul Izzah binti Ahmad Jailani', '+6011223344555', '2026-01-01 12:28:54'),
 (2, 6, 'Jason Lee Keng Wee', '+6012-3456789', '2025-11-24 02:55:07'),
 (3, 7, 'Muthu Kumar a/l Balakrishnan', '+6013-9876543', '2025-11-24 02:55:07'),
 (4, 8, 'Sarah Jenkins', '+44-7700900000', '2025-11-24 02:55:07'),
-(5, 9, 'Awang Damit', '+6019-8765432', '2025-11-24 02:55:07');
+(5, 9, 'Awang Damit', '+6019-8765432', '2025-11-24 02:55:07'),
+(6, 10, 'Naim Najmi', '+601125696678', '2026-01-03 03:46:00'),
+(7, 11, 'Naim Najmi', '60377214000', '2026-01-06 03:20:17');
 
 -- --------------------------------------------------------
 
@@ -323,15 +336,17 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `email`, `hashed_password`, `user_role`, `profile_image_url`, `created_at`, `is_active`) VALUES
-(1, 'admin@rentmy.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'PLATFORM_ADMIN', '/uploads/profiles/profile-placeholder.png', '2023-01-01 00:00:00', 1),
-(2, 'ops@metrocity.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', '/uploads/profiles/profile-placeholder.png', '2023-02-15 01:30:00', 1),
+(1, 'admin@rentmy.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'PLATFORM_ADMIN', '/uploads/profiles/profile-1-1767268148259-2bdb3401.png', '2023-01-01 00:00:00', 1),
+(2, 'ops@metrocity.com.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', '/uploads/profiles/profile-2-1767269383817-88f30178.png', '2023-02-15 01:30:00', 1),
 (3, 'josephine@borneo4x4.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', '/uploads/profiles/profile-placeholder.png', '2023-03-10 06:20:00', 1),
 (4, 'manager@prestigelimo.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'FLEET_OWNER', '/uploads/profiles/profile-placeholder.png', '2023-04-05 03:00:00', 1),
-(5, 'nurul.izzah@student.um.edu.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-01-10 02:00:00', 1),
+(5, 'nurul.izzah@student.um.edu.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-5-1767270534317-30db6296.jpg', '2024-01-10 02:00:00', 1),
 (6, 'jason.lee@corp.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-01-12 08:30:00', 1),
 (7, 'muthu.kumar@gmail.com', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-02-01 01:15:00', 1),
 (8, 'sarah.jenkins@ukmail.co.uk', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-03-15 05:45:00', 1),
-(9, 'awang.damit@sabah.gov.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-04-20 00:30:00', 1);
+(9, 'awang.damit@sabah.gov.my', '$2a$12$gV3zQhGbeDylo/WoQEBiSejDv1L6jV8n55jWuD5ROXq/ZjnP3NzuS', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2024-04-20 00:30:00', 1),
+(10, 'naim.hazre@gmail.com', '$2a$10$BWLW1h60s2t0rfZJMsdoK.gobuE3wnmAfzMzVSYhNxH6OMQsvxoxC', 'RENTER', '/uploads/profiles/profile-placeholder.png', '2026-01-03 03:26:12', 1),
+(11, 's70224@ocean.umt.edu.my', '$2a$10$qWjWWZTvUmeAWB/VlYyUXODVyHOw8bOvVjPXAmFMbNNsOf./cxa.6', 'RENTER', '/uploads/profiles/profile-11-1767669609330-406bb356.jpg', '2026-01-06 03:19:07', 1);
 
 -- --------------------------------------------------------
 
@@ -493,7 +508,12 @@ INSERT INTO `vehiclepricehistory` (`price_id`, `vehicle_id`, `rate_per_day`, `ef
 (7, 7, 220.00, '2023-12-31 16:00:00'),
 (8, 8, 850.00, '2023-12-31 16:00:00'),
 (9, 9, 900.00, '2023-12-31 16:00:00'),
-(10, 10, 120.00, '2025-12-23 06:11:51');
+(10, 10, 120.00, '2025-12-23 06:11:51'),
+(11, 11, 150.00, '2025-12-28 09:48:42'),
+(20, 10, 130.00, '2025-12-30 10:18:00'),
+(22, 12, 135.00, '2025-12-31 04:45:09'),
+(23, 12, 145.00, '2025-12-31 04:46:39'),
+(24, 12, 205.00, '2026-01-05 04:47:00');
 
 -- --------------------------------------------------------
 
@@ -534,7 +554,9 @@ INSERT INTO `vehicles` (`vehicle_id`, `fleet_owner_id`, `model`, `brand`, `manuf
 (7, 3, 'City 1.5 V Sensing', 'Honda', 2024, 'PQA 8888', 'Sedan', 'PETROL', 'AUTO', 8000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
 (8, 3, 'Vellfire 2.5 ZG', 'Toyota', 2023, 'V 1', 'Luxury MPV', 'PETROL', 'AUTO', 15000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
 (9, 3, '320i M Sport', 'BMW', 2023, 'PPP 77', 'Luxury Sedan', 'PETROL', 'AUTO', 9000, '/uploads/vehicles/vehicle-placeholder.png', '2025-11-24 02:58:33', '2025-12-16 10:05:12', NULL, 0, NULL),
-(10, 1, 'Camry II', 'Toyota', 2020, 'VEB 8175', 'Sedan', 'Petrol', 'Automatic', 23000, '/uploads/vehicles/vehicle_10_a33dd1f2.jpeg', '2025-12-23 06:11:51', '2025-12-28 06:01:45', 'AVAILABLE', 0, NULL);
+(10, 1, 'Camry II', 'Toyota', 2020, 'VEB 8175', 'Sedan', 'Petrol', 'Manual', 23000, '/uploads/vehicles/vehicle_10_a33dd1f2.jpeg', '2025-12-23 06:11:51', '2025-12-28 10:33:25', 'AVAILABLE', 0, '2025-12-28 09:00:53'),
+(11, 1, 'X50', 'Proton', 2020, 'RAM 9890', 'SUV', 'Petrol', 'Automatic', 23500, '/uploads/vehicles/vehicle_11_523ead8d.avif', '2025-12-28 09:48:42', '2025-12-29 02:16:11', 'AVAILABLE', 0, NULL),
+(12, 1, 'Camry IV', 'Toyota', 2024, 'VBN 4343', 'Sedan', 'Petrol', 'Manual', 24000, '/uploads/vehicles/vehicle_12_c594a63e.jpeg', '2025-12-31 04:45:09', '2025-12-31 04:47:49', 'MAINTENANCE', 1, '2025-12-31 04:53:10');
 
 --
 -- Indexes for dumped tables
@@ -663,7 +685,7 @@ ALTER TABLE `vehicles`
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `address_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `address_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `bookings`
@@ -675,7 +697,7 @@ ALTER TABLE `bookings`
 -- AUTO_INCREMENT for table `bookingstatuslog`
 --
 ALTER TABLE `bookingstatuslog`
-  MODIFY `booking_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `booking_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `fleetowners`
@@ -699,7 +721,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `paymentstatuslog`
 --
 ALTER TABLE `paymentstatuslog`
-  MODIFY `payment_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `payment_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `platformadmins`
@@ -711,13 +733,13 @@ ALTER TABLE `platformadmins`
 -- AUTO_INCREMENT for table `renters`
 --
 ALTER TABLE `renters`
-  MODIFY `renter_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `renter_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `vehiclemaintenance`
@@ -741,7 +763,7 @@ ALTER TABLE `vehiclepricehistory`
 -- AUTO_INCREMENT for table `vehicles`
 --
 ALTER TABLE `vehicles`
-  MODIFY `vehicle_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `vehicle_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
