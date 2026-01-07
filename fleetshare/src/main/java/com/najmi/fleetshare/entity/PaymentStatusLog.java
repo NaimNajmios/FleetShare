@@ -25,16 +25,20 @@ public class PaymentStatusLog {
     @Column(name = "status_timestamp", nullable = false)
     private LocalDateTime statusTimestamp;
 
+    @Column(name = "remarks", length = 500)
+    private String remarks;
+
     // Constructors
     public PaymentStatusLog() {
     }
 
     public PaymentStatusLog(Long paymentId, Payment.PaymentStatus statusValue, Long actorUserId,
-            LocalDateTime statusTimestamp) {
+            LocalDateTime statusTimestamp, String remarks) {
         this.paymentId = paymentId;
         this.statusValue = statusValue;
         this.actorUserId = actorUserId;
         this.statusTimestamp = statusTimestamp;
+        this.remarks = remarks;
     }
 
     // Getters and Setters
@@ -76,5 +80,13 @@ public class PaymentStatusLog {
 
     public void setStatusTimestamp(LocalDateTime statusTimestamp) {
         this.statusTimestamp = statusTimestamp;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 }

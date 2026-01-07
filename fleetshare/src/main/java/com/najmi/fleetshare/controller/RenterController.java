@@ -378,6 +378,26 @@ public class RenterController {
         return "redirect:/renter/bookings";
     }
 
+    @PostMapping("/bookings/{id}/payment/cash")
+    public String confirmCashPayment(@PathVariable Long id, HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            paymentService.processCashPayment(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Cash payment option confirmed. Please pay at counter.");
+            return "redirect:/renter/bookings/" + id;
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to process cash payment: " + e.getMessage());
+            return "redirect:/renter/bookings/" + id + "/payment";
+        }
+    }
+
     @GetMapping("/owners/{id}")
     public String ownerProfile(@PathVariable Long id, HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);

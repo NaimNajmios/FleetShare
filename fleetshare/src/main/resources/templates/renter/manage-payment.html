@@ -544,9 +544,12 @@
                 </button>
 
                 <!-- Button: Cash -->
-                <button id="btn-cash" class="btn-primary-action btn-pay-later hidden">
-                    CONFIRM PAY LATER
-                </button>
+                <form th:action="@{/renter/bookings/{id}/payment/cash(id=${booking.bookingId})}" method="POST"
+                    style="display: contents;">
+                    <button id="btn-cash" type="submit" class="btn-primary-action btn-pay-later hidden">
+                        CONFIRM PAY LATER
+                    </button>
+                </form>
             </div>
         </div>
     </main>
@@ -620,7 +623,7 @@
                 // Button Actions (Mock)
                 btnCard.addEventListener('click', () => alert('Redirecting to Payment Gateway...'));
                 btnTransfer.addEventListener('click', () => alert('Submitting Receipt...'));
-                btnCash.addEventListener('click', () => alert('Confirming Pay Later...'));
+                // btnCash.addEventListener('click', () => alert('Confirming Pay Later...'));
             });
         </script>
     </th:block>
