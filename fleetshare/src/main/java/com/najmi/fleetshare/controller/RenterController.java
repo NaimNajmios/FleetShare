@@ -165,6 +165,37 @@ public class RenterController {
         }
     }
 
+    @PostMapping("/vehicles/{id}/book/confirm")
+    public String confirmBooking(@PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestParam("pickupDate") String pickupDateStr,
+            @org.springframework.web.bind.annotation.RequestParam("returnDate") String returnDateStr,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            java.time.LocalDate pickupDate = java.time.LocalDate.parse(pickupDateStr);
+            java.time.LocalDate returnDate = java.time.LocalDate.parse(returnDateStr);
+
+            com.najmi.fleetshare.entity.Booking booking = bookingService.createBooking(
+                    user.getRenterDetails().getRenterId(),
+                    id,
+                    pickupDate,
+                    returnDate);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Booking confirmed successfully!");
+            return "redirect:/renter/bookings/" + booking.getBookingId() + "/payment";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to confirm booking: " + e.getMessage());
+            return "redirect:/renter/vehicles/" + id + "/book";
+        }
+    }
+
     @GetMapping("/bookings")
     public String myBookings(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
