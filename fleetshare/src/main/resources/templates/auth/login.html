@@ -23,50 +23,46 @@
         <div class="auth-card">
             <!-- Brand Logo -->
             <div class="auth-brand">
-                <div class="auth-brand-logo">🚗 FleetShare</div>
+                <div class="auth-brand-logo">&#128663; FleetShare</div>
             </div>
 
             <!-- Header -->
             <div class="auth-header">
-                <h1 class="auth-title">Welcome Back</h1>
-                <p class="auth-subtitle">Sign in to continue to your account</p>
+                <h1 class="auth-title">Welcome Back to FleetShare</h1>
+                <p class="auth-subtitle">Please sign in to continue to your account</p>
             </div>
 
             <!-- Error Messages -->
-            <div th:if="${param.error}" class="alert alert-error">
-                <i class="mdi mdi-alert-circle"></i>
+            <div th:if="${param.error}" class="form-error mb-4" role="alert">
+                <i class="mdi mdi-alert-circle" aria-hidden="true"></i>
                 <span>Invalid email or password. Please try again.</span>
             </div>
-            <div th:if="${param.logout}" class="alert alert-success">
-                <i class="mdi mdi-check-circle"></i>
-                <span>You have been logged out successfully.</span>
+            <div th:if="${param.logout}" class="form-helper text-success mb-4" role="status">
+                You have been logged out successfully.
             </div>
 
             <!-- Login Form -->
             <form class="auth-form" id="loginForm" th:action="@{/login}" method="post">
-                <!-- Email -->
-                <div class="form-floating mb-3">
-                    <input type="email" class="form-control" id="username" name="username" placeholder="Enter your email"
+                <!-- Email (Spring Security uses 'username' as default) -->
+                <div class="form-group">
+                    <label class="form-label" for="username">Email</label>
+                    <input type="text" class="form-input" id="username" name="username" placeholder="Enter your email"
                         required autocomplete="username">
-                    <label for="username">Email Address</label>
                 </div>
 
                 <!-- Password -->
-                <div class="input-wrapper mb-3">
-                    <div class="form-floating">
-                        <input type="password" class="form-control" id="password" name="password"
-                            placeholder="Enter your password" required autocomplete="current-password" style="padding-right: 2.5rem;">
-                        <label for="password">Password</label>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" class="form-input form-input-with-icon" id="password" name="password"
+                            placeholder="Enter your password" required autocomplete="current-password">
+                        <i class="mdi mdi-eye-off-outline input-icon-right" id="togglePassword" role="button"
+                           aria-label="Show password" tabindex="0"></i>
                     </div>
-                    <span class="toggle-password" data-target="password" onclick="togglePassword('password')">
-                        <i class="mdi mdi-eye-outline"></i>
-                    </span>
-                    <div class="form-group-footer mt-2">
-                        <a href="#" class="auth-link forgot-link">Forgot Password?</a>
-                    </div>
+                    <a href="#" class="auth-link forgot-password-link">Forgot Password?</a>
                 </div>
 
-                <!-- Remember Me -->
+                <!-- Keep me signed in -->
                 <div class="form-group">
                     <div class="form-checkbox-wrapper">
                         <input type="checkbox" class="form-checkbox" id="remember-me" name="remember-me">
@@ -78,11 +74,9 @@
 
                 <!-- Login Button -->
                 <div class="form-group mb-0">
-                    <button type="submit" class="btn btn-primary" id="loginBtn">
-                        <span class="btn-text">Sign In</span>
-                        <span class="btn-loader d-none">
-                            <span class="spinner-border spinner-border-sm"></span>
-                        </span>
+                    <button type="submit" class="btn btn-primary" id="loginButton">
+                        <span class="btn-text">Login</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
@@ -91,48 +85,62 @@
             <div class="auth-footer">
                 <p class="auth-footer-text">
                     Don't have an account?
-                    <a href="/register" class="auth-link">Create Account</a>
+                    <a href="/register" class="auth-link">Sign up</a>
                 </p>
             </div>
         </div>
     </div>
 
     <script>
-        // Password Toggle
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = document.querySelector(`[data-target="${inputId}"] i`);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password Toggle
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('mdi-eye-outline');
-                icon.classList.add('mdi-eye-off-outline');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('mdi-eye-off-outline');
-                icon.classList.add('mdi-eye-outline');
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function (e) {
+                    // toggle the type attribute
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+
+                    // toggle the eye icon
+                    this.classList.toggle('mdi-eye-outline');
+                    this.classList.toggle('mdi-eye-off-outline');
+
+                    // update aria-label
+                    this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+                });
+
+                // Add keyboard support for accessibility
+                togglePassword.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
             }
-        }
 
-        // Form Submit Loading State
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            const btn = document.getElementById('loginBtn');
-            const btnText = btn.querySelector('.btn-text');
-            const btnLoader = btn.querySelector('.btn-loader');
+            // Form Loading State
+            const loginForm = document.getElementById('loginForm');
+            const loginButton = document.getElementById('loginButton');
 
-            btnText.classList.add('d-none');
-            btnLoader.classList.remove('d-none');
-            btn.disabled = true;
-        });
+            if (loginForm && loginButton) {
+                loginForm.addEventListener('submit', function() {
+                    if (loginForm.checkValidity()) {
+                        loginButton.classList.add('btn-loading-inline');
+                        loginButton.disabled = true;
 
-        // Input Focus Animation
-        document.querySelectorAll('.form-input').forEach(input => {
-            input.addEventListener('focus', function () {
-                this.parentElement.classList.add('focused');
-            });
-            input.addEventListener('blur', function () {
-                this.parentElement.classList.remove('focused');
-            });
+                        // Show spinner
+                        const spinner = loginButton.querySelector('.spinner-border');
+                        if (spinner) {
+                            spinner.classList.remove('d-none');
+                        }
+
+                        // Ensure button maintains width
+                        loginButton.style.width = loginButton.offsetWidth + 'px';
+                    }
+                });
+            }
         });
     </script>
 </body>
