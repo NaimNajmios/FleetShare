@@ -285,14 +285,50 @@
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}" class="btn-cancel">CANCEL</a>
-                <!-- Placeholder form for confirmation action -->
-                <form action="#" method="POST" style="display: contents;">
-                    <button type="button" class="btn-confirm"
-                        onclick="alert('Booking functionality coming soon!')">CONFIRM BOOKING</button>
+                <form id="bookingForm" th:action="@{/renter/vehicles/{id}/book/confirm(id=${vehicle.vehicleId})}"
+                    method="POST" style="display: contents;">
+                    <input type="hidden" name="pickupDate" th:value="${pickupDate}" />
+                    <input type="hidden" name="returnDate" th:value="${returnDate}" />
+                    <button type="submit" class="btn-confirm">CONFIRM BOOKING</button>
                 </form>
             </div>
         </div>
     </main>
+
+    <th:block layout:fragment="extra-js">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.getElementById('bookingForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const form = this;
+
+                Swal.fire({
+                    title: 'Confirm Booking?',
+                    text: "Are you sure you want to proceed with this booking?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#212529',
+                    confirmButtonText: 'Yes, Confirm It!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we confirm your booking.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        form.submit();
+                    }
+                });
+            });
+        </script>
+    </th:block>
 </body>
 
 </html>
