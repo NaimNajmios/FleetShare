@@ -171,11 +171,81 @@ public class PaymentService {
     }
 
     /**
-     * Fetches all payments for a specific fleet owner
-     * 
-     * @param ownerId Fleet owner ID
-     * @return List of PaymentDTO objects for owner's invoices
+     * Processes a cash payment for a booking.
+     * Creates a payment record with PENDING status and CASH method.
+     *
+     * @param bookingId The booking ID
+     * @return The created Payment entity
      */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment processCashPayment(Long bookingId) {
+        // 1. Find Invoice
+        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
+        if (invoices.isEmpty()) {
+            throw new IllegalArgumentException("No invoice found for booking ID: " + bookingId);
+        }
+        // Assuming the latest invoice is the valid one
+        Invoice invoice = invoices.get(0);
+
+        // 2. Check if payment already exists
+        List<Payment> existingPayments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+        if (!existingPayments.isEmpty()) {
+            // Check if any is successful or pending
+            for (Payment p : existingPayments) {
+                if (p.getPaymentStatus() == Payment.PaymentStatus.VERIFIED ||
+                        p.getPaymentStatus() == Payment.PaymentStatus.PENDING) {
+                    // For now, allow re-submission if pending? Or maybe just return existing.
+                    // Let's assume we return the existing one if it's pending cash.
+                    if (p.getPaymentMethod() == Payment.PaymentMethod.CASH
+                            && p.getPaymentStatus() == Payment.PaymentStatus.PENDING) {
+                        return p;
+                    }
+                    // If it's another method or completed, we might want to throw error or handle
+                    // gracefully.
+                    // For simplicity, let's proceed to create a new one only if no valid payment
+                    // exists.
+                    // But strictly, we should probably throw exception if already paid.
+                    if (p.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
+                        throw new IllegalStateException("Payment already completed for this booking.");
+                    }
+                }
+            }
+        }
+
+        // 3. Create Payment
+        Payment payment = new Payment();
+        payment.setInvoiceId(invoice.getInvoiceId());
+        payment.setAmount(invoice.getTotalAmount());
+        payment.setPaymentMethod(Payment.PaymentMethod.CASH);
+        payment.setPaymentStatus(Payment.PaymentStatus.PENDING);
+        payment.setPaymentDate(java.time.LocalDateTime.now());
+        payment.setTransactionReference("CASH-" + System.currentTimeMillis()); // Generate a reference
+
+        payment = paymentRepository.save(payment);
+
+        // 4. Log Status
+        PaymentStatusLog log = new PaymentStatusLog();
+        log.setPaymentId(payment.getPaymentId());
+        log.setStatusValue(Payment.PaymentStatus.PENDING);
+        log.setStatusTimestamp(java.time.LocalDateTime.now());
+        log.setActorUserId(invoice.getRenterId()); // Renter ID as actor (approximate, ideally User ID)
+        // Note: ActorUserId should be User ID, but here we have Renter ID.
+        // We might need to fetch User from Renter if strict.
+        // Given existing code uses Renter ID in some places or User ID, let's try to be
+        // consistent.
+        // In createBooking, we used renter.getUserId().
+        // Here we only have invoice.getRenterId().
+        // Let's fetch Renter to get UserId.
+        Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+        if (renter != null) {
+            log.setActorUserId(renter.getUserId());
+        }
+        log.setRemarks("Cash payment option selected by renter");
+        paymentStatusLogRepository.save(log);
+
+        return payment;
+    }
+
     public List<PaymentDTO> getPaymentsByOwnerId(Long ownerId) {
         // Get all invoices for this owner
         List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
