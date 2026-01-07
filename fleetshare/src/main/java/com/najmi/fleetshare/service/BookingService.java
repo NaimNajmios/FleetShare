@@ -207,6 +207,51 @@ public class BookingService {
         return mapBookingsToDTOs(bookings);
     }
 
+    /**
+     * Fetches recent bookings for a specific renter
+     *
+     * @param renterId Renter ID
+     * @param limit    Number of bookings to fetch
+     * @return List of BookingDTO objects
+     */
+    public List<BookingDTO> getRecentBookingsByRenterId(Long renterId, int limit) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit,
+                org.springframework.data.domain.Sort.by("createdAt").descending());
+        List<Booking> bookings = bookingRepository.findByRenterId(renterId, pageable).getContent();
+        return mapBookingsToDTOs(bookings);
+    }
+
+    /**
+     * Fetches booking counts by status for a specific renter
+     *
+     * @param renterId Renter ID
+     * @return BookingCountDTO object
+     */
+    public com.najmi.fleetshare.dto.BookingCountDTO getBookingCountsByRenterId(Long renterId) {
+        List<Object[]> results = statusLogRepository.countBookingsByStatusForRenter(renterId);
+
+        long active = 0;
+        long completed = 0;
+        long pending = 0;
+        long total = 0;
+
+        for (Object[] result : results) {
+            BookingStatusLog.BookingStatus status = (BookingStatusLog.BookingStatus) result[0];
+            long count = ((Number) result[1]).longValue();
+            total += count;
+
+            if (BookingStatusLog.BookingStatus.ACTIVE.equals(status)) {
+                active = count;
+            } else if (BookingStatusLog.BookingStatus.COMPLETED.equals(status)) {
+                completed = count;
+            } else if (BookingStatusLog.BookingStatus.PENDING.equals(status)) {
+                pending = count;
+            }
+        }
+
+        return new com.najmi.fleetshare.dto.BookingCountDTO(total, active, completed, pending);
+    }
+
     public void updateBooking(BookingDTO bookingDTO) {
         Booking booking = bookingRepository.findById(bookingDTO.getBookingId()).orElse(null);
         if (booking != null) {

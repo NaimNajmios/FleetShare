@@ -12,6 +12,8 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByRenterId(Long renterId);
 
+    org.springframework.data.domain.Page<Booking> findByRenterId(Long renterId, org.springframework.data.domain.Pageable pageable);
+
     List<Booking> findByFleetOwnerId(Long fleetOwnerId);
 
     @Query("SELECT DISTINCT b.renterId FROM Booking b WHERE b.fleetOwnerId = :fleetOwnerId")
