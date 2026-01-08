@@ -516,6 +516,9 @@
                                 <div class="timeline-status" th:text="${log.statusValue}">
                                     PENDING
                                 </div>
+                                <div class="timeline-remarks" th:if="${log.remarks != null}" th:text="${log.remarks}">
+                                    Payment status updated.
+                                </div>
                             </div>
 
                             <!-- Fallback if no logs -->

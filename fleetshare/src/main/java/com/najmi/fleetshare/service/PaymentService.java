@@ -246,6 +246,109 @@ public class PaymentService {
         return payment;
     }
 
+    /**
+     * Gets the current payment for a booking.
+     *
+     * @param bookingId The booking ID
+     * @return The Payment entity or null if no payment exists
+     */
+    public Payment getPaymentByBookingId(Long bookingId) {
+        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
+        if (invoices.isEmpty()) {
+            return null;
+        }
+        Invoice invoice = invoices.get(0);
+        List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+        if (payments.isEmpty()) {
+            return null;
+        }
+        // Return the most recent payment (assuming first is latest)
+        return payments.get(0);
+    }
+
+    /**
+     * Changes the payment method for a booking.
+     * Only allowed when payment is PENDING.
+     *
+     * @param bookingId The booking ID
+     * @param newMethod The new payment method
+     * @return The new Payment entity
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment changePaymentMethod(Long bookingId, Payment.PaymentMethod newMethod) {
+        // 1. Get current payment
+        Payment existingPayment = getPaymentByBookingId(bookingId);
+
+        if (existingPayment == null) {
+            throw new IllegalArgumentException("No payment found for booking ID: " + bookingId);
+        }
+
+        if (existingPayment.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
+            throw new IllegalStateException("Cannot change payment method for a verified payment.");
+        }
+
+        // 2. Get invoice
+        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
+        Invoice invoice = invoices.get(0);
+
+        // 3. Get user ID for logging
+        Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+        Long userId = renter != null ? renter.getUserId() : null;
+
+        // 4. Log the change on old payment
+        PaymentStatusLog changeLog = new PaymentStatusLog();
+        changeLog.setPaymentId(existingPayment.getPaymentId());
+        changeLog.setStatusValue(Payment.PaymentStatus.FAILED); // Mark old as failed/cancelled
+        changeLog.setStatusTimestamp(java.time.LocalDateTime.now());
+        changeLog.setActorUserId(userId);
+        changeLog.setRemarks("Payment method changed from " + existingPayment.getPaymentMethod().name() +
+                " to " + newMethod.name());
+        paymentStatusLogRepository.save(changeLog);
+
+        // 5. Update old payment status to FAILED
+        existingPayment.setPaymentStatus(Payment.PaymentStatus.FAILED);
+        paymentRepository.save(existingPayment);
+
+        // 6. Create new payment with new method
+        Payment newPayment = new Payment();
+        newPayment.setInvoiceId(invoice.getInvoiceId());
+        newPayment.setAmount(invoice.getTotalAmount());
+        newPayment.setPaymentMethod(newMethod);
+        newPayment.setPaymentStatus(Payment.PaymentStatus.PENDING);
+        newPayment.setPaymentDate(java.time.LocalDateTime.now());
+        newPayment.setTransactionReference(newMethod.name() + "-" + System.currentTimeMillis());
+        newPayment = paymentRepository.save(newPayment);
+
+        // 7. Log new payment creation
+        PaymentStatusLog newLog = new PaymentStatusLog();
+        newLog.setPaymentId(newPayment.getPaymentId());
+        newLog.setStatusValue(Payment.PaymentStatus.PENDING);
+        newLog.setStatusTimestamp(java.time.LocalDateTime.now());
+        newLog.setActorUserId(userId);
+        newLog.setRemarks(getMethodRemarks(newMethod));
+        paymentStatusLogRepository.save(newLog);
+
+        return newPayment;
+    }
+
+    /**
+     * Helper to get descriptive remarks for a payment method.
+     */
+    private String getMethodRemarks(Payment.PaymentMethod method) {
+        switch (method) {
+            case CASH:
+                return "Cash payment option selected by renter";
+            case CREDIT_CARD:
+                return "Credit card payment initiated";
+            case BANK_TRANSFER:
+                return "Bank transfer payment selected";
+            case QR_PAYMENT:
+                return "QR payment selected";
+            default:
+                return "Payment method selected";
+        }
+    }
+
     public List<PaymentDTO> getPaymentsByOwnerId(Long ownerId) {
         // Get all invoices for this owner
         List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
