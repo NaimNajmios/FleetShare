@@ -414,6 +414,16 @@
             .bg-gradient-dark {
                 background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
             }
+
+            /* Sort Animation */
+            .animate-fade-in {
+                animation: fadeIn 0.4s ease-out forwards;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
         </style>
     </th:block>
 </head>
@@ -490,7 +500,25 @@
                     <div class="position-relative flex-grow-1">
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" class="search-bar-large" placeholder="Search by model, brand, or keywords..."
-                            id="vehicleSearch">
+                            id="vehicleSearch" aria-label="Search vehicles">
+                    </div>
+
+                    <!-- Sort Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-white bg-white shadow-sm dropdown-toggle d-flex align-items-center gap-2"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                style="padding: 1.2rem 1.5rem; border-radius: 20px; border: none; height: 100%; box-shadow: var(--card-shadow) !important;">
+                            <i class="fas fa-sort-amount-down text-muted"></i>
+                            <span class="d-none d-sm-inline fw-medium">Sort</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 p-2">
+                            <li><button class="dropdown-item rounded-3 active py-2 mb-1" onclick="setSort('recommended', this)">Recommended</button></li>
+                            <li><button class="dropdown-item rounded-3 py-2 mb-1" onclick="setSort('price-asc', this)">Price: Low to High</button></li>
+                            <li><button class="dropdown-item rounded-3 py-2 mb-1" onclick="setSort('price-desc', this)">Price: High to Low</button></li>
+                            <li><button class="dropdown-item rounded-3 py-2" onclick="setSort('year-desc', this)">Newest First</button></li>
+                        </ul>
                     </div>
                 </div>
 
@@ -747,8 +775,34 @@
                 document.getElementById('activeFilters').appendChild(chip);
             }
 
+            let currentSort = 'recommended';
+
+            // Initialize original order on load
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.vehicle-card').forEach((card, index) => {
+                    card.setAttribute('data-original-index', index);
+                });
+            });
+
+            function setSort(sortType, btn) {
+                currentSort = sortType;
+
+                // Update active state
+                btn.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                btn.classList.add('active');
+
+                // Update dropdown button text (optional, but nice)
+                // const sortLabel = btn.textContent.trim();
+                // btn.closest('.dropdown').querySelector('span').textContent = sortLabel;
+
+                applyFilters();
+            }
+
             function applyFilters() {
-                const cards = document.querySelectorAll('.vehicle-card');
+                const container = document.getElementById('vehicleGrid');
+                const cards = Array.from(document.querySelectorAll('.vehicle-card'));
                 const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
                 const activeFiltersContainer = document.getElementById('activeFilters');
                 activeFiltersContainer.innerHTML = ''; // Clear existing chips
@@ -792,6 +846,23 @@
                     addFilterChip('search', 'search', `Search: "${document.getElementById('vehicleSearch').value}"`);
                 }
 
+                // Sorting Logic
+                cards.sort((a, b) => {
+                    if (currentSort === 'price-asc') {
+                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    } else if (currentSort === 'price-desc') {
+                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    } else if (currentSort === 'year-desc') {
+                        return parseInt(b.dataset.year) - parseInt(a.dataset.year);
+                    } else {
+                        // Default / Recommended
+                        return parseInt(a.dataset.originalIndex) - parseInt(b.dataset.originalIndex);
+                    }
+                });
+
+                // Re-append in order (this moves them in DOM)
+                cards.forEach(card => container.appendChild(card));
+
                 let visibleCount = 0;
 
                 cards.forEach(card => {
@@ -809,9 +880,11 @@
 
                     if (matchesCategory && matchesTransmission && matchesPrice && matchesSearch) {
                         card.style.display = 'flex'; // Changed to flex for the card layout
+                        card.classList.add('animate-fade-in'); // Add animation class
                         visibleCount++;
                     } else {
                         card.style.display = 'none';
+                        card.classList.remove('animate-fade-in');
                     }
                 });
 
