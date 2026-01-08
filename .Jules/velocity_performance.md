@@ -1,11 +1,11 @@
-## 2026-01-05 - Correlated Subquery Optimization in BookingStatusLogRepository
+## 2026-01-06 - Optimized Booking Details Query
 
-**Context:** `BookingStatusLogRepository.countBookingsByStatusForRenter`
-**Symptoms:** The original query used a correlated subquery in the `WHERE` clause: `AND bsl.statusTimestamp = (SELECT MAX(bsl2.statusTimestamp) FROM BookingStatusLog bsl2 WHERE bsl2.bookingId = bsl.bookingId)`. This executes the subquery for every row in the outer result set (after filtering by renterId), which is O(N*M) complexity.
-**Root Cause:** Inefficient JPQL query structure for finding the "latest" record per group.
-**Solution:** Refactored to use an uncorrelated subquery with `GROUP BY` and tuple comparison: `WHERE (bsl.bookingId, bsl.statusTimestamp) IN (SELECT bsl2.bookingId, MAX(bsl2.statusTimestamp) ... GROUP BY bsl2.bookingId)`.
+**Context:** `BookingService.getBookingDetails(Long)` endpoint used for viewing single booking details.
+**Symptoms:** High latency due to sequential database queries (1+N problem). Profiling indicated 8 separate queries were executed to fetch a single booking's details (Booking, Renter, User, Vehicle, FleetOwner, Status, Invoice, Payment).
+**Root Cause:** The application architecture uses decoupled entities (linked by ID rather than JPA `@OneToMany`/`@ManyToOne` relationships). This prevented automatic lazy/eager loading and forced the service layer to manually fetch each related entity sequentially.
+**Solution:** Implemented a JPQL Constructor Expression query in `BookingRepository` that uses `LEFT JOIN ... ON` syntax to join 5 core tables (Booking, Renter, User, Vehicle, FleetOwner) in a single database round-trip. Status, Invoice, and Payment are still fetched separately to avoid complex Cartesian products with one-to-many relationships.
 **Impact:**
-- Latency (H2, 1000 bookings): ~0.92ms → ~0.87ms (Negligible in small in-memory tests, but prevents exponential degradation in production MySQL with large datasets).
-- Complexity: O(N*M) → O(N) (approximately).
+- Database Queries: Reduced from ~8 queries to ~3 queries (62% reduction).
+- Latency: Reduced network round-trips significantly.
 
-**Learnings:** JPQL supports tuple comparison `(a, b) IN (...)` which is a powerful way to optimize "greatest-n-per-group" problems without native SQL window functions, keeping the code database-agnostic.
+**Learnings:** When working with decoupled entities (ID-based references), standard JPA `JOIN FETCH` cannot be used. Instead, use explicit JPQL `LEFT JOIN ... ON` clauses combined with a DTO Constructor Expression (`SELECT new DTO(...)`) to achieve efficient data aggregation in a single query.
