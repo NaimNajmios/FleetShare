@@ -19,6 +19,15 @@ public interface BookingStatusLogRepository extends JpaRepository<BookingStatusL
     @Query("SELECT bsl FROM BookingStatusLog bsl WHERE bsl.bookingId IN :bookingIds")
     List<BookingStatusLog> findByBookingIdIn(java.util.Collection<Long> bookingIds);
 
+    @Query("SELECT bsl.bookingId, bsl.statusValue FROM BookingStatusLog bsl " +
+           "WHERE (bsl.bookingId, bsl.statusTimestamp) IN (" +
+           "    SELECT bsl2.bookingId, MAX(bsl2.statusTimestamp) " +
+           "    FROM BookingStatusLog bsl2 " +
+           "    WHERE bsl2.bookingId IN :bookingIds " +
+           "    GROUP BY bsl2.bookingId" +
+           ")")
+    List<Object[]> findLatestStatusForBookings(@org.springframework.data.repository.query.Param("bookingIds") java.util.Collection<Long> bookingIds);
+
     @Query("SELECT bsl.statusValue, COUNT(bsl) " +
             "FROM BookingStatusLog bsl " +
             "WHERE (bsl.bookingId, bsl.statusTimestamp) IN (" +
