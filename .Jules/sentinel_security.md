@@ -1,9 +1,13 @@
-## 2026-01-03 - [Missing Input Validation in Registration]
+## 2026-01-08 - Weak Password Policy and Missing Terms Enforcement
 
-**Context:** `AuthController.java`, `RegistrationDTO`
-**Vulnerability:** Missing Input Validation (Improper Input Validation)
+**Context:** User Registration (`RegistrationDTO`)
+**Vulnerability:** Weak Password Policy & Missing Terms Validation
 **Severity:** High
-**Root Cause:** The `RegistrationDTO` had validation annotations, but the `AuthController`'s `processRegistration` method was missing the `@Valid` annotation on the `ModelAttribute`, causing validation logic to be skipped entirely.
-**Fix Applied:** Added `@Valid` annotation to the `RegistrationDTO` parameter and implemented `BindingResult` checking in `AuthController`.
-**Prevention:** Ensure all controller methods accepting user input (DTOs) use `@Valid` or `@Validated` and handle `BindingResult` errors.
-**References:** CWE-20: Improper Input Validation
+**Root Cause:** `RegistrationDTO` only used `@Size(min=8)` for passwords and `agreeTerms` field lacked validation annotation.
+**Fix Applied:**
+- Implemented custom `@StrongPassword` annotation and validator.
+- Enforced complexity: Upper, Lower, Digit, Special Char, No Whitespace.
+- Added `@AssertTrue` to `agreeTerms` in `RegistrationDTO`.
+- Added unit tests for validation logic.
+**Prevention:** Always use strong password validators and verify boolean flags for critical agreements.
+**References:** CWE-521: Weak Password Requirements
