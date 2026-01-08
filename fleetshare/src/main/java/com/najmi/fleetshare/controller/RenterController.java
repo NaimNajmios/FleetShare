@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.najmi.fleetshare.entity.BookingStatusLog;
@@ -372,6 +373,11 @@ public class RenterController {
             // Verify booking belongs to logged-in renter
             if (booking != null && booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
                 model.addAttribute("booking", booking);
+
+                // Fetch current payment if exists
+                com.najmi.fleetshare.entity.Payment currentPayment = paymentService.getPaymentByBookingId(id);
+                model.addAttribute("currentPayment", currentPayment);
+
                 return "renter/manage-payment";
             }
         }
@@ -394,6 +400,45 @@ public class RenterController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to process cash payment: " + e.getMessage());
+            return "redirect:/renter/bookings/" + id + "/payment";
+        }
+    }
+
+    @PostMapping("/bookings/{id}/payment/change")
+    public String changePaymentMethod(@PathVariable Long id,
+            @RequestParam("method") String method,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            com.najmi.fleetshare.entity.Payment.PaymentMethod newMethod;
+            switch (method.toUpperCase()) {
+                case "CASH":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CASH;
+                    break;
+                case "CREDIT_CARD":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CREDIT_CARD;
+                    break;
+                case "BANK_TRANSFER":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.BANK_TRANSFER;
+                    break;
+                case "QR_PAYMENT":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.QR_PAYMENT;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid payment method: " + method);
+            }
+
+            paymentService.changePaymentMethod(id, newMethod);
+            redirectAttributes.addFlashAttribute("successMessage", "Payment method changed successfully.");
+            return "redirect:/renter/bookings/" + id;
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to change payment method: " + e.getMessage());
             return "redirect:/renter/bookings/" + id + "/payment";
         }
     }
