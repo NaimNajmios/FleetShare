@@ -4,6 +4,7 @@
 
 <head>
     <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" href="/css/browse-vehicles-ux.css">
         <style>
             :root {
                 --primary-color: #4B49AC;
@@ -487,6 +488,13 @@
                     </div>
                 </div>
                 </div> <!-- End offcanvas-body -->
+
+                <!-- Mobile Filter Footer -->
+                <div class="filter-footer d-lg-none">
+                    <button id="mobileFilterBtn" class="btn btn-primary w-100 py-2 fw-bold rounded-pill" type="button" data-bs-dismiss="offcanvas" data-bs-target="#filterSidebar">
+                        Show <span id="mobileResultCountText">Results</span>
+                    </button>
+                </div>
             </aside>
 
             <!-- Right Column: Content -->
@@ -890,6 +898,21 @@
 
                 // Update result count
                 document.getElementById('resultCount').textContent = visibleCount + ' results';
+
+                // Update Mobile Button Text
+                const mobileBtnText = document.getElementById('mobileResultCountText');
+                if (mobileBtnText) {
+                    mobileBtnText.textContent = visibleCount + (visibleCount === 1 ? ' Vehicle' : ' Vehicles');
+                }
+                const mobileBtn = document.getElementById('mobileFilterBtn');
+                if (mobileBtn) {
+                     if (visibleCount === 0) {
+                         mobileBtn.disabled = true;
+                         mobileBtnText.textContent = '0 Vehicles';
+                     } else {
+                         mobileBtn.disabled = false;
+                     }
+                }
 
                 // Show/Hide empty states
                 const emptyState = document.getElementById('emptyState');
