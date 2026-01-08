@@ -396,15 +396,28 @@
                                 <div class="info-item">
                                     <span class="info-label">Payment Method</span>
                                     <span class="info-value"
-                                        th:text="${booking != null and booking.paymentMethod != null ? booking.paymentMethod : 'Bank Transfer'}">
+                                        th:if="${booking != null and booking.paymentMethod != null}"
+                                        th:text="${booking.paymentMethod}">
                                         Bank Transfer
                                     </span>
+                                    <a th:if="${booking == null or booking.paymentMethod == null}"
+                                        th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}"
+                                        class="info-value"
+                                        style="color: #dc3545; text-decoration: none; font-weight: 600;">
+                                        <i class="fas fa-credit-card"></i> Choose Payment Method
+                                    </a>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Payment Status</span>
-                                    <span class="status-badge status-confirmed"
-                                        th:text="${booking != null and booking.paymentStatus != null ? booking.paymentStatus : 'CONFIRMED'}">
-                                        CONFIRMED
+                                    <span class="status-badge"
+                                        th:if="${booking != null and booking.paymentStatus != null}"
+                                        th:classappend="${booking.paymentStatus == 'VERIFIED' ? 'status-confirmed' : 'status-pending'}"
+                                        th:text="${booking.paymentStatus}">
+                                        PENDING
+                                    </span>
+                                    <span class="status-badge status-pending"
+                                        th:if="${booking == null or booking.paymentStatus == null}">
+                                        AWAITING
                                     </span>
                                 </div>
                             </div>
