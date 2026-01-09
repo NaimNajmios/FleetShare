@@ -101,9 +101,16 @@ public class FileStorageService {
         }
         try {
             String relativePath = fileUrl.replace("/uploads/", "");
-            Path filePath = Paths.get(uploadDir).resolve(relativePath);
+            Path baseDir = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path filePath = baseDir.resolve(relativePath).toAbsolutePath().normalize();
+
+            if (!filePath.startsWith(baseDir)) {
+                // Path traversal attempt detected
+                return false;
+            }
+
             return Files.deleteIfExists(filePath);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return false;
         }
     }

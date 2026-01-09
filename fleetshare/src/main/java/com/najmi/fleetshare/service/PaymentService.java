@@ -246,25 +246,6 @@ public class PaymentService {
         return payment;
     }
 
-    /**
-     * Gets the current payment for a booking.
-     *
-     * @param bookingId The booking ID
-     * @return The Payment entity or null if no payment exists
-     */
-    public Payment getPaymentByBookingId(Long bookingId) {
-        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
-        if (invoices.isEmpty()) {
-            return null;
-        }
-        Invoice invoice = invoices.get(0);
-        List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
-        if (payments.isEmpty()) {
-            return null;
-        }
-        // Return the most recent payment (assuming first is latest)
-        return payments.get(0);
-    }
 
     /**
      * Changes the payment method for a booking.
