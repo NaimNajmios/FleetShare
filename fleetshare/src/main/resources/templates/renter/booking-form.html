@@ -427,7 +427,7 @@
                         </div>
                         <div class="col-md-2 text-center">
                             <div class="date-connector-icon">
-                                <i class="fas fa-arrow-right"></i>
+                                <i class="fas fa-arrow-right text-muted"></i>
                             </div>
                         </div>
                         <div class="col-md-5">
@@ -449,13 +449,13 @@
                     <div class="form-group">
                         <div class="quick-select-pills">
                             <span class="text-muted small me-2 text-uppercase fw-bold" style="letter-spacing: 0.5px; font-size: 0.7rem;">Quick Select:</span>
-                            <button type="button" class="quick-select-pill" onclick="addDays(1)">
+                            <button type="button" class="quick-select-pill" onclick="addDays(1)" aria-label="Select 1 Day Duration">
                                 <i class="fas fa-clock"></i> 1 Day
                             </button>
-                            <button type="button" class="quick-select-pill" onclick="addDays(3)">
+                            <button type="button" class="quick-select-pill" onclick="addDays(3)" aria-label="Select 3 Days Duration">
                                 <i class="fas fa-calendar-week"></i> 3 Days
                             </button>
-                            <button type="button" class="quick-select-pill" onclick="addDays(7)">
+                            <button type="button" class="quick-select-pill" onclick="addDays(7)" aria-label="Select 1 Week Duration">
                                 <i class="fas fa-calendar"></i> 1 Week
                             </button>
                         </div>
@@ -463,11 +463,13 @@
 
                     <!-- Duration Badge -->
                     <div class="form-group mt-4">
-                        <label class="form-label text-muted small mb-2 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Duration</label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label text-muted small mb-0 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Duration</label>
+                        </div>
                         <div id="durationDisplay" class="duration-display hidden" role="status">
                             <div class="d-flex align-items-center gap-2">
                                 <i class="fas fa-hourglass-half"></i>
-                                <span id="durationText">0 Days</span>
+                                <span id="durationText">Select dates</span>
                             </div>
                             <div class="duration-bar">
                                 <div id="durationProgress" class="duration-progress"></div>
@@ -477,15 +479,27 @@
 
                     <!-- Total Cost -->
                     <div class="form-group">
-                        <label class="form-label" id="totalCostLabel">Total Cost</label>
-                        <div id="totalCostContainer" class="cost-card d-flex align-items-center justify-content-between"
-                             aria-labelledby="totalCostLabel"
-                             aria-live="polite">
-                            <div>
-                                <span class="d-block text-muted small">Estimated total</span>
-                                <small class="text-muted" style="font-size: 0.75rem;">Excludes tax & fees</small>
+                        <label class="form-label" id="totalCostLabel">Booking Summary</label>
+                        <div id="totalCostContainer" class="cost-card" aria-labelledby="totalCostLabel" aria-live="polite">
+                            <!-- Hidden Breakdown (Reveals on selection) -->
+                            <div id="costBreakdown" class="cost-breakdown d-none mb-3 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span>Base Rate</span>
+                                    <span th:text="'RM ' + ${vehicle.ratePerDay} + ' /day'">RM 120.00 /day</span>
+                                </div>
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span>Duration</span>
+                                    <span id="breakdownDuration">0 Days</span>
+                                </div>
                             </div>
-                            <span id="totalCostDisplay" class="h2 mb-0 text-primary fw-bold">RM 0.00</span>
+
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="d-block fw-bold text-dark">Total Cost</span>
+                                    <small class="text-muted" style="font-size: 0.75rem;">Excludes tax & fees</small>
+                                </div>
+                                <span id="totalCostDisplay" class="h2 mb-0 text-primary fw-bold">RM 0.00</span>
+                            </div>
                         </div>
                         <input type="hidden" id="totalCost" name="totalCost" value="0.00">
                     </div>
@@ -565,6 +579,9 @@
                 // Debounce timer for simulated availability check
                 let checkTimer;
 
+                const costBreakdown = document.getElementById('costBreakdown');
+                const breakdownDuration = document.getElementById('breakdownDuration');
+
                 function updateDuration() {
                     // Always clear any pending check first to avoid race conditions
                     clearTimeout(checkTimer);
@@ -586,8 +603,16 @@
                                 let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                                 if (diffDays === 0) diffDays = 1;
 
-                                durationText.textContent = diffDays + (diffDays === 1 ? ' Day' : ' Days');
+                                const durationStr = diffDays + (diffDays === 1 ? ' Day' : ' Days');
+                                durationText.textContent = durationStr;
+                                if (breakdownDuration) breakdownDuration.textContent = durationStr;
                                 durationDisplay.classList.remove('hidden');
+
+                                // Show breakdown
+                                if (costBreakdown) {
+                                    costBreakdown.classList.remove('d-none');
+                                    costBreakdown.classList.add('animate-fade-in');
+                                }
 
                                 // Visual bar progress (cap at 14 days for 100%)
                                 const percentage = Math.min((diffDays / 14) * 100, 100);
@@ -634,14 +659,24 @@
                 }
 
                 function resetFormState() {
-                    durationText.textContent = '0 Days';
+                    durationText.textContent = 'Select dates';
                     durationDisplay.classList.add('hidden');
                     durationProgress.style.width = '0%';
+                    if (costBreakdown) costBreakdown.classList.add('d-none');
                     updatePriceDisplay(0);
                 }
 
                 pickupInput.addEventListener('change', function () {
                     returnInput.min = this.value;
+
+                    // Smart Default: If return is empty or invalid, set to pickup + 1 day
+                    if (this.value && !returnInput.value) {
+                        const pickup = new Date(this.value);
+                        const nextDay = new Date(pickup);
+                        nextDay.setDate(pickup.getDate() + 1);
+                        returnInput.value = nextDay.toISOString().split('T')[0];
+                    }
+
                     if (returnInput.value && returnInput.value < this.value) {
                         returnInput.value = this.value;
                     }
