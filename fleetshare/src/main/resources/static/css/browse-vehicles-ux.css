@@ -1,0 +1,32 @@
+/* Mobile Filter Sidebar Footer */
+.filter-footer {
+    display: none;
+}
+
+@media (max-width: 991px) {
+    /* Ensure the offcanvas container uses flex to support sticky footer */
+    .filter-sidebar.offcanvas-lg {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Allow the body to take remaining space and scroll */
+    .filter-sidebar .offcanvas-body {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-bottom: 1rem; /* Ensure content isn't hidden behind footer if overlay issues occur */
+    }
+
+    /* Sticky Footer Styles */
+    .filter-footer {
+        display: block;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e9ecef;
+        background: white;
+        /* Position sticky isn't needed if using flex layout with mt-auto,
+           but good for safety if layout structure varies */
+        margin-top: auto;
+        z-index: 1050; /* Ensure it stays above content if needed */
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    }
+}
