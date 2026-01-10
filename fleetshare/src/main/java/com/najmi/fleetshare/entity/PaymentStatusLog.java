@@ -28,7 +28,7 @@ public class PaymentStatusLog {
     @Column(name = "remarks", length = 500)
     private String remarks;
 
-    // Constructors
+    // Empty Constructors
     public PaymentStatusLog() {
     }
 
