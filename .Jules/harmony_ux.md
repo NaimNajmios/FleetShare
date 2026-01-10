@@ -1,22 +1,22 @@
-## 2025-05-18 - Booking Form Cost Transparency
+## 2025-05-18 - Card-Based Payment Method Selection
 
-**Context:** Renter Booking Flow - Date Selection Step
-**User Need:** Users need to understand how the total cost is calculated before proceeding to payment.
-**Observation:** The previous form showed only a "Total Cost" which felt opaque. Users might hesitate if they don't see the "Rate x Days" math.
-**Solution Implemented:** Added a "Cost Breakdown" section that uses progressive disclosure. It remains hidden until dates are selected, then animates in to show the Base Rate and Duration multiplier.
-**Impact:** Increased transparency and trust. The "Smart Date" default also reduces friction by auto-selecting a 1-day minimum.
+**Context:** Renter Payment Management (`manage-payment.html`)
+**User Need:** Users need to select a payment method (Card, Transfer, Cash) to proceed with or verify their booking.
+**Observation:** The previous dropdown menu (`<select>`) was less intuitive for mobile users and hid the available options behind a click. It lacked visual weight for a primary decision step.
+**Solution Implemented:** Replaced the standard dropdown with a grid of interactive "cards" (`.payment-option-card`). Each card displays an icon and label, making all options immediately visible and providing a larger touch target.
+**Impact:**
+- Improved discoverability of payment options.
+- Enhanced touch usability on mobile devices.
+- Visual feedback (border, background, shadow) provides clear confirmation of selection.
+- Maintained progressive disclosure of the detailed payment instructions below the selection.
 
 **Code Pattern:**
 ```html
-<!-- Progressive Disclosure for Cost Breakdown -->
-<div id="costBreakdown" class="cost-breakdown d-none mb-3 pb-3 border-bottom">
-    <div class="d-flex justify-content-between small text-muted mb-1">
-        <span>Base Rate</span>
-        <span th:text="'RM ' + ${vehicle.ratePerDay} + ' /day'">RM 120.00 /day</span>
-    </div>
-    <div class="d-flex justify-content-between small text-muted">
-        <span>Duration</span>
-        <span id="breakdownDuration">0 Days</span>
-    </div>
+<div class="payment-options-grid" role="radiogroup" aria-label="Payment Method">
+    <button type="button" class="payment-option-card active" data-value="card" role="radio" aria-checked="true">
+        <i class="fab fa-cc-visa text-primary mb-2"></i>
+        <span>Card / FPX</span>
+    </button>
+    <!-- ... other options ... -->
 </div>
 ```
