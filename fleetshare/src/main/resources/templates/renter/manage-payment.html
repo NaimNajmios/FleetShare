@@ -375,11 +375,35 @@
                             <p class="text-muted" style="margin-bottom: 1.5rem;">
                                 <span th:if="${currentPayment.paymentMethod.name() == 'CASH'}">Please pay at the counter
                                     upon vehicle pickup.</span>
-                                <span th:if="${currentPayment.paymentMethod.name() == 'BANK_TRANSFER'}">Please complete
+                                <span
+                                    th:if="${currentPayment.paymentMethod.name() == 'BANK_TRANSFER' and currentPayment.verificationProofUrl != null}">Receipt
+                                    submitted. Awaiting verification.</span>
+                                <span
+                                    th:if="${currentPayment.paymentMethod.name() == 'BANK_TRANSFER' and currentPayment.verificationProofUrl == null}">Please
+                                    complete
                                     the bank transfer and upload receipt.</span>
                                 <span th:if="${currentPayment.paymentMethod.name() == 'CREDIT_CARD'}">Proceed to payment
                                     gateway to complete.</span>
                             </p>
+
+                            <!-- View Receipt Section (for BANK_TRANSFER with uploaded receipt) -->
+                            <div th:if="${currentPayment.paymentMethod.name() == 'BANK_TRANSFER' and currentPayment.verificationProofUrl != null}"
+                                style="margin-bottom: 1.5rem; padding: 1rem; background: #f0fff4; border: 1px solid #198754; border-radius: 0.5rem;">
+                                <div
+                                    style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                                    <i class="fas fa-receipt fa-2x" style="color: #198754;"></i>
+                                    <div style="text-align: left;">
+                                        <div style="font-weight: 600; color: #198754;">Receipt Uploaded</div>
+                                        <div class="text-muted" style="font-size: 0.85rem;">Pending verification</div>
+                                    </div>
+                                    <a th:href="${currentPayment.verificationProofUrl}" target="_blank"
+                                        class="btn btn-outline-success btn-sm"
+                                        style="border-radius: 2rem; padding: 0.5rem 1rem;">
+                                        <i class="fas fa-eye"></i> View Receipt
+                                    </a>
+                                </div>
+                            </div>
+
                             <button class="btn-primary-action btn-change" id="btn-change-method">
                                 <i class="fas fa-exchange-alt"></i> Change Payment Method
                             </button>
