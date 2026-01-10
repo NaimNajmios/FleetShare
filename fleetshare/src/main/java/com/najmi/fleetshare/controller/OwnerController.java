@@ -814,6 +814,24 @@ public class OwnerController {
         return "owner/view-payment";
     }
 
+    @PostMapping("/payments/verify/{paymentId}")
+    public String verifyPayment(@PathVariable Long paymentId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            paymentService.verifyPayment(paymentId, user.getUserId());
+            redirectAttributes.addFlashAttribute("successMessage", "Payment verified successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to verify payment: " + e.getMessage());
+        }
+        return "redirect:/owner/payments/view/" + paymentId;
+    }
+
     @GetMapping("/reports")
     public String reports(Model model) {
         return "owner/reports";
@@ -841,7 +859,8 @@ public class OwnerController {
 
     @PostMapping("/profile")
     @ResponseBody
-    public ResponseEntity<?> updateProfile(@Valid @RequestBody com.najmi.fleetshare.dto.OwnerProfileUpdateRequest request, HttpSession session) {
+    public ResponseEntity<?> updateProfile(
+            @Valid @RequestBody com.najmi.fleetshare.dto.OwnerProfileUpdateRequest request, HttpSession session) {
         SessionUser sessionUser = SessionHelper.getCurrentUser(session);
         if (sessionUser == null || sessionUser.getOwnerDetails() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
@@ -897,7 +916,8 @@ public class OwnerController {
 
         // Update session
         sessionUser.getOwnerDetails().setBusinessName(request.getBusinessName().trim());
-        sessionUser.getOwnerDetails().setContactPhone(request.getContactPhone() != null ? request.getContactPhone().trim() : null);
+        sessionUser.getOwnerDetails()
+                .setContactPhone(request.getContactPhone() != null ? request.getContactPhone().trim() : null);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
     }

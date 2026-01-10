@@ -443,6 +443,28 @@ public class RenterController {
         }
     }
 
+    @PostMapping("/bookings/{id}/payment/transfer")
+    public String processTransferPayment(@PathVariable Long id,
+            @RequestParam("receipt") org.springframework.web.multipart.MultipartFile receipt,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            paymentService.processBankTransferPayment(id, receipt);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Receipt submitted successfully. Your payment will be verified within 24 hours.");
+            return "redirect:/renter/bookings/" + id;
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to upload receipt: " + e.getMessage());
+            return "redirect:/renter/bookings/" + id + "/payment";
+        }
+    }
+
     @GetMapping("/owners/{id}")
     public String ownerProfile(@PathVariable Long id, HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);

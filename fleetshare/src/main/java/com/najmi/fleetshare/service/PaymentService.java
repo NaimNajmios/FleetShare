@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class PaymentService {
@@ -31,6 +32,9 @@ public class PaymentService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     /**
      * Fetches all payments with related information
@@ -242,6 +246,122 @@ public class PaymentService {
         }
         log.setRemarks("Cash payment option selected by renter");
         paymentStatusLogRepository.save(log);
+
+        return payment;
+    }
+
+    /**
+     * Processes a bank transfer payment for a booking with receipt upload.
+     *
+     * @param bookingId The booking ID
+     * @param receipt   The uploaded receipt file
+     * @return The created Payment entity
+     * @throws java.io.IOException if file storage fails
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment processBankTransferPayment(Long bookingId, MultipartFile receipt) throws java.io.IOException {
+        // 1. Find Invoice
+        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
+        if (invoices.isEmpty()) {
+            throw new IllegalArgumentException("No invoice found for booking ID: " + bookingId);
+        }
+        Invoice invoice = invoices.get(0);
+
+        // 2. Check if payment already exists
+        List<Payment> existingPayments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+        for (Payment p : existingPayments) {
+            if (p.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
+                throw new IllegalStateException("Payment already completed for this booking.");
+            }
+            // If pending bank transfer exists, update it with new receipt
+            if (p.getPaymentMethod() == Payment.PaymentMethod.BANK_TRANSFER &&
+                    p.getPaymentStatus() == Payment.PaymentStatus.PENDING) {
+                String proofUrl = fileStorageService.storePaymentProof(receipt, bookingId);
+                p.setVerificationProofUrl(proofUrl);
+                p.setPaymentDate(java.time.LocalDateTime.now());
+                p = paymentRepository.save(p);
+
+                // Log receipt re-upload
+                PaymentStatusLog log = new PaymentStatusLog();
+                log.setPaymentId(p.getPaymentId());
+                log.setStatusValue(Payment.PaymentStatus.PENDING);
+                log.setStatusTimestamp(java.time.LocalDateTime.now());
+                Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+                if (renter != null) {
+                    log.setActorUserId(renter.getUserId());
+                }
+                log.setRemarks("Bank transfer receipt re-uploaded");
+                paymentStatusLogRepository.save(log);
+
+                return p;
+            }
+        }
+
+        // 3. Store receipt file
+        String proofUrl = fileStorageService.storePaymentProof(receipt, bookingId);
+
+        // 4. Create Payment
+        Payment payment = new Payment();
+        payment.setInvoiceId(invoice.getInvoiceId());
+        payment.setAmount(invoice.getTotalAmount());
+        payment.setPaymentMethod(Payment.PaymentMethod.BANK_TRANSFER);
+        payment.setPaymentStatus(Payment.PaymentStatus.PENDING);
+        payment.setPaymentDate(java.time.LocalDateTime.now());
+        payment.setTransactionReference("TRANSFER-" + System.currentTimeMillis());
+        payment.setVerificationProofUrl(proofUrl);
+        payment = paymentRepository.save(payment);
+
+        // 5. Log Status
+        PaymentStatusLog log = new PaymentStatusLog();
+        log.setPaymentId(payment.getPaymentId());
+        log.setStatusValue(Payment.PaymentStatus.PENDING);
+        log.setStatusTimestamp(java.time.LocalDateTime.now());
+        Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+        if (renter != null) {
+            log.setActorUserId(renter.getUserId());
+        }
+        log.setRemarks("Bank transfer receipt submitted");
+        paymentStatusLogRepository.save(log);
+
+        return payment;
+    }
+
+    /**
+     * Verifies a payment by updating its status to VERIFIED.
+     *
+     * @param paymentId        The payment ID to verify
+     * @param verifiedByUserId The user ID of the person verifying
+     * @return The updated Payment entity
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment verifyPayment(Long paymentId, Long verifiedByUserId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found: " + paymentId));
+
+        if (payment.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
+            throw new IllegalStateException("Payment is already verified.");
+        }
+
+        // 1. Update payment status
+        payment.setPaymentStatus(Payment.PaymentStatus.VERIFIED);
+        payment.setVerifiedByUserId(verifiedByUserId);
+        payment = paymentRepository.save(payment);
+
+        // 2. Log status change
+        PaymentStatusLog log = new PaymentStatusLog();
+        log.setPaymentId(payment.getPaymentId());
+        log.setStatusValue(Payment.PaymentStatus.VERIFIED);
+        log.setStatusTimestamp(java.time.LocalDateTime.now());
+        log.setActorUserId(verifiedByUserId);
+        log.setRemarks("Payment verified by owner");
+        paymentStatusLogRepository.save(log);
+
+        // 3. Update invoice status to PAID
+        Invoice invoice = invoiceRepository.findById(payment.getInvoiceId()).orElse(null);
+        if (invoice != null) {
+            invoice.setStatus(Invoice.InvoiceStatus.PAID);
+            invoiceRepository.save(invoice);
+        }
 
         return payment;
     }
