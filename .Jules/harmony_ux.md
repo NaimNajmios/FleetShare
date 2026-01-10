@@ -1,39 +1,22 @@
-## 2026-01-06 - Client-Side Sorting & Animation
+## 2025-05-18 - Booking Form Cost Transparency
 
-**Context:** Renter Browse Vehicles Page (`browse-vehicles.html`)
-**User Need:** Users want to sort vehicles by price or newness to find the best deal or latest model quickly, but the previous interface only supported filtering (hide/show), not reordering.
-**Observation:** The vehicle list was static (server order). While filters were instant (JS), finding the "cheapest" required scrolling and manually comparing.
-**Solution Implemented:**
-1.  Added a "Sort" dropdown with options: Recommended, Price (Low-High/High-Low), Newest.
-2.  Implemented JS logic to reorder DOM elements based on `data-*` attributes (`data-price`, `data-year`).
-3.  Added a `data-original-index` on load to allow resetting to server order.
-4.  Added a CSS animation (`fadeIn`) that triggers when items are re-appended/shown to smooth the transition.
-
-**Impact:** Immediate, responsive sorting without server round-trips for the current page set. The animation provides delightful feedback that the list has updated.
+**Context:** Renter Booking Flow - Date Selection Step
+**User Need:** Users need to understand how the total cost is calculated before proceeding to payment.
+**Observation:** The previous form showed only a "Total Cost" which felt opaque. Users might hesitate if they don't see the "Rate x Days" math.
+**Solution Implemented:** Added a "Cost Breakdown" section that uses progressive disclosure. It remains hidden until dates are selected, then animates in to show the Base Rate and Duration multiplier.
+**Impact:** Increased transparency and trust. The "Smart Date" default also reduces friction by auto-selecting a 1-day minimum.
 
 **Code Pattern:**
-```javascript
-// Sorting Logic
-cards.sort((a, b) => {
-    if (currentSort === 'price-asc') {
-        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-    }
-    // ...
-});
-
-// Re-append to DOM
-cards.forEach(card => {
-    container.appendChild(card);
-    card.classList.add('animate-fade-in'); // Trigger animation
-});
-```
-
-```css
-.animate-fade-in {
-    animation: fadeIn 0.4s ease-out forwards;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+```html
+<!-- Progressive Disclosure for Cost Breakdown -->
+<div id="costBreakdown" class="cost-breakdown d-none mb-3 pb-3 border-bottom">
+    <div class="d-flex justify-content-between small text-muted mb-1">
+        <span>Base Rate</span>
+        <span th:text="'RM ' + ${vehicle.ratePerDay} + ' /day'">RM 120.00 /day</span>
+    </div>
+    <div class="d-flex justify-content-between small text-muted">
+        <span>Duration</span>
+        <span id="breakdownDuration">0 Days</span>
+    </div>
+</div>
 ```

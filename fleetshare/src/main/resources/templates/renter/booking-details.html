@@ -536,16 +536,89 @@
                 </div>
             </div>
         </div>
+
+        <!-- Cancel Booking Modal -->
+        <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-labelledby="cancelBookingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="modal-header bg-danger text-white border-0">
+                        <h5 class="modal-title" id="cancelBookingModalLabel">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Cancel Booking
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="mb-3 text-muted">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+
+                        <div class="mb-3">
+                            <label for="cancellationReason" class="form-label text-dark fw-bold small">Reason for Cancellation (Optional)</label>
+                            <textarea class="form-control bg-light border-0" id="cancellationReason" rows="3" placeholder="Please let us know why you are cancelling..."></textarea>
+                        </div>
+
+                        <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <div class="small">
+                                Cancellation fees may apply depending on the owner's policy.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Keep Booking</button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4" id="btn-confirm-cancel">
+                            Yes, Cancel Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <th:block layout:fragment="extra-js">
         <script>
-            // Cancel Booking button
-            document.getElementById('btn-cancel-booking').addEventListener('click', function () {
-                if (confirm('Are you sure you want to cancel this booking?\n\nThis action cannot be undone.')) {
-                    alert('Cancel booking functionality will be implemented.');
-                    // Future: Send cancel request to backend
-                    // window.location.href = '/renter/bookings/' + bookingId + '/cancel';
+            document.addEventListener('DOMContentLoaded', function() {
+                // Cancel Booking Modal Logic
+                const cancelBtn = document.getElementById('btn-cancel-booking');
+                const confirmCancelBtn = document.getElementById('btn-confirm-cancel');
+                let cancelModal;
+
+                // Initialize modal if element exists
+                const modalEl = document.getElementById('cancelBookingModal');
+                if (modalEl) {
+                    cancelModal = new bootstrap.Modal(modalEl);
+                }
+
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function (e) {
+                        e.preventDefault(); // Prevent any default action
+                        if (cancelModal) {
+                            cancelModal.show();
+                        }
+                    });
+                }
+
+                if (confirmCancelBtn) {
+                    confirmCancelBtn.addEventListener('click', function () {
+                        // UI: Loading State
+                        const originalText = this.innerHTML;
+                        this.disabled = true;
+                        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Cancelling...';
+
+                        // Simulation of API call
+                        setTimeout(() => {
+                            if (cancelModal) cancelModal.hide();
+
+                            // Show success toast
+                            if (window.showToast) {
+                                window.showToast('Booking cancellation functionality coming soon!', 'info', 'Coming Soon');
+                            } else {
+                                alert('Booking cancellation functionality coming soon!');
+                            }
+
+                            // Reset button
+                            this.disabled = false;
+                            this.innerHTML = originalText;
+                        }, 1000);
+                    });
                 }
             });
         </script>
