@@ -3,8 +3,7 @@ package com.najmi.fleetshare.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.DecimalMax;
+
 import java.io.Serializable;
 
 public class OwnerProfileUpdateRequest implements Serializable {
