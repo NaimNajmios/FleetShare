@@ -333,9 +333,19 @@
                     <a href="/owner/payments" class="btn btn-outline-secondary btn-block mb-3">
                         <i class="mdi mdi-arrow-left"></i> Back to Payments
                     </a>
-                    <button class="btn btn-secondary btn-block" onclick="window.print()">
+                    <button class="btn btn-secondary btn-block mb-3" onclick="window.print()">
                         <i class="mdi mdi-printer"></i> Print Details
                     </button>
+
+                    <!-- Verify Payment Button (Only for PENDING status) -->
+                    <div th:if="${payment.paymentStatus == 'PENDING'}" class="mt-3 pt-3"
+                        style="border-top: 1px solid #dee2e6;">
+                        <div class="text-muted small mb-2">Payment Actions</div>
+                        <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal"
+                            data-bs-target="#verifyModal">
+                            <i class="mdi mdi-check-circle"></i> Verify Payment
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Status Timeline -->
@@ -368,7 +378,37 @@
                     </div>
                 </div>
             </div>
+        </div>\r\n\r\n        <!-- Verify Payment Modal -->
+    <div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="verifyModalLabel">
+                        <i class="mdi mdi-check-circle me-2"></i>Verify Payment
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to verify this payment?</p>
+                    <div class="alert alert-info mb-0">
+                        <i class="mdi mdi-information me-1"></i>
+                        This will mark the payment as <strong>VERIFIED</strong> and update the invoice status to
+                        <strong>PAID</strong>.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form th:action="@{/owner/payments/verify/{id}(id=${payment.paymentId})}" method="POST"
+                        style="display: inline;">
+                        <button type="submit" class="btn btn-success">
+                            <i class="mdi mdi-check"></i> Confirm Verification
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
+    </div>
     </div>
 </body>
 
