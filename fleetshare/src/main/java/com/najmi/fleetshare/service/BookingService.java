@@ -252,6 +252,93 @@ public class BookingService {
         return statusLogRepository.findByBookingIdOrderByStatusTimestampDesc(bookingId);
     }
 
+    /**
+     * Updates the booking status with validation and logging.
+     *
+     * @param bookingId   The booking ID to update
+     * @param newStatus   The new status to set
+     * @param actorUserId The user performing the action
+     * @param remarks     Optional remarks for the status change
+     * @return The updated Booking entity
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Booking updateBookingStatus(Long bookingId, String newStatus, Long actorUserId, String remarks) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
+
+        // Get current status
+        BookingStatusLog.BookingStatus currentStatus = statusLogRepository
+                .findLatestStatusByBookingId(bookingId)
+                .map(BookingStatusLog::getStatusValue)
+                .orElse(BookingStatusLog.BookingStatus.PENDING);
+
+        BookingStatusLog.BookingStatus targetStatus;
+        try {
+            targetStatus = BookingStatusLog.BookingStatus.valueOf(newStatus.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status: " + newStatus);
+        }
+
+        // Validate status transition
+        if (!isValidTransition(currentStatus, targetStatus)) {
+            throw new IllegalStateException("Cannot transition from " + currentStatus + " to " + targetStatus);
+        }
+
+        // Create status log entry
+        BookingStatusLog statusLog = new BookingStatusLog();
+        statusLog.setBookingId(bookingId);
+        statusLog.setStatusValue(targetStatus);
+        statusLog.setActorUserId(actorUserId);
+        statusLog.setStatusTimestamp(java.time.LocalDateTime.now());
+        statusLog.setRemarks(
+                remarks != null && !remarks.trim().isEmpty() ? remarks.trim() : getDefaultRemarks(targetStatus));
+        statusLogRepository.save(statusLog);
+
+        return booking;
+    }
+
+    /**
+     * Validates if a status transition is allowed.
+     */
+    private boolean isValidTransition(BookingStatusLog.BookingStatus from, BookingStatusLog.BookingStatus to) {
+        // Define allowed transitions
+        switch (from) {
+            case PENDING:
+                return to == BookingStatusLog.BookingStatus.CONFIRMED || to == BookingStatusLog.BookingStatus.CANCELLED;
+            case CONFIRMED:
+                return to == BookingStatusLog.BookingStatus.ACTIVE || to == BookingStatusLog.BookingStatus.CANCELLED;
+            case ACTIVE:
+                return to == BookingStatusLog.BookingStatus.COMPLETED || to == BookingStatusLog.BookingStatus.DISPUTED;
+            case DISPUTED:
+                return to == BookingStatusLog.BookingStatus.COMPLETED || to == BookingStatusLog.BookingStatus.CANCELLED;
+            case COMPLETED:
+            case CANCELLED:
+                return false; // Terminal states
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Returns default remarks for a status change.
+     */
+    private String getDefaultRemarks(BookingStatusLog.BookingStatus status) {
+        switch (status) {
+            case CONFIRMED:
+                return "Booking confirmed by owner";
+            case ACTIVE:
+                return "Vehicle picked up - rental started";
+            case COMPLETED:
+                return "Vehicle returned - rental completed";
+            case CANCELLED:
+                return "Booking cancelled";
+            case DISPUTED:
+                return "Issue reported - under dispute";
+            default:
+                return "Status updated";
+        }
+    }
+
     public List<BookingLogDTO> getBookingStatusLogsDTO(Long bookingId) {
         List<BookingStatusLog> logs = statusLogRepository.findByBookingIdOrderByStatusTimestampDesc(bookingId);
 

@@ -674,6 +674,41 @@ public class OwnerController {
         return "owner/view-booking";
     }
 
+    @PostMapping("/bookings/{bookingId}/status")
+    public String updateBookingStatus(@PathVariable Long bookingId,
+            @RequestParam("status") String status,
+            @RequestParam(value = "remarks", required = false) String remarks,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Validate ownership
+            BookingDTO booking = bookingService.getBookingDetails(bookingId);
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
+                return "redirect:/owner/bookings";
+            }
+
+            VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(booking.getVehicleId());
+            if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Unauthorized access.");
+                return "redirect:/owner/bookings";
+            }
+
+            bookingService.updateBookingStatus(bookingId, status, user.getUserId(), remarks);
+            redirectAttributes.addFlashAttribute("successMessage", "Booking status updated to " + status + ".");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to update status: " + e.getMessage());
+        }
+        return "redirect:/owner/bookings/view/" + bookingId;
+    }
+
     @GetMapping("/bookings/edit/{bookingId}")
     public String editBooking(@PathVariable Long bookingId, HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);

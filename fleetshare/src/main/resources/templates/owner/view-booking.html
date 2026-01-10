@@ -414,27 +414,75 @@
             <!-- Right Column: Action Panel -->
             <div class="col-lg-4">
                 <div class="action-panel">
-                    <div class="card-header-custom">Actions</div>
+                    <div class="card-header-custom">Workflow Actions</div>
 
-                    <div class="form-group">
-                        <label>Workflow State</label>
-                        <select class="form-control mb-2">
-                            <option th:selected="${booking.status == 'PENDING'}">Pending</option>
-                            <option th:selected="${booking.status == 'CONFIRMED'}">Confirmed</option>
-                            <option th:selected="${booking.status == 'ACTIVE'}">Active</option>
-                            <option th:selected="${booking.status == 'COMPLETED'}">Completed</option>
-                            <option th:selected="${booking.status == 'CANCELLED'}">Cancelled</option>
-                        </select>
-                        <button class="btn btn-primary btn-block">Update Status</button>
+                    <!-- PENDING Status Actions -->
+                    <div th:if="${booking.status == 'PENDING'}" class="mb-3">
+                        <p class="text-muted small mb-2">This booking is awaiting confirmation.</p>
+                        <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal" data-bs-target="#confirmModal">
+                            <i class="mdi mdi-check-circle"></i> Confirm Booking
+                        </button>
+                        <button class="btn btn-outline-danger btn-block" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                            <i class="mdi mdi-close-circle"></i> Cancel Booking
+                        </button>
+                    </div>
+
+                    <!-- CONFIRMED Status Actions -->
+                    <div th:if="${booking.status == 'CONFIRMED'}" class="mb-3">
+                        <p class="text-muted small mb-2">Booking confirmed. Ready for pickup.</p>
+                        <button class="btn btn-primary btn-block mb-2" data-bs-toggle="modal" data-bs-target="#activeModal">
+                            <i class="mdi mdi-car-key"></i> Mark as Active (Picked Up)
+                        </button>
+                        <button class="btn btn-outline-danger btn-block" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                            <i class="mdi mdi-close-circle"></i> Cancel Booking
+                        </button>
+                    </div>
+
+                    <!-- ACTIVE Status Actions -->
+                    <div th:if="${booking.status == 'ACTIVE'}" class="mb-3">
+                        <p class="text-muted small mb-2">Rental in progress.</p>
+                        <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal" data-bs-target="#completeModal">
+                            <i class="mdi mdi-check-all"></i> Mark as Completed (Returned)
+                        </button>
+                        <button class="btn btn-outline-warning btn-block" data-bs-toggle="modal" data-bs-target="#disputeModal">
+                            <i class="mdi mdi-alert-circle"></i> Report Issue
+                        </button>
+                    </div>
+
+                    <!-- DISPUTED Status Actions -->
+                    <div th:if="${booking.status == 'DISPUTED'}" class="mb-3">
+                        <p class="text-muted small mb-2">This booking has an open dispute.</p>
+                        <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal" data-bs-target="#completeModal">
+                            <i class="mdi mdi-check-all"></i> Resolve & Complete
+                        </button>
+                        <button class="btn btn-outline-danger btn-block" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                            <i class="mdi mdi-close-circle"></i> Cancel & Refund
+                        </button>
+                    </div>
+
+                    <!-- COMPLETED Status -->
+                    <div th:if="${booking.status == 'COMPLETED'}" class="mb-3">
+                        <div class="alert alert-success mb-0">
+                            <i class="mdi mdi-check-circle"></i> This booking has been completed.
+                        </div>
+                    </div>
+
+                    <!-- CANCELLED Status -->
+                    <div th:if="${booking.status == 'CANCELLED'}" class="mb-3">
+                        <div class="alert alert-danger mb-0">
+                            <i class="mdi mdi-close-circle"></i> This booking has been cancelled.
+                        </div>
                     </div>
 
                     <hr>
-
-                    <button class="btn btn-success btn-block mb-3">Mark as Completed</button>
-
+                    
                     <a th:href="@{/owner/bookings/edit/{id}(id=${booking.bookingId})}"
-                        class="btn btn-warning btn-block mb-2">Edit Booking Details</a>
-                    <button class="btn btn-secondary btn-block">Print Booking Details</button>
+                        class="btn btn-outline-primary btn-block mb-2">
+                        <i class="mdi mdi-pencil"></i> Edit Booking Details
+                    </a>
+                    <button class="btn btn-outline-secondary btn-block" onclick="window.print()">
+                        <i class="mdi mdi-printer"></i> Print Booking Details
+                    </button>
                 </div>
 
                 <!-- Status Timeline -->
@@ -474,6 +522,139 @@
                         <p>No status changes recorded yet</p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Booking Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="mdi mdi-check-circle me-2"></i>Confirm Booking</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/owner/bookings/{id}/status(id=${booking.bookingId})}" method="POST">
+                    <input type="hidden" name="status" value="CONFIRMED">
+                    <div class="modal-body">
+                        <p>Confirm this booking?</p>
+                        <div class="form-group">
+                            <label class="form-label">Remarks (optional)</label>
+                            <textarea name="remarks" class="form-control" rows="2" placeholder="Add any notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success"><i class="mdi mdi-check"></i> Confirm Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark as Active Modal -->
+    <div class="modal fade" id="activeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="mdi mdi-car-key me-2"></i>Mark as Active</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/owner/bookings/{id}/status(id=${booking.bookingId})}" method="POST">
+                    <input type="hidden" name="status" value="ACTIVE">
+                    <div class="modal-body">
+                        <p>Mark this booking as active? (Vehicle picked up)</p>
+                        <div class="form-group">
+                            <label class="form-label">Remarks (optional)</label>
+                            <textarea name="remarks" class="form-control" rows="2" placeholder="Add any notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="mdi mdi-car-key"></i> Mark as Active</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark as Completed Modal -->
+    <div class="modal fade" id="completeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="mdi mdi-check-all me-2"></i>Mark as Completed</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/owner/bookings/{id}/status(id=${booking.bookingId})}" method="POST">
+                    <input type="hidden" name="status" value="COMPLETED">
+                    <div class="modal-body">
+                        <p>Mark this booking as completed? (Vehicle returned)</p>
+                        <div class="form-group">
+                            <label class="form-label">Remarks (optional)</label>
+                            <textarea name="remarks" class="form-control" rows="2" placeholder="Add any notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success"><i class="mdi mdi-check-all"></i> Complete Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Issue (Dispute) Modal -->
+    <div class="modal fade" id="disputeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="mdi mdi-alert-circle me-2"></i>Report Issue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/owner/bookings/{id}/status(id=${booking.bookingId})}" method="POST">
+                    <input type="hidden" name="status" value="DISPUTED">
+                    <div class="modal-body">
+                        <p>Report an issue with this booking?</p>
+                        <div class="form-group">
+                            <label class="form-label">Issue Details <span class="text-danger">*</span></label>
+                            <textarea name="remarks" class="form-control" rows="3" placeholder="Describe the issue..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning"><i class="mdi mdi-alert-circle"></i> Report Issue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Booking Modal -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="mdi mdi-close-circle me-2"></i>Cancel Booking</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/owner/bookings/{id}/status(id=${booking.bookingId})}" method="POST">
+                    <input type="hidden" name="status" value="CANCELLED">
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <i class="mdi mdi-alert"></i> This action cannot be undone.
+                        </div>
+                        <p>Are you sure you want to cancel this booking?</p>
+                        <div class="form-group">
+                            <label class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
+                            <textarea name="remarks" class="form-control" rows="2" placeholder="Reason for cancellation..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back</button>
+                        <button type="submit" class="btn btn-danger"><i class="mdi mdi-close-circle"></i> Cancel Booking</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
