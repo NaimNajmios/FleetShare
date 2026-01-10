@@ -105,21 +105,6 @@ public class PaymentService {
         return dtos;
     }
 
-    public Payment getPaymentByBookingId(Long bookingId) {
-        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
-        if (invoices.isEmpty()) {
-            return null;
-        }
-        // Assuming one active invoice per booking for now, or take the latest
-        Invoice invoice = invoices.get(0);
-        List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
-        if (payments.isEmpty()) {
-            return null;
-        }
-        // Assuming one payment record per invoice for now
-        return payments.get(0);
-    }
-
     /**
      * Fetches detailed payment information by payment ID
      * 
