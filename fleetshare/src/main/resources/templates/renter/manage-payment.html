@@ -130,6 +130,54 @@
                 box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
             }
 
+            /* Payment Option Cards */
+            .payment-options-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .payment-option-card {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 1.5rem 1rem;
+                border: 2px solid #dee2e6;
+                border-radius: 0.75rem;
+                background: white;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+                color: #495057;
+                font-weight: 600;
+                font-size: 0.95rem;
+                height: 100%;
+                width: 100%;
+            }
+
+            .payment-option-card i {
+                font-size: 1.75rem;
+                transition: transform 0.2s ease;
+            }
+
+            .payment-option-card:hover {
+                border-color: #adb5bd;
+                background: #f8f9fa;
+                transform: translateY(-2px);
+            }
+
+            .payment-option-card.active {
+                border-color: #0d6efd;
+                background: #e7f5ff;
+                color: #0d6efd;
+                box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+            }
+
+            .payment-option-card.active i {
+                transform: scale(1.1);
+            }
+
             .dynamic-input-area {
                 background: white;
                 border-radius: 1rem;
@@ -432,11 +480,21 @@
                     <div th:if="${currentPayment == null}">
                         <div class="method-selection-card">
                             <h2 class="section-title">How would you like to pay?</h2>
-                            <select id="paymentMethod" class="payment-method-select">
-                                <option value="card">Credit/Debit Card & FPX</option>
-                                <option value="transfer">Bank Transfer / DuitNow QR</option>
-                                <option value="cash">Cash at Counter</option>
-                            </select>
+                            <div class="payment-options-grid" role="radiogroup" aria-label="Payment Method">
+                                <button type="button" class="payment-option-card active" data-value="card" role="radio" aria-checked="true">
+                                    <i class="fab fa-cc-visa text-primary mb-2"></i>
+                                    <span>Card / FPX</span>
+                                </button>
+                                <button type="button" class="payment-option-card" data-value="transfer" role="radio" aria-checked="false">
+                                    <i class="fas fa-university text-info mb-2"></i>
+                                    <span>Transfer</span>
+                                </button>
+                                <button type="button" class="payment-option-card" data-value="cash" role="radio" aria-checked="false">
+                                    <i class="fas fa-money-bill-wave text-success mb-2"></i>
+                                    <span>Cash</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="paymentMethodValue" value="card">
                         </div>
 
                         <div class="dynamic-input-area">
@@ -667,21 +725,39 @@
                 }
 
                 // Method selection for new payments
-                const methodSelect = document.getElementById('paymentMethod');
-                if (methodSelect) {
+                const paymentOptions = document.querySelectorAll('.payment-option-card');
+
+                if (paymentOptions.length > 0) {
                     const contentCard = document.getElementById('content-card');
                     const contentTransfer = document.getElementById('content-transfer');
                     const contentCash = document.getElementById('content-cash');
                     const btnCard = document.getElementById('btn-card');
                     const btnTransfer = document.getElementById('btn-transfer');
                     const btnCash = document.getElementById('btn-cash');
+                    const hiddenInput = document.getElementById('paymentMethodValue');
 
-                    methodSelect.addEventListener('change', function () {
-                        const selected = this.value;
+                    function updatePaymentUI(selected) {
+                        // Update hidden input
+                        if(hiddenInput) hiddenInput.value = selected;
 
+                        // Reset all options
+                        paymentOptions.forEach(opt => {
+                            opt.classList.remove('active');
+                            opt.setAttribute('aria-checked', 'false');
+                        });
+
+                        // Set active option
+                        const activeOption = document.querySelector(`.payment-option-card[data-value="${selected}"]`);
+                        if(activeOption) {
+                            activeOption.classList.add('active');
+                            activeOption.setAttribute('aria-checked', 'true');
+                        }
+
+                        // Hide all contents
                         [contentCard, contentTransfer, contentCash].forEach(el => { if (el) el.classList.add('hidden'); });
                         [btnCard, btnTransfer, btnCash].forEach(el => { if (el) el.classList.add('hidden'); });
 
+                        // Show selected content
                         if (selected === 'card') {
                             if (contentCard) contentCard.classList.remove('hidden');
                             if (btnCard) btnCard.classList.remove('hidden');
@@ -692,6 +768,20 @@
                             if (contentCash) contentCash.classList.remove('hidden');
                             if (btnCash) btnCash.classList.remove('hidden');
                         }
+                    }
+
+                    paymentOptions.forEach(option => {
+                        option.addEventListener('click', function() {
+                            updatePaymentUI(this.dataset.value);
+                        });
+
+                        // Keyboard support
+                        option.addEventListener('keydown', function(e) {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                updatePaymentUI(this.dataset.value);
+                            }
+                        });
                     });
 
                     // Button Actions
