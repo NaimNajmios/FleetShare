@@ -103,7 +103,6 @@ public class GlobalExceptionHandler {
             org.springframework.web.bind.MethodArgumentNotValidException ex) {
         java.util.Map<String, String> errors = new java.util.HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((org.springframework.validation.FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put("error", errorMessage); // Simplified for this app's existing frontend expectations
         });

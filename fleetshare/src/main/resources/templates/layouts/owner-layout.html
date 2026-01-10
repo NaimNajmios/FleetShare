@@ -30,6 +30,11 @@
 </head>
 
 <body>
+    <script>
+        if (localStorage.getItem('sidebarState') === 'collapsed') {
+            document.body.classList.add('sidebar-icon-only');
+        }
+    </script>
     <div class="container-scroller">
         <!-- partial:fragments/owner-nav.html -->
         <div th:replace="~{fragments/owner-nav :: navbar}"></div>
