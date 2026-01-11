@@ -305,6 +305,62 @@
                 color: #6c757d;
                 line-height: 1.4;
             }
+
+            /* Status Banner Styles */
+            .status-banner {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem 1.5rem;
+                border-radius: 0.75rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .status-banner i {
+                font-size: 1.5rem;
+            }
+
+            .status-banner strong {
+                display: block;
+                font-size: 1rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .status-banner p {
+                margin: 0;
+                font-size: 0.875rem;
+                opacity: 0.9;
+            }
+
+            .status-banner.banner-pending {
+                background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+                color: #856404;
+                border: 1px solid #ffc107;
+            }
+
+            .status-banner.banner-confirmed {
+                background: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
+                color: #004085;
+                border: 1px solid #007bff;
+            }
+
+            .status-banner.banner-active {
+                background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+                color: #0c5460;
+                border: 1px solid #17a2b8;
+            }
+
+            .status-banner.banner-completed {
+                background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                color: #155724;
+                border: 1px solid #28a745;
+            }
+
+            .status-banner.banner-cancelled {
+                background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                color: #721c24;
+                border: 1px solid #dc3545;
+            }
         </style>
     </th:block>
 </head>
@@ -319,6 +375,43 @@
                 </a>
                 <h1 class="page-title">View Your Booking</h1>
                 <p class="page-subtitle">// BOOKING DETAILS //</p>
+                        </div>
+
+            <!-- Status Banner -->
+            <div th:if="${booking.status == 'PENDING'}" class="status-banner banner-pending">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <strong>Awaiting Owner Confirmation</strong>
+                    <p>The owner will review and confirm your booking request.</p>
+                </div>
+            </div>
+            <div th:if="${booking.status == 'CONFIRMED'}" class="status-banner banner-confirmed">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Booking Confirmed!</strong>
+                    <p th:text="'Your vehicle is ready for pickup on ' + ${#temporals.format(booking.startDate, 'dd MMM yyyy')} + '.'">Ready for pickup.</p>
+                </div>
+            </div>
+            <div th:if="${booking.status == 'ACTIVE'}" class="status-banner banner-active">
+                <i class="fas fa-car"></i>
+                <div>
+                    <strong>Rental in Progress</strong>
+                    <p>Enjoy your ride! Return the vehicle by the end date.</p>
+                </div>
+            </div>
+            <div th:if="${booking.status == 'COMPLETED'}" class="status-banner banner-completed">
+                <i class="fas fa-flag-checkered"></i>
+                <div>
+                    <strong>Rental Completed</strong>
+                    <p>Thank you for renting with us!</p>
+                </div>
+            </div>
+            <div th:if="${booking.status == 'CANCELLED'}" class="status-banner banner-cancelled">
+                <i class="fas fa-times-circle"></i>
+                <div>
+                    <strong>Booking Cancelled</strong>
+                    <p>This booking has been cancelled.</p>
+                </div>
             </div>
 
             <div class="booking-layout">
@@ -468,8 +561,61 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Timeline -->
+                                <!-- Right Column: Actions & Timeline -->
                 <div class="booking-sidebar">
+                    <!-- Contextual Actions Card -->
+                    <div class="action-card">
+                        <h2 class="card-title">Actions</h2>
+                        
+                        <!-- PENDING Actions -->
+                        <div th:if="${booking.status == 'PENDING'}">
+                            <a th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-credit-card me-2"></i>Manage Payment
+                            </a>
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">
+                                <i class="fas fa-times me-2"></i>Cancel Booking
+                            </button>
+                        </div>
+                        
+                        <!-- CONFIRMED Actions -->
+                        <div th:if="${booking.status == 'CONFIRMED'}">
+                            <a href="#" class="btn btn-primary">
+                                <i class="fas fa-phone me-2"></i>Contact Owner
+                            </a>
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">
+                                <i class="fas fa-times me-2"></i>Cancel Booking
+                            </button>
+                        </div>
+                        
+                        <!-- ACTIVE Actions -->
+                        <div th:if="${booking.status == 'ACTIVE'}">
+                            <a href="#" class="btn btn-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Report Issue
+                            </a>
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="fas fa-phone me-2"></i>Contact Owner
+                            </a>
+                        </div>
+                        
+                        <!-- COMPLETED Actions -->
+                        <div th:if="${booking.status == 'COMPLETED'}">
+                            <a href="#" class="btn btn-success">
+                                <i class="fas fa-star me-2"></i>Leave a Review
+                            </a>
+                            <a th:href="@{/renter/vehicles/{id}(id=${booking.vehicleId})}" class="btn btn-outline-primary">
+                                <i class="fas fa-redo me-2"></i>Book Again
+                            </a>
+                        </div>
+                        
+                        <!-- CANCELLED Actions -->
+                        <div th:if="${booking.status == 'CANCELLED'}">
+                            <a th:href="@{/renter/vehicles/{id}(id=${booking.vehicleId})}" class="btn btn-primary">
+                                <i class="fas fa-redo me-2"></i>Book Again
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- Booking Timeline -->
                     <div class="timeline-card">
                         <h2 class="card-title">Booking Timeline</h2>
