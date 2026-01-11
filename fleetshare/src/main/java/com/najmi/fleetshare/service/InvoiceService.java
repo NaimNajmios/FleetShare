@@ -86,22 +86,22 @@ public class InvoiceService {
                 <html>
                 <head>
                     <style>
-                        body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
+                        body { font-family: Arial, sans-serif; padding: 40px; color: #333; font-size: 12px; }
                         .header { text-align: center; margin-bottom: 30px; }
-                        .header h1 { color: #4B49AC; margin: 0; }
+                        .header h1 { color: #4B49AC; margin: 0; font-size: 24px; }
                         .header p { color: #666; margin: 5px 0; }
-                        .invoice-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
-                        .info-block { width: 45%; }
-                        .info-block h3 { color: #4B49AC; border-bottom: 2px solid #4B49AC; padding-bottom: 5px; }
-                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-                        th { background-color: #4B49AC; color: white; }
-                        .total-row { font-weight: bold; font-size: 1.2em; }
+                        .info-table { width: 100%%; margin-bottom: 20px; }
+                        .info-table td { vertical-align: top; padding: 10px; }
+                        .info-block h3 { color: #4B49AC; border-bottom: 2px solid #4B49AC; padding-bottom: 5px; margin-top: 0; }
+                        .items-table { width: 100%%; border-collapse: collapse; margin: 20px 0; }
+                        .items-table th, .items-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+                        .items-table th { background-color: #4B49AC; color: white; }
+                        .total-row { font-weight: bold; font-size: 14px; }
                         .total-row td { border-top: 2px solid #333; }
-                        .status { padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; }
+                        .status { padding: 3px 10px; border-radius: 10px; font-weight: bold; }
                         .status-issued { background: #fff3cd; color: #856404; }
                         .status-paid { background: #d4edda; color: #155724; }
-                        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 0.9em; }
+                        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 11px; }
                     </style>
                 </head>
                 <body>
@@ -110,22 +110,28 @@ public class InvoiceService {
                         <p>FleetShare Vehicle Rental Platform</p>
                     </div>
 
-                    <div class="invoice-info">
-                        <div class="info-block">
-                            <h3>Invoice Details</h3>
-                            <p><strong>Invoice No:</strong> %s</p>
-                            <p><strong>Issue Date:</strong> %s</p>
-                            <p><strong>Due Date:</strong> %s</p>
-                            <p><strong>Status:</strong> <span class="status status-%s">%s</span></p>
-                        </div>
-                        <div class="info-block">
-                            <h3>Bill To</h3>
-                            <p><strong>%s</strong></p>
-                            <p>Booking #%s</p>
-                        </div>
-                    </div>
+                    <table class="info-table">
+                        <tr>
+                            <td style="width: 50%%;">
+                                <div class="info-block">
+                                    <h3>Invoice Details</h3>
+                                    <p><strong>Invoice No:</strong> %s</p>
+                                    <p><strong>Issue Date:</strong> %s</p>
+                                    <p><strong>Due Date:</strong> %s</p>
+                                    <p><strong>Status:</strong> <span class="status status-%s">%s</span></p>
+                                </div>
+                            </td>
+                            <td style="width: 50%%;">
+                                <div class="info-block">
+                                    <h3>Bill To</h3>
+                                    <p><strong>%s</strong></p>
+                                    <p>Booking #%s</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
 
-                    <table>
+                    <table class="items-table">
                         <thead>
                             <tr>
                                 <th>Description</th>
@@ -154,19 +160,20 @@ public class InvoiceService {
                     </div>
                 </body>
                 </html>
-                """.formatted(
-                invoice.getInvoiceNumber(),
-                invoice.getIssueDate() != null ? invoice.getIssueDate().format(dateFormatter) : "N/A",
-                invoice.getDueDate() != null ? invoice.getDueDate().format(dateFormatter) : "N/A",
-                invoice.getStatus().name().toLowerCase(),
-                invoice.getStatus().name(),
-                renterName,
-                invoice.getBookingId(),
-                vehicleInfo,
-                rentalPeriod,
-                amount,
-                amount,
-                ownerName);
+                """
+                .formatted(
+                        invoice.getInvoiceNumber(),
+                        invoice.getIssueDate() != null ? invoice.getIssueDate().format(dateFormatter) : "N/A",
+                        invoice.getDueDate() != null ? invoice.getDueDate().format(dateFormatter) : "N/A",
+                        invoice.getStatus().name().toLowerCase(),
+                        invoice.getStatus().name(),
+                        renterName,
+                        invoice.getBookingId(),
+                        vehicleInfo,
+                        rentalPeriod,
+                        amount,
+                        amount,
+                        ownerName);
     }
 
     /**
