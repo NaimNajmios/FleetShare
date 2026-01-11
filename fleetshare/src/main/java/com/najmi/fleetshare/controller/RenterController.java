@@ -61,6 +61,12 @@ public class RenterController {
     @Autowired
     private com.najmi.fleetshare.service.FileStorageService fileStorageService;
 
+    @Autowired
+    private com.najmi.fleetshare.service.InvoiceService invoiceService;
+
+    @Autowired
+    private com.najmi.fleetshare.service.ReceiptService receiptService;
+
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -556,5 +562,80 @@ public class RenterController {
         model.addAttribute("recentBookings", recentBookings);
 
         return "renter/home";
+    }
+
+    /**
+     * Download invoice PDF for a booking
+     */
+    @GetMapping("/bookings/{id}/invoice")
+    public org.springframework.http.ResponseEntity<byte[]> downloadInvoice(
+            @PathVariable Long id, HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return org.springframework.http.ResponseEntity.status(401).build();
+        }
+
+        try {
+            // Get invoice for this booking
+            com.najmi.fleetshare.entity.Invoice invoice = invoiceService.getInvoiceByBookingId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
+
+            // Verify ownership
+            if (!invoice.getRenterId().equals(user.getRenterDetails().getRenterId())) {
+                return org.springframework.http.ResponseEntity.status(403).build();
+            }
+
+            byte[] pdf = invoiceService.generateInvoicePdf(invoice.getInvoiceId());
+
+            return org.springframework.http.ResponseEntity.ok()
+                    .header("Content-Disposition",
+                            "attachment; filename=invoice-" + invoice.getInvoiceNumber() + ".pdf")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Download receipt PDF for a booking (only if payment is verified)
+     */
+    @GetMapping("/bookings/{id}/receipt")
+    public org.springframework.http.ResponseEntity<byte[]> downloadReceipt(
+            @PathVariable Long id, HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return org.springframework.http.ResponseEntity.status(401).build();
+        }
+
+        try {
+            // Get invoice for this booking
+            com.najmi.fleetshare.entity.Invoice invoice = invoiceService.getInvoiceByBookingId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
+
+            // Verify ownership
+            if (!invoice.getRenterId().equals(user.getRenterDetails().getRenterId())) {
+                return org.springframework.http.ResponseEntity.status(403).build();
+            }
+
+            // Get payment for this invoice
+            com.najmi.fleetshare.entity.Payment payment = receiptService.getPaymentByInvoiceId(invoice.getInvoiceId())
+                    .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
+            // Check if payment is verified
+            if (!receiptService.canGenerateReceipt(payment.getPaymentId())) {
+                return org.springframework.http.ResponseEntity.status(400).build();
+            }
+
+            byte[] pdf = receiptService.generateReceiptPdf(payment.getPaymentId());
+
+            return org.springframework.http.ResponseEntity.ok()
+                    .header("Content-Disposition",
+                            "attachment; filename=receipt-" + invoice.getInvoiceNumber() + ".pdf")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().build();
+        }
     }
 }
