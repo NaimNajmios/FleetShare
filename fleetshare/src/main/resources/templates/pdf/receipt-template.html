@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #28a745;
+            padding: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header p {
+            margin: 5px 0;
+        }
+
+        .success-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .info-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .info-table td {
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .info-block h3 {
+            color: #28a745;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .items-table th {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 14px;
+            background-color: #d4edda;
+        }
+
+        .payment-details {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .payment-details h3 {
+            color: #28a745;
+            margin-top: 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 11px;
+        }
+
+        .verified-badge {
+            background: #28a745;
+            color: white;
+            padding: 3px 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="success-icon">&#10003;</div>
+        <h1>PAYMENT RECEIPT</h1>
+        <p>FleetShare Vehicle Rental Platform</p>
+    </div>
+
+    <table class="info-table">
+        <tr>
+            <td style="width: 50%;">
+                <div class="info-block">
+                    <h3>Receipt Details</h3>
+                    <p><strong>Invoice No:</strong> <span th:text="${invoiceNumber}">INV-001</span></p>
+                    <p><strong>Transaction Ref:</strong> <span th:text="${transactionRef}">TXN-001</span></p>
+                    <p><strong>Payment Date:</strong> <span th:text="${paymentDate}">01 Jan 2026, 10:00</span></p>
+                    <p><strong>Status:</strong> <span class="verified-badge">VERIFIED</span></p>
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="info-block">
+                    <h3>Paid By</h3>
+                    <p><strong th:text="${renterName}">John Doe</strong></p>
+                    <p>Booking #<span th:text="${bookingId}">123</span></p>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Vehicle</th>
+                <th>Rental Period</th>
+                <th style="text-align: right;">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Vehicle Rental</td>
+                <td th:text="${vehicleInfo}">Toyota Vios (ABC 1234)</td>
+                <td th:text="${rentalPeriod}">01 Jan 2026 - 03 Jan 2026</td>
+                <td style="text-align: right;" th:text="'RM ' + ${#numbers.formatDecimal(amount, 1, 2)}">RM 300.00</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="3">Amount Paid</td>
+                <td style="text-align: right;" th:text="'RM ' + ${#numbers.formatDecimal(amount, 1, 2)}">RM 300.00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="payment-details">
+        <h3>Payment Information</h3>
+        <p><strong>Payment Method:</strong> <span th:text="${paymentMethod}">CASH</span></p>
+        <p><strong>Transaction Reference:</strong> <span th:text="${transactionRef}">TXN-001</span></p>
+    </div>
+
+    <div class="footer">
+        <p>Received by: <span th:text="${ownerName}">ABC Rentals</span></p>
+        <p>This is a computer-generated receipt and does not require a signature.</p>
+        <p>Thank you for using FleetShare!</p>
+    </div>
+</body>
+
+</html>
