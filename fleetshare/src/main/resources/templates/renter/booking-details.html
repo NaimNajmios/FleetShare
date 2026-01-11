@@ -550,8 +550,8 @@
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="action-buttons">
+                    <!-- Action Buttons (Only for PENDING) -->
+                    <div class="action-buttons" th:if="${booking.status == 'PENDING'}">
                         <a th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}" class="btn-manage">
                             <i class="fas fa-credit-card"></i> Manage Payment
                         </a>
