@@ -347,6 +347,22 @@
                 </div>
             </div>
 
+            <!-- Search Bar -->
+            <div class="booking-search-container mb-4" th:if="${!#lists.isEmpty(bookings)}">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 ps-3">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" id="bookingSearch" class="form-control border-start-0 ps-0 py-2"
+                           placeholder="Search by vehicle, booking ID, or registration..."
+                           aria-label="Search bookings">
+                    <button class="btn btn-outline-secondary border-start-0" type="button" id="clearSearch"
+                            style="display: none;" aria-label="Clear search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
             <!-- Filter Tabs -->
             <div class="filter-tabs" role="tablist" aria-label="Booking Status Filters" th:if="${!#lists.isEmpty(bookings)}">
                 <button class="filter-tab active" role="tab" aria-selected="true" data-filter="all" onclick="filterBookings('all', this)">
@@ -511,56 +527,63 @@
 
     <th:block layout:fragment="extra-js">
         <script>
-            function filterBookings(filterType, tabElement) {
-                // Update active tab
-                const tabs = document.querySelectorAll('.filter-tab');
-                tabs.forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
+            // State management
+            let currentFilter = 'all';
+            let currentSearch = '';
 
+            function filterBookings(filterType, tabElement) {
+                // Update active tab UI
                 if (tabElement) {
+                    const tabs = document.querySelectorAll('.filter-tab');
+                    tabs.forEach(t => {
+                        t.classList.remove('active');
+                        t.setAttribute('aria-selected', 'false');
+                    });
                     tabElement.classList.add('active');
                     tabElement.setAttribute('aria-selected', 'true');
                 }
 
-                // Filter logic
+                // Update state
+                if (filterType) currentFilter = filterType;
+
+                applyFilters();
+            }
+
+            function applyFilters() {
                 const cards = document.querySelectorAll('.booking-card');
                 const emptyState = document.getElementById('filterEmptyState');
                 let visibleCount = 0;
 
                 cards.forEach(card => {
                     const status = (card.getAttribute('data-status') || '').toUpperCase();
-                    let isVisible = false;
 
-                    switch(filterType) {
-                        case 'all':
-                            isVisible = true;
-                            break;
-                        case 'upcoming':
-                            // PENDING or CONFIRMED are usually upcoming
-                            isVisible = status === 'PENDING' || status === 'CONFIRMED';
-                            break;
-                        case 'active':
-                            // IN_PROGRESS or ACTIVE
-                            isVisible = status === 'IN_PROGRESS' || status === 'ACTIVE';
-                            break;
-                        case 'completed':
-                            isVisible = status === 'COMPLETED';
-                            break;
-                        case 'cancelled':
-                            isVisible = status === 'CANCELLED';
-                            break;
-                        default:
-                            isVisible = true;
+                    // 1. Status Filter
+                    let statusMatch = false;
+                    switch(currentFilter) {
+                        case 'all': statusMatch = true; break;
+                        case 'upcoming': statusMatch = status === 'PENDING' || status === 'CONFIRMED'; break;
+                        case 'active': statusMatch = status === 'IN_PROGRESS' || status === 'ACTIVE'; break;
+                        case 'completed': statusMatch = status === 'COMPLETED'; break;
+                        case 'cancelled': statusMatch = status === 'CANCELLED'; break;
+                        default: statusMatch = true;
                     }
 
-                    if (isVisible) {
+                    // 2. Search Filter
+                    let searchMatch = true;
+                    if (currentSearch) {
+                        const textContent = card.innerText.toLowerCase();
+                        // Also check specific attributes if text content is too broad
+                        searchMatch = textContent.includes(currentSearch);
+                    }
+
+                    if (statusMatch && searchMatch) {
                         card.style.display = 'block';
-                        // Trigger reflow for animation if needed
-                        card.style.animation = 'none';
-                        card.offsetHeight; /* trigger reflow */
-                        card.style.animation = 'fadeIn 0.4s ease-out';
+                        // Trigger reflow for animation
+                        if (card.style.display === 'none') { // Only animate if it was hidden
+                            card.style.animation = 'none';
+                            card.offsetHeight;
+                            card.style.animation = 'fadeIn 0.4s ease-out';
+                        }
                         visibleCount++;
                     } else {
                         card.style.display = 'none';
@@ -571,21 +594,53 @@
                 const countSpan = document.getElementById('showingCount');
                 if (countSpan) countSpan.textContent = visibleCount;
 
-                // Show/Hide Empty State
+                // Show/Hide Empty State with dynamic message
                 if (visibleCount === 0 && cards.length > 0) {
                     emptyState.style.display = 'block';
+                    const emptyTitle = emptyState.querySelector('h4');
+                    const emptyMsg = emptyState.querySelector('p');
+
+                    if (currentSearch && currentFilter !== 'all') {
+                        emptyTitle.textContent = 'No matches found';
+                        emptyMsg.textContent = `No ${currentFilter} bookings match "${currentSearch}"`;
+                    } else if (currentSearch) {
+                        emptyTitle.textContent = 'No matches found';
+                        emptyMsg.textContent = `No bookings match "${currentSearch}"`;
+                    } else {
+                        emptyTitle.textContent = 'No bookings found';
+                        emptyMsg.textContent = `You don't have any ${currentFilter} bookings.`;
+                    }
                 } else {
                     emptyState.style.display = 'none';
                 }
             }
 
-            // Accessibility: Keyboard navigation for tabs
+            // Search functionality
             document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('bookingSearch');
+                const clearBtn = document.getElementById('clearSearch');
                 const tabContainer = document.querySelector('.filter-tabs');
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e) {
+                        currentSearch = e.target.value.toLowerCase().trim();
+                        clearBtn.style.display = currentSearch ? 'block' : 'none';
+                        applyFilters();
+                    });
+
+                    clearBtn.addEventListener('click', function() {
+                        searchInput.value = '';
+                        currentSearch = '';
+                        this.style.display = 'none';
+                        searchInput.focus();
+                        applyFilters();
+                    });
+                }
+
+                // Accessibility
                 if (tabContainer) {
                     tabContainer.addEventListener('keydown', function(e) {
-                        // Implement arrow key navigation if needed,
-                        // but buttons are natively focusable.
+                        // Implement arrow key navigation if needed
                     });
                 }
             });
