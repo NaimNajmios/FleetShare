@@ -6,6 +6,8 @@ import com.najmi.fleetshare.repository.InvoiceRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -20,6 +22,9 @@ public class InvoiceService {
 
     @Autowired
     private BookingService bookingService;
+
+    @Autowired
+    private TemplateEngine templateEngine;
 
     /**
      * Get invoice by booking ID
@@ -62,118 +67,45 @@ public class InvoiceService {
     }
 
     /**
-     * Build HTML content for invoice
+     * Build HTML content for invoice using Thymeleaf template
      */
     private String buildInvoiceHtml(Invoice invoice, BookingDTO booking) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
 
-        String vehicleInfo = booking != null
-                ? booking.getVehicleBrand() + " " + booking.getVehicleModel() + " ("
-                        + booking.getVehicleRegistrationNo() + ")"
-                : "N/A";
+        Context context = new Context();
 
-        String renterName = booking != null ? booking.getRenterName() : "N/A";
-        String ownerName = booking != null ? booking.getOwnerBusinessName() : "N/A";
+        // Invoice details
+        context.setVariable("invoiceNumber", invoice.getInvoiceNumber());
+        context.setVariable("issueDate", invoice.getIssueDate() != null
+                ? invoice.getIssueDate().format(dateFormatter)
+                : "N/A");
+        context.setVariable("dueDate", invoice.getDueDate() != null
+                ? invoice.getDueDate().format(dateFormatter)
+                : "N/A");
+        context.setVariable("status", invoice.getStatus().name());
+        context.setVariable("statusClass", invoice.getStatus().name().toLowerCase());
+        context.setVariable("bookingId", invoice.getBookingId());
 
-        String rentalPeriod = booking != null
-                ? booking.getStartDate().format(dateFormatter) + " - " + booking.getEndDate().format(dateFormatter)
-                : "N/A";
+        // Booking/Vehicle details
+        if (booking != null) {
+            context.setVariable("renterName", booking.getRenterName());
+            context.setVariable("vehicleInfo", booking.getVehicleBrand() + " " + booking.getVehicleModel()
+                    + " (" + booking.getVehicleRegistrationNo() + ")");
+            context.setVariable("rentalPeriod", booking.getStartDate().format(dateFormatter)
+                    + " - " + booking.getEndDate().format(dateFormatter));
+            context.setVariable("ownerName", booking.getOwnerBusinessName());
+        } else {
+            context.setVariable("renterName", "N/A");
+            context.setVariable("vehicleInfo", "N/A");
+            context.setVariable("rentalPeriod", "N/A");
+            context.setVariable("ownerName", "N/A");
+        }
 
+        // Amount
         BigDecimal amount = invoice.getTotalAmount() != null ? invoice.getTotalAmount() : BigDecimal.ZERO;
+        context.setVariable("amount", amount);
 
-        return """
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 40px; color: #333; font-size: 12px; }
-                        .header { text-align: center; margin-bottom: 30px; }
-                        .header h1 { color: #4B49AC; margin: 0; font-size: 24px; }
-                        .header p { color: #666; margin: 5px 0; }
-                        .info-table { width: 100%%; margin-bottom: 20px; }
-                        .info-table td { vertical-align: top; padding: 10px; }
-                        .info-block h3 { color: #4B49AC; border-bottom: 2px solid #4B49AC; padding-bottom: 5px; margin-top: 0; }
-                        .items-table { width: 100%%; border-collapse: collapse; margin: 20px 0; }
-                        .items-table th, .items-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-                        .items-table th { background-color: #4B49AC; color: white; }
-                        .total-row { font-weight: bold; font-size: 14px; }
-                        .total-row td { border-top: 2px solid #333; }
-                        .status { padding: 3px 10px; border-radius: 10px; font-weight: bold; }
-                        .status-issued { background: #fff3cd; color: #856404; }
-                        .status-paid { background: #d4edda; color: #155724; }
-                        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 11px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>INVOICE</h1>
-                        <p>FleetShare Vehicle Rental Platform</p>
-                    </div>
-
-                    <table class="info-table">
-                        <tr>
-                            <td style="width: 50%%;">
-                                <div class="info-block">
-                                    <h3>Invoice Details</h3>
-                                    <p><strong>Invoice No:</strong> %s</p>
-                                    <p><strong>Issue Date:</strong> %s</p>
-                                    <p><strong>Due Date:</strong> %s</p>
-                                    <p><strong>Status:</strong> <span class="status status-%s">%s</span></p>
-                                </div>
-                            </td>
-                            <td style="width: 50%%;">
-                                <div class="info-block">
-                                    <h3>Bill To</h3>
-                                    <p><strong>%s</strong></p>
-                                    <p>Booking #%s</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <table class="items-table">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th>Vehicle</th>
-                                <th>Rental Period</th>
-                                <th style="text-align: right;">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Vehicle Rental</td>
-                                <td>%s</td>
-                                <td>%s</td>
-                                <td style="text-align: right;">RM %.2f</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="3">Total</td>
-                                <td style="text-align: right;">RM %.2f</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div class="footer">
-                        <p>Fleet Owner: %s</p>
-                        <p>Thank you for using FleetShare!</p>
-                    </div>
-                </body>
-                </html>
-                """
-                .formatted(
-                        invoice.getInvoiceNumber(),
-                        invoice.getIssueDate() != null ? invoice.getIssueDate().format(dateFormatter) : "N/A",
-                        invoice.getDueDate() != null ? invoice.getDueDate().format(dateFormatter) : "N/A",
-                        invoice.getStatus().name().toLowerCase(),
-                        invoice.getStatus().name(),
-                        renterName,
-                        invoice.getBookingId(),
-                        vehicleInfo,
-                        rentalPeriod,
-                        amount,
-                        amount,
-                        ownerName);
+        return templateEngine.process("pdf/invoice-template", context);
     }
 
     /**
