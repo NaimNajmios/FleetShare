@@ -329,6 +329,34 @@ public class AdminController {
         return "admin/booking-details";
     }
 
+    @PostMapping("/bookings/{bookingId}/status")
+    public String updateBookingStatus(@PathVariable Long bookingId,
+            @RequestParam("status") String status,
+            @RequestParam(value = "remarks", required = false) String remarks,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            BookingDTO booking = bookingService.getBookingDetails(bookingId);
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
+                return "redirect:/admin/bookings";
+            }
+
+            bookingService.updateBookingStatus(bookingId, status, user.getUserId(), remarks);
+            redirectAttributes.addFlashAttribute("successMessage", "Booking status updated to " + status + ".");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to update status: " + e.getMessage());
+        }
+        return "redirect:/admin/bookings/view/" + bookingId;
+    }
+
     @GetMapping("/payment")
     public String payment(Model model) {
         var allPayments = paymentService.getAllPayments();
