@@ -493,6 +493,30 @@
                     </button>
                 </div>
 
+                                <!-- Documents Card -->
+                <div class="action-panel mt-3">
+                    <div class="card-header-custom">Documents</div>
+                    
+                    <!-- Invoice Download -->
+                    <a th:href="@{/owner/bookings/{id}/invoice(id=${booking.bookingId})}" 
+                       class="btn btn-outline-primary btn-block mb-2">
+                        <i class="mdi mdi-file-document"></i> Download Invoice
+                    </a>
+                    
+                    <!-- Receipt Download (only if payment verified) -->
+                    <a th:if="${booking.paymentStatus == 'VERIFIED'}"
+                       th:href="@{/owner/bookings/{id}/receipt(id=${booking.bookingId})}" 
+                       class="btn btn-success btn-block mb-2">
+                        <i class="mdi mdi-receipt"></i> Download Receipt
+                    </a>
+                    
+                    <!-- Receipt unavailable message -->
+                    <div th:if="${booking.paymentStatus != 'VERIFIED'}" 
+                         class="text-muted small text-center" style="padding: 0.5rem;">
+                        <i class="mdi mdi-information"></i> Receipt available after payment verification
+                    </div>
+                </div>
+
                 <!-- Status Timeline -->
                 <div class="info-card mt-3">
                     <div class="card-header-custom">Status Timeline</div>

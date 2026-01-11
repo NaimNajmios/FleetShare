@@ -375,7 +375,7 @@
                 </a>
                 <h1 class="page-title">View Your Booking</h1>
                 <p class="page-subtitle">// BOOKING DETAILS //</p>
-                        </div>
+            </div>
 
             <!-- Status Banner -->
             <div th:if="${booking.status == 'PENDING'}" class="status-banner banner-pending">
@@ -389,7 +389,9 @@
                 <i class="fas fa-check-circle"></i>
                 <div>
                     <strong>Booking Confirmed!</strong>
-                    <p th:text="'Your vehicle is ready for pickup on ' + ${#temporals.format(booking.startDate, 'dd MMM yyyy')} + '.'">Ready for pickup.</p>
+                    <p
+                        th:text="'Your vehicle is ready for pickup on ' + ${#temporals.format(booking.startDate, 'dd MMM yyyy')} + '.'">
+                        Ready for pickup.</p>
                 </div>
             </div>
             <div th:if="${booking.status == 'ACTIVE'}" class="status-banner banner-active">
@@ -561,33 +563,35 @@
                     </div>
                 </div>
 
-                                <!-- Right Column: Actions & Timeline -->
+                <!-- Right Column: Actions & Timeline -->
                 <div class="booking-sidebar">
                     <!-- Contextual Actions Card -->
                     <div class="action-card">
                         <h2 class="card-title">Actions</h2>
-                        
+
                         <!-- PENDING Actions -->
                         <div th:if="${booking.status == 'PENDING'}">
-                            <a th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}" 
-                               class="btn btn-primary">
+                            <a th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}"
+                                class="btn btn-primary">
                                 <i class="fas fa-credit-card me-2"></i>Manage Payment
                             </a>
-                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal"
+                                data-bs-target="#cancelBookingModal">
                                 <i class="fas fa-times me-2"></i>Cancel Booking
                             </button>
                         </div>
-                        
+
                         <!-- CONFIRMED Actions -->
                         <div th:if="${booking.status == 'CONFIRMED'}">
                             <a href="#" class="btn btn-primary">
                                 <i class="fas fa-phone me-2"></i>Contact Owner
                             </a>
-                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal"
+                                data-bs-target="#cancelBookingModal">
                                 <i class="fas fa-times me-2"></i>Cancel Booking
                             </button>
                         </div>
-                        
+
                         <!-- ACTIVE Actions -->
                         <div th:if="${booking.status == 'ACTIVE'}">
                             <a href="#" class="btn btn-warning">
@@ -597,22 +601,47 @@
                                 <i class="fas fa-phone me-2"></i>Contact Owner
                             </a>
                         </div>
-                        
+
                         <!-- COMPLETED Actions -->
                         <div th:if="${booking.status == 'COMPLETED'}">
                             <a href="#" class="btn btn-success">
                                 <i class="fas fa-star me-2"></i>Leave a Review
                             </a>
-                            <a th:href="@{/renter/vehicles/{id}(id=${booking.vehicleId})}" class="btn btn-outline-primary">
+                            <a th:href="@{/renter/vehicles/{id}(id=${booking.vehicleId})}"
+                                class="btn btn-outline-primary">
                                 <i class="fas fa-redo me-2"></i>Book Again
                             </a>
                         </div>
-                        
+
                         <!-- CANCELLED Actions -->
                         <div th:if="${booking.status == 'CANCELLED'}">
                             <a th:href="@{/renter/vehicles/{id}(id=${booking.vehicleId})}" class="btn btn-primary">
                                 <i class="fas fa-redo me-2"></i>Book Again
                             </a>
+                        </div>
+                    </div>
+
+                    <!-- Documents Card -->
+                    <div class="action-card" style="margin-top: 1rem;">
+                        <h2 class="card-title">Documents</h2>
+
+                        <!-- Invoice - always visible if invoice exists -->
+                        <a th:href="@{/renter/bookings/{id}/invoice(id=${booking.bookingId})}"
+                            class="btn btn-outline-primary" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fas fa-file-invoice me-2"></i>Download Invoice
+                        </a>
+
+                        <!-- Receipt - only visible when payment is VERIFIED -->
+                        <a th:if="${booking.paymentStatus == 'VERIFIED'}"
+                            th:href="@{/renter/bookings/{id}/receipt(id=${booking.bookingId})}" class="btn btn-success"
+                            style="width: 100%;">
+                            <i class="fas fa-receipt me-2"></i>Download Receipt
+                        </a>
+
+                        <!-- Receipt not available message -->
+                        <div th:if="${booking.paymentStatus != 'VERIFIED'}" class="text-muted small"
+                            style="text-align: center; padding: 0.5rem;">
+                            <i class="fas fa-info-circle me-1"></i>Receipt available after payment verification
                         </div>
                     </div>
 
@@ -684,21 +713,26 @@
         </div>
 
         <!-- Cancel Booking Modal -->
-        <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-labelledby="cancelBookingModalLabel" aria-hidden="true">
+        <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-labelledby="cancelBookingModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                     <div class="modal-header bg-danger text-white border-0">
                         <h5 class="modal-title" id="cancelBookingModalLabel">
                             <i class="fas fa-exclamation-triangle me-2"></i>Cancel Booking
                         </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <p class="mb-3 text-muted">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+                        <p class="mb-3 text-muted">Are you sure you want to cancel this booking? This action cannot be
+                            undone.</p>
 
                         <div class="mb-3">
-                            <label for="cancellationReason" class="form-label text-dark fw-bold small">Reason for Cancellation (Optional)</label>
-                            <textarea class="form-control bg-light border-0" id="cancellationReason" rows="3" placeholder="Please let us know why you are cancelling..."></textarea>
+                            <label for="cancellationReason" class="form-label text-dark fw-bold small">Reason for
+                                Cancellation (Optional)</label>
+                            <textarea class="form-control bg-light border-0" id="cancellationReason" rows="3"
+                                placeholder="Please let us know why you are cancelling..."></textarea>
                         </div>
 
                         <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
@@ -709,7 +743,8 @@
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Keep Booking</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Keep Booking</button>
                         <button type="button" class="btn btn-danger rounded-pill px-4" id="btn-confirm-cancel">
                             Yes, Cancel Booking
                         </button>
@@ -721,7 +756,7 @@
 
     <th:block layout:fragment="extra-js">
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Cancel Booking Modal Logic
                 const cancelBtn = document.getElementById('btn-cancel-booking');
                 const confirmCancelBtn = document.getElementById('btn-confirm-cancel');
