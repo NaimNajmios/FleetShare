@@ -85,11 +85,12 @@ public class BookingService {
                 .collect(Collectors.toMap(User::getUserId, Function.identity()));
 
         // Bulk fetch status logs
-        Map<Long, String> statusMap = statusLogRepository.findByBookingIdIn(bookingIds).stream()
-                .collect(Collectors.groupingBy(BookingStatusLog::getBookingId,
-                        Collectors.collectingAndThen(
-                                Collectors.maxBy(Comparator.comparing(BookingStatusLog::getStatusTimestamp)),
-                                opt -> opt.map(log -> log.getStatusValue().name()).orElse("PENDING"))));
+        Map<Long, String> statusMap = statusLogRepository.findLatestStatusForBookings(bookingIds).stream()
+                .collect(Collectors.toMap(
+                        BookingStatusLog::getBookingId,
+                        log -> log.getStatusValue().name(),
+                        (existing, replacement) -> existing // Should not happen with unique results, but safe
+                ));
 
         // Bulk fetch invoices
         Map<Long, Invoice> invoiceMap = invoiceRepository.findByBookingIdIn(bookingIds).stream()
