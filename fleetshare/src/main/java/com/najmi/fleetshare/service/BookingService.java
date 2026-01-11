@@ -43,6 +43,12 @@ public class BookingService {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private VehiclePriceHistoryRepository vehiclePriceHistoryRepository;
+
+    @Autowired
+    private BookingPriceSnapshotRepository bookingPriceSnapshotRepository;
+
     /**
      * Fetches all bookings with related information
      *
@@ -480,12 +486,23 @@ public class BookingService {
         // can't easily.
         // I will proceed with a placeholder rate and a comment.
 
-        java.math.BigDecimal ratePerDay = java.math.BigDecimal.valueOf(100); // Placeholder
-        // TODO: Fetch actual rate from VehiclePriceHistory
+        // Fetch actual rate from VehiclePriceHistory
+        java.math.BigDecimal ratePerDay = vehiclePriceHistoryRepository
+                .findLatestPriceByVehicleId(vehicleId)
+                .map(VehiclePriceHistory::getRatePerDay)
+                .orElse(java.math.BigDecimal.valueOf(100)); // Fallback rate if none found
 
         java.math.BigDecimal totalAmount = ratePerDay.multiply(java.math.BigDecimal.valueOf(days));
 
-        // 5. Create Invoice (ISSUED)
+        // 5. Save BookingPriceSnapshot
+        BookingPriceSnapshot priceSnapshot = new BookingPriceSnapshot(
+                booking.getBookingId(),
+                ratePerDay,
+                (int) days,
+                totalAmount);
+        bookingPriceSnapshotRepository.save(priceSnapshot);
+
+        // 6. Create Invoice (ISSUED)
         Invoice invoice = new Invoice();
         invoice.setBookingId(booking.getBookingId());
         invoice.setFleetOwnerId(vehicle.getFleetOwnerId());
