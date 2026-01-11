@@ -420,7 +420,7 @@
                     <div th:if="${booking.status == 'PENDING'}" class="mb-3">
                         <p class="text-muted small mb-2">This booking is awaiting confirmation.</p>
                         <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal"
-                            data-bs-target="#confirmModal">
+                            data-bs-target="#bookingConfirmModal">
                             <i class="mdi mdi-check-circle"></i> Confirm Booking
                         </button>
                         <button class="btn btn-outline-danger btn-block" data-bs-toggle="modal"
@@ -532,10 +532,9 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Confirm Booking Modal -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="bookingConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
@@ -675,6 +674,7 @@
                 </form>
             </div>
         </div>
+    </div>
     </div>
 </body>
 

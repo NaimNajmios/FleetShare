@@ -217,7 +217,7 @@
         <div class="confirmation-container">
             <div class="page-header">
                 <h1 class="page-title">Booking Confirmation</h1>
-                <p class="page-subtitle">Please review your booking and client details below before confirming.</p>
+                <p class="page-subtitle">Please review your booking and client details before confirming.</p>
             </div>
 
             <!-- A. Vehicle Summary -->
@@ -325,10 +325,12 @@
                             <i class="fas fa-question"></i>
                         </div>
                         <h4 class="mb-2 fw-bold text-dark">Confirm Booking?</h4>
-                        <p class="text-muted mb-4">Are you sure you want to proceed with this booking? Please check all details carefully.</p>
+                        <p class="text-muted mb-4">Are you sure you want to proceed with this booking? Please check all
+                            details carefully.</p>
 
                         <div class="d-flex justify-content-center gap-2">
-                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary rounded-pill px-4"
+                                data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-danger rounded-pill px-4" id="btn-final-confirm">
                                 Yes, Confirm It!
                             </button>
@@ -341,12 +343,12 @@
 
     <th:block layout:fragment="extra-js">
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const finalConfirmBtn = document.getElementById('btn-final-confirm');
                 const form = document.getElementById('bookingForm');
 
                 if (finalConfirmBtn && form) {
-                    finalConfirmBtn.addEventListener('click', function() {
+                    finalConfirmBtn.addEventListener('click', function () {
                         // Loading state
                         this.disabled = true;
                         this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
