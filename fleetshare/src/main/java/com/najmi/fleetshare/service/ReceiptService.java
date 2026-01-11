@@ -100,47 +100,53 @@ public class ReceiptService {
                 <html>
                 <head>
                     <style>
-                        body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
-                        .header { text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #28a745, #20c997); padding: 30px; border-radius: 10px; color: white; }
-                        .header h1 { margin: 0; }
-                        .header p { margin: 5px 0; opacity: 0.9; }
-                        .success-icon { font-size: 48px; margin-bottom: 10px; }
-                        .receipt-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
-                        .info-block { width: 45%; }
-                        .info-block h3 { color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 5px; }
-                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-                        th { background-color: #28a745; color: white; }
-                        .total-row { font-weight: bold; font-size: 1.2em; background-color: #d4edda; }
-                        .payment-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                        body { font-family: Arial, sans-serif; padding: 40px; color: #333; font-size: 12px; }
+                        .header { text-align: center; margin-bottom: 30px; background-color: #28a745; padding: 30px; color: white; }
+                        .header h1 { margin: 0; font-size: 24px; }
+                        .header p { margin: 5px 0; }
+                        .success-icon { font-size: 36px; margin-bottom: 10px; }
+                        .info-table { width: 100%%; margin-bottom: 20px; }
+                        .info-table td { vertical-align: top; padding: 10px; }
+                        .info-block h3 { color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 5px; margin-top: 0; }
+                        .items-table { width: 100%%; border-collapse: collapse; margin: 20px 0; }
+                        .items-table th, .items-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+                        .items-table th { background-color: #28a745; color: white; }
+                        .total-row { font-weight: bold; font-size: 14px; background-color: #d4edda; }
+                        .payment-details { background: #f8f9fa; padding: 15px; margin: 20px 0; }
                         .payment-details h3 { color: #28a745; margin-top: 0; }
-                        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 0.9em; }
-                        .verified-badge { background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+                        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 11px; }
+                        .verified-badge { background: #28a745; color: white; padding: 3px 10px; font-weight: bold; }
                     </style>
                 </head>
                 <body>
                     <div class="header">
-                        <div class="success-icon">✓</div>
+                        <div class="success-icon">&#10003;</div>
                         <h1>PAYMENT RECEIPT</h1>
                         <p>FleetShare Vehicle Rental Platform</p>
                     </div>
 
-                    <div class="receipt-info">
-                        <div class="info-block">
-                            <h3>Receipt Details</h3>
-                            <p><strong>Invoice No:</strong> %s</p>
-                            <p><strong>Transaction Ref:</strong> %s</p>
-                            <p><strong>Payment Date:</strong> %s</p>
-                            <p><strong>Status:</strong> <span class="verified-badge">VERIFIED</span></p>
-                        </div>
-                        <div class="info-block">
-                            <h3>Paid By</h3>
-                            <p><strong>%s</strong></p>
-                            <p>Booking #%s</p>
-                        </div>
-                    </div>
+                    <table class="info-table">
+                        <tr>
+                            <td style="width: 50%%;">
+                                <div class="info-block">
+                                    <h3>Receipt Details</h3>
+                                    <p><strong>Invoice No:</strong> %s</p>
+                                    <p><strong>Transaction Ref:</strong> %s</p>
+                                    <p><strong>Payment Date:</strong> %s</p>
+                                    <p><strong>Status:</strong> <span class="verified-badge">VERIFIED</span></p>
+                                </div>
+                            </td>
+                            <td style="width: 50%%;">
+                                <div class="info-block">
+                                    <h3>Paid By</h3>
+                                    <p><strong>%s</strong></p>
+                                    <p>Booking #%s</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
 
-                    <table>
+                    <table class="items-table">
                         <thead>
                             <tr>
                                 <th>Description</th>
