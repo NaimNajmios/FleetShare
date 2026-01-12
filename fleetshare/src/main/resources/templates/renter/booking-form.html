@@ -184,6 +184,13 @@
                 transform: translateY(-1px);
             }
 
+            .quick-select-pill.active {
+                background: #e8e8f4;
+                border-color: #4B49AC;
+                color: #4B49AC;
+                font-weight: 600;
+            }
+
             .quick-select-pill:active {
                 transform: translateY(0);
             }
@@ -306,7 +313,7 @@
                 color: #adb5bd;
                 font-size: 1.2rem;
                 height: 100%;
-                padding-top: 1rem;
+                padding-top: 0.5rem;
             }
 
             @media (max-width: 768px) {
@@ -354,6 +361,44 @@
             .input-group:focus-within .input-group-text,
             .input-group:focus-within .form-control {
                 border-color: #86b7fe;
+            }
+
+            /* UX Enhancements: Date Context */
+            .day-of-week-label {
+                font-size: 0.75rem;
+                color: #4B49AC;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 0.5rem;
+                padding-left: 0.5rem;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                min-height: 1.2em;
+            }
+
+            .day-of-week-label.visible {
+                opacity: 1;
+            }
+
+            .duration-badge {
+                background: #e8e8f4;
+                color: #4B49AC;
+                padding: 0.25rem 0.75rem;
+                border-radius: 50px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                white-space: nowrap;
+                opacity: 0;
+                transform: scale(0.9);
+                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            .duration-badge.visible {
+                opacity: 1;
+                transform: scale(1);
             }
 
         </style>
@@ -415,7 +460,7 @@
                     method="POST" th:data-rate="${vehicle.ratePerDay}">
 
                     <!-- Date Selection Row -->
-                    <div class="row g-2 mb-2 align-items-center">
+                    <div class="row g-2 mb-2 align-items-start">
                         <div class="col-md-5">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -424,10 +469,12 @@
                                     <label for="pickupDate">Pickup Date</label>
                                 </div>
                             </div>
+                            <div id="pickupDayLabel" class="day-of-week-label"></div>
                         </div>
                         <div class="col-md-2 text-center">
                             <div class="date-connector-icon">
-                                <i class="fas fa-arrow-right text-muted"></i>
+                                <span id="durationBadge" class="duration-badge"></span>
+                                <i id="arrowIcon" class="fas fa-arrow-right text-muted" style="transition: opacity 0.2s;"></i>
                             </div>
                         </div>
                         <div class="col-md-5">
@@ -438,6 +485,7 @@
                                     <label for="returnDate">Return Date</label>
                                 </div>
                             </div>
+                            <div id="returnDayLabel" class="day-of-week-label"></div>
                         </div>
                     </div>
 
@@ -449,13 +497,13 @@
                     <div class="form-group">
                         <div class="quick-select-pills">
                             <span class="text-muted small me-2 text-uppercase fw-bold" style="letter-spacing: 0.5px; font-size: 0.7rem;">Quick Select:</span>
-                            <button type="button" class="quick-select-pill" onclick="addDays(1)" aria-label="Select 1 Day Duration">
+                            <button type="button" class="quick-select-pill" onclick="addDays(1)" data-days="1" aria-label="Select 1 Day Duration">
                                 <i class="fas fa-clock"></i> 1 Day
                             </button>
-                            <button type="button" class="quick-select-pill" onclick="addDays(3)" aria-label="Select 3 Days Duration">
+                            <button type="button" class="quick-select-pill" onclick="addDays(3)" data-days="3" aria-label="Select 3 Days Duration">
                                 <i class="fas fa-calendar-week"></i> 3 Days
                             </button>
-                            <button type="button" class="quick-select-pill" onclick="addDays(7)" aria-label="Select 1 Week Duration">
+                            <button type="button" class="quick-select-pill" onclick="addDays(7)" data-days="7" aria-label="Select 1 Week Duration">
                                 <i class="fas fa-calendar"></i> 1 Week
                             </button>
                         </div>
@@ -528,9 +576,15 @@
                 const totalCostContainer = document.getElementById('totalCostContainer');
                 const totalCostDisplay = document.getElementById('totalCostDisplay');
 
+                // New UX Elements
+                const pickupDayLabel = document.getElementById('pickupDayLabel');
+                const returnDayLabel = document.getElementById('returnDayLabel');
+                const durationBadge = document.getElementById('durationBadge');
+                const arrowIcon = document.getElementById('arrowIcon');
+                const pills = document.querySelectorAll('.quick-select-pill');
+
                 // Set min date to today (local time)
                 const now = new Date();
-                // Format: YYYY-MM-DD
                 const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
                     .toISOString()
                     .split('T')[0];
@@ -539,6 +593,14 @@
 
                 // Get rate per day from data attribute
                 const ratePerDay = parseFloat(document.getElementById('bookingForm').dataset.rate);
+
+                // Helper: Get Day of Week
+                function getDayOfWeek(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    return days[date.getUTCDay()]; // Use UTC to avoid timezone shifts on simple date strings
+                }
 
                 // Animation Helper: Count Up
                 function animateValue(obj, start, end, duration) {
@@ -558,13 +620,10 @@
                 // Make addDays available globally
                 window.addDays = function(days) {
                     if (!pickupInput.value) {
-                        // Use local today if no date selected
                         const now = new Date();
                         pickupInput.value = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
                             .toISOString()
                             .split('T')[0];
-                        // Trigger change to update min date for return
-                        pickupInput.dispatchEvent(new Event('change'));
                     }
 
                     const pickup = new Date(pickupInput.value);
@@ -573,7 +632,10 @@
 
                     // Ensure format matches YYYY-MM-DD
                     returnInput.value = newReturn.toISOString().split('T')[0];
+
+                    // Manually trigger change to update UI
                     updateDuration();
+                    updateDateContext();
                 };
 
                 // Debounce timer for simulated availability check
@@ -583,11 +645,28 @@
                 const breakdownDuration = document.getElementById('breakdownDuration');
 
                 function updateDuration() {
-                    // Always clear any pending check first to avoid race conditions
                     clearTimeout(checkTimer);
 
                     const pickup = new Date(pickupInput.value);
                     const returnDate = new Date(returnInput.value);
+
+                    // Calculate Duration if valid
+                    let currentDurationDays = 0;
+                    if (pickupInput.value && returnInput.value && returnDate >= pickup) {
+                        const diffTime = Math.abs(returnDate - pickup);
+                        currentDurationDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        if (currentDurationDays === 0) currentDurationDays = 1;
+                    }
+
+                    // Update Pills Active State
+                    pills.forEach(pill => {
+                        const days = parseInt(pill.dataset.days);
+                        if (currentDurationDays === days) {
+                            pill.classList.add('active');
+                        } else {
+                            pill.classList.remove('active');
+                        }
+                    });
 
                     if (pickupInput.value && returnInput.value) {
                         if (returnDate >= pickup) {
@@ -608,6 +687,11 @@
                                 if (breakdownDuration) breakdownDuration.textContent = durationStr;
                                 durationDisplay.classList.remove('hidden');
 
+                                // Update Badge
+                                durationBadge.textContent = durationStr;
+                                durationBadge.classList.add('visible');
+                                arrowIcon.style.display = 'none';
+
                                 // Show breakdown
                                 if (costBreakdown) {
                                     costBreakdown.classList.remove('d-none');
@@ -625,7 +709,7 @@
                                 proceedBtn.disabled = false;
                                 dateError.style.display = 'none';
                                 returnInput.classList.remove('is-invalid');
-                            }, 400); // 400ms delay for "checking" feel
+                            }, 400);
 
                         } else {
                             resetFormState();
@@ -638,6 +722,26 @@
                         proceedBtn.disabled = true;
                         dateError.style.display = 'none';
                         returnInput.classList.remove('is-invalid');
+                    }
+                }
+
+                function updateDateContext() {
+                    // Update Day of Week Labels
+                    const pickupDay = getDayOfWeek(pickupInput.value);
+                    const returnDay = getDayOfWeek(returnInput.value);
+
+                    if (pickupDay) {
+                        pickupDayLabel.textContent = pickupDay;
+                        pickupDayLabel.classList.add('visible');
+                    } else {
+                        pickupDayLabel.classList.remove('visible');
+                    }
+
+                    if (returnDay) {
+                        returnDayLabel.textContent = returnDay;
+                        returnDayLabel.classList.add('visible');
+                    } else {
+                        returnDayLabel.classList.remove('visible');
                     }
                 }
 
@@ -664,13 +768,36 @@
                     durationProgress.style.width = '0%';
                     if (costBreakdown) costBreakdown.classList.add('d-none');
                     updatePriceDisplay(0);
+
+                    durationBadge.classList.remove('visible');
+                    arrowIcon.style.display = 'block';
                 }
 
+                // Store previous values to calculate duration preservation
+                let previousPickup = '';
+                let previousReturn = '';
+
                 pickupInput.addEventListener('change', function () {
+                    // Update Min Date for Return
                     returnInput.min = this.value;
 
-                    // Smart Default: If return is empty or invalid, set to pickup + 1 day
-                    if (this.value && !returnInput.value) {
+                    // Smart UX: Preserve Duration
+                    // If we had a valid range before, and we move the pickup date,
+                    // move the return date by the same amount.
+                    if (previousPickup && previousReturn && this.value) {
+                         const oldStart = new Date(previousPickup);
+                         const oldEnd = new Date(previousReturn);
+                         const newStart = new Date(this.value);
+
+                         // Calculate previous duration in ms
+                         const durationMs = oldEnd - oldStart;
+
+                         if (durationMs >= 0) { // Valid duration
+                             const newEnd = new Date(newStart.getTime() + durationMs);
+                             returnInput.value = newEnd.toISOString().split('T')[0];
+                         }
+                    } else if (this.value && !returnInput.value) {
+                        // Default Fallback: Pickup + 1 Day
                         const pickup = new Date(this.value);
                         const nextDay = new Date(pickup);
                         nextDay.setDate(pickup.getDate() + 1);
@@ -680,10 +807,23 @@
                     if (returnInput.value && returnInput.value < this.value) {
                         returnInput.value = this.value;
                     }
+
                     updateDuration();
+                    updateDateContext();
+
+                    // Update previous values state
+                    previousPickup = this.value;
+                    previousReturn = returnInput.value;
                 });
 
-                returnInput.addEventListener('change', updateDuration);
+                returnInput.addEventListener('change', function() {
+                    updateDuration();
+                    updateDateContext();
+
+                    // Update previous values state
+                    previousPickup = pickupInput.value;
+                    previousReturn = this.value;
+                });
 
                 // Handle Form Submission
                 const form = document.getElementById('bookingForm');
