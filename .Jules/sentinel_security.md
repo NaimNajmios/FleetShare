@@ -1,18 +1,15 @@
-## 2026-01-10 - Information Leakage & Credential Exposure Hardening
+## 2026-01-12 - Enforce Strong Passwords
 
-**Context:** Application Configuration and Entity Definition
-**Vulnerability:**
-1.  **Information Leakage:** `server.error.include-message=always` in `application.properties` was exposing internal exception messages in API responses.
-2.  **Credential Exposure:** `User` entity's `hashedPassword` field lacked `@JsonIgnore`, risking exposure in JSON serialization.
+**Context:** User Registration (`RegistrationDTO`)
+**Vulnerability:** Weak Password Policy
 **Severity:** Medium
-**Root Cause:**
-1.  Insecure default configuration for development convenience left enabled.
-2.  Missing Jackson annotation on sensitive entity field.
-**Fix Applied:**
-1.  Updated `application.properties` to set `server.error.include-message`, `include-binding-errors`, and `include-stacktrace` to `never`.
-2.  Added `@JsonIgnore` to `hashedPassword` in `User.java`.
-3.  Removed `TestPasswordEncoder.java` (hardcoded credentials).
-**Prevention:**
-1.  Use `never` for error attributes in production configuration.
-2.  Always annotate sensitive fields (passwords, tokens) with `@JsonIgnore` in Entities and DTOs.
-**References:** CWE-209 (Information Exposure Through an Error Message), CWE-200 (Exposure of Sensitive Information to an Unauthorized Actor)
+**Root Cause:** The application was only checking for a minimum length of 8 characters for passwords, allowing weak passwords like "password" or "12345678".
+**Fix Applied:** Implemented a custom `@StrongPassword` annotation and `StrongPasswordValidator` that enforces:
+- Minimum 8 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one digit
+- At least one special character
+- No whitespace
+**Prevention:** Always use strong password policies for user authentication. Use custom validators or standard libraries (like Passay) to enforce complexity.
+**References:** CWE-521: Weak Password Requirements
