@@ -77,12 +77,9 @@ public class RenterController {
             }
         }
 
-        // Fetch all vehicles and filter to show only available ones
+        // Fetch available vehicles directly from DB
         // TODO: Add pagination
-        List<VehicleDTO> allVehicles = vehicleManagementService.getAllVehicles();
-        List<VehicleDTO> availableVehicles = allVehicles.stream()
-                .filter(vehicle -> "AVAILABLE".equals(vehicle.getStatus()))
-                .collect(Collectors.toList());
+        List<VehicleDTO> availableVehicles = vehicleManagementService.getAvailableVehicles();
 
         model.addAttribute("vehicles", availableVehicles);
         return "renter/browse-vehicles";
