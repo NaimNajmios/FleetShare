@@ -54,6 +54,20 @@ public class VehicleManagementService {
                 return mapVehiclesToDTOs(vehicles);
         }
 
+        /**
+         * Fetches available vehicles with their pricing and owner information.
+         * Optimized to filter at database level.
+         *
+         * @return List of VehicleDTO objects
+         */
+        public List<VehicleDTO> getAvailableVehicles() {
+                List<Vehicle> vehicles = vehicleRepository.findByStatusAndIsDeletedFalse(Vehicle.VehicleStatus.AVAILABLE);
+                if (vehicles.isEmpty()) {
+                        return Collections.emptyList();
+                }
+                return mapVehiclesToDTOs(vehicles);
+        }
+
         private List<VehicleDTO> mapVehiclesToDTOs(List<Vehicle> vehicles) {
                 Set<Long> vehicleIds = vehicles.stream().map(Vehicle::getVehicleId).collect(Collectors.toSet());
                 Set<Long> fleetOwnerIds = vehicles.stream().map(Vehicle::getFleetOwnerId).collect(Collectors.toSet());
