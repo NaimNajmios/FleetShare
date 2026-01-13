@@ -425,6 +425,33 @@
                 from { opacity: 0; transform: translateY(10px); }
                 to { opacity: 1; transform: translateY(0); }
             }
+
+            /* Clear Search Button */
+            .btn-clear {
+                position: absolute;
+                right: 1.2rem;
+                top: 50%;
+                transform: translateY(-50%);
+                background: transparent;
+                border: none;
+                color: #dc3545;
+                font-size: 1.1rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                line-height: 1;
+                transition: all 0.2s;
+                z-index: 6;
+            }
+
+            .btn-clear:hover {
+                transform: translateY(-50%) scale(1.1);
+                color: #bb2d3b;
+            }
+
+            /* Adjust input padding to make room for clear button */
+            .search-bar-large {
+                padding-right: 3.5rem;
+            }
         </style>
     </th:block>
 </head>
@@ -509,6 +536,9 @@
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" class="search-bar-large" placeholder="Search by model, brand, or keywords..."
                             id="vehicleSearch" aria-label="Search vehicles">
+                        <button type="button" class="btn-clear d-none" id="clearSearchBtn" aria-label="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
 
                     <!-- Sort Dropdown -->
@@ -759,6 +789,7 @@
                 } else if (type === 'search') {
                     const el = document.getElementById('vehicleSearch');
                     if (el) el.value = '';
+                    toggleClearButton();
                 }
                 applyFilters();
             }
@@ -933,12 +964,49 @@
                 document.getElementById('minPrice').value = '';
                 document.getElementById('maxPrice').value = '';
                 document.getElementById('vehicleSearch').value = '';
+                toggleClearButton();
 
                 applyFilters();
             }
 
-            // Search listener
-            document.getElementById('vehicleSearch').addEventListener('input', applyFilters);
+            // Debounce function
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Search listener with Debounce and Clear Button
+            const searchInput = document.getElementById('vehicleSearch');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            const debouncedApplyFilters = debounce(applyFilters, 300);
+
+            searchInput.addEventListener('input', function(e) {
+                toggleClearButton();
+                debouncedApplyFilters();
+            });
+
+            function toggleClearButton() {
+                if (searchInput.value.trim().length > 0) {
+                    clearBtn.classList.remove('d-none');
+                } else {
+                    clearBtn.classList.add('d-none');
+                }
+            }
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                toggleClearButton();
+                applyFilters();
+                searchInput.focus();
+            });
 
             // Quick View Functionality
             function openQuickView(btn) {
