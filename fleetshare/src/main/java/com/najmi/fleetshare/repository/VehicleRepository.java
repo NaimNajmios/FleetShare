@@ -13,4 +13,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByFleetOwnerIdAndIsDeletedFalse(Long fleetOwnerId);
 
     List<Vehicle> findByIsDeletedFalse();
+
+    List<Vehicle> findByStatusAndIsDeletedFalse(Vehicle.VehicleStatus status);
 }

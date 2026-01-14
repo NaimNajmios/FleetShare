@@ -9,3 +9,19 @@
 - Latency: Reduced network round-trips significantly.
 
 **Learnings:** When working with decoupled entities (ID-based references), standard JPA `JOIN FETCH` cannot be used. Instead, use explicit JPQL `LEFT JOIN ... ON` clauses combined with a DTO Constructor Expression (`SELECT new DTO(...)`) to achieve efficient data aggregation in a single query.
+
+## 2026-01-13 - Optimized Vehicle Browsing Query
+
+**Context:** `RenterController.browseVehicles` endpoint (`/renter/vehicles`) used for listing available vehicles.
+**Symptoms:** Potential high latency and memory usage identified by static analysis. The code was fetching *all* vehicles (including rented, maintenance, and deleted ones) and then filtering for "AVAILABLE" status in memory using Java Streams.
+**Root Cause:** "Fetch-all-and-filter" anti-pattern. `VehicleManagementService.getAllVehicles()` retrieved the entire dataset, which was then filtered in the controller.
+**Solution:**
+1. Added `findByStatusAndIsDeletedFalse` to `VehicleRepository` to filter at the database level.
+2. Added `getAvailableVehicles` to `VehicleManagementService` to utilize the new repository method.
+3. Updated `RenterController` to call the optimized service method.
+**Impact:**
+- Database Load: Reduced significantly. Only "AVAILABLE" vehicles are fetched.
+- Memory Usage: Reduced as non-relevant vehicles are never loaded into memory.
+- Network I/O: Reduced payload size from DB to App.
+
+**Learnings:** Always prefer database-level filtering (WHERE clauses) over application-level filtering (Java Streams) for potentially large datasets like Vehicles or Bookings.
