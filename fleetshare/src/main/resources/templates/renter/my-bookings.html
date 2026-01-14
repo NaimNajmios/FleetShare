@@ -333,6 +333,13 @@
                 color: #dee2e6;
                 margin-bottom: 1rem;
             }
+
+            /* Status Borders for clearer scanning */
+            .booking-card.status-border-pending { border-left: 5px solid #ffc107; }
+            .booking-card.status-border-confirmed { border-left: 5px solid #0d6efd; }
+            .booking-card.status-border-active { border-left: 5px solid #00897b; }
+            .booking-card.status-border-completed { border-left: 5px solid #2e7d32; }
+            .booking-card.status-border-cancelled { border-left: 5px solid #dc3545; }
         </style>
     </th:block>
 </head>
@@ -384,10 +391,17 @@
 
             <!-- Booking Cards -->
             <div id="bookingList" th:if="${!#lists.isEmpty(bookings)}">
-                <!-- Using div instead of 'a' tag for card to avoid nested interactive elements issues -->
                 <div th:each="booking : ${bookings}"
                     class="booking-card position-relative"
+                    th:classappend="${'status-border-' + booking.status.toLowerCase()}"
                     th:data-status="${booking.status}">
+
+                    <!-- Main Card Link (Stretched) -->
+                    <a th:href="@{/renter/bookings/{id}(id=${booking.bookingId})}"
+                       class="stretched-link"
+                       th:aria-label="'View details for booking #' + ${booking.bookingId}">
+                       <span class="visually-hidden">View Details</span>
+                    </a>
 
                     <!-- Booking Header -->
                     <div class="booking-header">
@@ -404,59 +418,57 @@
                         </span>
                     </div>
 
-                    <!-- Main Clickable Area (Wrapped in a link) -->
-                    <a th:href="@{/renter/bookings/{id}(id=${booking.bookingId})}" class="text-decoration-none text-reset">
-                        <div class="booking-content">
-                            <!-- Vehicle Image -->
-                            <div class="vehicle-image-box">
-                                <img th:if="${booking.vehicleImageUrl != null and !booking.vehicleImageUrl.isEmpty()}"
-                                    th:src="${booking.vehicleImageUrl}" alt="Vehicle">
-                                <i th:unless="${booking.vehicleImageUrl != null and !booking.vehicleImageUrl.isEmpty()}"
-                                    class="fas fa-car"></i>
+                    <!-- Content (No 'a' wrapper) -->
+                    <div class="booking-content">
+                        <!-- Vehicle Image -->
+                        <div class="vehicle-image-box">
+                            <img th:if="${booking.vehicleImageUrl != null and !booking.vehicleImageUrl.isEmpty()}"
+                                th:src="${booking.vehicleImageUrl}" alt="Vehicle">
+                            <i th:unless="${booking.vehicleImageUrl != null and !booking.vehicleImageUrl.isEmpty()}"
+                                class="fas fa-car"></i>
+                        </div>
+
+                        <!-- Booking Info -->
+                        <div class="booking-info">
+                            <h3 class="vehicle-title" th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">
+                                Toyota Camry
+                            </h3>
+                            <div class="detail-item mb-2">
+                                <i class="fas fa-hashtag"></i>
+                                <span th:text="${booking.vehicleRegistrationNo}">WXY 1234</span>
                             </div>
 
-                            <!-- Booking Info -->
-                            <div class="booking-info">
-                                <h3 class="vehicle-title" th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">
-                                    Toyota Camry
-                                </h3>
-                                <div class="detail-item mb-2">
-                                    <i class="fas fa-hashtag"></i>
-                                    <span th:text="${booking.vehicleRegistrationNo}">WXY 1234</span>
+                            <div class="booking-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <div>
+                                        <span class="detail-label">Start:</span>
+                                        <span th:text="${#temporals.format(booking.startDate, 'dd MMM yyyy, HH:mm')}">
+                                            12 May 2024, 10:00
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <div class="booking-details">
-                                    <div class="detail-item">
-                                        <i class="fas fa-calendar-check"></i>
-                                        <div>
-                                            <span class="detail-label">Start:</span>
-                                            <span th:text="${#temporals.format(booking.startDate, 'dd MMM yyyy, HH:mm')}">
-                                                12 May 2024, 10:00
-                                            </span>
-                                        </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <div>
+                                        <span class="detail-label">End:</span>
+                                        <span th:text="${#temporals.format(booking.endDate, 'dd MMM yyyy, HH:mm')}">
+                                            15 May 2024, 10:00
+                                        </span>
                                     </div>
+                                </div>
 
-                                    <div class="detail-item">
-                                        <i class="fas fa-calendar-times"></i>
-                                        <div>
-                                            <span class="detail-label">End:</span>
-                                            <span th:text="${#temporals.format(booking.endDate, 'dd MMM yyyy, HH:mm')}">
-                                                15 May 2024, 10:00
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="detail-item" th:if="${booking.totalCost != null}">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                        <div>
-                                            <span class="detail-label">Total:</span>
-                                            <span th:text="'RM ' + ${booking.totalCost}">RM 300.00</span>
-                                        </div>
+                                <div class="detail-item" th:if="${booking.totalCost != null}">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <div>
+                                        <span class="detail-label">Total:</span>
+                                        <span th:text="'RM ' + ${booking.totalCost}">RM 300.00</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
 
                     <!-- Smart Actions Footer (Relative position z-2 to sit on top) -->
                     <div class="booking-actions position-relative z-2">
@@ -464,6 +476,7 @@
                         <a th:if="${booking.status == 'PENDING'}"
                            th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}"
                            class="btn-action btn-action-primary"
+                           onclick="this.style.pointerEvents='none'; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Loading...'"
                            aria-label="Make payment for this booking">
                             <i class="fas fa-credit-card"></i> Pay Now
                         </a>
