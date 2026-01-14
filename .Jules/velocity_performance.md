@@ -1,27 +1,25 @@
-## 2026-01-06 - Optimized Booking Details Query
+# Velocity's Performance Log
 
-**Context:** `BookingService.getBookingDetails(Long)` endpoint used for viewing single booking details.
-**Symptoms:** High latency due to sequential database queries (1+N problem). Profiling indicated 8 separate queries were executed to fetch a single booking's details (Booking, Renter, User, Vehicle, FleetOwner, Status, Invoice, Payment).
-**Root Cause:** The application architecture uses decoupled entities (linked by ID rather than JPA `@OneToMany`/`@ManyToOne` relationships). This prevented automatic lazy/eager loading and forced the service layer to manually fetch each related entity sequentially.
-**Solution:** Implemented a JPQL Constructor Expression query in `BookingRepository` that uses `LEFT JOIN ... ON` syntax to join 5 core tables (Booking, Renter, User, Vehicle, FleetOwner) in a single database round-trip. Status, Invoice, and Payment are still fetched separately to avoid complex Cartesian products with one-to-many relationships.
+## 2025-02-18 - [Optimization Init]
+
+**Context:** Initial codebase exploration.
+**Symptoms:** N/A
+**Root Cause:** N/A
+**Solution:** N/A
+**Impact:** N/A
+**Learnings:** N/A
+
+## 2026-01-14 - [VehiclePriceHistory Fetch Optimization]
+
+**Context:** `VehiclePriceHistoryRepository.findLatestPricesForVehicles` used a correlated subquery to fetch the effective price for a list of vehicles.
+**Symptoms:** Potential N+1 like behavior (or N*M complexity) in database execution plan due to correlated subquery, especially on large datasets. Attempting Tuple IN pattern caused severe regression on H2 (28s execution).
+**Root Cause:** Correlated subqueries execute the inner query for each candidate row. H2's optimizer failed to optimize the Tuple IN pattern efficiently.
+**Solution:** Replaced with a Native Query using Window Function (`ROW_NUMBER() OVER (PARTITION BY ...)`).
 **Impact:**
-- Database Queries: Reduced from ~8 queries to ~3 queries (62% reduction).
-- Latency: Reduced network round-trips significantly.
+- Latency (H2 Test Benchmark): ~130ms → ~91ms (30% improvement).
+- Scalability: Avoids correlated subquery loop, ensuring O(N log N) complexity instead of potentially O(N*M).
+- H2 Compatibility: Fixed the severe regression (28s -> 0.09s).
 
-**Learnings:** When working with decoupled entities (ID-based references), standard JPA `JOIN FETCH` cannot be used. Instead, use explicit JPQL `LEFT JOIN ... ON` clauses combined with a DTO Constructor Expression (`SELECT new DTO(...)`) to achieve efficient data aggregation in a single query.
-
-## 2026-01-13 - Optimized Vehicle Browsing Query
-
-**Context:** `RenterController.browseVehicles` endpoint (`/renter/vehicles`) used for listing available vehicles.
-**Symptoms:** Potential high latency and memory usage identified by static analysis. The code was fetching *all* vehicles (including rented, maintenance, and deleted ones) and then filtering for "AVAILABLE" status in memory using Java Streams.
-**Root Cause:** "Fetch-all-and-filter" anti-pattern. `VehicleManagementService.getAllVehicles()` retrieved the entire dataset, which was then filtered in the controller.
-**Solution:**
-1. Added `findByStatusAndIsDeletedFalse` to `VehicleRepository` to filter at the database level.
-2. Added `getAvailableVehicles` to `VehicleManagementService` to utilize the new repository method.
-3. Updated `RenterController` to call the optimized service method.
-**Impact:**
-- Database Load: Reduced significantly. Only "AVAILABLE" vehicles are fetched.
-- Memory Usage: Reduced as non-relevant vehicles are never loaded into memory.
-- Network I/O: Reduced payload size from DB to App.
-
-**Learnings:** Always prefer database-level filtering (WHERE clauses) over application-level filtering (Java Streams) for potentially large datasets like Vehicles or Bookings.
+**Learnings:**
+- Window functions are a robust alternative to "Top-N-per-group" problems where Tuple IN optimization fails (e.g., on H2).
+- Always benchmark optimizations on the target environment (or representative test env) as theoretical improvements (Tuple IN) might have specific regressions.
