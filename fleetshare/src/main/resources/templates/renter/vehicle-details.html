@@ -465,6 +465,25 @@
                     setTimeout(function () { map.invalidateSize(); }, 200);
                 }
             })();
+
+            // Preserve date params for booking
+            document.addEventListener('DOMContentLoaded', function() {
+                const params = new URLSearchParams(window.location.search);
+                const pickup = params.get('pickup');
+                const returnDate = params.get('return');
+
+                if (pickup && returnDate) {
+                    const queryStr = `?pickup=${pickup}&return=${returnDate}`;
+
+                    // Update all book buttons
+                    document.querySelectorAll('a[href*="/book"]').forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && !href.includes('?')) {
+                             link.setAttribute('href', href + queryStr);
+                        }
+                    });
+                }
+            });
         </script>
     </th:block>
 </body>

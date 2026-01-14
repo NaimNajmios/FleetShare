@@ -445,6 +445,23 @@
                         <a href="#" class="clear-filters" onclick="clearAllFilters()">Clear All</a>
                     </div>
 
+                <!-- Rental Dates Filter -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Rental Dates</div>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="form-floating">
+                            <input type="date" id="filterPickupDate" class="form-control" placeholder="Pickup"
+                                   th:value="${param.pickup}" onchange="applyFilters()">
+                            <label for="filterPickupDate">Pickup Date</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="date" id="filterReturnDate" class="form-control" placeholder="Return"
+                                   th:value="${param.return}" onchange="applyFilters()">
+                            <label for="filterReturnDate">Return Date</label>
+                        </div>
+                    </div>
+                </div>
+
                     <!-- Category Filter -->
                 <div class="filter-group">
                     <div class="filter-group-title">Category</div>
@@ -760,6 +777,9 @@
                     const max = document.getElementById('maxPrice');
                     if (min) min.value = '';
                     if (max) max.value = '';
+                } else if (type === 'dates') {
+                    document.getElementById('filterPickupDate').value = '';
+                    document.getElementById('filterReturnDate').value = '';
                 } else if (type === 'search') {
                     const el = document.getElementById('vehicleSearch');
                     if (el) {
@@ -841,6 +861,25 @@
                     const label = cb.parentNode.textContent.trim();
                     addFilterChip('transmission', cb.value, label);
                 });
+
+                // Get rental dates
+                const pickupDate = document.getElementById('filterPickupDate').value;
+                const returnDate = document.getElementById('filterReturnDate').value;
+
+                if (pickupDate && returnDate) {
+                     // Simple validation
+                     if (new Date(returnDate) < new Date(pickupDate)) {
+                         // Don't add chip or update links if invalid, maybe show error?
+                         // For now, let's just ignore.
+                     } else {
+                         const start = new Date(pickupDate).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+                         const end = new Date(returnDate).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+                         addFilterChip('dates', 'dates', `${start} - ${end}`);
+                     }
+                }
+
+                // Update Links with Dates
+                updateVehicleLinks(pickupDate, returnDate);
 
                 // Get price range
                 const minPriceStr = document.getElementById('minPrice').value;
@@ -939,6 +978,8 @@
                 document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                 document.getElementById('minPrice').value = '';
                 document.getElementById('maxPrice').value = '';
+                document.getElementById('filterPickupDate').value = '';
+                document.getElementById('filterReturnDate').value = '';
 
                 const searchInput = document.getElementById('vehicleSearch');
                 searchInput.value = '';
@@ -986,6 +1027,28 @@
             });
 
             // Quick View Functionality
+            function updateVehicleLinks(pickup, returnDate) {
+                const cards = document.querySelectorAll('.vehicle-card');
+                const params = new URLSearchParams();
+                if (pickup) params.set('pickup', pickup);
+                if (returnDate) params.set('return', returnDate);
+                const queryStr = params.toString() ? '?' + params.toString() : '';
+
+                cards.forEach(card => {
+                    const vehicleId = card.dataset.id;
+                    const links = card.querySelectorAll('a'); // Get both the image link and the "View Details" button
+                    links.forEach(link => {
+                        // Ensure we only update internal vehicle links, not other links if any
+                        const href = link.getAttribute('href');
+                        if (href && href.startsWith('/renter/vehicles/') && !href.includes('/book')) {
+                             // Clean existing params if any (though unlikely with Thymeleaf default)
+                             const basePath = href.split('?')[0];
+                             link.setAttribute('href', basePath + queryStr);
+                        }
+                    });
+                });
+            }
+
             function openQuickView(btn) {
                 // Get the card element (parent of the button's container)
                 const card = btn.closest('.vehicle-card');
@@ -1027,7 +1090,15 @@
                     imgEl.parentElement.style.backgroundColor = '#e9ecef';
                 }
 
-                document.getElementById('qvDetailsLink').href = '/renter/vehicles/' + data.id;
+                // Update Quick View Link
+                const pickup = document.getElementById('filterPickupDate').value;
+                const returnDate = document.getElementById('filterReturnDate').value;
+                const params = new URLSearchParams();
+                if (pickup) params.set('pickup', pickup);
+                if (returnDate) params.set('return', returnDate);
+                const queryStr = params.toString() ? '?' + params.toString() : '';
+
+                document.getElementById('qvDetailsLink').href = '/renter/vehicles/' + data.id + queryStr;
 
                 // Open Modal
                 const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
@@ -1039,6 +1110,19 @@
                     btn.focus();
                 }, { once: true });
             }
+
+            // Set min date for pickup to today and initialize
+            document.addEventListener('DOMContentLoaded', () => {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('filterPickupDate').setAttribute('min', today);
+                document.getElementById('filterReturnDate').setAttribute('min', today);
+
+                // Apply filters on load if params exist
+                if (document.getElementById('filterPickupDate').value ||
+                    document.getElementById('filterReturnDate').value) {
+                    applyFilters();
+                }
+            });
         </script>
     </th:block>
 </body>

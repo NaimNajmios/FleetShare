@@ -591,6 +591,22 @@
                 pickupInput.min = today;
                 returnInput.min = today;
 
+                // ViewCraft: Pre-fill dates from URL params
+                const params = new URLSearchParams(window.location.search);
+                const urlPickup = params.get('pickup');
+                const urlReturn = params.get('return');
+
+                if (urlPickup && urlReturn) {
+                    // Basic validation to ensure dates are not in the past relative to today
+                    if (urlPickup >= today) {
+                        pickupInput.value = urlPickup;
+                        returnInput.value = urlReturn;
+
+                        // Set min return date
+                        returnInput.min = urlPickup;
+                    }
+                }
+
                 // Get rate per day from data attribute
                 const ratePerDay = parseFloat(document.getElementById('bookingForm').dataset.rate);
 
@@ -774,8 +790,14 @@
                 }
 
                 // Store previous values to calculate duration preservation
-                let previousPickup = '';
-                let previousReturn = '';
+                let previousPickup = pickupInput.value || '';
+                let previousReturn = returnInput.value || '';
+
+                // Trigger initial calculation if values present
+                if (pickupInput.value && returnInput.value) {
+                    updateDuration();
+                    updateDateContext();
+                }
 
                 pickupInput.addEventListener('change', function () {
                     // Update Min Date for Return
