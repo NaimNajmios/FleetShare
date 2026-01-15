@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -456,18 +460,46 @@ public class PaymentService {
     public List<PaymentDTO> getPaymentsByOwnerId(Long ownerId) {
         // Get all invoices for this owner
         List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
+        if (ownerInvoices.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Collect Invoice IDs
+        Set<Long> invoiceIds = ownerInvoices.stream()
+                .map(Invoice::getInvoiceId)
+                .collect(Collectors.toSet());
+
+        // Bulk Fetch Payments
+        List<Payment> allPayments = paymentRepository.findByInvoiceIdIn(invoiceIds);
+
+        // Collect Renter IDs and FleetOwner IDs
+        Set<Long> renterIds = ownerInvoices.stream()
+                .map(Invoice::getRenterId)
+                .collect(Collectors.toSet());
+
+        Set<Long> fleetOwnerIds = ownerInvoices.stream()
+                .map(Invoice::getFleetOwnerId)
+                .collect(Collectors.toSet());
+
+        // Bulk Fetch Renters
+        Map<Long, Renter> renterMap = renterRepository.findAllById(renterIds).stream()
+                .collect(Collectors.toMap(Renter::getRenterId, Function.identity()));
+
+        // Bulk Fetch Fleet Owners
+        Map<Long, FleetOwner> ownerMap = fleetOwnerRepository.findAllById(fleetOwnerIds).stream()
+                .collect(Collectors.toMap(FleetOwner::getFleetOwnerId, Function.identity()));
+
+        // Map Invoices to ID for quick lookup (if needed, but we iterate payments)
+        Map<Long, Invoice> invoiceMap = ownerInvoices.stream()
+                .collect(Collectors.toMap(Invoice::getInvoiceId, Function.identity()));
+
         List<PaymentDTO> paymentDTOs = new ArrayList<>();
 
-        for (Invoice invoice : ownerInvoices) {
-            // Get payments for this invoice
-            List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
-
-            for (Payment payment : payments) {
-                // Get renter information
-                Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
-
-                // Get fleet owner information
-                FleetOwner owner = fleetOwnerRepository.findById(invoice.getFleetOwnerId()).orElse(null);
+        for (Payment payment : allPayments) {
+            Invoice invoice = invoiceMap.get(payment.getInvoiceId());
+            if (invoice != null) {
+                Renter renter = renterMap.get(invoice.getRenterId());
+                FleetOwner owner = ownerMap.get(invoice.getFleetOwnerId());
 
                 PaymentDTO dto = new PaymentDTO(
                         payment.getPaymentId(),
