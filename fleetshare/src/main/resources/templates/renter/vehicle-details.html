@@ -283,7 +283,7 @@
         <div class="details-container">
             <!-- Breadcrumb -->
             <nav class="back-nav" aria-label="Breadcrumb">
-                <a href="/renter/vehicles" class="back-link">
+                <a href="/renter/vehicles" class="back-link" onclick="if(document.referrer.indexOf('/renter/vehicles') !== -1) { history.back(); return false; }">
                     <i class="fas fa-arrow-left"></i> Back to Browse Vehicles
                 </a>
             </nav>

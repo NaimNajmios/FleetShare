@@ -797,25 +797,110 @@
                 document.querySelectorAll('.vehicle-card').forEach((card, index) => {
                     card.setAttribute('data-original-index', index);
                 });
+                // UX Improvement: Restore state from URL
+                syncUrlToState();
             });
 
             function setSort(sortType, btn) {
                 currentSort = sortType;
 
                 // Update active state
-                btn.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                btn.classList.add('active');
-
-                // Update dropdown button text (optional, but nice)
-                // const sortLabel = btn.textContent.trim();
-                // btn.closest('.dropdown').querySelector('span').textContent = sortLabel;
+                if (btn) {
+                    btn.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                }
 
                 applyFilters();
             }
 
+            // UX Improvement: URL State Synchronization
+            function syncStateToUrl() {
+                const params = new URLSearchParams();
+
+                // Categories
+                const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                    .map(cb => cb.value);
+                checkedCategories.forEach(cat => params.append('category', cat));
+
+                // Transmissions
+                const checkedTransmissions = Array.from(document.querySelectorAll('input[name="transmission"]:checked'))
+                    .map(cb => cb.value);
+                checkedTransmissions.forEach(trans => params.append('transmission', trans));
+
+                // Price
+                const minPrice = document.getElementById('minPrice').value;
+                const maxPrice = document.getElementById('maxPrice').value;
+                if (minPrice) params.set('minPrice', minPrice);
+                if (maxPrice) params.set('maxPrice', maxPrice);
+
+                // Search
+                const search = document.getElementById('vehicleSearch').value;
+                if (search) params.set('search', search);
+
+                // Sort
+                if (currentSort !== 'recommended') params.set('sort', currentSort);
+
+                // Update URL without reloading
+                const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                window.history.replaceState({}, '', newUrl);
+            }
+
+            function syncUrlToState() {
+                const params = new URLSearchParams(window.location.search);
+
+                // Categories
+                const categories = params.getAll('category');
+                categories.forEach(cat => {
+                    const cb = document.querySelector(`input[name="category"][value="${cat}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                // Transmissions
+                const transmissions = params.getAll('transmission');
+                transmissions.forEach(trans => {
+                    const cb = document.querySelector(`input[name="transmission"][value="${trans}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                // Price
+                const minPrice = params.get('minPrice');
+                const maxPrice = params.get('maxPrice');
+                if (minPrice) document.getElementById('minPrice').value = minPrice;
+                if (maxPrice) document.getElementById('maxPrice').value = maxPrice;
+
+                // Search
+                const search = params.get('search');
+                if (search) {
+                    const searchInput = document.getElementById('vehicleSearch');
+                    searchInput.value = search;
+                    toggleClearButton(searchInput);
+                }
+
+                // Sort
+                const sort = params.get('sort');
+                if (sort) {
+                    currentSort = sort;
+                    // Visually update sort dropdown if possible
+                    const sortBtn = document.querySelector(`.dropdown-item[onclick*="'${sort}'"]`);
+                    if (sortBtn) {
+                         // Find the parent dropdown menu to clear actives
+                         sortBtn.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                        sortBtn.classList.add('active');
+                    }
+                }
+
+                // Apply filters after restoration
+                applyFilters();
+            }
+
             function applyFilters() {
+                // Update URL state
+                syncStateToUrl();
+
                 const container = document.getElementById('vehicleGrid');
                 const cards = Array.from(document.querySelectorAll('.vehicle-card'));
                 const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
