@@ -32,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.najmi.fleetshare.dto.PasswordChangeRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Controller
 @RequestMapping("/renter")
@@ -39,6 +41,9 @@ public class RenterController {
 
     @Autowired
     private VehicleManagementService vehicleManagementService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private BookingService bookingService;
@@ -296,6 +301,35 @@ public class RenterController {
         sessionUser.getRenterDetails().setPhoneNumber(phoneNumber != null ? phoneNumber.trim() : null);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
+    }
+
+    @PostMapping("/profile/password")
+    @ResponseBody
+    public ResponseEntity<?> updatePassword(
+            @jakarta.validation.Valid @RequestBody PasswordChangeRequest request,
+            HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "New passwords do not match"));
+        }
+
+        com.najmi.fleetshare.entity.User user = userRepository.findById(sessionUser.getUserId()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getHashedPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Incorrect old password"));
+        }
+
+        user.setHashedPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Password changed successfully"));
     }
 
     @PostMapping("/profile/image")
