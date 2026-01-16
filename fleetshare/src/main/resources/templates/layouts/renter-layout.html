@@ -53,10 +53,11 @@
 
     <!-- Main Content -->
     <main layout:fragment="content" class="fade-in">
-        <!-- Toast Notifications -->
-        <div th:replace="~{fragments/toast :: toast}"></div>
         <!-- Page content goes here -->
     </main>
+
+    <!-- Toast Notifications -->
+    <div th:replace="~{fragments/toast :: toast}"></div>
 
     <!-- Footer -->
     <div th:replace="~{fragments/renter-footer :: renter-footer}"></div>
