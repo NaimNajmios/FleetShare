@@ -517,4 +517,18 @@ public class PaymentService {
 
         return paymentDTOs;
     }
+
+    /**
+     * Calculates total revenue for a specific owner
+     *
+     * @param ownerId Owner ID
+     * @return Total revenue
+     */
+    public java.math.BigDecimal getTotalRevenueByOwnerId(Long ownerId) {
+        java.util.List<Payment.PaymentStatus> statuses = java.util.Arrays.asList(
+                Payment.PaymentStatus.VERIFIED
+        );
+        java.math.BigDecimal revenue = paymentRepository.calculateTotalRevenueForOwner(ownerId, statuses);
+        return revenue != null ? revenue : java.math.BigDecimal.ZERO;
+    }
 }

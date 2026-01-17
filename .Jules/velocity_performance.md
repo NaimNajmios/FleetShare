@@ -25,3 +25,19 @@
 - Network I/O: Reduced payload size from DB to App.
 
 **Learnings:** Always prefer database-level filtering (WHERE clauses) over application-level filtering (Java Streams) for potentially large datasets like Vehicles or Bookings.
+
+## 2026-01-17 - Optimized Owner Dashboard Load
+
+**Context:** `OwnerController.dashboard` endpoint used for displaying fleet owner statistics and recent bookings.
+**Symptoms:** High memory usage and potential latency. The controller fetched *all* bookings and *all* payments for the owner, then filtered and aggregated them in-memory to calculate counts and revenue. It also fetched all bookings to display only the 5 most recent ones.
+**Root Cause:** "Fetch-all-and-compute" anti-pattern. `BookingService.getBookingsByOwnerId` and `PaymentService.getPaymentsByOwnerId` were loading entire datasets into memory.
+**Solution:**
+1. Implemented JPQL aggregation queries (`COUNT`, `SUM`) in repositories to fetch statistics directly.
+2. Implemented `Pageable` in `BookingRepository` to fetch only the top 5 recent bookings.
+3. Updated `OwnerController` to use these optimized service methods.
+**Impact:**
+- Database Queries: Replaced heavy SELECT * queries with lightweight COUNT/SUM queries.
+- Memory Usage: Reduced significantly by not loading thousands of Booking/Payment objects into heap.
+- Network I/O: drastically reduced payload size from DB.
+
+**Learnings:** Use database aggregation for statistics. Avoid fetching entire collections just to count them or show a subset. When entities are decoupled (no direct relationships), use JPQL `IN` subqueries or Cross Joins with careful WHERE clauses to perform aggregations.

@@ -17,6 +17,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByFleetOwnerId(Long fleetOwnerId);
 
+    org.springframework.data.domain.Page<Booking> findByFleetOwnerId(Long fleetOwnerId, org.springframework.data.domain.Pageable pageable);
+
     @Query("SELECT DISTINCT b.renterId FROM Booking b WHERE b.fleetOwnerId = :fleetOwnerId")
     List<Long> findDistinctRenterIdsByFleetOwnerId(@Param("fleetOwnerId") Long fleetOwnerId);
 
