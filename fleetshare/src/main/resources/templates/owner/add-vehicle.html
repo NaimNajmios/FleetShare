@@ -33,6 +33,8 @@
                 justify-content: center;
                 cursor: pointer;
                 transition: all 0.3s ease;
+                overflow: hidden;
+                position: relative;
             }
 
             .image-dropzone:hover {
@@ -100,25 +102,6 @@
                 box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
             }
 
-            .manage-rate-btn {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
-                text-align: left;
-                background-color: white;
-                border: 1px solid #ced4da;
-                color: #495057;
-                padding: 0.75rem;
-                border-radius: 0.25rem;
-                cursor: pointer;
-            }
-
-            .manage-rate-btn:hover {
-                background-color: #f8f9fa;
-                border-color: #b3b7bb;
-            }
-
             .action-buttons {
                 display: flex;
                 justify-content: flex-end;
@@ -133,106 +116,12 @@
                 }
             }
 
-            /* Rate Modal Styles */
-            .rate-modal-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1050;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .rate-modal-overlay.show {
-                display: flex;
-            }
-
-            .rate-modal {
-                background: white;
-                border-radius: 12px;
-                width: 100%;
-                max-width: 400px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-                animation: modalSlideIn 0.3s ease;
-            }
-
-            @keyframes modalSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .rate-modal-header {
-                padding: 1.5rem;
-                border-bottom: 1px solid #e9ecef;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .rate-modal-header h5 {
-                margin: 0;
-                font-weight: 600;
-                color: #2c2e30;
-            }
-
-            .rate-modal-close {
-                background: none;
-                border: none;
-                font-size: 1.5rem;
-                color: #6c757d;
-                cursor: pointer;
-            }
-
-            .rate-modal-body {
-                padding: 1.5rem;
-            }
-
-            .rate-input-group {
-                display: flex;
-                align-items: center;
-                border: 2px solid #ced4da;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-
-            .rate-input-group:focus-within {
-                border-color: #007bff;
-                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-            }
-
-            .rate-input-prefix {
-                padding: 0.75rem 1rem;
-                background: #f8f9fa;
-                font-weight: 600;
+            /* Input Group Styling for Rate */
+            .input-group-text {
+                background-color: #e9ecef;
+                border: 1px solid #ced4da;
                 color: #495057;
-            }
-
-            .rate-input {
-                flex: 1;
-                border: none;
-                padding: 0.75rem;
-                font-size: 1.25rem;
-                font-weight: 500;
-                outline: none;
-            }
-
-            .rate-modal-footer {
-                padding: 1rem 1.5rem;
-                border-top: 1px solid #e9ecef;
-                display: flex;
-                justify-content: flex-end;
-                gap: 0.75rem;
+                font-weight: 600;
             }
         </style>
     </th:block>
@@ -258,18 +147,27 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <form th:action="@{/owner/vehicles/add}" method="post">
+                        <!-- Added enctype for file upload support -->
+                        <form th:action="@{/owner/vehicles/add}" method="post" enctype="multipart/form-data">
                             <div class="profile-container">
                                 <!-- Image Upload Section -->
                                 <div class="profile-header">
-                                    <div class="image-dropzone"
+                                    <div class="image-dropzone" role="button" tabindex="0" aria-label="Upload Vehicle Image"
                                         onclick="document.getElementById('vehicleImageInput').click()">
-                                        <i class="mdi mdi-cloud-upload dropzone-icon"></i>
-                                        <p class="dropzone-text">Click to upload or drag and drop</p>
-                                        <p class="dropzone-hint">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
-                                        <input type="file" id="vehicleImageInput" style="display: none;"
+                                        <div id="dropzoneContent">
+                                            <i class="mdi mdi-cloud-upload dropzone-icon"></i>
+                                            <p class="dropzone-text">Click to upload or drag and drop</p>
+                                            <p class="dropzone-hint">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                                        </div>
+                                        <img id="imagePreview" src="#" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                                        <!-- Added name="image" for controller binding -->
+                                        <input type="file" id="vehicleImageInput" name="image" style="display: none;"
                                             accept="image/*">
                                     </div>
+                                    <!-- Add button to remove image, initially hidden -->
+                                    <button type="button" id="removeImageBtn" class="btn btn-sm btn-outline-danger mt-2" style="display: none; align-self: center;">
+                                        <i class="mdi mdi-delete"></i> Remove Image
+                                    </button>
                                 </div>
 
                                 <!-- Vehicle Specifications -->
@@ -349,13 +247,13 @@
                                                 <option value="UNAVAILABLE">Unavailable</option>
                                             </select>
                                         </div>
+                                        <!-- SIMPLIFIED RATE INPUT -->
                                         <div class="form-group">
                                             <label>Rate Per Day (RM)</label>
-                                            <input type="hidden" id="ratePerDayInput" name="ratePerDay" value="0">
-                                            <button type="button" class="btn manage-rate-btn" id="openRateModal">
-                                                <span id="rateDisplay">Set Rate Per Day</span>
-                                                <i class="mdi mdi-cog"></i>
-                                            </button>
+                                            <div class="input-group">
+                                                <span class="input-group-text">RM</span>
+                                                <input type="number" class="form-control" name="ratePerDay" placeholder="0.00" min="0" step="0.01" required>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -374,65 +272,91 @@
                 </div>
             </div>
         </div>
-
-        <!-- Rate Per Day Modal -->
-        <div class="rate-modal-overlay" id="rateModalOverlay">
-            <div class="rate-modal">
-                <div class="rate-modal-header">
-                    <h5><i class="mdi mdi-currency-usd mr-2"></i>Set Rate Per Day</h5>
-                    <button class="rate-modal-close" id="closeRateModal">&times;</button>
-                </div>
-                <div class="rate-modal-body">
-                    <p class="text-muted mb-3">Enter the daily rental rate for this vehicle</p>
-                    <div class="rate-input-group">
-                        <span class="rate-input-prefix">RM</span>
-                        <input type="number" class="rate-input" id="rateModalInput" min="0" step="0.01"
-                            placeholder="0.00">
-                    </div>
-                </div>
-                <div class="rate-modal-footer">
-                    <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
-                    <button class="btn btn-primary" id="saveRateModal">Save Rate</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <th:block layout:fragment="extra-js">
         <script>
-            // Rate Modal Logic
-            const rateModalOverlay = document.getElementById('rateModalOverlay');
-            const rateModalInput = document.getElementById('rateModalInput');
-            const rateDisplay = document.getElementById('rateDisplay');
-            const ratePerDayInput = document.getElementById('ratePerDayInput');
+            // Image Preview Logic
+            const imageInput = document.getElementById('vehicleImageInput');
+            const dropzoneContent = document.getElementById('dropzoneContent');
+            const imagePreview = document.getElementById('imagePreview');
+            const removeBtn = document.getElementById('removeImageBtn');
 
-            document.getElementById('openRateModal').addEventListener('click', function () {
-                rateModalInput.value = ratePerDayInput.value || '';
-                rateModalOverlay.classList.add('show');
-                rateModalInput.focus();
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        dropzoneContent.style.display = 'none';
+                        removeBtn.style.display = 'block';
+                    }
+
+                    reader.readAsDataURL(file);
+                }
             });
 
-            document.getElementById('closeRateModal').addEventListener('click', closeModal);
-            document.getElementById('cancelRateModal').addEventListener('click', closeModal);
-
-            rateModalOverlay.addEventListener('click', function (e) {
-                if (e.target === rateModalOverlay) closeModal();
+            removeBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent triggering the dropzone click
+                imageInput.value = ''; // Clear input
+                imagePreview.style.display = 'none';
+                imagePreview.src = '#';
+                dropzoneContent.style.display = 'block'; // Show dropzone text
+                removeBtn.style.display = 'none';
             });
 
-            document.getElementById('saveRateModal').addEventListener('click', function () {
-                const rate = parseFloat(rateModalInput.value) || 0;
-                ratePerDayInput.value = rate.toFixed(2);
-                rateDisplay.textContent = rate > 0 ? 'RM ' + rate.toFixed(2) + ' / day' : 'Set Rate Per Day';
-                closeModal();
+            // Drag and Drop visual feedback
+            const dropzone = document.querySelector('.image-dropzone');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
             });
 
-            function closeModal() {
-                rateModalOverlay.classList.remove('show');
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
 
-            // Close on Escape key
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) closeModal();
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                dropzone.style.borderColor = '#007bff';
+                dropzone.style.backgroundColor = '#e9ecef';
+            }
+
+            function unhighlight(e) {
+                dropzone.style.borderColor = '#ced4da';
+                dropzone.style.backgroundColor = '#f8f9fa';
+            }
+
+            dropzone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    imageInput.files = files;
+                    // Trigger change event manually
+                    const event = new Event('change');
+                    imageInput.dispatchEvent(event);
+                }
+            }
+
+            // Keyboard accessibility for dropzone
+            dropzone.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    document.getElementById('vehicleImageInput').click();
+                }
             });
         </script>
     </th:block>
