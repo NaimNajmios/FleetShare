@@ -1,22 +1,30 @@
-## 2025-05-18 - Card-Based Payment Method Selection
+## 2024-05-23 - Centralized Toast Notification System
 
-**Context:** Renter Payment Management (`manage-payment.html`)
-**User Need:** Users need to select a payment method (Card, Transfer, Cash) to proceed with or verify their booking.
-**Observation:** The previous dropdown menu (`<select>`) was less intuitive for mobile users and hid the available options behind a click. It lacked visual weight for a primary decision step.
-**Solution Implemented:** Replaced the standard dropdown with a grid of interactive "cards" (`.payment-option-card`). Each card displays an icon and label, making all options immediately visible and providing a larger touch target.
+**Context:** The application had a `toast.html` fragment, but it was incorrectly included inside the `layout:fragment="content"` block in `renter-layout.html`, causing it to be overwritten by page content. This forced individual pages like `profile.html` to implement their own ad-hoc toast logic, leading to inconsistency and code duplication.
+
+**User Need:** Users need consistent, non-intrusive feedback for actions (e.g., "Profile updated", "Booking cancelled") across the application without jarring alerts or inconsistent styling.
+
+**Observation:**
+- `renter-layout.html` swallowed the toast fragment.
+- `profile.html` duplicated toast CSS and JS.
+- `booking-details.html` relied on `alert()` as a fallback.
+
+**Solution Implemented:**
+1. Moved the toast fragment inclusion in `renter-layout.html` outside the content block.
+2. Removed duplicate toast logic and CSS from `profile.html`.
+3. Replaced `alert()` with `window.showToast()` in `booking-details.html`.
+
 **Impact:**
-- Improved discoverability of payment options.
-- Enhanced touch usability on mobile devices.
-- Visual feedback (border, background, shadow) provides clear confirmation of selection.
-- Maintained progressive disclosure of the detailed payment instructions below the selection.
+- **Consistency:** All renter pages now use the same beautiful toast notifications.
+- **Maintainability:** Removed ~50 lines of duplicate code/CSS.
+- **Delight:** Users get smooth, animated feedback instead of browser alerts.
 
 **Code Pattern:**
 ```html
-<div class="payment-options-grid" role="radiogroup" aria-label="Payment Method">
-    <button type="button" class="payment-option-card active" data-value="card" role="radio" aria-checked="true">
-        <i class="fab fa-cc-visa text-primary mb-2"></i>
-        <span>Card / FPX</span>
-    </button>
-    <!-- ... other options ... -->
-</div>
+<!-- Correct Layout Implementation -->
+<main layout:fragment="content">
+    <!-- Page Content -->
+</main>
+<!-- Toast outside content block -->
+<div th:replace="~{fragments/toast :: toast}"></div>
 ```
