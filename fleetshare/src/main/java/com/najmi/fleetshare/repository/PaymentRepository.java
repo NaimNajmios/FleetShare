@@ -19,4 +19,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "AND p.paymentStatus IN :statuses")
     java.math.BigDecimal calculateTotalRevenueForOwner(@org.springframework.data.repository.query.Param("ownerId") Long ownerId,
                                                        @org.springframework.data.repository.query.Param("statuses") java.util.Collection<Payment.PaymentStatus> statuses);
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(p.amount) FROM Payment p WHERE p.paymentStatus IN :statuses")
+    java.math.BigDecimal calculateTotalRevenue(@org.springframework.data.repository.query.Param("statuses") java.util.Collection<Payment.PaymentStatus> statuses);
 }

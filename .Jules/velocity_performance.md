@@ -41,3 +41,20 @@
 - Network I/O: drastically reduced payload size from DB.
 
 **Learnings:** Use database aggregation for statistics. Avoid fetching entire collections just to count them or show a subset. When entities are decoupled (no direct relationships), use JPQL `IN` subqueries or Cross Joins with careful WHERE clauses to perform aggregations.
+
+## 2026-01-18 - Optimized Admin Dashboard Load
+
+**Context:** `AdminController.dashboard` endpoint used for displaying platform-wide statistics and recent bookings.
+**Symptoms:** Critical scalability bottleneck. The controller fetched *all* bookings and *all* payments in the system to calculate simple counts and revenue sums. It also loaded all payments (with N+1 lookups for Invoice/Renter/Owner) to sum revenue.
+**Root Cause:** "Fetch-all-and-compute" anti-pattern coupled with N+1 fetch issues in `PaymentService`.
+**Solution:**
+1. Added `countAllBookingsByStatus()` to `BookingStatusLogRepository` to count bookings by status in the DB.
+2. Added `calculateTotalRevenue(statuses)` to `PaymentRepository` to sum revenue in the DB.
+3. Added `getRecentBookings(limit)` to `BookingService` using `PageRequest` to fetch only top 5 records.
+4. Refactored `AdminController` to use these O(1) operations instead of O(N) in-memory processing.
+**Impact:**
+- Memory Usage: Reduced from O(N) (loading entire DB) to O(1) (loading single DTO/Decimal).
+- Database Queries: Replaced thousands of N+1 queries (for payments) with 3 optimized queries.
+- Latency: Expected drastic reduction for large datasets.
+
+**Learnings:** Admin dashboards are common sources of "Select All" bugs. Always verify that summary statistics are calculated by the database, not the application server.

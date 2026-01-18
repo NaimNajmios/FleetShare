@@ -531,4 +531,17 @@ public class PaymentService {
         java.math.BigDecimal revenue = paymentRepository.calculateTotalRevenueForOwner(ownerId, statuses);
         return revenue != null ? revenue : java.math.BigDecimal.ZERO;
     }
+
+    /**
+     * Calculates total revenue for the platform
+     *
+     * @return Total revenue
+     */
+    public java.math.BigDecimal getTotalPlatformRevenue() {
+        java.util.List<Payment.PaymentStatus> statuses = java.util.Arrays.asList(
+                Payment.PaymentStatus.VERIFIED
+        );
+        java.math.BigDecimal revenue = paymentRepository.calculateTotalRevenue(statuses);
+        return revenue != null ? revenue : java.math.BigDecimal.ZERO;
+    }
 }

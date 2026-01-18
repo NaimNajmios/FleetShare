@@ -49,4 +49,14 @@ public interface BookingStatusLogRepository extends JpaRepository<BookingStatusL
             ") " +
             "GROUP BY bsl.statusValue")
     List<Object[]> countBookingsByStatusForOwner(@org.springframework.data.repository.query.Param("ownerId") Long ownerId);
+
+    @Query("SELECT bsl.statusValue, COUNT(bsl) " +
+            "FROM BookingStatusLog bsl " +
+            "WHERE (bsl.bookingId, bsl.statusTimestamp) IN (" +
+            "    SELECT bsl2.bookingId, MAX(bsl2.statusTimestamp) " +
+            "    FROM BookingStatusLog bsl2 " +
+            "    GROUP BY bsl2.bookingId" +
+            ") " +
+            "GROUP BY bsl.statusValue")
+    List<Object[]> countAllBookingsByStatus();
 }

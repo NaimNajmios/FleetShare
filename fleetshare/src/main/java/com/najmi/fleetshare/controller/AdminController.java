@@ -117,38 +117,17 @@ public class AdminController {
             model.addAttribute("maintenanceVehicles", maintenanceVehicles);
 
             // Platform-wide booking statistics
-            List<BookingDTO> allBookings = bookingService.getAllBookings();
-            int totalBookings = allBookings != null ? allBookings.size() : 0;
-            long activeRentals = allBookings != null ? allBookings.stream()
-                    .filter(b -> "ACTIVE".equals(b.getStatus()) || "IN_PROGRESS".equals(b.getStatus()))
-                    .count() : 0;
-            long pendingBookings = allBookings != null ? allBookings.stream()
-                    .filter(b -> "PENDING".equals(b.getStatus()) || "CONFIRMED".equals(b.getStatus()))
-                    .count() : 0;
-            model.addAttribute("totalBookings", totalBookings);
-            model.addAttribute("activeRentals", activeRentals);
-            model.addAttribute("pendingBookings", pendingBookings);
+            com.najmi.fleetshare.dto.BookingCountDTO bookingStats = bookingService.getPlatformBookingCounts();
+            model.addAttribute("totalBookings", bookingStats.getTotal());
+            model.addAttribute("activeRentals", bookingStats.getActive());
+            model.addAttribute("pendingBookings", bookingStats.getPending());
 
             // Recent bookings (last 5)
-            List<BookingDTO> recentBookings = allBookings != null ? allBookings.stream()
-                    .sorted((b1, b2) -> {
-                        if (b1.getCreatedAt() == null)
-                            return 1;
-                        if (b2.getCreatedAt() == null)
-                            return -1;
-                        return b2.getCreatedAt().compareTo(b1.getCreatedAt());
-                    })
-                    .limit(5)
-                    .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>();
+            List<BookingDTO> recentBookings = bookingService.getRecentBookings(5);
             model.addAttribute("recentBookings", recentBookings);
 
             // Platform-wide revenue
-            var allPayments = paymentService.getAllPayments();
-            BigDecimal totalRevenue = allPayments != null ? allPayments.stream()
-                    .filter(p -> "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
-                    .map(p -> p.getAmount())
-                    .filter(a -> a != null)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+            BigDecimal totalRevenue = paymentService.getTotalPlatformRevenue();
             model.addAttribute("totalRevenue", totalRevenue);
 
         } catch (Exception e) {
