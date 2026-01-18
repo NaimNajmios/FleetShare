@@ -812,7 +812,46 @@
                 document.querySelectorAll('.vehicle-card').forEach((card, index) => {
                     card.setAttribute('data-original-index', index);
                 });
+                loadFiltersFromURL();
             });
+
+            function loadFiltersFromURL() {
+                const params = new URLSearchParams(window.location.search);
+                let shouldApply = false;
+
+                // Restore Checkboxes
+                ['category', 'transmission'].forEach(group => {
+                    params.getAll(group).forEach(val => {
+                        const el = document.querySelector(`input[name="${group}"][value="${val}"]`);
+                        if (el) { el.checked = true; shouldApply = true; }
+                    });
+                });
+
+                // Restore Inputs
+                if (params.has('minPrice')) { document.getElementById('minPrice').value = params.get('minPrice'); shouldApply = true; }
+                if (params.has('maxPrice')) { document.getElementById('maxPrice').value = params.get('maxPrice'); shouldApply = true; }
+
+                if (params.has('q')) {
+                    const el = document.getElementById('vehicleSearch');
+                    el.value = params.get('q');
+                    toggleClearButton(el);
+                    shouldApply = true;
+                }
+
+                // Restore Sort
+                const sort = params.get('sort');
+                if (sort && sort !== 'recommended') {
+                    currentSort = sort;
+                    const btn = document.querySelector(`button[onclick="setSort('${sort}', this)"]`);
+                    if (btn) {
+                        document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+                        btn.classList.add('active');
+                    }
+                    shouldApply = true;
+                }
+
+                if (shouldApply) applyFilters();
+            }
 
             function setSort(sortType, btn) {
                 currentSort = sortType;
@@ -863,6 +902,20 @@
                 const minPrice = parseFloat(minPriceStr) || 0;
                 const maxPrice = parseFloat(maxPriceStr) || Infinity;
 
+                // ViewCraft: Update URL for Deep Linking
+                const params = new URLSearchParams();
+                checkedCategories.forEach(c => params.append('category', c));
+                checkedTransmissions.forEach(t => params.append('transmission', t));
+                if (minPriceStr) params.set('minPrice', minPriceStr);
+                if (maxPriceStr) params.set('maxPrice', maxPriceStr);
+                const rawSearchInput = document.getElementById('vehicleSearch').value;
+                if (rawSearchInput) params.set('q', rawSearchInput);
+                if (currentSort !== 'recommended') params.set('sort', currentSort);
+
+                const newQuery = params.toString();
+                const newUrl = window.location.pathname + (newQuery ? '?' + newQuery : '');
+                window.history.replaceState({}, '', newUrl);
+
                 if (minPriceStr || maxPriceStr) {
                     let label = 'Price: ';
                     if (minPriceStr && maxPriceStr) label += `RM${minPriceStr} - RM${maxPriceStr}`;
@@ -873,7 +926,7 @@
 
                 // Search chip
                 if (searchInput) {
-                    addFilterChip('search', 'search', `Search: "${document.getElementById('vehicleSearch').value}"`);
+                    addFilterChip('search', 'search', `Search: "${rawSearchInput}"`);
                 }
 
                 // Sorting Logic
