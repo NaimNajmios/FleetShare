@@ -28,3 +28,25 @@
 <!-- Toast outside content block -->
 <div th:replace="~{fragments/toast :: toast}"></div>
 ```
+
+## 2024-05-23 - [Simplified Input Interactions]
+
+**Context:** Owner Vehicle Onboarding (add-vehicle.html)
+**User Need:** Fleet owners need to quickly add vehicles with price and photos.
+**Observation:** The previous design hid the "Rate Per Day" input inside a modal, requiring 3 extra clicks. The image upload had no visual feedback.
+**Solution Implemented:** Replaced the modal with a direct Bootstrap input group. Added a drag-and-drop zone with immediate image preview.
+**Impact:** Reduced clicks for rate entry from 4 to 1. Provided immediate confirmation of image selection.
+**Code Pattern:**
+```html
+<!-- Input Group Pattern -->
+<div class="input-group">
+    <span class="input-group-text">RM</span>
+    <input type="number" class="form-control" name="ratePerDay">
+</div>
+
+<!-- Image Preview Pattern -->
+<div class="image-dropzone" role="button" tabindex="0">
+    <img id="imagePreview" src="#" style="display:none;">
+    <div id="dropzoneContent">...</div>
+</div>
+```
