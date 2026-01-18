@@ -1,5 +1,6 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.BookingCountDTO;
 import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.BookingLogDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
@@ -113,50 +114,18 @@ public class OwnerController {
                 model.addAttribute("rentedVehicles", rentedCount);
                 model.addAttribute("maintenanceVehicles", maintenanceCount);
 
-                // Fetch bookings for this owner
-                List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId);
-                if (bookings == null)
-                    bookings = new java.util.ArrayList<>();
-                model.addAttribute("totalBookings", bookings.size());
+                // Optimized: Fetch counts using database aggregation
+                BookingCountDTO counts = bookingService.getBookingCountsByOwnerId(ownerId);
+                model.addAttribute("totalBookings", counts.getTotal());
+                model.addAttribute("activeRentals", counts.getActive());
+                model.addAttribute("pendingBookings", counts.getPending());
 
-                // Count active rentals (IN_PROGRESS status)
-                long activeRentals = bookings.stream()
-                        .filter(b -> b != null
-                                && ("IN_PROGRESS".equals(b.getStatus()) || "ACTIVE".equals(b.getStatus())))
-                        .count();
-                model.addAttribute("activeRentals", activeRentals);
-
-                // Count pending bookings
-                long pendingBookings = bookings.stream()
-                        .filter(b -> b != null
-                                && ("PENDING".equals(b.getStatus()) || "CONFIRMED".equals(b.getStatus())))
-                        .count();
-                model.addAttribute("pendingBookings", pendingBookings);
-
-                // Get recent bookings (last 5)
-                List<BookingDTO> recentBookings = bookings.stream()
-                        .filter(Objects::nonNull)
-                        .sorted((b1, b2) -> {
-                            if (b1.getStartDate() == null)
-                                return 1;
-                            if (b2.getStartDate() == null)
-                                return -1;
-                            return b2.getStartDate().compareTo(b1.getStartDate());
-                        })
-                        .limit(5)
-                        .collect(java.util.stream.Collectors.toList());
+                // Optimized: Fetch recent bookings (last 5) using pagination
+                List<BookingDTO> recentBookings = bookingService.getRecentBookingsByOwnerId(ownerId, 5);
                 model.addAttribute("recentBookings", recentBookings);
 
-                // Fetch payments and calculate revenue
-                List<PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId);
-                if (payments == null)
-                    payments = new java.util.ArrayList<>();
-                BigDecimal totalRevenue = payments.stream()
-                        .filter(p -> p != null
-                                && ("COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus())))
-                        .map(PaymentDTO::getAmount)
-                        .filter(Objects::nonNull)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                // Optimized: Fetch total revenue using database aggregation
+                BigDecimal totalRevenue = paymentService.getTotalRevenueByOwnerId(ownerId);
                 model.addAttribute("totalRevenue", totalRevenue);
 
                 // Pass vehicles list for status overview
