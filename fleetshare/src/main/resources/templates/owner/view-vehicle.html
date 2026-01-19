@@ -592,11 +592,15 @@
                                                     th:text="${vehicle.status}">AVAILABLE</span>
                                             </div>
                                             <div class="info-card-footer edit-actions">
-                                                <select class="form-control form-select" name="status">
+                                                                                                <select class="form-control form-select" name="status">
                                                     <option th:selected="${vehicle.status == 'AVAILABLE'}"
                                                         value="AVAILABLE">Available</option>
+                                                    <option th:selected="${vehicle.status == 'RENTED'}"
+                                                        value="RENTED">Rented</option>
                                                     <option th:selected="${vehicle.status == 'MAINTENANCE'}"
                                                         value="MAINTENANCE">Maintenance</option>
+                                                    <option th:selected="${vehicle.status == 'UNAVAILABLE'}"
+                                                        value="UNAVAILABLE">Unavailable</option>
                                                 </select>
                                             </div>
                                         </div>
