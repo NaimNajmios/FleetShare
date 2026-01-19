@@ -569,18 +569,6 @@
                     <div class="action-card">
                         <h2 class="card-title">Actions</h2>
 
-                        <!-- PENDING Actions -->
-                        <div th:if="${booking.status == 'PENDING'}">
-                            <a th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}"
-                                class="btn btn-primary">
-                                <i class="fas fa-credit-card me-2"></i>Manage Payment
-                            </a>
-                            <button class="btn btn-outline-danger" data-bs-toggle="modal"
-                                data-bs-target="#cancelBookingModal">
-                                <i class="fas fa-times me-2"></i>Cancel Booking
-                            </button>
-                        </div>
-
                         <!-- CONFIRMED Actions -->
                         <div th:if="${booking.status == 'CONFIRMED'}">
                             <a href="#" class="btn btn-primary">
