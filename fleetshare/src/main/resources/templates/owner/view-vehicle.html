@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/owner-layout}" th:with="activePage='vehicles', pageTitle='Vehicle Details'">
 
@@ -847,20 +847,56 @@
                 if (e.key === 'Escape' && rateModalOverlay.classList.contains('show')) {
                     rateModalOverlay.classList.remove('show');
                 }
-            });
-
-            // Image Logic
+            });            // Image Logic
             let selectedFile = null;
+            const originalImageSrc = document.getElementById('vehicleImage')?.src;
+            const hasOriginalImage = !!originalImageSrc;
+
             document.getElementById('changeImageBtn').addEventListener('click', () => document.getElementById('vehicleImageInput').click());
+            
             document.getElementById('vehicleImageInput').addEventListener('change', (e) => {
                 if (e.target.files[0]) {
                     selectedFile = e.target.files[0];
                     const reader = new FileReader();
                     reader.onload = (ev) => {
-                        const img = document.getElementById('vehicleImage');
-                        if (img) img.src = ev.target.result;
+                        let img = document.getElementById('vehicleImage');
+                        const placeholder = document.getElementById('vehiclePlaceholder');
+                        
+                        if (!img) {
+                            img = document.createElement('img');
+                            img.id = 'vehicleImage';
+                            img.className = 'vehicle-image';
+                            img.alt = 'Vehicle Image';
+                            document.querySelector('.vehicle-image-container').appendChild(img);
+                        }
+                        
+                        img.src = ev.target.result;
+                        img.style.display = 'block';
+                        
+                        if (placeholder) {
+                            placeholder.style.display = 'none';
+                        }
                     };
                     reader.readAsDataURL(selectedFile);
+                }
+            });
+
+            document.getElementById('resetImageBtn').addEventListener('click', () => {
+                selectedFile = null;
+                document.getElementById('vehicleImageInput').value = '';
+                
+                let img = document.getElementById('vehicleImage');
+                const placeholder = document.getElementById('vehiclePlaceholder');
+                
+                if (hasOriginalImage) {
+                    if (img) {
+                        img.src = originalImageSrc;
+                        img.style.display = 'block';
+                    }
+                    if (placeholder) placeholder.style.display = 'none';
+                } else {
+                    if (img) img.style.display = 'none';
+                    if (placeholder) placeholder.style.display = 'block';
                 }
             });
 

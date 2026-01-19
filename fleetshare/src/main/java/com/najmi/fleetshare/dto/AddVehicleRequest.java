@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import org.springframework.web.multipart.MultipartFile;
 
 public class AddVehicleRequest {
     @NotBlank(message = "Brand is required")
@@ -49,6 +50,7 @@ public class AddVehicleRequest {
 
     private String vehicleImageUrl;
     private String effectiveDate;
+    private MultipartFile image; // For file upload from form
 
     // Getters and Setters
     public String getBrand() {
@@ -145,5 +147,13 @@ public class AddVehicleRequest {
 
     public void setEffectiveDate(String effectiveDate) {
         this.effectiveDate = effectiveDate;
+    }
+
+    public MultipartFile getImage() {
+        return image;
+    }
+
+    public void setImage(MultipartFile image) {
+        this.image = image;
     }
 }
