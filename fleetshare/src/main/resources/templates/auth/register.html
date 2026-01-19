@@ -30,11 +30,6 @@
             <div class="auth-header">
                 <h1 class="auth-title">Create Your Account</h1>
                 <p class="auth-subtitle">Join FleetShare to start renting or sharing vehicles</p>
-                <!-- Global Error Message -->
-                <div th:if="${error}" class="alert alert-danger mt-3" role="alert">
-                    <i class="mdi mdi-alert-circle me-2"></i>
-                    <span th:text="${error}"></span>
-                </div>
             </div>
 
             <!-- Progress Steps -->
@@ -56,7 +51,7 @@
             </div>
 
             <!-- Registration Form -->
-            <form class="auth-form" id="registerForm" th:action="@{/register}" th:object="${registrationDTO}" method="post">
+            <form class="auth-form" id="registerForm" th:action="@{/register}" method="post">
 
                 <!-- Step 1: Account Info -->
                 <div class="form-step-content active" data-step="1">
@@ -65,10 +60,8 @@
                             <i class="mdi mdi-account-outline label-icon"></i>
                             Full Name
                         </label>
-                        <input type="text" class="form-input" id="fullName" th:field="*{fullName}"
-                            th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                        <input type="text" class="form-input" id="fullName" name="fullName"
                             placeholder="Enter your full name" required autocomplete="name">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
                     </div>
 
                     <div class="form-group">
@@ -77,10 +70,8 @@
                             Phone Number
                             <span class="form-label-optional">(Optional)</span>
                         </label>
-                        <input type="tel" class="form-input" id="phoneNumber" th:field="*{phoneNumber}"
-                            th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                        <input type="tel" class="form-input" id="phoneNumber" name="phoneNumber"
                             placeholder="e.g. +60123456789" autocomplete="tel">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
                     </div>
 
                     <div class="form-group">
@@ -88,11 +79,9 @@
                             <i class="mdi mdi-email-outline label-icon"></i>
                             Email Address
                         </label>
-                        <input type="email" class="form-input" id="email" th:field="*{email}"
-                            th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                        <input type="email" class="form-input" id="email" name="email"
                             placeholder="Enter your email address" required autocomplete="email">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-                        <small class="form-helper" th:unless="${#fields.hasErrors('email')}">We'll never share your email with anyone else.</small>
+                        <small class="form-helper">We'll never share your email with anyone else.</small>
                     </div>
 
                     <div class="form-group">
@@ -102,17 +91,13 @@
                         </label>
                         <div class="input-wrapper">
                             <input type="password" class="form-input form-input-with-icon" id="registerPassword"
-                                th:field="*{password}"
-                                th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
-                                placeholder="Create a strong password" required
+                                name="password" placeholder="Create a strong password" required
                                 autocomplete="new-password" minlength="8">
                             <span class="input-icon-right toggle-password" data-target="registerPassword"
                                 onclick="togglePassword('registerPassword')">
                                 <i class="mdi mdi-eye-outline"></i>
                             </span>
                         </div>
-                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-
                         <!-- Password Strength Indicator -->
                         <div class="password-strength">
                             <div class="strength-bar">
@@ -129,16 +114,13 @@
                         </label>
                         <div class="input-wrapper">
                             <input type="password" class="form-input form-input-with-icon" id="confirmPassword"
-                                th:field="*{confirmPassword}"
-                                th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
-                                placeholder="Confirm your password" required
+                                name="confirmPassword" placeholder="Confirm your password" required
                                 autocomplete="new-password">
                             <span class="input-icon-right toggle-password" data-target="confirmPassword"
                                 onclick="togglePassword('confirmPassword')">
                                 <i class="mdi mdi-eye-outline"></i>
                             </span>
                         </div>
-                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
                         <div class="form-error d-none" id="passwordMatchError">
                             <i class="mdi mdi-alert-circle"></i>
                             Passwords do not match
@@ -158,10 +140,8 @@
                             <i class="mdi mdi-map-marker-outline label-icon"></i>
                             Address Line 1
                         </label>
-                        <input type="text" class="form-input" id="addressLine1" th:field="*{addressLine1}"
-                            th:classappend="${#fields.hasErrors('addressLine1')} ? 'is-invalid' : ''"
+                        <input type="text" class="form-input" id="addressLine1" name="addressLine1"
                             placeholder="Street address, P.O. box" required autocomplete="address-line1">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('addressLine1')}" th:errors="*{addressLine1}"></div>
                     </div>
 
                     <div class="form-group">
@@ -169,35 +149,27 @@
                             Address Line 2
                             <span class="form-label-optional">(Optional)</span>
                         </label>
-                        <input type="text" class="form-input" id="addressLine2" th:field="*{addressLine2}"
-                            th:classappend="${#fields.hasErrors('addressLine2')} ? 'is-invalid' : ''"
+                        <input type="text" class="form-input" id="addressLine2" name="addressLine2"
                             placeholder="Apartment, suite, unit, building" autocomplete="address-line2">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('addressLine2')}" th:errors="*{addressLine2}"></div>
                     </div>
 
                     <div class="form-row form-row-3">
                         <div class="form-group">
                             <label class="form-label" for="city">City</label>
-                            <input type="text" class="form-input" id="city" th:field="*{city}"
-                                th:classappend="${#fields.hasErrors('city')} ? 'is-invalid' : ''"
-                                placeholder="City" required autocomplete="address-level2">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
+                            <input type="text" class="form-input" id="city" name="city" placeholder="City" required
+                                autocomplete="address-level2">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="state">State</label>
-                            <input type="text" class="form-input" id="state" th:field="*{state}"
-                                th:classappend="${#fields.hasErrors('state')} ? 'is-invalid' : ''"
-                                placeholder="State" required autocomplete="address-level1">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('state')}" th:errors="*{state}"></div>
+                            <input type="text" class="form-input" id="state" name="state" placeholder="State" required
+                                autocomplete="address-level1">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="postalCode">Postal Code</label>
-                            <input type="text" class="form-input" id="postalCode" th:field="*{postalCode}"
-                                th:classappend="${#fields.hasErrors('postalCode')} ? 'is-invalid' : ''"
-                                placeholder="ZIP" required autocomplete="postal-code">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('postalCode')}" th:errors="*{postalCode}"></div>
+                            <input type="text" class="form-input" id="postalCode" name="postalCode" placeholder="ZIP"
+                                required autocomplete="postal-code">
                         </div>
                     </div>
 
@@ -247,7 +219,7 @@
                             </div>
                         </div>
 
-                        <select class="form-select visually-hidden" id="userRole" th:field="*{userRole}" required
+                        <select class="form-select visually-hidden" id="userRole" name="userRole" required
                             tabindex="-1">
                             <option value="">Select your role</option>
                             <option value="renter">Renter</option>
@@ -256,20 +228,17 @@
                         <div class="form-error d-none" id="roleError">
                             <i class="mdi mdi-alert-circle"></i> Please select a role
                         </div>
-                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('userRole')}" th:errors="*{userRole}"></div>
                     </div>
 
                     <!-- Terms and Conditions -->
                     <div class="form-group">
                         <div class="form-checkbox-wrapper">
-                            <input type="checkbox" class="form-checkbox" id="agreeTerms" th:field="*{agreeTerms}"
-                                th:classappend="${#fields.hasErrors('agreeTerms')} ? 'is-invalid' : ''" required>
+                            <input type="checkbox" class="form-checkbox" id="agreeTerms" name="agreeTerms" required>
                             <label class="form-checkbox-label" for="agreeTerms">
                                 I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#"
                                     class="auth-link">Privacy Policy</a>
                             </label>
                         </div>
-                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('agreeTerms')}" th:errors="*{agreeTerms}"></div>
                     </div>
 
                     <div class="form-actions">
@@ -298,36 +267,6 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Restore visual state for Role Selection if reloaded with data
-            const userRoleSelect = document.getElementById('userRole');
-            if (userRoleSelect && userRoleSelect.value) {
-                const card = document.querySelector(`.role-card[data-value="${userRoleSelect.value}"]`);
-                if (card) {
-                    // Manually select without triggering event if not needed, or just call selectRole
-                    selectRole(card);
-                }
-            }
-
-            // Auto-navigate to step with errors
-            const invalidInput = document.querySelector('.is-invalid, .invalid-feedback');
-            if (invalidInput) {
-                const stepContent = invalidInput.closest('.form-step-content');
-                if (stepContent) {
-                    const stepNumber = stepContent.dataset.step;
-                    // Switch to that step
-                    document.querySelectorAll('.form-step-content').forEach(el => el.classList.remove('active'));
-                    stepContent.classList.add('active');
-
-                    // Update header steps
-                    document.querySelectorAll('.form-steps .step').forEach((s, i) => {
-                        if (i + 1 <= stepNumber) s.classList.add('active');
-                        else s.classList.remove('active');
-                    });
-                }
-            }
-        });
-
         // Password Toggle
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
@@ -395,8 +334,6 @@
             let isValid = true;
 
             inputs.forEach(input => {
-                // Skip validation for fields that are already marked invalid by server if they haven't been touched yet?
-                // Actually, client side validation should run.
                 if (!input.value.trim()) {
                     input.classList.add('error');
                     isValid = false;
@@ -446,12 +383,7 @@
             });
             card.classList.add('selected');
             card.setAttribute('aria-checked', 'true');
-
-            // Set value on select
-            const roleValue = card.dataset.value;
-            const select = document.getElementById('userRole');
-            select.value = roleValue;
-
+            document.getElementById('userRole').value = card.dataset.value;
             document.getElementById('roleError').classList.add('d-none');
         }
 
