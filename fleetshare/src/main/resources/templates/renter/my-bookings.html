@@ -575,7 +575,7 @@
                     switch(currentFilter) {
                         case 'all': statusMatch = true; break;
                         case 'upcoming': statusMatch = status === 'PENDING' || status === 'CONFIRMED'; break;
-                        case 'active': statusMatch = status === 'IN_PROGRESS' || status === 'ACTIVE'; break;
+                        case 'active': statusMatch = status === 'ACTIVE'; break;
                         case 'completed': statusMatch = status === 'COMPLETED'; break;
                         case 'cancelled': statusMatch = status === 'CANCELLED'; break;
                         default: statusMatch = true;
@@ -590,12 +590,13 @@
                     }
 
                     if (statusMatch && searchMatch) {
-                        card.style.display = 'block';
-                        // Trigger reflow for animation
                         if (card.style.display === 'none') { // Only animate if it was hidden
+                            card.style.display = 'block';
                             card.style.animation = 'none';
-                            card.offsetHeight;
+                            card.offsetHeight; // Trigger reflow
                             card.style.animation = 'fadeIn 0.4s ease-out';
+                        } else {
+                            card.style.display = 'block';
                         }
                         visibleCount++;
                     } else {
@@ -628,6 +629,16 @@
                 }
             }
 
+            // Debounce utility
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    const context = this;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(context, args), wait);
+                };
+            }
+
             // Search functionality
             document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.getElementById('bookingSearch');
@@ -635,10 +646,12 @@
                 const tabContainer = document.querySelector('.filter-tabs');
 
                 if (searchInput) {
+                    const debouncedApply = debounce(applyFilters, 300);
+
                     searchInput.addEventListener('input', function(e) {
                         currentSearch = e.target.value.toLowerCase().trim();
                         clearBtn.style.display = currentSearch ? 'block' : 'none';
-                        applyFilters();
+                        debouncedApply();
                     });
 
                     clearBtn.addEventListener('click', function() {
@@ -646,14 +659,32 @@
                         currentSearch = '';
                         this.style.display = 'none';
                         searchInput.focus();
-                        applyFilters();
+                        applyFilters(); // Apply immediately when cleared
                     });
                 }
 
-                // Accessibility
+                // Accessibility: Keyboard Navigation for Tabs
                 if (tabContainer) {
+                    const tabs = tabContainer.querySelectorAll('.filter-tab');
+
                     tabContainer.addEventListener('keydown', function(e) {
-                        // Implement arrow key navigation if needed
+                        const activeTab = document.activeElement;
+                        if (!activeTab.classList.contains('filter-tab')) return;
+
+                        const index = Array.from(tabs).indexOf(activeTab);
+                        let nextIndex = null;
+
+                        if (e.key === 'ArrowRight') {
+                            nextIndex = (index + 1) % tabs.length;
+                        } else if (e.key === 'ArrowLeft') {
+                            nextIndex = (index - 1 + tabs.length) % tabs.length;
+                        }
+
+                        if (nextIndex !== null) {
+                            e.preventDefault();
+                            tabs[nextIndex].focus();
+                            tabs[nextIndex].click(); // Automatically select on navigate
+                        }
                     });
                 }
             });
