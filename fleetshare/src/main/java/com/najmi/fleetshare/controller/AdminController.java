@@ -7,6 +7,7 @@ import com.najmi.fleetshare.dto.MaintenanceLogDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.dto.PasswordChangeRequest;
 import com.najmi.fleetshare.entity.PlatformAdmin;
 import com.najmi.fleetshare.repository.PlatformAdminRepository;
 import com.najmi.fleetshare.service.BookingService;
@@ -679,6 +680,35 @@ public class AdminController {
         sessionUser.getAdminDetails().setFullName(fullName.trim());
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
+    }
+
+    @PostMapping("/profile/password")
+    @ResponseBody
+    public ResponseEntity<?> updatePassword(
+            @jakarta.validation.Valid @RequestBody PasswordChangeRequest request,
+            HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "New passwords do not match"));
+        }
+
+        com.najmi.fleetshare.entity.User user = userRepository.findById(sessionUser.getUserId()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getHashedPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Incorrect old password"));
+        }
+
+        user.setHashedPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Password changed successfully"));
     }
 
     @PostMapping("/profile/image")

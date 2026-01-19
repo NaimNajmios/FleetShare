@@ -10,6 +10,7 @@ import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
+import com.najmi.fleetshare.dto.PasswordChangeRequest;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.entity.VehiclePriceHistory;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
@@ -273,6 +274,16 @@ public class OwnerController {
 
         try {
             Long fleetOwnerId = user.getOwnerDetails().getFleetOwnerId();
+
+            // Handle image upload if provided
+            if (request.getImage() != null && !request.getImage().isEmpty()) {
+                // Store image first, then set the URL on the request
+                // Using a temporary vehicle ID (0) since we don't have the ID yet
+                // The file will be stored with timestamp to make it unique
+                String imageUrl = fileStorageService.storeVehicleImage(request.getImage(), System.currentTimeMillis());
+                request.setVehicleImageUrl(imageUrl);
+            }
+
             vehicleManagementService.createVehicle(fleetOwnerId, request);
             redirectAttributes.addFlashAttribute("successMessage", "Vehicle added successfully!");
             return "redirect:/owner/vehicles";
@@ -925,6 +936,35 @@ public class OwnerController {
                 .setContactPhone(request.getContactPhone() != null ? request.getContactPhone().trim() : null);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Profile updated successfully"));
+    }
+
+    @PostMapping("/profile/password")
+    @ResponseBody
+    public ResponseEntity<?> updatePassword(
+            @Valid @RequestBody PasswordChangeRequest request,
+            HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "New passwords do not match"));
+        }
+
+        com.najmi.fleetshare.entity.User user = userRepository.findById(sessionUser.getUserId()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User not found"));
+        }
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getHashedPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Incorrect old password"));
+        }
+
+        user.setHashedPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Password changed successfully"));
     }
 
     @PostMapping("/profile/image")
