@@ -17,7 +17,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -66,5 +68,17 @@ public class AuthControllerTest {
         // Assert
         // Service should NOT be called if validation works
         verify(registrationService, never()).registerUser(any(RegistrationDTO.class));
+    }
+
+    @Test
+    public void register_withFlashAttribute_shouldPreserveDto() throws Exception {
+        RegistrationDTO existingDto = new RegistrationDTO();
+        existingDto.setEmail("existing@example.com");
+
+        mockMvc.perform(get("/register")
+                .flashAttr("registrationDTO", existingDto))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("registrationDTO", existingDto))
+                .andExpect(view().name("auth/register"));
     }
 }
