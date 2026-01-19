@@ -806,11 +806,20 @@
             }
 
             let currentSort = 'recommended';
+            let isRestoringState = false; // Flag to prevent URL updates during restoration
 
-            // Initialize original order on load
+            // Initialize original order and load filters from URL
             document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.vehicle-card').forEach((card, index) => {
                     card.setAttribute('data-original-index', index);
+                });
+
+                // UX: Restore state from URL
+                loadFiltersFromURL();
+
+                // Handle browser back/forward buttons
+                window.addEventListener('popstate', () => {
+                   loadFiltersFromURL();
                 });
             });
 
@@ -818,9 +827,12 @@
                 currentSort = sortType;
 
                 // Update active state
-                btn.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(item => {
-                    item.classList.remove('active');
-                });
+                const menu = btn.closest('.dropdown-menu');
+                if (menu) {
+                    menu.querySelectorAll('.dropdown-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                }
                 btn.classList.add('active');
 
                 // Update dropdown button text (optional, but nice)
@@ -830,10 +842,103 @@
                 applyFilters();
             }
 
+            // --- UX Enhancement: Deep Linking & State Persistence ---
+            function updateURL(params) {
+                if (isRestoringState) return;
+
+                const url = new URL(window.location);
+
+                // Clear existing query params that we manage
+                url.searchParams.delete('category');
+                url.searchParams.delete('transmission');
+                url.searchParams.delete('minPrice');
+                url.searchParams.delete('maxPrice');
+                url.searchParams.delete('search');
+                url.searchParams.delete('sort');
+
+                // Add new params
+                if (params.categories.length > 0) {
+                    params.categories.forEach(c => url.searchParams.append('category', c));
+                }
+                if (params.transmissions.length > 0) {
+                    params.transmissions.forEach(t => url.searchParams.append('transmission', t));
+                }
+                if (params.minPrice) url.searchParams.set('minPrice', params.minPrice);
+                if (params.maxPrice) url.searchParams.set('maxPrice', params.maxPrice);
+                if (params.search) url.searchParams.set('search', params.search);
+                if (params.sort !== 'recommended') url.searchParams.set('sort', params.sort);
+
+                // Update URL without reloading
+                window.history.replaceState({}, '', url);
+            }
+
+            function loadFiltersFromURL() {
+                isRestoringState = true;
+                const urlParams = new URLSearchParams(window.location.search);
+
+                // Reset everything first
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.getElementById('minPrice').value = '';
+                document.getElementById('maxPrice').value = '';
+                document.getElementById('vehicleSearch').value = '';
+
+                // Restore Categories
+                const categories = urlParams.getAll('category');
+                categories.forEach(cat => {
+                    const cb = document.querySelector(`input[name="category"][value="${cat}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                // Restore Transmission
+                const transmissions = urlParams.getAll('transmission');
+                transmissions.forEach(trans => {
+                    const cb = document.querySelector(`input[name="transmission"][value="${trans}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                // Restore Price
+                const minPrice = urlParams.get('minPrice');
+                if (minPrice) document.getElementById('minPrice').value = minPrice;
+
+                const maxPrice = urlParams.get('maxPrice');
+                if (maxPrice) document.getElementById('maxPrice').value = maxPrice;
+
+                // Restore Search
+                const search = urlParams.get('search');
+                if (search) {
+                    const searchInput = document.getElementById('vehicleSearch');
+                    searchInput.value = search;
+                    toggleClearButton(searchInput);
+                }
+
+                // Restore Sort
+                const sort = urlParams.get('sort');
+                if (sort) {
+                    currentSort = sort;
+                    // Update UI for Sort
+                    const sortBtn = document.querySelector(`button[onclick="setSort('${sort}', this)"]`);
+                    if (sortBtn) {
+                         const menu = sortBtn.closest('.dropdown-menu');
+                         if (menu) {
+                             menu.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
+                         }
+                         sortBtn.classList.add('active');
+                    }
+                }
+
+                // Apply
+                applyFilters();
+                isRestoringState = false;
+            }
+            // -----------------------------------------------------
+
             function applyFilters() {
                 const container = document.getElementById('vehicleGrid');
                 const cards = Array.from(document.querySelectorAll('.vehicle-card'));
-                const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
+                const searchInput = document.getElementById('vehicleSearch').value.toLowerCase(); // keep case-insensitive for search logic
+                // For URL persistence, we want the RAW value to preserve user intent display
+                const rawSearchInput = document.getElementById('vehicleSearch').value;
+
                 const activeFiltersContainer = document.getElementById('activeFilters');
                 activeFiltersContainer.innerHTML = ''; // Clear existing chips
 
@@ -872,9 +977,19 @@
                 }
 
                 // Search chip
-                if (searchInput) {
-                    addFilterChip('search', 'search', `Search: "${document.getElementById('vehicleSearch').value}"`);
+                if (rawSearchInput) {
+                    addFilterChip('search', 'search', `Search: "${rawSearchInput}"`);
                 }
+
+                // UX: Update URL State
+                updateURL({
+                    categories: checkedCategories,
+                    transmissions: checkedTransmissions,
+                    minPrice: minPriceStr,
+                    maxPrice: maxPriceStr,
+                    search: rawSearchInput,
+                    sort: currentSort
+                });
 
                 // Sorting Logic
                 cards.sort((a, b) => {
