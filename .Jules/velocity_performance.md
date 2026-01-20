@@ -41,3 +41,16 @@
 - Network I/O: drastically reduced payload size from DB.
 
 **Learnings:** Use database aggregation for statistics. Avoid fetching entire collections just to count them or show a subset. When entities are decoupled (no direct relationships), use JPQL `IN` subqueries or Cross Joins with careful WHERE clauses to perform aggregations.
+
+## 2026-01-20 - Optimized Vehicle Price History Query
+
+**Context:** `VehicleManagementService.getAvailableVehicles` and `getAllVehicles` endpoints. Specifically `VehiclePriceHistoryRepository.findLatestPricesForVehicles`.
+**Symptoms:** Severe performance regression detected on H2 database (and potential bottleneck on MySQL with large datasets). The query took ~113 seconds for 1000 vehicles with history.
+**Root Cause:** The query used a Correlated Subquery pattern `WHERE ... = (SELECT MAX(...) ...)` inside an `IN` clause. This forced the database to execute the subquery for every candidate row (O(N*M) complexity).
+**Solution:** Replaced the Correlated Subquery with a Native Query using Window Functions (`ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)`). This allows the database to compute rankings in a single pass (O(N log N) or O(N)).
+**Impact:**
+- Latency: 112,952 ms → 433 ms (99.6% reduction) in test environment.
+- Throughput: Significantly increased for vehicle browsing endpoints.
+- Database Load: Reduced massive scanning and CPU usage.
+
+**Learnings:** Avoid Correlated Subqueries for "latest record per group" problems. Use Window Functions (`ROW_NUMBER()`, `RANK()`) which are optimized for this exact pattern in modern SQL databases.
