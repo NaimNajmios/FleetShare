@@ -152,20 +152,23 @@
                             <div class="profile-container">
                                 <!-- Image Upload Section -->
                                 <div class="profile-header">
-                                    <div class="image-dropzone" role="button" tabindex="0" aria-label="Upload Vehicle Image"
+                                    <div class="image-dropzone" role="button" tabindex="0"
+                                        aria-label="Upload Vehicle Image"
                                         onclick="document.getElementById('vehicleImageInput').click()">
                                         <div id="dropzoneContent">
                                             <i class="mdi mdi-cloud-upload dropzone-icon"></i>
                                             <p class="dropzone-text">Click to upload or drag and drop</p>
                                             <p class="dropzone-hint">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
                                         </div>
-                                        <img id="imagePreview" src="#" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                                        <img id="imagePreview" src="#" alt="Preview"
+                                            style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
                                         <!-- Added name="image" for controller binding -->
                                         <input type="file" id="vehicleImageInput" name="image" style="display: none;"
                                             accept="image/*">
                                     </div>
                                     <!-- Add button to remove image, initially hidden -->
-                                    <button type="button" id="removeImageBtn" class="btn btn-sm btn-outline-danger mt-2" style="display: none; align-self: center;">
+                                    <button type="button" id="removeImageBtn" class="btn btn-sm btn-outline-danger mt-2"
+                                        style="display: none; align-self: center;">
                                         <i class="mdi mdi-delete"></i> Remove Image
                                     </button>
                                 </div>
@@ -176,13 +179,38 @@
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label>Brand</label>
-                                            <input type="text" class="form-control" name="brand"
-                                                placeholder="e.g., Toyota" required>
+                                            <input type="text" class="form-control" name="brand" id="brandInput"
+                                                list="brandList" placeholder="e.g., Toyota" required autocomplete="off">
+                                            <datalist id="brandList">
+                                                <option value="Perodua">
+                                                <option value="Proton">
+                                                <option value="Toyota">
+                                                <option value="Honda">
+                                                <option value="Nissan">
+                                                <option value="Mazda">
+                                                <option value="Hyundai">
+                                                <option value="Kia">
+                                                <option value="Mitsubishi">
+                                                <option value="Suzuki">
+                                                <option value="Ford">
+                                                <option value="Volkswagen">
+                                                <option value="BMW">
+                                                <option value="Mercedes-Benz">
+                                                <option value="Audi">
+                                                <option value="Volvo">
+                                                <option value="Lexus">
+                                                <option value="Subaru">
+                                                <option value="Isuzu">
+                                                <option value="Peugeot">
+                                            </datalist>
                                         </div>
                                         <div class="form-group">
                                             <label>Model</label>
-                                            <input type="text" class="form-control" name="model"
-                                                placeholder="e.g., Camry" required>
+                                            <input type="text" class="form-control" name="model" id="modelInput"
+                                                list="modelList" placeholder="e.g., Camry" required autocomplete="off">
+                                            <datalist id="modelList">
+                                                <!-- Models will be dynamically populated based on brand -->
+                                            </datalist>
                                         </div>
                                     </div>
                                     <div class="form-row">
@@ -252,7 +280,8 @@
                                             <label>Rate Per Day (RM)</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">RM</span>
-                                                <input type="number" class="form-control" name="ratePerDay" placeholder="0.00" min="0" step="0.01" required>
+                                                <input type="number" class="form-control" name="ratePerDay"
+                                                    placeholder="0.00" min="0" step="0.01" required>
                                             </div>
                                         </div>
                                     </div>
@@ -276,18 +305,42 @@
 
     <th:block layout:fragment="extra-js">
         <script>
+            // Malaysian Vehicle Brand-Model Data
+            const vehicleModels = {
+                'Perodua': ['Myvi', 'Axia', 'Bezza', 'Ativa', 'Aruz', 'Alza', 'Viva', 'Kancil', 'Kelisa', 'Kembara', 'Nautica'],
+                'Proton': ['Saga', 'X50', 'X70', 'X90', 'Persona', 'Iriz', 'Exora', 'Perdana', 'Preve', 'Suprima S', 'Inspira', 'Wira', 'Waja', 'Gen-2', 'Satria Neo'],
+                'Toyota': ['Vios', 'Camry', 'Corolla', 'Yaris', 'Innova', 'Avanza', 'Rush', 'Fortuner', 'Hilux', 'RAV4', 'C-HR', 'Alphard', 'Vellfire', 'Harrier', 'Land Cruiser'],
+                'Honda': ['City', 'Civic', 'Accord', 'Jazz', 'HR-V', 'CR-V', 'BR-V', 'WR-V', 'Odyssey', 'Brio'],
+                'Nissan': ['Almera', 'X-Trail', 'Serena', 'Navara', 'Kicks', 'Leaf', 'Skyline', 'Terra', 'Urvan'],
+                'Mazda': ['Mazda 2', 'Mazda 3', 'Mazda 6', 'CX-3', 'CX-5', 'CX-8', 'CX-30', 'CX-9', 'MX-5', 'BT-50'],
+                'Hyundai': ['Elantra', 'Sonata', 'Kona', 'Tucson', 'Santa Fe', 'Starex', 'Ioniq', 'Venue', 'Palisade', 'Staria'],
+                'Kia': ['Cerato', 'Optima', 'Sportage', 'Sorento', 'Carnival', 'Picanto', 'Seltos', 'Rio', 'Stinger', 'EV6'],
+                'Mitsubishi': ['Triton', 'Xpander', 'ASX', 'Outlander', 'Pajero Sport', 'Attrage', 'Mirage', 'Lancer'],
+                'Suzuki': ['Swift', 'Ertiga', 'Jimny', 'Vitara', 'S-Presso', 'Ciaz', 'XL7', 'APV'],
+                'Ford': ['Ranger', 'Everest', 'Territory', 'Focus', 'Fiesta', 'Mustang', 'Explorer'],
+                'Volkswagen': ['Polo', 'Golf', 'Passat', 'Tiguan', 'Touareg', 'Arteon', 'T-Cross', 'T-Roc', 'Jetta'],
+                'BMW': ['1 Series', '2 Series', '3 Series', '5 Series', '7 Series', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i4', 'iX'],
+                'Mercedes-Benz': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'CLA', 'AMG GT', 'EQC', 'EQS'],
+                'Audi': ['A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'e-tron'],
+                'Volvo': ['S60', 'S90', 'V60', 'V90', 'XC40', 'XC60', 'XC90', 'C40'],
+                'Lexus': ['IS', 'ES', 'LS', 'NX', 'RX', 'UX', 'LX', 'LC', 'RC'],
+                'Subaru': ['Impreza', 'WRX', 'Levorg', 'Forester', 'Outback', 'XV', 'BRZ'],
+                'Isuzu': ['D-Max', 'MU-X'],
+                'Peugeot': ['208', '308', '408', '508', '2008', '3008', '5008', 'Traveller']
+            };
+
             // Image Preview Logic
             const imageInput = document.getElementById('vehicleImageInput');
             const dropzoneContent = document.getElementById('dropzoneContent');
             const imagePreview = document.getElementById('imagePreview');
             const removeBtn = document.getElementById('removeImageBtn');
 
-            imageInput.addEventListener('change', function(e) {
+            imageInput.addEventListener('change', function (e) {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
 
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         imagePreview.src = e.target.result;
                         imagePreview.style.display = 'block';
                         dropzoneContent.style.display = 'none';
@@ -298,7 +351,7 @@
                 }
             });
 
-            removeBtn.addEventListener('click', function(e) {
+            removeBtn.addEventListener('click', function (e) {
                 e.stopPropagation(); // Prevent triggering the dropzone click
                 imageInput.value = ''; // Clear input
                 imagePreview.style.display = 'none';
@@ -352,12 +405,33 @@
             }
 
             // Keyboard accessibility for dropzone
-            dropzone.addEventListener('keydown', function(e) {
+            dropzone.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     document.getElementById('vehicleImageInput').click();
                 }
             });
+
+            // Dynamic Model Suggestions based on Brand
+            const brandInput = document.getElementById('brandInput');
+            const modelInput = document.getElementById('modelInput');
+            const modelList = document.getElementById('modelList');
+
+            function updateModelSuggestions() {
+                const brand = brandInput.value.trim();
+                modelList.innerHTML = '';
+
+                if (vehicleModels[brand]) {
+                    vehicleModels[brand].forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        modelList.appendChild(option);
+                    });
+                }
+            }
+
+            brandInput.addEventListener('input', updateModelSuggestions);
+            brandInput.addEventListener('change', updateModelSuggestions);
         </script>
     </th:block>
 </body>
