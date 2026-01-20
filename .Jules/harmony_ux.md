@@ -50,3 +50,35 @@
     <div id="dropzoneContent">...</div>
 </div>
 ```
+
+## 2024-05-23 - [Search Filter Persistence & Deep Linking]
+
+**Context:** The "Browse Vehicles" page (`/renter/vehicles`) allows users to filter vehicles by category, transmission, price, and search keywords.
+**User Need:** Users want to be able to share their search results with others or navigate back to their filtered list after viewing a vehicle's details.
+**Observation:** Currently, all filtering is client-side and ephemeral. Navigating away and back resets all filters, causing frustration and lost context.
+**Solution Implemented:** Implemented Deep Linking using `history.replaceState` and `URLSearchParams`.
+- When filters change, the URL query parameters are updated.
+- On page load, filters are populated from the URL query parameters.
+- `popstate` event listener handles browser Back/Forward navigation.
+**Impact:**
+- Users can bookmark specific searches.
+- Browser "Back" button now correctly restores the previous filter state.
+- Friction reduced when browsing multiple vehicles.
+
+**Code Pattern:**
+```javascript
+// Sync filters to URL
+function updateURLParams() {
+    const params = new URLSearchParams();
+    // ... collect filter values ...
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState(null, '', newUrl);
+}
+
+// Restore filters from URL
+function loadFiltersFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    // ... apply values to inputs ...
+    if (shouldApply) applyFilters();
+}
+```

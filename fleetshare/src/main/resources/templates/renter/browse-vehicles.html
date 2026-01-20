@@ -947,6 +947,9 @@
                     if (emptyState && cards.length === 0) emptyState.style.display = 'block';
                     noFilterResults.style.display = 'none';
                 }
+
+                // Update URL with current filters
+                updateURLParams();
             }
 
             function clearAllFilters() {
@@ -1054,6 +1057,113 @@
                     btn.focus();
                 }, { once: true });
             }
+
+            // --- UX IMPROVEMENT: Deep Linking & URL Synchronization ---
+
+            function updateURLParams() {
+                const params = new URLSearchParams();
+
+                // Categories
+                const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                    .map(cb => cb.value);
+                if (checkedCategories.length > 0) {
+                    params.set('category', checkedCategories.join(','));
+                }
+
+                // Transmissions
+                const checkedTransmissions = Array.from(document.querySelectorAll('input[name="transmission"]:checked'))
+                    .map(cb => cb.value);
+                if (checkedTransmissions.length > 0) {
+                    params.set('transmission', checkedTransmissions.join(','));
+                }
+
+                // Price
+                const minPrice = document.getElementById('minPrice').value;
+                const maxPrice = document.getElementById('maxPrice').value;
+                if (minPrice) params.set('minPrice', minPrice);
+                if (maxPrice) params.set('maxPrice', maxPrice);
+
+                // Search
+                // Use the raw value, not lowercased, for the URL
+                const search = document.getElementById('vehicleSearch').value;
+                if (search) params.set('search', search);
+
+                // Update URL without reloading
+                const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                window.history.replaceState(null, '', newUrl);
+            }
+
+            function loadFiltersFromURL() {
+                const params = new URLSearchParams(window.location.search);
+                let shouldApply = false;
+
+                // Categories
+                if (params.has('category')) {
+                    const categories = params.get('category').split(',');
+                    categories.forEach(val => {
+                        const cb = document.querySelector(`input[name="category"][value="${val}"]`);
+                        if (cb) {
+                            cb.checked = true;
+                            shouldApply = true;
+                        }
+                    });
+                }
+
+                // Transmissions
+                if (params.has('transmission')) {
+                    const transmissions = params.get('transmission').split(',');
+                    transmissions.forEach(val => {
+                        const cb = document.querySelector(`input[name="transmission"][value="${val}"]`);
+                        if (cb) {
+                            cb.checked = true;
+                            shouldApply = true;
+                        }
+                    });
+                }
+
+                // Price
+                if (params.has('minPrice')) {
+                    document.getElementById('minPrice').value = params.get('minPrice');
+                    shouldApply = true;
+                }
+                if (params.has('maxPrice')) {
+                    document.getElementById('maxPrice').value = params.get('maxPrice');
+                    shouldApply = true;
+                }
+
+                // Search
+                if (params.has('search')) {
+                    const searchValue = params.get('search');
+                    document.getElementById('vehicleSearch').value = searchValue;
+                    toggleClearButton(document.getElementById('vehicleSearch'));
+                    shouldApply = true;
+                }
+
+                if (shouldApply) {
+                    applyFilters();
+                }
+            }
+
+            // Initialize on load
+            document.addEventListener('DOMContentLoaded', loadFiltersFromURL);
+
+            // Handle Back/Forward buttons
+            window.addEventListener('popstate', () => {
+                 // Reset all filters first
+                 document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                 document.getElementById('minPrice').value = '';
+                 document.getElementById('maxPrice').value = '';
+                 document.getElementById('vehicleSearch').value = '';
+                 toggleClearButton(document.getElementById('vehicleSearch'));
+
+                 // Re-apply from URL
+                 loadFiltersFromURL();
+
+                 // If URL is empty, we should also re-apply filters (which will show all)
+                 if (!window.location.search) {
+                     applyFilters();
+                 }
+            });
         </script>
     </th:block>
 </body>
