@@ -355,6 +355,65 @@
                 font-size: 3rem;
             }
 
+            /* Drag & Drop Enhancements */
+            .avatar-circle {
+                position: relative; /* Ensure overlay is positioned relative to this */
+                transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+            }
+
+            .avatar-circle.editable {
+                cursor: pointer;
+            }
+
+            .avatar-circle.editable:hover {
+                transform: scale(1.05);
+                border-color: #8b5cf6;
+            }
+
+            .avatar-circle.drag-over {
+                border-color: #8b5cf6;
+                transform: scale(1.1);
+                box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.2);
+                background: #f5f3ff;
+            }
+
+            .avatar-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 23, 42, 0.6);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                border-radius: 50%;
+                pointer-events: none; /* Let clicks pass through to parent */
+                backdrop-filter: blur(2px);
+            }
+
+            .avatar-circle.editable:hover .avatar-overlay,
+            .avatar-circle.drag-over .avatar-overlay {
+                opacity: 1;
+            }
+
+            .avatar-overlay i {
+                font-size: 1.5rem !important;
+                margin-bottom: 0.25rem;
+                color: white !important;
+            }
+
+            .avatar-overlay span {
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
         </style>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -377,11 +436,17 @@
 
                     <!-- Avatar Section -->
                     <div class="avatar-section">
-                        <div class="avatar-circle">
+                        <div class="avatar-circle" id="avatar-dropzone">
                             <img th:if="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
                                 th:src="${user.profileImageUrl}" alt="Profile Photo">
                             <i th:unless="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
                                 class="fas fa-user"></i>
+
+                            <!-- Overlay for Edit/Drag State -->
+                            <div class="avatar-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>Change</span>
+                            </div>
                         </div>
                         <div class="avatar-controls">
                             <h4>Profile Photo</h4>
@@ -621,6 +686,9 @@
                 btnUpload.classList.remove('hidden');
                 editActions.classList.remove('hidden');
                 viewActions.classList.add('hidden');
+
+                // Enable dropzone visual
+                document.getElementById('avatar-dropzone').classList.add('editable');
             });
 
             btnCancel.addEventListener('click', function (e) {
@@ -709,6 +777,9 @@
                 btnUpload.classList.add('hidden');
                 editActions.classList.add('hidden');
                 viewActions.classList.remove('hidden');
+
+                // Disable dropzone visual
+                document.getElementById('avatar-dropzone').classList.remove('editable');
             }
 
             // Image Upload Handling
@@ -745,22 +816,72 @@
                     const existingImg = avatarCircle.querySelector('img');
                     const existingIcon = avatarCircle.querySelector('i');
 
-                    if (existingIcon) existingIcon.style.display = 'none';
+                    // Hide the default user icon if it exists as a direct child
+                    if (existingIcon && existingIcon.parentElement === avatarCircle) {
+                        existingIcon.style.display = 'none';
+                    }
 
-                    if (existingImg) {
+                    if (existingImg && existingImg.parentElement === avatarCircle) {
                         existingImg.src = event.target.result;
                         existingImg.style.display = 'block';
                     } else {
                         const newImg = document.createElement('img');
                         newImg.src = event.target.result;
                         newImg.alt = 'Profile Preview';
-                        avatarCircle.appendChild(newImg);
+                        // Insert as first child so it stays behind the overlay
+                        avatarCircle.insertBefore(newImg, avatarCircle.firstChild);
                     }
                 };
                 reader.readAsDataURL(file);
 
                 showToast('Image selected. Click Save to apply.', 'success');
             });
+
+            // Drag & Drop Logic
+            const dropzone = document.getElementById('avatar-dropzone');
+
+            // Click to upload (when in edit mode)
+            dropzone.addEventListener('click', function() {
+                if (isEditMode) fileInput.click();
+            });
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // Highlight drop area
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => {
+                    if (isEditMode) dropzone.classList.add('drag-over');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => {
+                    dropzone.classList.remove('drag-over');
+                }, false);
+            });
+
+            // Handle dropped files
+            dropzone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                if (!isEditMode) return;
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    fileInput.files = files; // Sync with file input
+                    // Trigger change event manually
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                }
+            }
 
             // Password Modal Logic
             const passwordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
