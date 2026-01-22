@@ -947,6 +947,9 @@
                     if (emptyState && cards.length === 0) emptyState.style.display = 'block';
                     noFilterResults.style.display = 'none';
                 }
+
+                // UX Improvement: Sync state to URL
+                updateUrlState();
             }
 
             function clearAllFilters() {
@@ -1054,6 +1057,101 @@
                     btn.focus();
                 }, { once: true });
             }
+
+            // --- UX Improvement: URL Synchronization ---
+
+            let isRestoringState = false;
+
+            function updateUrlState() {
+                if (isRestoringState) return;
+
+                const params = new URLSearchParams();
+
+                // Categories
+                document.querySelectorAll('input[name="category"]:checked').forEach(cb => {
+                    params.append('category', cb.value);
+                });
+
+                // Transmission
+                document.querySelectorAll('input[name="transmission"]:checked').forEach(cb => {
+                    params.append('transmission', cb.value);
+                });
+
+                // Price
+                const minPrice = document.getElementById('minPrice').value;
+                const maxPrice = document.getElementById('maxPrice').value;
+                if (minPrice) params.set('minPrice', minPrice);
+                if (maxPrice) params.set('maxPrice', maxPrice);
+
+                // Search
+                const search = document.getElementById('vehicleSearch').value;
+                if (search) params.set('search', search);
+
+                // Sort
+                if (currentSort !== 'recommended') {
+                    params.set('sort', currentSort);
+                }
+
+                const newRelativePathQuery = window.location.pathname + '?' + params.toString();
+                history.replaceState(null, '', newRelativePathQuery);
+            }
+
+            function restoreFromUrl() {
+                isRestoringState = true;
+                const params = new URLSearchParams(window.location.search);
+
+                // Reset UI first
+                document.querySelectorAll('input[name="category"], input[name="transmission"]').forEach(cb => cb.checked = false);
+                document.getElementById('minPrice').value = '';
+                document.getElementById('maxPrice').value = '';
+                document.getElementById('vehicleSearch').value = '';
+
+                // Restore Categories
+                params.getAll('category').forEach(val => {
+                    const cb = document.querySelector(`input[name="category"][value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                // Restore Transmission
+                params.getAll('transmission').forEach(val => {
+                    const cb = document.querySelector(`input[name="transmission"][value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+
+                // Restore Price
+                const minPrice = params.get('minPrice');
+                const maxPrice = params.get('maxPrice');
+                if (minPrice) document.getElementById('minPrice').value = minPrice;
+                if (maxPrice) document.getElementById('maxPrice').value = maxPrice;
+
+                // Restore Search
+                const search = params.get('search');
+                const searchInput = document.getElementById('vehicleSearch');
+                if (search) {
+                    searchInput.value = search;
+                    toggleClearButton(searchInput);
+                }
+
+                // Restore Sort
+                const sort = params.get('sort');
+                if (sort && sort !== 'recommended') {
+                    const sortBtn = document.querySelector(`button[onclick*="'${sort}'"]`);
+                    if (sortBtn) {
+                         setSort(sort, sortBtn);
+                    }
+                }
+
+                isRestoringState = false;
+                applyFilters();
+            }
+
+            // Handle browser Back/Forward
+            window.addEventListener('popstate', restoreFromUrl);
+
+            // Init from URL on load (runs after the initial DOMContentLoaded setup)
+            document.addEventListener('DOMContentLoaded', () => {
+                restoreFromUrl();
+            });
         </script>
     </th:block>
 </body>
