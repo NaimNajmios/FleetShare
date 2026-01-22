@@ -41,3 +41,19 @@
 - Network I/O: drastically reduced payload size from DB.
 
 **Learnings:** Use database aggregation for statistics. Avoid fetching entire collections just to count them or show a subset. When entities are decoupled (no direct relationships), use JPQL `IN` subqueries or Cross Joins with careful WHERE clauses to perform aggregations.
+
+## 2026-01-22 - Optimized Latest Vehicle Price Retrieval
+
+**Context:** `VehicleManagementService.mapVehiclesToDTOs` used in vehicle browsing and listing.
+**Symptoms:** Performance bottleneck identified in `VehiclePriceHistoryRepository.findLatestPricesForVehicles`. The query used a Correlated Subquery pattern (`WHERE date = (SELECT MAX(...) WHERE id = outer.id)`) which executes effectively in O(N^2) complexity on some database engines or prevents optimal index usage, leading to slow performance as the price history table grows.
+**Root Cause:** The use of a Correlated Subquery to find the "latest" record per group (Vehicle) causes the database to re-evaluate the subquery for every candidate row.
+**Solution:**
+1. Implemented a Native SQL Query using Window Functions (`ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)`).
+2. Added `findLatestPricesForVehiclesOptimized` to `VehiclePriceHistoryRepository`.
+3. Updated `VehicleManagementService` to use the optimized method.
+**Impact:**
+- Complexity: Reduced from potentially O(N^2) to O(N log N) (sorting for window function).
+- Scalability: Handles large datasets of price history much more efficiently.
+- Correctness: Preserved the logic of selecting the latest effective price <= current time.
+
+**Learnings:** For "Greatest-N-Per-Group" problems (e.g., latest price per item, latest status per order), Window Functions (like `ROW_NUMBER()`) are generally far superior to Correlated Subqueries or `IN` tuple matching, especially in modern databases like MySQL 8.0+ and PostgreSQL.
