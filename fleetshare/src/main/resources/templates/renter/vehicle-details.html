@@ -283,7 +283,7 @@
         <div class="details-container">
             <!-- Breadcrumb -->
             <nav class="back-nav" aria-label="Breadcrumb">
-                <a href="/renter/vehicles" class="back-link">
+                <a href="/renter/vehicles" class="back-link" id="backToBrowse">
                     <i class="fas fa-arrow-left"></i> Back to Browse Vehicles
                 </a>
             </nav>
@@ -445,6 +445,17 @@
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
         <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Enhance Back Navigation to preserve filters
+                const backLink = document.getElementById('backToBrowse');
+                if (backLink && document.referrer.includes('/renter/vehicles')) {
+                    backLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        history.back();
+                    });
+                }
+            });
+
             (function initOwnerMap() {
                 var mapEl = document.getElementById('owner-map');
                 if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
