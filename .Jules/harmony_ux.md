@@ -50,3 +50,31 @@
     <div id="dropzoneContent">...</div>
 </div>
 ```
+
+## 2025-01-23 - Client-Side URL Synchronization for Filters
+
+**Context:** Vehicle Browse Page (`browse-vehicles.html`), where users filter results by category, price, and transmission.
+**User Need:** Users expect their filtered view to persist when they navigate away (e.g., to view vehicle details) and return via the browser's Back button, or when they share a link.
+**Observation:** The previous implementation used client-side DOM manipulation to hide/show cards but did not update the URL. Refreshing or navigating back reset all filters to the default state, causing frustration and loss of context.
+**Solution Implemented:** Added `updateURLParams()` and `restoreStateFromURL()` functions.
+- `updateURLParams`: Serializes filter inputs to `URLSearchParams` and updates the browser URL using `history.replaceState` (without reloading).
+- `restoreStateFromURL`: On page load (and `popstate`), reads the URL parameters and programmatically sets the input values, then triggers the filtering logic.
+- Included `isRestoringState` guard to prevent redundant URL updates during restoration.
+**Impact:** Filters are now "sticky". Users can bookmark specific searches or navigate back from details pages without losing their filter criteria.
+**Measurement:** Verified via Playwright script; URL updates immediately upon interaction, and state is correctly restored on reload.
+
+**Code Pattern:**
+```javascript
+function updateURLParams() {
+    if (isRestoringState) return;
+    const params = new URLSearchParams();
+    // ... populate params from inputs ...
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    history.replaceState(null, '', newUrl);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    restoreStateFromURL();
+    window.addEventListener('popstate', restoreStateFromURL);
+});
+```
