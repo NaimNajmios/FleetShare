@@ -11,3 +11,19 @@
     <input type="number" class="form-control price-input border-start-0 ps-1" aria-label="Minimum Price">
 </div>
 ```
+
+## 2026-01-24 - Deep Linking for Client-Side Filters
+
+**Context:** Vehicle Browsing (`browse-vehicles.html`)
+**Challenge:** Users could not share search results or restore their filter state after refreshing the page because filtering was purely client-side without URL synchronization.
+**Solution:** Implemented `updateURLState()` to serialize filters to `URLSearchParams` and `history.replaceState`. Added `restoreFromURL()` on `DOMContentLoaded` and `popstate` to parse params and re-apply filters. Added `isRestoringState` flag to prevent circular logic.
+**Impact:** Enables deep linking and sharing of specific search results, significantly improving usability and shareability.
+**Code Example:**
+```javascript
+function updateURLState() {
+    const params = new URLSearchParams();
+    // ... collect params ...
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    history.replaceState(null, '', newUrl);
+}
+```
