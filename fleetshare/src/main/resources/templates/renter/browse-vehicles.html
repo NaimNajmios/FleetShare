@@ -763,6 +763,111 @@
     <th:block layout:fragment="extra-js">
         <script>
             // ... existing JS ...
+            // Flag to prevent URL updates during initialization
+            let isRestoringState = false;
+
+            function updateURL() {
+                if (isRestoringState) return;
+
+                const params = new URLSearchParams();
+
+                // Categories
+                const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                    .map(cb => cb.value);
+                checkedCategories.forEach(cat => params.append('category', cat));
+
+                // Transmission
+                const checkedTransmissions = Array.from(document.querySelectorAll('input[name="transmission"]:checked'))
+                    .map(cb => cb.value);
+                checkedTransmissions.forEach(trans => params.append('transmission', trans));
+
+                // Price
+                const minPrice = document.getElementById('minPrice').value;
+                const maxPrice = document.getElementById('maxPrice').value;
+                if (minPrice) params.set('minPrice', minPrice);
+                if (maxPrice) params.set('maxPrice', maxPrice);
+
+                // Search
+                const search = document.getElementById('vehicleSearch').value;
+                if (search) params.set('search', search);
+
+                // Sort
+                if (currentSort !== 'recommended') {
+                    params.set('sort', currentSort);
+                }
+
+                const newUrl = window.location.pathname + '?' + params.toString();
+                history.replaceState(null, '', newUrl);
+            }
+
+            function restoreStateFromURL() {
+                isRestoringState = true;
+                const params = new URLSearchParams(window.location.search);
+
+                // Clear all first
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.getElementById('minPrice').value = '';
+                document.getElementById('maxPrice').value = '';
+                document.getElementById('vehicleSearch').value = '';
+
+                // Restore Categories
+                params.getAll('category').forEach(cat => {
+                    const el = document.querySelector(`input[name="category"][value="${cat}"]`);
+                    if (el) el.checked = true;
+                });
+
+                // Restore Transmission
+                params.getAll('transmission').forEach(trans => {
+                    const el = document.querySelector(`input[name="transmission"][value="${trans}"]`);
+                    if (el) el.checked = true;
+                });
+
+                // Restore Price
+                if (params.has('minPrice')) document.getElementById('minPrice').value = params.get('minPrice');
+                if (params.has('maxPrice')) document.getElementById('maxPrice').value = params.get('maxPrice');
+
+                // Restore Search
+                if (params.has('search')) {
+                    const searchInput = document.getElementById('vehicleSearch');
+                    searchInput.value = params.get('search');
+                    toggleClearButton(searchInput);
+                }
+
+                // Restore Sort
+                if (params.has('sort')) {
+                    const sort = params.get('sort');
+                    // Find the button with onclick="setSort('sort', this)"
+                    // We need to simulate the button click or manually set it
+                    // Since setSort expects a button element, we'll find it by searching the dropdown items
+                    const sortBtns = document.querySelectorAll('.dropdown-item');
+                    let targetBtn = null;
+
+                    // Helper to extract sort type from onclick attribute
+                    // onclick="setSort('price-asc', this)"
+                    sortBtns.forEach(btn => {
+                        const onclick = btn.getAttribute('onclick');
+                        if (onclick && onclick.includes(`'${sort}'`)) {
+                            targetBtn = btn;
+                        }
+                    });
+
+                    if (targetBtn) {
+                        setSort(sort, targetBtn); // This calls applyFilters, but isRestoringState is true
+                    } else {
+                        // Fallback
+                        currentSort = sort;
+                    }
+                }
+
+                applyFilters();
+                isRestoringState = false;
+            }
+
+            // Initialize on load
+            window.addEventListener('DOMContentLoaded', restoreStateFromURL);
+            // Handle browser back/forward
+            window.addEventListener('popstate', restoreStateFromURL);
+
             function removeFilter(type, value) {
                 if (type === 'category') {
                     const el = document.querySelector(`input[name="category"][value="${value}"]`);
@@ -947,6 +1052,9 @@
                     if (emptyState && cards.length === 0) emptyState.style.display = 'block';
                     noFilterResults.style.display = 'none';
                 }
+
+                // Update URL
+                updateURL();
             }
 
             function clearAllFilters() {
