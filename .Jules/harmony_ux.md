@@ -50,3 +50,23 @@
     <div id="dropzoneContent">...</div>
 </div>
 ```
+
+## 2024-05-24 - [Real-time Form Validation]
+
+**Context:** Owner Vehicle Onboarding (add-vehicle.html)
+**User Need:** Owners need immediate feedback on form errors before attempting to submit, preventing frustration and round trips.
+**Observation:** The form relied on standard browser tooltips which appear only on submit. Users could fill the whole form invalidly and only find out at the end.
+**Solution Implemented:** Added real-time validation listeners (`input`, `blur`) that toggle Bootstrap's `.is-invalid` / `.is-valid` classes and display specific error messages. The submit button is now dynamically disabled until the form is valid.
+**Impact:** Immediate error correction guidance. Prevented submission of invalid forms.
+**Code Pattern:**
+```javascript
+input.addEventListener('input', () => {
+    if (input.checkValidity()) {
+        input.classList.add('is-valid');
+        input.classList.remove('is-invalid');
+    } else {
+        input.classList.add('is-invalid');
+    }
+    updateSubmitButtonState();
+});
+```
