@@ -5,7 +5,6 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
-            /* Report Category Cards */
             .report-category-card {
                 border-radius: 12px;
                 padding: 1.25rem;
@@ -167,7 +166,6 @@
 
 <body>
     <div layout:fragment="content">
-        <!-- Header -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -182,60 +180,54 @@
             </div>
         </div>
 
-        <!-- Report Category Cards -->
         <div class="row mb-4">
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-booking active" onclick="selectCategory('booking', this)">
+                <div class="report-category-card cat-booking active" data-category="booking">
                     <i class="mdi mdi-calendar-check category-icon"></i>
                     <span class="category-label">Booking</span>
                 </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-vehicle" onclick="selectCategory('vehicle', this)">
+                <div class="report-category-card cat-vehicle" data-category="vehicle">
                     <i class="mdi mdi-car category-icon"></i>
                     <span class="category-label">Vehicle</span>
                 </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-payment" onclick="selectCategory('payment', this)">
+                <div class="report-category-card cat-payment" data-category="payment">
                     <i class="mdi mdi-currency-usd category-icon"></i>
                     <span class="category-label">Payment</span>
                 </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-maintenance" onclick="selectCategory('maintenance', this)">
+                <div class="report-category-card cat-maintenance" data-category="maintenance">
                     <i class="mdi mdi-wrench category-icon"></i>
                     <span class="category-label">Maintenance</span>
                 </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-user" onclick="selectCategory('user', this)">
+                <div class="report-category-card cat-user" data-category="user">
                     <i class="mdi mdi-account-group category-icon"></i>
                     <span class="category-label">User</span>
                 </div>
             </div>
         </div>
 
-        <!-- Report Builder -->
         <div class="row">
-            <!-- Report Types -->
             <div class="col-lg-4 mb-4 mb-lg-0">
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Report Templates</h5>
                         <div id="report-types-container">
-                            <div class="report-type-card selected" data-report="monthly-revenue"
-                                onclick="selectReport('monthly-revenue', this)">
+                            <div class="report-type-card selected" data-report="monthly-revenue">
                                 <div class="report-name">Monthly Revenue</div>
                                 <p class="report-desc">Revenue breakdown by month</p>
                             </div>
-                            <div class="report-type-card" data-report="utilization-rate"
-                                onclick="selectReport('utilization-rate', this)">
+                            <div class="report-type-card" data-report="utilization-rate">
                                 <div class="report-name">Utilization Rate</div>
                                 <p class="report-desc">Fleet utilization analysis</p>
                             </div>
-                            <div class="report-type-card" data-report="booking-summary"
-                                onclick="selectReport('booking-summary', this)">
+                            <div class="report-type-card" data-report="booking-summary">
                                 <div class="report-name">Booking Summary</div>
                                 <p class="report-desc">All bookings overview</p>
                             </div>
@@ -244,7 +236,6 @@
                 </div>
             </div>
 
-            <!-- Configuration -->
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
@@ -253,28 +244,17 @@
                         <div class="config-section mb-4">
                             <label class="config-label">Duration</label>
                             <div class="duration-pills">
-                                <label class="duration-pill">
-                                    <input type="radio" name="duration" value="today">
-                                    Today
-                                </label>
-                                <label class="duration-pill active">
-                                    <input type="radio" name="duration" value="last7" checked>
-                                    Last 7 Days
-                                </label>
-                                <label class="duration-pill">
-                                    <input type="radio" name="duration" value="thisMonth">
-                                    This Month
-                                </label>
-                                <label class="duration-pill">
-                                    <input type="radio" name="duration" value="lastMonth">
-                                    Last Month
-                                </label>
-                                <label class="duration-pill">
-                                    <input type="radio" name="duration" value="custom">
-                                    Custom Range
-                                </label>
+                                <label class="duration-pill"><input type="radio" name="duration" value="today">
+                                    Today</label>
+                                <label class="duration-pill active"><input type="radio" name="duration" value="last7"
+                                        checked> Last 7 Days</label>
+                                <label class="duration-pill"><input type="radio" name="duration" value="thisMonth"> This
+                                    Month</label>
+                                <label class="duration-pill"><input type="radio" name="duration" value="lastMonth"> Last
+                                    Month</label>
+                                <label class="duration-pill"><input type="radio" name="duration" value="custom"> Custom
+                                    Range</label>
                             </div>
-
                             <div class="row date-range" style="display: none;">
                                 <div class="col-md-6 mb-3 mb-md-0">
                                     <label class="config-label">Start Date</label>
@@ -301,9 +281,8 @@
                                 <label class="config-label">Fleet Owner</label>
                                 <select class="form-select" id="owner-filter">
                                     <option value="">All Owners</option>
-                                    <option th:each="owner : ${fleetOwners}" th:value="${owner.fleetOwnerId}"
-                                        th:text="${owner.businessName}">
-                                    </option>
+                                    <option th:each="owner : ${fleetOwners}" th:value="${owner.userId}"
+                                        th:text="${owner.businessName}"></option>
                                 </select>
                             </div>
                         </div>
@@ -314,25 +293,23 @@
                                 Reports can be previewed, downloaded as PDF or CSV
                             </div>
                             <div class="btn-group">
-                                <button class="btn btn-outline-primary" onclick="previewReport()">
+                                <button class="btn btn-outline-primary" id="btn-preview">
                                     <i class="mdi mdi-eye"></i> Preview
                                 </button>
-                                <button class="btn-generate" onclick="downloadReport('pdf')">
+                                <button class="btn-generate" id="btn-pdf">
                                     <i class="mdi mdi-file-pdf-box"></i> PDF
                                 </button>
-                                <button class="btn btn-success" onclick="downloadReport('csv')">
+                                <button class="btn btn-success" id="btn-csv">
                                     <i class="mdi mdi-file-excel"></i> CSV
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Loading Indicator -->
                         <div id="loading-indicator" style="display: none;" class="text-center py-4">
                             <div class="spinner-border text-primary" role="status"></div>
                             <p class="mt-2 text-muted">Generating report...</p>
                         </div>
 
-                        <!-- Preview Section -->
                         <div id="preview-section" style="display: none;"></div>
                     </div>
                 </div>
@@ -373,6 +350,14 @@
                 ]
             };
 
+            // Get CSRF token from meta tags
+            function getCsrfToken() {
+                return document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            }
+            function getCsrfHeader() {
+                return document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            }
+
             function selectCategory(category, element) {
                 currentCategory = category;
                 document.querySelectorAll('.report-category-card').forEach(card => card.classList.remove('active'));
@@ -382,7 +367,7 @@
                 const templates = reportTemplates[category];
 
                 container.innerHTML = templates.map((t, i) => `
-                    <div class="report-type-card ${i === 0 ? 'selected' : ''}" data-report="${t.id}" onclick="selectReport('${t.id}', this)">
+                    <div class="report-type-card ${i === 0 ? 'selected' : ''}" data-report="${t.id}">
                         <div class="report-name">${t.name}</div>
                         <p class="report-desc">${t.desc}</p>
                     </div>
@@ -398,18 +383,6 @@
                 element.classList.add('selected');
                 document.getElementById('preview-section').style.display = 'none';
             }
-
-            // Duration pills
-            document.querySelectorAll('.duration-pill').forEach(pill => {
-                pill.addEventListener('click', function () {
-                    document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active'));
-                    this.classList.add('active');
-
-                    const dateRange = document.querySelector('.date-range');
-                    const value = this.querySelector('input').value;
-                    dateRange.style.display = value === 'custom' ? 'flex' : 'none';
-                });
-            });
 
             function getReportParams() {
                 const duration = document.querySelector('.duration-pill.active input').value;
@@ -432,9 +405,17 @@
                 preview.style.display = 'none';
 
                 try {
+                    const csrfToken = getCsrfToken();
+                    const csrfHeader = getCsrfHeader();
+
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (csrfToken && csrfHeader) {
+                        headers[csrfHeader] = csrfToken;
+                    }
+
                     const response = await fetch('/admin/reports/generate', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: headers,
                         body: JSON.stringify(getReportParams())
                     });
 
@@ -443,7 +424,6 @@
                         alert('Error: ' + data.error);
                         return;
                     }
-
                     displayPreview(data);
                 } catch (e) {
                     alert('Failed to generate report: ' + e.message);
@@ -454,10 +434,8 @@
 
             function displayPreview(data) {
                 const section = document.getElementById('preview-section');
-
                 const summaryHtml = data.summary ?
                     Object.entries(data.summary).map(([k, v]) => `<span class="badge bg-primary me-2">${k}: ${v}</span>`).join('') : '';
-
                 const noData = !data.data || data.data.length === 0;
 
                 section.innerHTML = `
@@ -494,9 +472,39 @@
                     ownerId: params.ownerId || '',
                     format: format
                 }).toString();
-
                 window.location.href = '/admin/reports/download?' + queryString;
             }
+
+            // Event delegation - runs after DOM is ready
+            document.addEventListener('DOMContentLoaded', function () {
+                // Category cards
+                document.querySelectorAll('.report-category-card').forEach(card => {
+                    card.addEventListener('click', function () {
+                        selectCategory(this.dataset.category, this);
+                    });
+                });
+
+                // Report type cards (using event delegation for dynamic content)
+                document.getElementById('report-types-container').addEventListener('click', function (e) {
+                    const card = e.target.closest('.report-type-card');
+                    if (card) selectReport(card.dataset.report, card);
+                });
+
+                // Duration pills
+                document.querySelectorAll('.duration-pill').forEach(pill => {
+                    pill.addEventListener('click', function () {
+                        document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active'));
+                        this.classList.add('active');
+                        document.querySelector('.date-range').style.display =
+                            this.querySelector('input').value === 'custom' ? 'flex' : 'none';
+                    });
+                });
+
+                // Action buttons
+                document.getElementById('btn-preview').addEventListener('click', previewReport);
+                document.getElementById('btn-pdf').addEventListener('click', () => downloadReport('pdf'));
+                document.getElementById('btn-csv').addEventListener('click', () => downloadReport('csv'));
+            });
         </script>
     </th:block>
 </body>
