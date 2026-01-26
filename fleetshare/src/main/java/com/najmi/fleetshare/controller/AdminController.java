@@ -484,7 +484,11 @@ public class AdminController {
             var reportData = reportService.generateReportData(request);
             return ResponseEntity.ok(reportData);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            String errorMsg = e.getMessage() != null ? e.getMessage()
+                    : "An unexpected error occurred during report generation";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", errorMsg));
         }
     }
 
