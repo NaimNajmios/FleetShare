@@ -156,9 +156,30 @@
                 margin: 0;
             }
 
-            #preview-section {
-                border-top: 1px solid #eee;
-                padding-top: 1.5rem;
+            /* Modal Styles */
+            #previewModal .modal-dialog {
+                max-width: 900px;
+            }
+
+            #previewModal .modal-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 0.5rem 0.5rem 0 0;
+            }
+
+            #previewModal .modal-header .btn-close {
+                filter: brightness(0) invert(1);
+            }
+
+            #previewModal .summary-badges {
+                margin-bottom: 1rem;
+            }
+
+            #previewModal .summary-badges .badge {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.75rem;
+                margin-right: 0.5rem;
+                margin-bottom: 0.5rem;
             }
         </style>
     </th:block>
@@ -287,7 +308,7 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div class="text-muted small">
                                 <i class="mdi mdi-information-outline me-1"></i>
                                 Reports can be previewed, downloaded as PDF or CSV
@@ -304,13 +325,36 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div id="loading-indicator" style="display: none;" class="text-center py-4">
+        <!-- Preview Modal -->
+        <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="previewModalLabel">
+                            <i class="mdi mdi-table me-2"></i>Report Preview
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="loading-indicator" class="text-center py-5">
                             <div class="spinner-border text-primary" role="status"></div>
                             <p class="mt-2 text-muted">Generating report...</p>
                         </div>
-
-                        <div id="preview-section" style="display: none;"></div>
+                        <div id="preview-content" style="display: none;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success" id="modal-btn-csv">
+                            <i class="mdi mdi-file-excel me-1"></i> Download CSV
+                        </button>
+                        <button type="button" class="btn-generate" id="modal-btn-pdf">
+                            <i class="mdi mdi-file-pdf-box me-1"></i> Download PDF
+                        </button>
                     </div>
                 </div>
             </div>
@@ -321,6 +365,7 @@
         <script>
             let currentCategory = 'booking';
             let currentReport = 'monthly-revenue';
+            let previewModal;
 
             const reportTemplates = {
                 booking: [
@@ -350,7 +395,6 @@
                 ]
             };
 
-            // Get CSRF token from meta tags
             function getCsrfToken() {
                 return document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             }
@@ -374,14 +418,12 @@
                 `).join('');
 
                 currentReport = templates[0].id;
-                document.getElementById('preview-section').style.display = 'none';
             }
 
             function selectReport(reportId, element) {
                 currentReport = reportId;
                 document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('selected'));
                 element.classList.add('selected');
-                document.getElementById('preview-section').style.display = 'none';
             }
 
             function getReportParams() {
@@ -399,10 +441,10 @@
             }
 
             async function previewReport() {
-                const loading = document.getElementById('loading-indicator');
-                const preview = document.getElementById('preview-section');
-                loading.style.display = 'block';
-                preview.style.display = 'none';
+                // Show modal with loading
+                document.getElementById('loading-indicator').style.display = 'block';
+                document.getElementById('preview-content').style.display = 'none';
+                previewModal.show();
 
                 try {
                     const csrfToken = getCsrfToken();
@@ -421,43 +463,57 @@
 
                     const data = await response.json();
                     if (data.error) {
-                        alert('Error: ' + data.error);
-                        return;
+                        document.getElementById('preview-content').innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="mdi mdi-alert-circle me-2"></i>${data.error}
+                            </div>
+                        `;
+                    } else {
+                        displayPreview(data);
                     }
-                    displayPreview(data);
                 } catch (e) {
-                    alert('Failed to generate report: ' + e.message);
+                    document.getElementById('preview-content').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="mdi mdi-alert-circle me-2"></i>Failed to generate report: ${e.message}
+                        </div>
+                    `;
                 } finally {
-                    loading.style.display = 'none';
+                    document.getElementById('loading-indicator').style.display = 'none';
+                    document.getElementById('preview-content').style.display = 'block';
                 }
             }
 
             function displayPreview(data) {
-                const section = document.getElementById('preview-section');
+                const section = document.getElementById('preview-content');
+                document.getElementById('previewModalLabel').innerHTML = `
+                    <i class="mdi mdi-table me-2"></i>${data.reportTitle}
+                `;
+
                 const summaryHtml = data.summary ?
-                    Object.entries(data.summary).map(([k, v]) => `<span class="badge bg-primary me-2">${k}: ${v}</span>`).join('') : '';
+                    `<div class="summary-badges">${Object.entries(data.summary).map(([k, v]) =>
+                        `<span class="badge bg-primary">${k}: ${v}</span>`).join('')}</div>` : '';
+
                 const noData = !data.data || data.data.length === 0;
 
                 section.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="mb-0"><i class="mdi mdi-table me-2"></i>${data.reportTitle}</h6>
-                        <small class="text-muted">${data.period}</small>
+                        <span class="text-muted"><i class="mdi mdi-calendar me-1"></i>${data.period}</span>
+                        <span class="badge bg-secondary">${data.data?.length || 0} records</span>
                     </div>
-                    <div class="mb-3">${summaryHtml}</div>
-                    ${noData ? '<div class="alert alert-info">No data found for the selected criteria.</div>' : `
+                    ${summaryHtml}
+                    ${noData ? '<div class="alert alert-info"><i class="mdi mdi-information me-2"></i>No data found for the selected criteria.</div>' : `
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead class="table-light">
+                        <table class="table table-sm table-hover table-striped">
+                            <thead class="table-dark">
                                 <tr>${data.columns.map(c => `<th>${c}</th>`).join('')}</tr>
                             </thead>
                             <tbody>
-                                ${data.data.slice(0, 20).map(row => `<tr>${data.columns.map(c => `<td>${row[c] ?? '-'}</td>`).join('')}</tr>`).join('')}
+                                ${data.data.slice(0, 50).map(row => `<tr>${data.columns.map(c => `<td>${row[c] ?? '-'}</td>`).join('')}</tr>`).join('')}
                             </tbody>
                         </table>
-                        ${data.data.length > 20 ? `<p class="text-muted small">Showing 20 of ${data.data.length} rows. Download for complete data.</p>` : ''}
+                        ${data.data.length > 50 ? `<p class="text-muted small text-center"><i class="mdi mdi-information me-1"></i>Showing 50 of ${data.data.length} rows. Download for complete data.</p>` : ''}
                     </div>`}
                 `;
-                section.style.display = 'block';
             }
 
             function downloadReport(format) {
@@ -475,22 +531,20 @@
                 window.location.href = '/admin/reports/download?' + queryString;
             }
 
-            // Event delegation - runs after DOM is ready
             document.addEventListener('DOMContentLoaded', function () {
-                // Category cards
+                previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+
                 document.querySelectorAll('.report-category-card').forEach(card => {
                     card.addEventListener('click', function () {
                         selectCategory(this.dataset.category, this);
                     });
                 });
 
-                // Report type cards (using event delegation for dynamic content)
                 document.getElementById('report-types-container').addEventListener('click', function (e) {
                     const card = e.target.closest('.report-type-card');
                     if (card) selectReport(card.dataset.report, card);
                 });
 
-                // Duration pills
                 document.querySelectorAll('.duration-pill').forEach(pill => {
                     pill.addEventListener('click', function () {
                         document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active'));
@@ -500,10 +554,11 @@
                     });
                 });
 
-                // Action buttons
                 document.getElementById('btn-preview').addEventListener('click', previewReport);
                 document.getElementById('btn-pdf').addEventListener('click', () => downloadReport('pdf'));
                 document.getElementById('btn-csv').addEventListener('click', () => downloadReport('csv'));
+                document.getElementById('modal-btn-pdf').addEventListener('click', () => downloadReport('pdf'));
+                document.getElementById('modal-btn-csv').addEventListener('click', () => downloadReport('csv'));
             });
         </script>
     </th:block>
