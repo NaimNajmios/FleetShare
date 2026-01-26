@@ -148,7 +148,8 @@
                 <div class="card">
                     <div class="card-body">
                         <!-- Added enctype for file upload support -->
-                        <form th:action="@{/owner/vehicles/add}" method="post" enctype="multipart/form-data">
+                        <form id="addVehicleForm" th:action="@{/owner/vehicles/add}" method="post"
+                            enctype="multipart/form-data" novalidate>
                             <div class="profile-container">
                                 <!-- Image Upload Section -->
                                 <div class="profile-header">
@@ -178,7 +179,7 @@
                                     <h4>Vehicle Specifications</h4>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>Brand</label>
+                                            <label for="brandInput">Brand</label>
                                             <input type="text" class="form-control" name="brand" id="brandInput"
                                                 list="brandList" placeholder="e.g., Toyota" required autocomplete="off">
                                             <datalist id="brandList">
@@ -203,26 +204,31 @@
                                                 <option value="Isuzu">
                                                 <option value="Peugeot">
                                             </datalist>
+                                            <div class="invalid-feedback">Brand is required.</div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Model</label>
+                                            <label for="modelInput">Model</label>
                                             <input type="text" class="form-control" name="model" id="modelInput"
                                                 list="modelList" placeholder="e.g., Camry" required autocomplete="off">
                                             <datalist id="modelList">
                                                 <!-- Models will be dynamically populated based on brand -->
                                             </datalist>
+                                            <div class="invalid-feedback">Model is required.</div>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>Manufacturing Year</label>
-                                            <input type="number" class="form-control" name="manufacturingYear"
-                                                placeholder="e.g., 2023">
+                                            <label for="manufacturingYear">Manufacturing Year</label>
+                                            <input type="number" class="form-control" id="manufacturingYear"
+                                                name="manufacturingYear" placeholder="e.g., 2023" required min="1900">
+                                            <div class="invalid-feedback">Please enter a valid year (1900-Current).
+                                            </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Registration No.</label>
-                                            <input type="text" class="form-control" name="registrationNo"
-                                                placeholder="e.g., VBE 1234" required>
+                                            <label for="registrationNo">Registration No.</label>
+                                            <input type="text" class="form-control" id="registrationNo"
+                                                name="registrationNo" placeholder="e.g., VBE 1234" required>
+                                            <div class="invalid-feedback">Registration number is required.</div>
                                         </div>
                                     </div>
                                     <div class="form-row">
@@ -237,9 +243,10 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label>Mileage (km)</label>
-                                            <input type="number" class="form-control" name="mileage"
-                                                placeholder="e.g., 50000">
+                                            <label for="mileage">Mileage (km)</label>
+                                            <input type="number" class="form-control" id="mileage" name="mileage"
+                                                placeholder="e.g., 50000" required min="0">
+                                            <div class="invalid-feedback">Mileage must be a positive number.</div>
                                         </div>
                                     </div>
                                     <div class="form-row">
@@ -277,11 +284,12 @@
                                         </div>
                                         <!-- SIMPLIFIED RATE INPUT -->
                                         <div class="form-group">
-                                            <label>Rate Per Day (RM)</label>
+                                            <label for="ratePerDay">Rate Per Day (RM)</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">RM</span>
-                                                <input type="number" class="form-control" name="ratePerDay"
-                                                    placeholder="0.00" min="0" step="0.01" required>
+                                                <input type="number" class="form-control" id="ratePerDay"
+                                                    name="ratePerDay" placeholder="0.00" min="0" step="0.01" required>
+                                                <div class="invalid-feedback">Rate must be greater than 0.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -326,7 +334,7 @@
                 'Lexus': ['IS', 'ES', 'LS', 'NX', 'RX', 'UX', 'LX', 'LC', 'RC'],
                 'Subaru': ['Impreza', 'WRX', 'Levorg', 'Forester', 'Outback', 'XV', 'BRZ'],
                 'Isuzu': ['D-Max', 'MU-X'],
-                'Peugeot': ['208', '308', '408', '508', '2008', '3008', '5008', 'Traveller']
+                'Peugeot': ['208', '308', '408', '5008', '2008', '3008', '5008', 'Traveller']
             };
 
             // Image Preview Logic
@@ -432,6 +440,87 @@
 
             brandInput.addEventListener('input', updateModelSuggestions);
             brandInput.addEventListener('change', updateModelSuggestions);
+
+            // Real-time Validation Logic
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.getElementById('addVehicleForm');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                // Select all relevant inputs
+                const inputs = form.querySelectorAll('input[required], select[required], input[type="number"]');
+
+                // Set max year dynamically
+                const yearInput = document.getElementById('manufacturingYear');
+                if (yearInput) {
+                    const currentYear = new Date().getFullYear();
+                    yearInput.max = currentYear + 1;
+                }
+
+                const validateField = (input) => {
+                    // Skip hidden inputs
+                    if (input.type === 'hidden') return true;
+
+                    // Reset custom validity for specific fields before checking
+                    if (input.id === 'manufacturingYear') {
+                        input.setCustomValidity('');
+                    }
+
+                    let isValid = input.checkValidity();
+
+                    // Custom logic for year
+                    if (isValid && input.id === 'manufacturingYear' && input.value) {
+                        const year = parseInt(input.value);
+                        const currentYear = new Date().getFullYear();
+                        if (year < 1900 || year > currentYear + 1) {
+                            isValid = false;
+                            input.setCustomValidity('Invalid year');
+                        }
+                    }
+
+                    if (isValid) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                    }
+                    return isValid;
+                };
+
+                const updateFormState = () => {
+                    // We check global form validity
+                    // Note: checkValidity() checks all constraints
+                    const isFormValid = form.checkValidity();
+                    if (isFormValid) {
+                        submitBtn.disabled = false;
+                    } else {
+                        submitBtn.disabled = true;
+                    }
+                };
+
+                // Initial Check
+                updateFormState();
+
+                inputs.forEach(input => {
+                    input.addEventListener('input', () => {
+                        validateField(input);
+                        updateFormState();
+                    });
+
+                    input.addEventListener('blur', () => {
+                        validateField(input);
+                        updateFormState();
+                    });
+                });
+
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        // Trigger validation UI on all fields
+                        inputs.forEach(input => validateField(input));
+                    }
+                });
+            });
         </script>
     </th:block>
 </body>
