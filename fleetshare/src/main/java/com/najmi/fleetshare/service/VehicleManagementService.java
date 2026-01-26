@@ -73,7 +73,7 @@ public class VehicleManagementService {
                 Set<Long> fleetOwnerIds = vehicles.stream().map(Vehicle::getFleetOwnerId).collect(Collectors.toSet());
 
                 // Bulk fetch prices
-                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findLatestPricesForVehicles(vehicleIds).stream()
+                Map<Long, BigDecimal> priceMap = priceHistoryRepository.findLatestPricesForVehiclesNative(vehicleIds).stream()
                                 .collect(Collectors.toMap(
                                                 VehiclePriceHistory::getVehicleId,
                                                 VehiclePriceHistory::getRatePerDay,
