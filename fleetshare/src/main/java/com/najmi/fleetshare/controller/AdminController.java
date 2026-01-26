@@ -74,6 +74,9 @@ public class AdminController {
     @Autowired
     private com.najmi.fleetshare.service.FileStorageService fileStorageService;
 
+    @Autowired
+    private com.najmi.fleetshare.service.ReportService reportService;
+
     @GetMapping("/")
     public String index() {
         return "redirect:/admin/dashboard";
@@ -462,7 +465,83 @@ public class AdminController {
 
     @GetMapping("/reports")
     public String reports(Model model) {
+        model.addAttribute("fleetOwners", userManagementService.getAllFleetOwners());
         return "admin/reports";
+    }
+
+    @PostMapping("/reports/generate")
+    @ResponseBody
+    public ResponseEntity<?> generateReportPreview(@RequestBody com.najmi.fleetshare.dto.ReportRequest request,
+            HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            request.setRequesterId(user.getUserId());
+            request.setAdmin(true);
+            var reportData = reportService.generateReportData(request);
+            return ResponseEntity.ok(reportData);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/reports/download")
+    public ResponseEntity<byte[]> downloadReport(
+            @RequestParam String category,
+            @RequestParam String reportType,
+            @RequestParam String duration,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long ownerId,
+            @RequestParam(defaultValue = "pdf") String format,
+            HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            com.najmi.fleetshare.dto.ReportRequest request = new com.najmi.fleetshare.dto.ReportRequest();
+            request.setCategory(category);
+            request.setReportType(reportType);
+            request.setDuration(duration);
+            request.setStatus(status);
+            request.setOwnerId(ownerId);
+            request.setRequesterId(user.getUserId());
+            request.setAdmin(true);
+
+            if (startDate != null && !startDate.isEmpty()) {
+                request.setStartDate(java.time.LocalDate.parse(startDate));
+            }
+            if (endDate != null && !endDate.isEmpty()) {
+                request.setEndDate(java.time.LocalDate.parse(endDate));
+            }
+
+            byte[] content;
+            String contentType;
+            String filename;
+
+            if ("csv".equalsIgnoreCase(format)) {
+                content = reportService.generateCsvReport(request);
+                contentType = "text/csv";
+                filename = reportType + "-report.csv";
+            } else {
+                content = reportService.generatePdfReport(request);
+                contentType = "application/pdf";
+                filename = reportType + "-report.pdf";
+            }
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + filename)
+                    .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                    .body(content);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/ai-reports")

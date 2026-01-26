@@ -5,6 +5,7 @@
 <head>
     <th:block layout:fragment="extra-css">
         <style>
+            /* Report Category Cards */
             .report-category-card {
                 border-radius: 12px;
                 padding: 1.25rem;
@@ -109,16 +110,21 @@
             .btn-generate {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
-                padding: 0.75rem 2rem;
+                padding: 0.75rem 1.5rem;
                 border: none;
                 border-radius: 0.5rem;
                 font-weight: 600;
                 cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: all 0.3s ease;
             }
 
             .btn-generate:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                color: white;
             }
 
             .report-type-card {
@@ -150,66 +156,86 @@
                 color: #6c757d;
                 margin: 0;
             }
+
+            #preview-section {
+                border-top: 1px solid #eee;
+                padding-top: 1.5rem;
+            }
         </style>
     </th:block>
 </head>
 
 <body>
     <div layout:fragment="content">
+        <!-- Header -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <h3 class="font-weight-bold mb-1">Report Builder</h3>
-                        <p class="text-muted mb-0">Generate structured, parameter-based reports</p>
-                    </div><a th:href="@{/admin/ai-reports}" class="btn btn-outline-primary"><i
-                            class="mdi mdi-robot me-1"></i> Try AI Data Assistant</a>
+                        <h3 class="font-weight-bold mb-1">Platform Report Builder</h3>
+                        <p class="text-muted mb-0">Generate platform-wide structured reports</p>
+                    </div>
+                    <a th:href="@{/admin/ai-reports}" class="btn btn-outline-primary">
+                        <i class="mdi mdi-robot me-1"></i> Try AI Data Assistant
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Report Category Cards -->
         <div class="row mb-4">
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-booking active" data-category="booking"
-                    onclick="selectCategory('booking', this)"><i class="mdi mdi-calendar-check category-icon"></i><span
-                        class="category-label">Booking</span></div>
+                <div class="report-category-card cat-booking active" onclick="selectCategory('booking', this)">
+                    <i class="mdi mdi-calendar-check category-icon"></i>
+                    <span class="category-label">Booking</span>
+                </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-vehicle" data-category="vehicle"
-                    onclick="selectCategory('vehicle', this)"><i class="mdi mdi-car category-icon"></i><span
-                        class="category-label">Vehicle</span></div>
+                <div class="report-category-card cat-vehicle" onclick="selectCategory('vehicle', this)">
+                    <i class="mdi mdi-car category-icon"></i>
+                    <span class="category-label">Vehicle</span>
+                </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-payment" data-category="payment"
-                    onclick="selectCategory('payment', this)"><i class="mdi mdi-currency-usd category-icon"></i><span
-                        class="category-label">Payment</span></div>
+                <div class="report-category-card cat-payment" onclick="selectCategory('payment', this)">
+                    <i class="mdi mdi-currency-usd category-icon"></i>
+                    <span class="category-label">Payment</span>
+                </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-maintenance" data-category="maintenance"
-                    onclick="selectCategory('maintenance', this)"><i class="mdi mdi-wrench category-icon"></i><span
-                        class="category-label">Maintenance</span></div>
+                <div class="report-category-card cat-maintenance" onclick="selectCategory('maintenance', this)">
+                    <i class="mdi mdi-wrench category-icon"></i>
+                    <span class="category-label">Maintenance</span>
+                </div>
             </div>
             <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="report-category-card cat-user" data-category="user" onclick="selectCategory('user', this)">
-                    <i class="mdi mdi-account-group category-icon"></i><span class="category-label">User</span></div>
+                <div class="report-category-card cat-user" onclick="selectCategory('user', this)">
+                    <i class="mdi mdi-account-group category-icon"></i>
+                    <span class="category-label">User</span>
+                </div>
             </div>
         </div>
 
+        <!-- Report Builder -->
         <div class="row">
+            <!-- Report Types -->
             <div class="col-lg-4 mb-4 mb-lg-0">
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Report Templates</h5>
                         <div id="report-types-container">
-                            <div class="report-type-card selected" data-report="monthly-revenue">
+                            <div class="report-type-card selected" data-report="monthly-revenue"
+                                onclick="selectReport('monthly-revenue', this)">
                                 <div class="report-name">Monthly Revenue</div>
                                 <p class="report-desc">Revenue breakdown by month</p>
                             </div>
-                            <div class="report-type-card" data-report="utilization-rate">
+                            <div class="report-type-card" data-report="utilization-rate"
+                                onclick="selectReport('utilization-rate', this)">
                                 <div class="report-name">Utilization Rate</div>
                                 <p class="report-desc">Fleet utilization analysis</p>
                             </div>
-                            <div class="report-type-card" data-report="booking-summary">
+                            <div class="report-type-card" data-report="booking-summary"
+                                onclick="selectReport('booking-summary', this)">
                                 <div class="report-name">Booking Summary</div>
                                 <p class="report-desc">All bookings overview</p>
                             </div>
@@ -217,63 +243,260 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Configuration -->
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Report Configuration</h5>
+
                         <div class="config-section mb-4">
                             <label class="config-label">Duration</label>
                             <div class="duration-pills">
-                                <label class="duration-pill"><input type="radio" name="duration"
-                                        value="today">Today</label>
-                                <label class="duration-pill active"><input type="radio" name="duration" value="last7"
-                                        checked>Last 7 Days</label>
-                                <label class="duration-pill"><input type="radio" name="duration" value="thisMonth">This
-                                    Month</label>
-                                <label class="duration-pill"><input type="radio" name="duration" value="lastMonth">Last
-                                    Month</label>
-                                <label class="duration-pill"><input type="radio" name="duration" value="custom">Custom
-                                    Range</label>
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="today">
+                                    Today
+                                </label>
+                                <label class="duration-pill active">
+                                    <input type="radio" name="duration" value="last7" checked>
+                                    Last 7 Days
+                                </label>
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="thisMonth">
+                                    This Month
+                                </label>
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="lastMonth">
+                                    Last Month
+                                </label>
+                                <label class="duration-pill">
+                                    <input type="radio" name="duration" value="custom">
+                                    Custom Range
+                                </label>
                             </div>
+
                             <div class="row date-range" style="display: none;">
-                                <div class="col-md-6 mb-3 mb-md-0"><label class="config-label">Start Date</label><input
-                                        type="date" class="form-control" id="start-date"></div>
-                                <div class="col-md-6"><label class="config-label">End Date</label><input type="date"
-                                        class="form-control" id="end-date"></div>
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label class="config-label">Start Date</label>
+                                    <input type="date" class="form-control" id="start-date">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="config-label">End Date</label>
+                                    <input type="date" class="form-control" id="end-date">
+                                </div>
                             </div>
                         </div>
+
                         <div class="row mb-4">
-                            <div class="col-md-6 mb-3 mb-md-0"><label class="config-label">Status Filter</label><select
-                                    class="form-select" id="status-filter">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="config-label">Status Filter</label>
+                                <select class="form-select" id="status-filter">
                                     <option value="">All Status</option>
-                                    <option value="confirmed">Confirmed</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="cancelled">Cancelled</option>
-                                </select></div>
-                            <div class="col-md-6"><label class="config-label">Owner</label><select class="form-select"
-                                    id="owner-filter">
+                                    <option value="CONFIRMED">Confirmed</option>
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="CANCELLED">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="config-label">Fleet Owner</label>
+                                <select class="form-select" id="owner-filter">
                                     <option value="">All Owners</option>
-                                </select></div>
+                                    <option th:each="owner : ${fleetOwners}" th:value="${owner.fleetOwnerId}"
+                                        th:text="${owner.businessName}">
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="text-muted small"><i class="mdi mdi-information-outline me-1"></i>Reports will
-                                be generated as PDF or Excel</div><button class="btn-generate"
-                                onclick="generateReport()"><i class="mdi mdi-file-document"></i> Generate
-                                Report</button>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="text-muted small">
+                                <i class="mdi mdi-information-outline me-1"></i>
+                                Reports can be previewed, downloaded as PDF or CSV
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary" onclick="previewReport()">
+                                    <i class="mdi mdi-eye"></i> Preview
+                                </button>
+                                <button class="btn-generate" onclick="downloadReport('pdf')">
+                                    <i class="mdi mdi-file-pdf-box"></i> PDF
+                                </button>
+                                <button class="btn btn-success" onclick="downloadReport('csv')">
+                                    <i class="mdi mdi-file-excel"></i> CSV
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Loading Indicator -->
+                        <div id="loading-indicator" style="display: none;" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Generating report...</p>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div id="preview-section" style="display: none;"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <th:block layout:fragment="extra-js">
         <script>
-            let currentCategory = 'booking', currentReport = 'monthly-revenue';
-            const reportTemplates = { booking: [{ id: 'monthly-revenue', name: 'Monthly Revenue', desc: 'Revenue breakdown' }, { id: 'utilization-rate', name: 'Utilization Rate', desc: 'Fleet utilization' }, { id: 'booking-summary', name: 'Booking Summary', desc: 'All bookings' }], vehicle: [{ id: 'vehicle-performance', name: 'Vehicle Performance', desc: 'Metrics per vehicle' }, { id: 'fleet-status', name: 'Fleet Status', desc: 'Current status' }, { id: 'maintenance-due', name: 'Maintenance Due', desc: 'Upcoming maintenance' }], payment: [{ id: 'payment-summary', name: 'Payment Summary', desc: 'Transactions summary' }, { id: 'outstanding-payments', name: 'Outstanding Payments', desc: 'Pending payments' }, { id: 'revenue-analysis', name: 'Revenue Analysis', desc: 'Revenue breakdown' }], maintenance: [{ id: 'maintenance-history', name: 'Maintenance History', desc: 'Past records' }, { id: 'cost-analysis', name: 'Cost Analysis', desc: 'Cost breakdown' }, { id: 'upcoming-maintenance', name: 'Upcoming Maintenance', desc: 'Scheduled' }], user: [{ id: 'user-activity', name: 'User Activity', desc: 'Activity log' }, { id: 'top-customers', name: 'Top Customers', desc: 'Most active' }, { id: 'user-demographics', name: 'User Demographics', desc: 'Demographics' }] };
-            function selectCategory(c, el) { currentCategory = c; document.querySelectorAll('.report-category-card').forEach(card => card.classList.remove('active')); el.classList.add('active'); const container = document.getElementById('report-types-container'); container.innerHTML = reportTemplates[c].map((t, i) => `<div class="report-type-card ${i === 0 ? 'selected' : ''}" data-report="${t.id}" onclick="selectReport('${t.id}', this)"><div class="report-name">${t.name}</div><p class="report-desc">${t.desc}</p></div>`).join(''); currentReport = reportTemplates[c][0].id; }
-            function selectReport(r, el) { currentReport = r; document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('selected')); el.classList.add('selected'); }
-            document.querySelectorAll('.duration-pill').forEach(pill => { pill.addEventListener('click', function () { document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active')); this.classList.add('active'); document.querySelector('.date-range').style.display = this.querySelector('input').value === 'custom' ? 'flex' : 'none'; }); });
-            function generateReport() { const duration = document.querySelector('.duration-pill.active input').value; alert(`Generating ${currentReport} for ${currentCategory}.\nDuration: ${duration}\n\nThis is a UI demo.`); }
+            let currentCategory = 'booking';
+            let currentReport = 'monthly-revenue';
+
+            const reportTemplates = {
+                booking: [
+                    { id: 'monthly-revenue', name: 'Monthly Revenue', desc: 'Revenue breakdown by month' },
+                    { id: 'utilization-rate', name: 'Utilization Rate', desc: 'Fleet utilization analysis' },
+                    { id: 'booking-summary', name: 'Booking Summary', desc: 'All bookings overview' }
+                ],
+                vehicle: [
+                    { id: 'vehicle-performance', name: 'Vehicle Performance', desc: 'Performance metrics per vehicle' },
+                    { id: 'fleet-status', name: 'Fleet Status', desc: 'Current fleet status overview' },
+                    { id: 'maintenance-due', name: 'Maintenance Due', desc: 'Upcoming maintenance schedule' }
+                ],
+                payment: [
+                    { id: 'payment-summary', name: 'Payment Summary', desc: 'Payment transactions summary' },
+                    { id: 'outstanding-payments', name: 'Outstanding Payments', desc: 'Pending payment list' },
+                    { id: 'revenue-analysis', name: 'Revenue Analysis', desc: 'Detailed revenue breakdown' }
+                ],
+                maintenance: [
+                    { id: 'maintenance-history', name: 'Maintenance History', desc: 'Past maintenance records' },
+                    { id: 'cost-analysis', name: 'Cost Analysis', desc: 'Maintenance cost breakdown' },
+                    { id: 'upcoming-maintenance', name: 'Upcoming Maintenance', desc: 'Scheduled maintenance' }
+                ],
+                user: [
+                    { id: 'user-activity', name: 'User Activity', desc: 'Customer booking activity' },
+                    { id: 'top-customers', name: 'Top Customers', desc: 'Most active customers' },
+                    { id: 'user-demographics', name: 'User Demographics', desc: 'Customer demographics' }
+                ]
+            };
+
+            function selectCategory(category, element) {
+                currentCategory = category;
+                document.querySelectorAll('.report-category-card').forEach(card => card.classList.remove('active'));
+                element.classList.add('active');
+
+                const container = document.getElementById('report-types-container');
+                const templates = reportTemplates[category];
+
+                container.innerHTML = templates.map((t, i) => `
+                    <div class="report-type-card ${i === 0 ? 'selected' : ''}" data-report="${t.id}" onclick="selectReport('${t.id}', this)">
+                        <div class="report-name">${t.name}</div>
+                        <p class="report-desc">${t.desc}</p>
+                    </div>
+                `).join('');
+
+                currentReport = templates[0].id;
+                document.getElementById('preview-section').style.display = 'none';
+            }
+
+            function selectReport(reportId, element) {
+                currentReport = reportId;
+                document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('selected'));
+                element.classList.add('selected');
+                document.getElementById('preview-section').style.display = 'none';
+            }
+
+            // Duration pills
+            document.querySelectorAll('.duration-pill').forEach(pill => {
+                pill.addEventListener('click', function () {
+                    document.querySelectorAll('.duration-pill').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const dateRange = document.querySelector('.date-range');
+                    const value = this.querySelector('input').value;
+                    dateRange.style.display = value === 'custom' ? 'flex' : 'none';
+                });
+            });
+
+            function getReportParams() {
+                const duration = document.querySelector('.duration-pill.active input').value;
+                const ownerFilter = document.getElementById('owner-filter').value;
+                return {
+                    category: currentCategory,
+                    reportType: currentReport,
+                    duration: duration,
+                    startDate: document.getElementById('start-date')?.value || null,
+                    endDate: document.getElementById('end-date')?.value || null,
+                    status: document.getElementById('status-filter').value || null,
+                    ownerId: ownerFilter ? parseInt(ownerFilter) : null
+                };
+            }
+
+            async function previewReport() {
+                const loading = document.getElementById('loading-indicator');
+                const preview = document.getElementById('preview-section');
+                loading.style.display = 'block';
+                preview.style.display = 'none';
+
+                try {
+                    const response = await fetch('/admin/reports/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(getReportParams())
+                    });
+
+                    const data = await response.json();
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
+                    }
+
+                    displayPreview(data);
+                } catch (e) {
+                    alert('Failed to generate report: ' + e.message);
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
+
+            function displayPreview(data) {
+                const section = document.getElementById('preview-section');
+
+                const summaryHtml = data.summary ?
+                    Object.entries(data.summary).map(([k, v]) => `<span class="badge bg-primary me-2">${k}: ${v}</span>`).join('') : '';
+
+                const noData = !data.data || data.data.length === 0;
+
+                section.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0"><i class="mdi mdi-table me-2"></i>${data.reportTitle}</h6>
+                        <small class="text-muted">${data.period}</small>
+                    </div>
+                    <div class="mb-3">${summaryHtml}</div>
+                    ${noData ? '<div class="alert alert-info">No data found for the selected criteria.</div>' : `
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>${data.columns.map(c => `<th>${c}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.slice(0, 20).map(row => `<tr>${data.columns.map(c => `<td>${row[c] ?? '-'}</td>`).join('')}</tr>`).join('')}
+                            </tbody>
+                        </table>
+                        ${data.data.length > 20 ? `<p class="text-muted small">Showing 20 of ${data.data.length} rows. Download for complete data.</p>` : ''}
+                    </div>`}
+                `;
+                section.style.display = 'block';
+            }
+
+            function downloadReport(format) {
+                const params = getReportParams();
+                const queryString = new URLSearchParams({
+                    category: params.category,
+                    reportType: params.reportType,
+                    duration: params.duration,
+                    startDate: params.startDate || '',
+                    endDate: params.endDate || '',
+                    status: params.status || '',
+                    ownerId: params.ownerId || '',
+                    format: format
+                }).toString();
+
+                window.location.href = '/admin/reports/download?' + queryString;
+            }
         </script>
     </th:block>
 </body>

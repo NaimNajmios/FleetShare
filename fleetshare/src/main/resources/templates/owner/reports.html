@@ -114,7 +114,7 @@
             .btn-generate {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
-                padding: 0.75rem 2rem;
+                padding: 0.75rem 1.5rem;
                 border: none;
                 border-radius: 0.5rem;
                 font-weight: 600;
@@ -128,6 +128,7 @@
             .btn-generate:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                color: white;
             }
 
             /* Report Types List */
@@ -159,6 +160,11 @@
                 font-size: 0.8rem;
                 color: #6c757d;
                 margin: 0;
+            }
+
+            #preview-section {
+                border-top: 1px solid #eee;
+                padding-top: 1.5rem;
             }
         </style>
     </th:block>
@@ -228,15 +234,18 @@
                         <h5 class="card-title mb-3">Report Templates</h5>
                         <div id="report-types-container">
                             <!-- Booking Reports (Default) -->
-                            <div class="report-type-card selected" data-report="monthly-revenue">
+                            <div class="report-type-card selected" data-report="monthly-revenue"
+                                onclick="selectReport('monthly-revenue', this)">
                                 <div class="report-name">Monthly Revenue</div>
                                 <p class="report-desc">Revenue breakdown by month</p>
                             </div>
-                            <div class="report-type-card" data-report="utilization-rate">
+                            <div class="report-type-card" data-report="utilization-rate"
+                                onclick="selectReport('utilization-rate', this)">
                                 <div class="report-name">Utilization Rate</div>
                                 <p class="report-desc">Fleet utilization analysis</p>
                             </div>
-                            <div class="report-type-card" data-report="booking-summary">
+                            <div class="report-type-card" data-report="booking-summary"
+                                onclick="selectReport('booking-summary', this)">
                                 <div class="report-name">Booking Summary</div>
                                 <p class="report-desc">All bookings overview</p>
                             </div>
@@ -293,9 +302,9 @@
                                 <label class="config-label">Status Filter</label>
                                 <select class="form-select" id="status-filter">
                                     <option value="">All Status</option>
-                                    <option value="confirmed">Confirmed</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="cancelled">Cancelled</option>
+                                    <option value="CONFIRMED">Confirmed</option>
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="CANCELLED">Cancelled</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -309,16 +318,32 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
                             <div class="text-muted small">
                                 <i class="mdi mdi-information-outline me-1"></i>
-                                Reports will be generated as PDF or Excel files
+                                Reports can be previewed, downloaded as PDF or CSV
                             </div>
-                            <button class="btn-generate" onclick="generateReport()">
-                                <i class="mdi mdi-file-document"></i>
-                                Generate Report
-                            </button>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary" onclick="previewReport()">
+                                    <i class="mdi mdi-eye"></i> Preview
+                                </button>
+                                <button class="btn-generate" onclick="downloadReport('pdf')">
+                                    <i class="mdi mdi-file-pdf-box"></i> PDF
+                                </button>
+                                <button class="btn btn-success" onclick="downloadReport('csv')">
+                                    <i class="mdi mdi-file-excel"></i> CSV
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Loading Indicator -->
+                        <div id="loading-indicator" style="display: none;" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Generating report...</p>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div id="preview-section" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -377,12 +402,14 @@
                 `).join('');
 
                 currentReport = templates[0].id;
+                document.getElementById('preview-section').style.display = 'none';
             }
 
             function selectReport(reportId, element) {
                 currentReport = reportId;
                 document.querySelectorAll('.report-type-card').forEach(card => card.classList.remove('selected'));
                 element.classList.add('selected');
+                document.getElementById('preview-section').style.display = 'none';
             }
 
             // Duration pills
@@ -397,9 +424,91 @@
                 });
             });
 
-            function generateReport() {
+            function getReportParams() {
                 const duration = document.querySelector('.duration-pill.active input').value;
-                alert(`Generating ${currentReport} report for ${currentCategory} category.\n\nDuration: ${duration}\n\nThis is a UI preview. Report generation will be implemented.`);
+                const vehicleFilter = document.getElementById('vehicle-filter').value;
+                return {
+                    category: currentCategory,
+                    reportType: currentReport,
+                    duration: duration,
+                    startDate: document.getElementById('start-date')?.value || null,
+                    endDate: document.getElementById('end-date')?.value || null,
+                    status: document.getElementById('status-filter').value || null,
+                    vehicleId: vehicleFilter ? parseInt(vehicleFilter) : null
+                };
+            }
+
+            async function previewReport() {
+                const loading = document.getElementById('loading-indicator');
+                const preview = document.getElementById('preview-section');
+                loading.style.display = 'block';
+                preview.style.display = 'none';
+
+                try {
+                    const response = await fetch('/owner/reports/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(getReportParams())
+                    });
+
+                    const data = await response.json();
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
+                    }
+
+                    displayPreview(data);
+                } catch (e) {
+                    alert('Failed to generate report: ' + e.message);
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
+
+            function displayPreview(data) {
+                const section = document.getElementById('preview-section');
+
+                const summaryHtml = data.summary ?
+                    Object.entries(data.summary).map(([k, v]) => `<span class="badge bg-primary me-2">${k}: ${v}</span>`).join('') : '';
+
+                const noData = !data.data || data.data.length === 0;
+
+                section.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0"><i class="mdi mdi-table me-2"></i>${data.reportTitle}</h6>
+                        <small class="text-muted">${data.period}</small>
+                    </div>
+                    <div class="mb-3">${summaryHtml}</div>
+                    ${noData ? '<div class="alert alert-info">No data found for the selected criteria.</div>' : `
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>${data.columns.map(c => `<th>${c}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${data.data.slice(0, 20).map(row => `<tr>${data.columns.map(c => `<td>${row[c] ?? '-'}</td>`).join('')}</tr>`).join('')}
+                            </tbody>
+                        </table>
+                        ${data.data.length > 20 ? `<p class="text-muted small">Showing 20 of ${data.data.length} rows. Download for complete data.</p>` : ''}
+                    </div>`}
+                `;
+                section.style.display = 'block';
+            }
+
+            function downloadReport(format) {
+                const params = getReportParams();
+                const queryString = new URLSearchParams({
+                    category: params.category,
+                    reportType: params.reportType,
+                    duration: params.duration,
+                    startDate: params.startDate || '',
+                    endDate: params.endDate || '',
+                    status: params.status || '',
+                    vehicleId: params.vehicleId || '',
+                    format: format
+                }).toString();
+
+                window.location.href = '/owner/reports/download?' + queryString;
             }
         </script>
     </th:block>
