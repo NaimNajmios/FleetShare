@@ -41,3 +41,15 @@
 - Network I/O: drastically reduced payload size from DB.
 
 **Learnings:** Use database aggregation for statistics. Avoid fetching entire collections just to count them or show a subset. When entities are decoupled (no direct relationships), use JPQL `IN` subqueries or Cross Joins with careful WHERE clauses to perform aggregations.
+
+## 2026-01-29 - Optimized Bulk Latest Price Retrieval
+
+**Context:** `VehicleManagementService.getAllVehicles()` and `getAvailableVehicles()` used for vehicle listing.
+**Symptoms:** Performance bottleneck in `VehiclePriceHistoryRepository.findLatestPricesForVehicles` due to a correlated subquery in the `WHERE` clause (`vph.effectiveStartDate = (SELECT MAX(...) ...)`). This ran a subquery for every candidate row.
+**Root Cause:** Inefficient "Greatest N Per Group" SQL pattern using correlated subqueries, which scales poorly with table size.
+**Solution:** Replaced the JPQL correlated subquery with a Native SQL query using the `ROW_NUMBER()` window function. The query partitions by `vehicle_id` and orders by `effective_start_date DESC` (and `price_id DESC` for deterministic tie-breaking) to select the single latest record per vehicle efficiently.
+**Impact:**
+- Query Complexity: Replaced O(N*M) correlated logic (worst case) with O(N log N) window function logic (typically single pass with sort/scan).
+- Correctness: Ensured deterministic results for same-day price updates by using `price_id` as a secondary sort key.
+
+**Learnings:** For "latest record per group" problems, prefer SQL Window Functions (`ROW_NUMBER()`) over correlated subqueries or Tuple-IN logic. When using Native Queries with JPA Entities, explicitly select all mapped columns to avoid partial hydration or mapping errors.

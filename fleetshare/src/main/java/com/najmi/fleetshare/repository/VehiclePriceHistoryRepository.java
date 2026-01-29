@@ -33,13 +33,18 @@ public interface VehiclePriceHistoryRepository extends JpaRepository<VehiclePric
     @Query("SELECT vph FROM VehiclePriceHistory vph WHERE vph.vehicleId IN :vehicleIds")
     List<VehiclePriceHistory> findByVehicleIdIn(java.util.Collection<Long> vehicleIds);
 
-    @Query("SELECT vph FROM VehiclePriceHistory vph " +
-           "WHERE vph.vehicleId IN :vehicleIds " +
-           "AND vph.effectiveStartDate = (" +
-           "    SELECT MAX(vph2.effectiveStartDate) " +
-           "    FROM VehiclePriceHistory vph2 " +
-           "    WHERE vph2.vehicleId = vph.vehicleId " +
-           "    AND vph2.effectiveStartDate <= CURRENT_TIMESTAMP" +
-           ")")
+    @Query(value = "SELECT vph.price_id, vph.vehicle_id, vph.rate_per_day, vph.effective_start_date " +
+                   "FROM ( " +
+                   "    SELECT *, " +
+                   "           ROW_NUMBER() OVER ( " +
+                   "               PARTITION BY vehicle_id " +
+                   "               ORDER BY effective_start_date DESC, price_id DESC " +
+                   "           ) as rn " +
+                   "    FROM vehiclepricehistory " +
+                   "    WHERE vehicle_id IN :vehicleIds " +
+                   "    AND effective_start_date <= CURRENT_TIMESTAMP " +
+                   ") vph " +
+                   "WHERE vph.rn = 1",
+           nativeQuery = true)
     List<VehiclePriceHistory> findLatestPricesForVehicles(@Param("vehicleIds") java.util.Collection<Long> vehicleIds);
 }
