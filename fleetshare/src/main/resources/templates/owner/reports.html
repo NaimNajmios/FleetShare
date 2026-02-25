@@ -181,6 +181,17 @@
                 margin-right: 0.5rem;
                 margin-bottom: 0.5rem;
             }
+
+            .chart-container {
+                position: relative;
+                width: 100%;
+                max-height: 350px;
+                margin-bottom: 1.5rem;
+                padding: 1rem;
+                background: #f8f9fa;
+                border-radius: 0.75rem;
+                border: 1px solid #e9ecef;
+            }
         </style>
     </th:block>
 </head>
@@ -347,6 +358,10 @@
                             <p class="mt-2 text-muted">Generating report...</p>
                         </div>
                         <div id="preview-content" style="display: none;"></div>
+                        <div class="chart-container" id="chart-container" style="display: none;">
+                            <canvas id="reportChart"></canvas>
+                        </div>
+                        <div id="preview-table-content" style="display: none;"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -367,6 +382,136 @@
             let currentCategory = 'booking';
             let currentReport = 'monthly-revenue';
             let previewModal;
+            let reportChartInstance = null;
+
+            // Chart configurations for report types that support visualization
+            const chartConfigs = {
+                'monthly-revenue': {
+                    type: 'bar',
+                    labelCol: 'Month',
+                    datasets: [
+                        { col: 'Revenue', label: 'Revenue (RM)', type: 'bar', color: 'rgba(102, 126, 234, 0.7)', borderColor: '#667eea', parse: v => parseFloat(String(v).replace(/[^\d.-]/g, '')) || 0 },
+                        { col: 'Bookings', label: 'Bookings', type: 'line', color: 'rgba(118, 75, 162, 0.8)', borderColor: '#764ba2', yAxisID: 'y1', parse: v => parseInt(v) || 0 }
+                    ],
+                    dualAxis: true
+                },
+                'utilization-rate': {
+                    type: 'bar',
+                    indexAxis: 'y',
+                    labelCol: 'Vehicle',
+                    datasets: [
+                        { col: 'Utilization', label: 'Utilization (%)', color: 'rgba(17, 153, 142, 0.7)', borderColor: '#11998e', parse: v => parseFloat(String(v).replace('%', '')) || 0 }
+                    ]
+                },
+                'vehicle-performance': {
+                    type: 'bar',
+                    labelCol: 'Vehicle',
+                    datasets: [
+                        { col: 'Revenue', label: 'Revenue (RM)', color: 'rgba(102, 126, 234, 0.7)', borderColor: '#667eea', parse: v => parseFloat(String(v).replace(/[^\d.-]/g, '')) || 0 }
+                    ]
+                },
+                'revenue-analysis': {
+                    type: 'doughnut',
+                    labelCol: 'Payment Method',
+                    datasets: [
+                        { col: 'Revenue', label: 'Revenue (RM)', parse: v => parseFloat(String(v).replace(/[^\d.-]/g, '')) || 0 }
+                    ],
+                    colors: ['#667eea', '#764ba2', '#11998e', '#38ef7d', '#fa709a', '#fee140', '#4facfe', '#f093fb']
+                },
+                'cost-analysis': {
+                    type: 'bar',
+                    labelCol: 'Vehicle',
+                    datasets: [
+                        { col: 'Total Cost', label: 'Total Cost (RM)', color: 'rgba(79, 172, 254, 0.7)', borderColor: '#4facfe', parse: v => parseFloat(String(v).replace(/[^\d.-]/g, '')) || 0 }
+                    ]
+                },
+                'top-customers': {
+                    type: 'bar',
+                    indexAxis: 'y',
+                    labelCol: 'Customer',
+                    datasets: [
+                        { col: 'Revenue', label: 'Revenue (RM)', color: 'rgba(240, 147, 251, 0.7)', borderColor: '#f093fb', parse: v => parseFloat(String(v).replace(/[^\d.-]/g, '')) || 0 }
+                    ]
+                }
+            };
+
+            function renderChart(data) {
+                const config = chartConfigs[currentReport];
+                const chartContainer = document.getElementById('chart-container');
+                const canvas = document.getElementById('reportChart');
+
+                // Destroy previous chart
+                if (reportChartInstance) {
+                    reportChartInstance.destroy();
+                    reportChartInstance = null;
+                }
+
+                if (!config || !data.data || data.data.length === 0) {
+                    chartContainer.style.display = 'none';
+                    return;
+                }
+
+                chartContainer.style.display = 'block';
+                const labels = data.data.map(row => row[config.labelCol] || '-');
+
+                let datasets;
+                if (config.type === 'doughnut') {
+                    const values = data.data.map(row => config.datasets[0].parse(row[config.datasets[0].col]));
+                    datasets = [{
+                        data: values,
+                        backgroundColor: config.colors.slice(0, values.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }];
+                } else {
+                    datasets = config.datasets.map(ds => ({
+                        label: ds.label,
+                        data: data.data.map(row => ds.parse(row[ds.col])),
+                        backgroundColor: ds.color,
+                        borderColor: ds.borderColor,
+                        borderWidth: ds.type === 'line' ? 2 : 1,
+                        type: ds.type || config.type,
+                        yAxisID: ds.yAxisID || 'y',
+                        tension: 0.3,
+                        fill: false,
+                        pointRadius: ds.type === 'line' ? 4 : undefined
+                    }));
+                }
+
+                const options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: config.indexAxis || 'x',
+                    plugins: {
+                        legend: { display: config.datasets.length > 1 || config.type === 'doughnut' },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    if (config.type === 'doughnut') {
+                                        return `${labels[ctx.dataIndex]}: RM ${ctx.parsed.toFixed(2)}`;
+                                    }
+                                    return `${ctx.dataset.label}: ${ctx.parsed.y ?? ctx.parsed.x}`;
+                                }
+                            }
+                        }
+                    }
+                };
+
+                if (config.type !== 'doughnut') {
+                    options.scales = {
+                        y: { beginAtZero: true, position: 'left' }
+                    };
+                    if (config.dualAxis) {
+                        options.scales.y1 = { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } };
+                    }
+                }
+
+                reportChartInstance = new Chart(canvas.getContext('2d'), {
+                    type: config.type === 'doughnut' ? 'doughnut' : 'bar',
+                    data: { labels, datasets },
+                    options
+                });
+            }
 
             const reportTemplates = {
                 booking: [
@@ -486,6 +631,7 @@
 
             function displayPreview(data) {
                 const section = document.getElementById('preview-content');
+                const tableSection = document.getElementById('preview-table-content');
                 document.getElementById('previewModalLabel').innerHTML = `
                     <i class="mdi mdi-table me-2"></i>${data.reportTitle}
                 `;
@@ -502,7 +648,14 @@
                         <span class="badge bg-secondary">${data.data?.length || 0} records</span>
                     </div>
                     ${summaryHtml}
-                    ${noData ? '<div class="alert alert-info"><i class="mdi mdi-information me-2"></i>No data found for the selected criteria.</div>' : `
+                `;
+
+                // Render chart if applicable
+                renderChart(data);
+
+                // Render table
+                tableSection.style.display = 'block';
+                tableSection.innerHTML = noData ? '<div class="alert alert-info"><i class="mdi mdi-information me-2"></i>No data found for the selected criteria.</div>' : `
                     <div class="table-responsive">
                         <table class="table table-sm table-hover table-striped">
                             <thead class="table-dark">
@@ -513,8 +666,7 @@
                             </tbody>
                         </table>
                         ${data.data.length > 50 ? `<p class="text-muted small text-center"><i class="mdi mdi-information me-1"></i>Showing 50 of ${data.data.length} rows. Download for complete data.</p>` : ''}
-                    </div>`}
-                `;
+                    </div>`;
             }
 
             function downloadReport(format) {

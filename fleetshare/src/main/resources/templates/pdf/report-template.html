@@ -132,6 +132,20 @@
             color: #666;
             font-style: italic;
         }
+
+        .chart-section {
+            margin: 15px 0 20px 0;
+            padding: 15px;
+            background: #fafbfc;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .chart-section svg {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
@@ -157,6 +171,13 @@
             </td>
         </tr>
     </table>
+
+    <!-- Chart visualization (SVG) for applicable report types -->
+    <th:block th:if="${chartSvg != null}">
+        <div class="chart-section" th:utext="${chartSvg}">
+            <!-- SVG chart rendered here -->
+        </div>
+    </th:block>
 
     <th:block th:if="${report.data != null and !report.data.isEmpty()}">
         <table class="data-table">

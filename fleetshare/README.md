@@ -60,18 +60,18 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 ### ✅ Checklist
 
-- [ ] **[R1 / R9] User Registration**
-    - [ ] Create `UserRegistrationDTO` to handle form inputs.
-    - [ ] Implement `UserService.registerUser()` with password encryption.
-    - [ ] Validation: Use Bean Validation (`@Valid`, `@Email`, `@NotBlank`).
-- [ ] **[R1 / R9 / R18] Secure Login**
-    - [ ] Implement `CustomUserDetailsService` loading users from the DB.
-    - [ ] Configure `SecurityFilterChain` for URL protection.
-- [ ] **[R22] Role-Based Access Control (RBAC)**
-    - [ ] **Security:** Annotate Controllers with `@PreAuthorize("hasRole('RENTER')")`.
-    - [ ] **Security:** Use `@PostAuthorize` to ensure Owners only view their own data.
-- [ ] **Profile Management**
-    - [ ] Service method `updateProfile(UserId, UpdateDTO)`.
+- [x] **[R1 / R9] User Registration**
+    - [x] Create `UserRegistrationDTO` to handle form inputs.
+    - [x] Implement `UserService.registerUser()` with password encryption.
+    - [x] Validation: Use Bean Validation (`@Valid`, `@Email`, `@NotBlank`).
+- [x] **[R1 / R9 / R18] Secure Login**
+    - [x] Implement `CustomUserDetailsService` loading users from the DB.
+    - [x] Configure `SecurityFilterChain` for URL protection.
+- [x] **[R22] Role-Based Access Control (RBAC)**
+    - [x] **Security:** Annotate Controllers with `@PreAuthorize("hasRole('RENTER')")`.
+    - [x] **Security:** Use `@PostAuthorize` to ensure Owners only view their own data.
+- [x] **Profile Management**
+    - [x] Service method `updateProfile(UserId, UpdateDTO)`.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -90,16 +90,16 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 ### ✅ Checklist
 
-- [ ] **[R2] Add Vehicle**
-    - [ ] `VehicleController.addVehicle(@RequestBody VehicleDTO)` endpoint.
-    - [ ] Handle photo uploads using `MultipartFile` and store paths in DB.
-- [ ] **[R2] Manage Fleet Inventory**
-    - [ ] Repository: `findByFleetOwnerId(Long ownerId)`.
-    - [ ] **CRUD:** Service methods `updateVehicle` and `deleteVehicle`.
-- [ ] **[R3] Availability Management**
-    - [ ] Logic to check if vehicle status can be toggled (check dependencies).
-- [ ] **[R7] Utilization Reports**
-    - [ ] create a Custom Interface (Projection) for utilization stats to map JPQL results.
+- [x] **[R2] Add Vehicle**
+    - [x] `VehicleController.addVehicle(@RequestBody VehicleDTO)` endpoint.
+    - [x] Handle photo uploads using `MultipartFile` and store paths in DB.
+- [x] **[R2] Manage Fleet Inventory**
+    - [x] Repository: `findByFleetOwnerId(Long ownerId)`.
+    - [x] **CRUD:** Service methods `updateVehicle` and `deleteVehicle`.
+- [x] **[R3] Availability Management**
+    - [x] Logic to check if vehicle status can be toggled (check dependencies).
+- [x] **[R7] Utilization Reports**
+    - [x] create a Custom Interface (Projection) for utilization stats to map JPQL results.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -126,18 +126,18 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 ### ✅ Checklist
 
-- [ ] **[R10] Vehicle Search**
-    - [ ] Implement `VehicleSpecification` (Spring Data JPA Specifications) for dynamic filtering (date, price, location).
-- [ ] **[R11] Vehicle Details**
-    - [ ] DTO projection including `Vehicle`, current `Price`, and `Owner` info.
-- [ ] **[R12] Booking Creation**
-    - [ ] `BookingService.createBooking()` with `@Transactional`.
-    - [ ] **Validation:** Custom logic to check date overlaps.
-- [ ] **[R5] Booking Management**
-    - [ ] Endpoints: `PATCH /api/bookings/{id}/status`.
-    - [ ] Logic: Update `BookingStatusLog` automatically on status change.
-- [ ] **[R15] Booking History**
-    - [ ] `Pageable` endpoints for history lists (Pagination).
+- [x] **[R10] Vehicle Search**
+    - [x] Implement `VehicleSpecification` (Spring Data JPA Specifications) for dynamic filtering (date, price, location).
+- [x] **[R11] Vehicle Details**
+    - [x] DTO projection including `Vehicle`, current `Price`, and `Owner` info.
+- [x] **[R12] Booking Creation**
+    - [x] `BookingService.createBooking()` with `@Transactional`.
+    - [x] **Validation:** Custom logic to check date overlaps.
+- [x] **[R5] Booking Management**
+    - [x] Endpoints: `PATCH /api/bookings/{id}/status`.
+    - [x] Logic: Update `BookingStatusLog` automatically on status change.
+- [x] **[R15] Booking History**
+    - [x] `Pageable` endpoints for history lists (Pagination).
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -160,12 +160,12 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 ### ✅ Checklist
 
-- [ ] **[R4] Maintenance Logging**
-    - [ ] CRUD Endpoints for Maintenance.
-- [ ] **[R3] Auto-Availability Integration**
-    - [ ] Service Logic: When Maintenance is `ACTIVE`, set Vehicle `status` = `MAINTENANCE`.
-- [ ] **Maintenance History**
-    - [ ] `List<MaintenanceDTO> getMaintenanceHistory(Long vehicleId)`.
+- [x] **[R4] Maintenance Logging**
+    - [x] CRUD Endpoints for Maintenance.
+- [x] **[R3] Auto-Availability Integration**
+    - [x] Service Logic: When Maintenance is `ACTIVE`, set Vehicle `status` = `MAINTENANCE`.
+- [x] **Maintenance History**
+    - [x] `List<MaintenanceDTO> getMaintenanceHistory(Long vehicleId)`.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -181,13 +181,13 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 ### ✅ Checklist
 
-- [ ] **[R13] Payment Processing**
-    - [ ] Endpoint to upload Proof (`MultipartFile`).
-    - [ ] Service to link Payment to Invoice.
-- [ ] **[R16] Payment History**
-    - [ ] Repository: `findByInvoice_Renter_Id(Long renterId)`.
-- [ ] **[R6] Revenue Reports**
-    - [ ] JPQL Aggregation Query for Owner Revenue.
+- [x] **[R13] Payment Processing**
+    - [x] Endpoint to upload Proof (`MultipartFile`).
+    - [x] Service to link Payment to Invoice.
+- [x] **[R16] Payment History**
+    - [x] Repository: `findByInvoice_Renter_Id(Long renterId)`.
+- [x] **[R6] Revenue Reports**
+    - [x] JPQL Aggregation Query for Owner Revenue.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -207,12 +207,12 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 ### ✅ Checklist
 
-- [ ] **[R19] User Management**
-    - [ ] `AdminUserController` with endpoints to `PATCH /users/{id}/active`.
-- [ ] **[R20] Dispute Resolution**
-    - [ ] Read-only view of `BookingStatusLog` and `PaymentStatusLog`.
-- [ ] **[R21] Platform Reporting**
-    - [ ] **Service:** `AdminReportService` gathering counts via `long userCount = userRepository.count();`.
+- [x] **[R19] User Management**
+    - [x] `AdminUserController` with endpoints to `PATCH /users/{id}/active`.
+- [x] **[R20] Dispute Resolution**
+    - [x] Read-only view of `BookingStatusLog` and `PaymentStatusLog`.
+- [x] **[R21] Platform Reporting**
+    - [x] **Service:** `AdminReportService` gathering counts via `long userCount = userRepository.count();`.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
