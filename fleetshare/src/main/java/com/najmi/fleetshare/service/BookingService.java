@@ -179,6 +179,12 @@ public class BookingService {
             }
         }
 
+        // Fetch Booking Price Snapshot
+        bookingPriceSnapshotRepository.findByBookingId(bookingId).ifPresent(snapshot -> {
+            dto.setRatePerDay(snapshot.getRatePerDay());
+            dto.setDaysRented(snapshot.getDaysRented());
+        });
+
         return dto;
     }
 
@@ -238,19 +244,55 @@ public class BookingService {
         return new com.najmi.fleetshare.dto.BookingCountDTO(total, active, completed, pending);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void updateBooking(BookingDTO bookingDTO) {
         Booking booking = bookingRepository.findById(bookingDTO.getBookingId()).orElse(null);
-        if (booking != null) {
-            booking.setStartDate(bookingDTO.getStartDate());
-            booking.setEndDate(bookingDTO.getEndDate());
-            bookingRepository.save(booking);
+        if (booking == null) {
+            throw new IllegalArgumentException("Booking not found: " + bookingDTO.getBookingId());
+        }
 
-            // Update invoice if exists
-            List<Invoice> invoices = invoiceRepository.findByBookingId(booking.getBookingId());
-            if (!invoices.isEmpty()) {
-                Invoice invoice = invoices.get(0);
-                invoice.setTotalAmount(bookingDTO.getTotalCost());
-                invoiceRepository.save(invoice);
+        // 1. Update booking dates
+        booking.setStartDate(bookingDTO.getStartDate());
+        booking.setEndDate(bookingDTO.getEndDate());
+        bookingRepository.save(booking);
+
+        // 2. Recalculate days and total cost from the price snapshot's locked-in rate
+        long days = java.time.temporal.ChronoUnit.DAYS.between(
+                bookingDTO.getStartDate().toLocalDate(),
+                bookingDTO.getEndDate().toLocalDate());
+        if (days <= 0)
+            days = 1; // Minimum 1 day
+
+        java.math.BigDecimal totalCost;
+        BookingPriceSnapshot snapshot = bookingPriceSnapshotRepository
+                .findByBookingId(booking.getBookingId()).orElse(null);
+
+        if (snapshot != null) {
+            // Use the locked-in rate to recalculate
+            totalCost = snapshot.getRatePerDay().multiply(java.math.BigDecimal.valueOf(days));
+            snapshot.setDaysRented((int) days);
+            snapshot.setTotalCalculatedCost(totalCost);
+            bookingPriceSnapshotRepository.save(snapshot);
+        } else {
+            // Fallback: use totalCost from form if no snapshot exists
+            totalCost = bookingDTO.getTotalCost() != null
+                    ? bookingDTO.getTotalCost()
+                    : java.math.BigDecimal.ZERO;
+        }
+
+        // 3. Update invoice total_amount
+        List<Invoice> invoices = invoiceRepository.findByBookingId(booking.getBookingId());
+        if (!invoices.isEmpty()) {
+            Invoice invoice = invoices.get(0);
+            invoice.setTotalAmount(totalCost);
+            invoiceRepository.save(invoice);
+
+            // 4. Update payment amount (if exists)
+            List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+            if (!payments.isEmpty()) {
+                Payment payment = payments.get(0);
+                payment.setAmount(totalCost);
+                paymentRepository.save(payment);
             }
         }
     }
@@ -528,7 +570,7 @@ public class BookingService {
      * Fetches recent bookings for a specific owner
      *
      * @param ownerId Owner ID
-     * @param limit    Number of bookings to fetch
+     * @param limit   Number of bookings to fetch
      * @return List of BookingDTO objects
      */
     public List<BookingDTO> getRecentBookingsByOwnerId(Long ownerId, int limit) {
@@ -561,7 +603,8 @@ public class BookingService {
                 active += count;
             } else if (BookingStatusLog.BookingStatus.COMPLETED.equals(status)) {
                 completed += count;
-            } else if (BookingStatusLog.BookingStatus.PENDING.equals(status) || BookingStatusLog.BookingStatus.CONFIRMED.equals(status)) {
+            } else if (BookingStatusLog.BookingStatus.PENDING.equals(status)
+                    || BookingStatusLog.BookingStatus.CONFIRMED.equals(status)) {
                 pending += count;
             }
         }

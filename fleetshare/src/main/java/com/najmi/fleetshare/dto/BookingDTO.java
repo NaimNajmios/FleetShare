@@ -30,6 +30,10 @@ public class BookingDTO {
     private String vehicleCategory;
     private BigDecimal vehicleRatePerDay;
 
+    // Booking price snapshot fields
+    private BigDecimal ratePerDay;
+    private Integer daysRented;
+
     // Constructors
     public BookingDTO() {
     }
@@ -251,5 +255,21 @@ public class BookingDTO {
 
     public void setVehicleRatePerDay(BigDecimal vehicleRatePerDay) {
         this.vehicleRatePerDay = vehicleRatePerDay;
+    }
+
+    public BigDecimal getRatePerDay() {
+        return ratePerDay;
+    }
+
+    public void setRatePerDay(BigDecimal ratePerDay) {
+        this.ratePerDay = ratePerDay;
+    }
+
+    public Integer getDaysRented() {
+        return daysRented;
+    }
+
+    public void setDaysRented(Integer daysRented) {
+        this.daysRented = daysRented;
     }
 }
