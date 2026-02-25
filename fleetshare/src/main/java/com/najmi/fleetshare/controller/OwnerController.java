@@ -715,6 +715,38 @@ public class OwnerController {
         return "owner/edit-booking";
     }
 
+    @PostMapping("/bookings/update")
+    public String updateBooking(@ModelAttribute BookingDTO bookingDTO,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Validate ownership
+            BookingDTO existing = bookingService.getBookingDetails(bookingDTO.getBookingId());
+            if (existing == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
+                return "redirect:/owner/bookings";
+            }
+
+            VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(existing.getVehicleId());
+            if (vehicle == null || !vehicle.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Unauthorized access.");
+                return "redirect:/owner/bookings";
+            }
+
+            bookingService.updateBooking(bookingDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Booking updated successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to update booking: " + e.getMessage());
+        }
+
+        return "redirect:/owner/bookings/view/" + bookingDTO.getBookingId();
+    }
+
     @GetMapping("/payments")
     public String payments(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
