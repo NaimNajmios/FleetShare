@@ -79,6 +79,7 @@
 
         .data-table td {
             font-size: 11px;
+            color: #333;
         }
 
         .summary-section {
@@ -188,7 +189,7 @@
             </thead>
             <tbody>
                 <tr th:each="row : ${report.data}">
-                    <td th:each="col : ${report.columns}" th:text="${row[col]}">Value</td>
+                    <td th:each="col : ${report.columns}" th:text="${row.get(col) ?: '-'}">Value</td>
                 </tr>
             </tbody>
         </table>
