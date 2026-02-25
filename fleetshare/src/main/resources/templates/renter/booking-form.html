@@ -220,7 +220,8 @@
                 justify-content: space-between;
                 gap: 0.75rem;
                 padding: 1rem 1.25rem;
-                background-color: #f0fdf4; /* Light green bg */
+                background-color: #f0fdf4;
+                /* Light green bg */
                 border: 1px solid #bbf7d0;
                 border-radius: 0.75rem;
                 color: #166534;
@@ -240,7 +241,8 @@
                 border-radius: 3px;
                 overflow: hidden;
                 margin: 0 1rem;
-                display: none; /* Hidden on mobile initially or if preferred */
+                display: none;
+                /* Hidden on mobile initially or if preferred */
             }
 
             @media (min-width: 768px) {
@@ -258,9 +260,23 @@
 
             /* Animation */
             @keyframes pulse-highlight {
-                0% { background-color: #f8f9fa; transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
-                50% { background-color: #eff6ff; transform: scale(1.02); box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1); }
-                100% { background-color: #f8f9fa; transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+                0% {
+                    background-color: #f8f9fa;
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+                }
+
+                50% {
+                    background-color: #eff6ff;
+                    transform: scale(1.02);
+                    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
+                }
+
+                100% {
+                    background-color: #f8f9fa;
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+                }
             }
 
             .pulse-highlight {
@@ -344,13 +360,14 @@
                 color: #6c757d;
             }
 
-            .form-floating > .form-control {
+            .form-floating>.form-control {
                 border-left: none;
             }
 
-            .form-floating > .form-control:focus {
+            .form-floating>.form-control:focus {
                 box-shadow: none;
-                border-color: #ced4da; /* Keep border color consistent */
+                border-color: #ced4da;
+                /* Keep border color consistent */
             }
 
             .input-group:focus-within {
@@ -401,7 +418,17 @@
                 transform: scale(1);
             }
 
+            /* Flatpickr disabled date styling */
+            .flatpickr-day.flatpickr-disabled,
+            .flatpickr-day.flatpickr-disabled:hover {
+                background: #f0f0f0 !important;
+                color: #bbb !important;
+                cursor: not-allowed !important;
+                text-decoration: line-through;
+                border-color: transparent !important;
+            }
         </style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     </th:block>
 </head>
 
@@ -465,7 +492,8 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                                 <div class="form-floating">
-                                    <input type="date" id="pickupDate" name="pickupDate" class="form-control" placeholder="Select date" required aria-required="true">
+                                    <input type="text" id="pickupDate" name="pickupDate" class="form-control"
+                                        placeholder="Select date" required aria-required="true">
                                     <label for="pickupDate">Pickup Date</label>
                                 </div>
                             </div>
@@ -474,14 +502,17 @@
                         <div class="col-md-2 text-center">
                             <div class="date-connector-icon">
                                 <span id="durationBadge" class="duration-badge"></span>
-                                <i id="arrowIcon" class="fas fa-arrow-right text-muted" style="transition: opacity 0.2s;"></i>
+                                <i id="arrowIcon" class="fas fa-arrow-right text-muted"
+                                    style="transition: opacity 0.2s;"></i>
                             </div>
                         </div>
                         <div class="col-md-5">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
                                 <div class="form-floating">
-                                    <input type="date" id="returnDate" name="returnDate" class="form-control" placeholder="Select date" required aria-required="true" aria-describedby="dateError">
+                                    <input type="text" id="returnDate" name="returnDate" class="form-control"
+                                        placeholder="Select date" required aria-required="true"
+                                        aria-describedby="dateError">
                                     <label for="returnDate">Return Date</label>
                                 </div>
                             </div>
@@ -490,20 +521,25 @@
                     </div>
 
                     <div id="dateError" class="date-error mb-3" role="alert" aria-live="assertive">
-                        <i class="fas fa-exclamation-circle me-1"></i> Return date must be equal to or after pickup date.
+                        <i class="fas fa-exclamation-circle me-1"></i> Return date must be equal to or after pickup
+                        date.
                     </div>
 
                     <!-- Quick Select Pills -->
                     <div class="form-group">
                         <div class="quick-select-pills">
-                            <span class="text-muted small me-2 text-uppercase fw-bold" style="letter-spacing: 0.5px; font-size: 0.7rem;">Quick Select:</span>
-                            <button type="button" class="quick-select-pill" onclick="addDays(1)" data-days="1" aria-label="Select 1 Day Duration">
+                            <span class="text-muted small me-2 text-uppercase fw-bold"
+                                style="letter-spacing: 0.5px; font-size: 0.7rem;">Quick Select:</span>
+                            <button type="button" class="quick-select-pill" onclick="addDays(1)" data-days="1"
+                                aria-label="Select 1 Day Duration">
                                 <i class="fas fa-clock"></i> 1 Day
                             </button>
-                            <button type="button" class="quick-select-pill" onclick="addDays(3)" data-days="3" aria-label="Select 3 Days Duration">
+                            <button type="button" class="quick-select-pill" onclick="addDays(3)" data-days="3"
+                                aria-label="Select 3 Days Duration">
                                 <i class="fas fa-calendar-week"></i> 3 Days
                             </button>
-                            <button type="button" class="quick-select-pill" onclick="addDays(7)" data-days="7" aria-label="Select 1 Week Duration">
+                            <button type="button" class="quick-select-pill" onclick="addDays(7)" data-days="7"
+                                aria-label="Select 1 Week Duration">
                                 <i class="fas fa-calendar"></i> 1 Week
                             </button>
                         </div>
@@ -512,7 +548,8 @@
                     <!-- Duration Badge -->
                     <div class="form-group mt-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label text-muted small mb-0 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Duration</label>
+                            <label class="form-label text-muted small mb-0 text-uppercase fw-bold"
+                                style="font-size: 0.75rem; letter-spacing: 0.5px;">Duration</label>
                         </div>
                         <div id="durationDisplay" class="duration-display hidden" role="status">
                             <div class="d-flex align-items-center gap-2">
@@ -528,7 +565,8 @@
                     <!-- Total Cost -->
                     <div class="form-group">
                         <label class="form-label" id="totalCostLabel">Booking Summary</label>
-                        <div id="totalCostContainer" class="cost-card" aria-labelledby="totalCostLabel" aria-live="polite">
+                        <div id="totalCostContainer" class="cost-card" aria-labelledby="totalCostLabel"
+                            aria-live="polite">
                             <!-- Hidden Breakdown (Reveals on selection) -->
                             <div id="costBreakdown" class="cost-breakdown d-none mb-3 pb-3 border-bottom">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
@@ -552,7 +590,8 @@
                         <input type="hidden" id="totalCost" name="totalCost" value="0.00">
                     </div>
 
-                    <button type="submit" id="btnProceed" class="btn-proceed d-flex align-items-center justify-content-center gap-2" disabled>
+                    <button type="submit" id="btnProceed"
+                        class="btn-proceed d-flex align-items-center justify-content-center gap-2" disabled>
                         <span>PROCEED TO REVIEW</span>
                         <div class="spinner-border spinner-border-sm d-none" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -564,7 +603,8 @@
     </main>
 
     <th:block layout:fragment="extra-js">
-        <script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script th:inline="javascript">
             document.addEventListener('DOMContentLoaded', function () {
                 const pickupInput = document.getElementById('pickupDate');
                 const returnInput = document.getElementById('returnDate');
@@ -583,13 +623,15 @@
                 const arrowIcon = document.getElementById('arrowIcon');
                 const pills = document.querySelectorAll('.quick-select-pill');
 
+                const vehicleId = /*[[${vehicle.vehicleId}]]*/ 0;
+
                 // Set min date to today (local time)
                 const now = new Date();
-                const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+                const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
                     .toISOString()
                     .split('T')[0];
-                pickupInput.min = today;
-                returnInput.min = today;
+
+                let fpPickup, fpReturn;
 
                 // Get rate per day from data attribute
                 const ratePerDay = parseFloat(document.getElementById('bookingForm').dataset.rate);
@@ -618,12 +660,13 @@
                 }
 
                 // Make addDays available globally
-                window.addDays = function(days) {
+                window.addDays = function (days) {
                     if (!pickupInput.value) {
                         const now = new Date();
                         pickupInput.value = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
                             .toISOString()
                             .split('T')[0];
+                        if (fpPickup) fpPickup.setDate(pickupInput.value);
                     }
 
                     const pickup = new Date(pickupInput.value);
@@ -631,7 +674,9 @@
                     newReturn.setDate(pickup.getDate() + days);
 
                     // Ensure format matches YYYY-MM-DD
-                    returnInput.value = newReturn.toISOString().split('T')[0];
+                    const newReturnStr = newReturn.toISOString().split('T')[0];
+                    returnInput.value = newReturnStr;
+                    if (fpReturn) fpReturn.setDate(newReturnStr);
 
                     // Manually trigger change to update UI
                     updateDuration();
@@ -777,57 +822,94 @@
                 let previousPickup = '';
                 let previousReturn = '';
 
-                pickupInput.addEventListener('change', function () {
+                function onPickupChange(selectedDates, dateStr, instance) {
+                    if (!dateStr) return;
+
                     // Update Min Date for Return
-                    returnInput.min = this.value;
+                    if (fpReturn) fpReturn.set('minDate', dateStr);
 
                     // Smart UX: Preserve Duration
-                    // If we had a valid range before, and we move the pickup date,
-                    // move the return date by the same amount.
-                    if (previousPickup && previousReturn && this.value) {
-                         const oldStart = new Date(previousPickup);
-                         const oldEnd = new Date(previousReturn);
-                         const newStart = new Date(this.value);
+                    if (previousPickup && previousReturn && dateStr) {
+                        const oldStart = new Date(previousPickup);
+                        const oldEnd = new Date(previousReturn);
+                        const newStart = new Date(dateStr);
 
-                         // Calculate previous duration in ms
-                         const durationMs = oldEnd - oldStart;
+                        const durationMs = oldEnd - oldStart;
 
-                         if (durationMs >= 0) { // Valid duration
-                             const newEnd = new Date(newStart.getTime() + durationMs);
-                             returnInput.value = newEnd.toISOString().split('T')[0];
-                         }
-                    } else if (this.value && !returnInput.value) {
+                        if (durationMs >= 0) {
+                            const newEnd = new Date(newStart.getTime() + durationMs);
+                            const newEndStr = newEnd.toISOString().split('T')[0];
+                            if (fpReturn) fpReturn.setDate(newEndStr);
+                            returnInput.value = newEndStr;
+                        }
+                    } else if (dateStr && !returnInput.value) {
                         // Default Fallback: Pickup + 1 Day
-                        const pickup = new Date(this.value);
+                        const pickup = new Date(dateStr);
                         const nextDay = new Date(pickup);
                         nextDay.setDate(pickup.getDate() + 1);
-                        returnInput.value = nextDay.toISOString().split('T')[0];
+                        const nextDayStr = nextDay.toISOString().split('T')[0];
+                        if (fpReturn) fpReturn.setDate(nextDayStr);
+                        returnInput.value = nextDayStr;
                     }
 
-                    if (returnInput.value && returnInput.value < this.value) {
-                        returnInput.value = this.value;
+                    if (returnInput.value && returnInput.value < dateStr) {
+                        if (fpReturn) fpReturn.setDate(dateStr);
+                        returnInput.value = dateStr;
                     }
 
                     updateDuration();
                     updateDateContext();
 
-                    // Update previous values state
-                    previousPickup = this.value;
+                    previousPickup = dateStr;
                     previousReturn = returnInput.value;
-                });
+                }
 
-                returnInput.addEventListener('change', function() {
+                function onReturnChange(selectedDates, dateStr, instance) {
                     updateDuration();
                     updateDateContext();
 
-                    // Update previous values state
                     previousPickup = pickupInput.value;
-                    previousReturn = this.value;
-                });
+                    previousReturn = dateStr;
+                }
+
+                // Initialize Flatpickr and fetch unavailable dates
+                fetch('/renter/bookings/vehicle/' + vehicleId + '/unavailable-dates')
+                    .then(response => response.json())
+                    .then(ranges => {
+                        const disableRanges = ranges.map(r => ({
+                            from: r.from,
+                            to: r.to
+                        }));
+
+                        const commonConfig = {
+                            dateFormat: 'Y-m-d',
+                            disable: disableRanges,
+                            minDate: todayStr,
+                            allowInput: true
+                        };
+
+                        fpPickup = flatpickr(pickupInput, Object.assign({}, commonConfig, {
+                            onChange: onPickupChange
+                        }));
+
+                        fpReturn = flatpickr(returnInput, Object.assign({}, commonConfig, {
+                            onChange: onReturnChange
+                        }));
+                    })
+                    .catch(err => {
+                        console.error('Failed to load unavailable dates:', err);
+                        const fallbackConfig = {
+                            dateFormat: 'Y-m-d',
+                            minDate: todayStr,
+                            allowInput: true
+                        };
+                        fpPickup = flatpickr(pickupInput, Object.assign({}, fallbackConfig, { onChange: onPickupChange }));
+                        fpReturn = flatpickr(returnInput, Object.assign({}, fallbackConfig, { onChange: onReturnChange }));
+                    });
 
                 // Handle Form Submission
                 const form = document.getElementById('bookingForm');
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     if (form.checkValidity()) {
                         const btnText = proceedBtn.querySelector('span');
                         const spinner = proceedBtn.querySelector('.spinner-border');
