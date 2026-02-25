@@ -669,4 +669,16 @@ public class RenterController {
             return org.springframework.http.ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/bookings/vehicle/{vehicleId}/unavailable-dates")
+    @ResponseBody
+    public ResponseEntity<?> getUnavailableDates(@PathVariable Long vehicleId) {
+        try {
+            // For new bookings, we don't exclude any existing booking ID
+            var ranges = bookingService.getUnavailableDateRanges(vehicleId, null);
+            return ResponseEntity.ok(ranges);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
 }
