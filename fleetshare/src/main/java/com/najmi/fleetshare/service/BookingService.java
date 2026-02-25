@@ -183,6 +183,7 @@ public class BookingService {
         bookingPriceSnapshotRepository.findByBookingId(bookingId).ifPresent(snapshot -> {
             dto.setRatePerDay(snapshot.getRatePerDay());
             dto.setDaysRented(snapshot.getDaysRented());
+            dto.setSnapshotRemarks(snapshot.getRemarks());
         });
 
         return dto;
@@ -256,7 +257,7 @@ public class BookingService {
         booking.setEndDate(bookingDTO.getEndDate());
         bookingRepository.save(booking);
 
-        // 2. Recalculate days and total cost from the price snapshot's locked-in rate
+        // 2. Calculate days from new dates
         long days = java.time.temporal.ChronoUnit.DAYS.between(
                 bookingDTO.getStartDate().toLocalDate(),
                 bookingDTO.getEndDate().toLocalDate());
@@ -268,8 +269,22 @@ public class BookingService {
                 .findByBookingId(booking.getBookingId()).orElse(null);
 
         if (snapshot != null) {
-            // Use the locked-in rate to recalculate
-            totalCost = snapshot.getRatePerDay().multiply(java.math.BigDecimal.valueOf(days));
+            java.math.BigDecimal autoCalculated = snapshot.getRatePerDay()
+                    .multiply(java.math.BigDecimal.valueOf(days));
+
+            // Check if owner provided a manual override
+            if (bookingDTO.getTotalCost() != null
+                    && bookingDTO.getTotalCost().compareTo(java.math.BigDecimal.ZERO) > 0
+                    && bookingDTO.getTotalCost().compareTo(autoCalculated) != 0) {
+                // Manual override: use owner's custom price
+                totalCost = bookingDTO.getTotalCost();
+                snapshot.setRemarks(bookingDTO.getSnapshotRemarks());
+            } else {
+                // Auto-calculated: rate × days
+                totalCost = autoCalculated;
+                snapshot.setRemarks(null);
+            }
+
             snapshot.setDaysRented((int) days);
             snapshot.setTotalCalculatedCost(totalCost);
             bookingPriceSnapshotRepository.save(snapshot);
