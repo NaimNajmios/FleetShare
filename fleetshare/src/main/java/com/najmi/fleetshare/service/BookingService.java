@@ -626,4 +626,59 @@ public class BookingService {
 
         return new com.najmi.fleetshare.dto.BookingCountDTO(total, active, completed, pending);
     }
+
+    /**
+     * Returns date ranges that are unavailable for a vehicle due to existing
+     * bookings.
+     * Excludes the specified booking (so the user can still see their own dates as
+     * available)
+     * and excludes bookings with CANCELLED or COMPLETED status.
+     *
+     * @param vehicleId        The vehicle ID
+     * @param excludeBookingId The booking ID to exclude (the one being edited), can
+     *                         be null
+     * @return List of maps with "start" and "end" keys as ISO date-time strings
+     */
+    public List<Map<String, String>> getUnavailableDateRanges(Long vehicleId, Long excludeBookingId) {
+        List<Booking> vehicleBookings = bookingRepository.findByVehicleId(vehicleId);
+
+        // Get all booking IDs to fetch their statuses
+        Set<Long> bookingIds = vehicleBookings.stream()
+                .map(Booking::getBookingId)
+                .collect(Collectors.toSet());
+
+        // Fetch latest status for all bookings in bulk
+        Map<Long, String> statusMap = Collections.emptyMap();
+        if (!bookingIds.isEmpty()) {
+            statusMap = statusLogRepository.findLatestStatusForBookings(bookingIds).stream()
+                    .collect(Collectors.toMap(
+                            BookingStatusLog::getBookingId,
+                            log -> log.getStatusValue().name(),
+                            (existing, replacement) -> existing));
+        }
+
+        List<Map<String, String>> unavailableRanges = new ArrayList<>();
+        Set<String> excludedStatuses = Set.of("CANCELLED", "COMPLETED");
+
+        for (Booking booking : vehicleBookings) {
+            // Skip the booking being edited
+            if (excludeBookingId != null && booking.getBookingId().equals(excludeBookingId)) {
+                continue;
+            }
+
+            String status = statusMap.getOrDefault(booking.getBookingId(), "PENDING");
+
+            // Skip cancelled/completed bookings
+            if (excludedStatuses.contains(status)) {
+                continue;
+            }
+
+            Map<String, String> range = Map.of(
+                    "from", booking.getStartDate().toLocalDate().toString(),
+                    "to", booking.getEndDate().toLocalDate().toString());
+            unavailableRanges.add(range);
+        }
+
+        return unavailableRanges;
+    }
 }

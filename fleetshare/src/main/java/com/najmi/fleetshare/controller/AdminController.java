@@ -711,6 +711,18 @@ public class AdminController {
         return "admin/edit-booking";
     }
 
+    @GetMapping("/bookings/vehicle/{vehicleId}/unavailable-dates")
+    @ResponseBody
+    public ResponseEntity<?> getUnavailableDates(@PathVariable Long vehicleId,
+            @RequestParam(value = "excludeBookingId", required = false) Long excludeBookingId) {
+        try {
+            var ranges = bookingService.getUnavailableDateRanges(vehicleId, excludeBookingId);
+            return ResponseEntity.ok(ranges);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/bookings/update")
     public String updateBooking(BookingDTO bookingDTO) {
         bookingService.updateBooking(bookingDTO);
