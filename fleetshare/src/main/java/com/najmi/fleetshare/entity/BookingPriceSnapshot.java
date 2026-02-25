@@ -24,6 +24,9 @@ public class BookingPriceSnapshot {
     @Column(name = "total_calculated_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalCalculatedCost;
 
+    @Column(name = "remarks", length = 500)
+    private String remarks;
+
     // Constructors
     public BookingPriceSnapshot() {
     }
@@ -67,5 +70,13 @@ public class BookingPriceSnapshot {
 
     public void setTotalCalculatedCost(BigDecimal totalCalculatedCost) {
         this.totalCalculatedCost = totalCalculatedCost;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 }

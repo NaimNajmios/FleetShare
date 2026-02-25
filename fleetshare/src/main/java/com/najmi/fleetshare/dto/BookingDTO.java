@@ -33,6 +33,7 @@ public class BookingDTO {
     // Booking price snapshot fields
     private BigDecimal ratePerDay;
     private Integer daysRented;
+    private String snapshotRemarks;
 
     // Constructors
     public BookingDTO() {
@@ -271,5 +272,13 @@ public class BookingDTO {
 
     public void setDaysRented(Integer daysRented) {
         this.daysRented = daysRented;
+    }
+
+    public String getSnapshotRemarks() {
+        return snapshotRemarks;
+    }
+
+    public void setSnapshotRemarks(String snapshotRemarks) {
+        this.snapshotRemarks = snapshotRemarks;
     }
 }
