@@ -43,6 +43,9 @@ public class ReportService {
     @Autowired
     private TemplateEngine templateEngine;
 
+    @Autowired
+    private ReportChartService reportChartService;
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -780,6 +783,11 @@ public class ReportService {
         Context context = new Context();
         context.setVariable("report", report);
         context.setVariable("request", request);
+
+        // Generate SVG chart for applicable report types
+        String chartSvg = reportChartService.generateChartSvg(request.getReportType(), report);
+        context.setVariable("chartSvg", chartSvg);
+
         return templateEngine.process("pdf/report-template", context);
     }
 
@@ -787,6 +795,7 @@ public class ReportService {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
+            builder.useSVGDrawer(new com.openhtmltopdf.svgsupport.BatikSVGDrawer());
             builder.withHtmlContent(html, null);
             builder.toStream(os);
             builder.run();
