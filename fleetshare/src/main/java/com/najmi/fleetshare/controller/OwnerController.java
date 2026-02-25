@@ -1215,4 +1215,69 @@ public class OwnerController {
             return org.springframework.http.ResponseEntity.badRequest().build();
         }
     }
+
+    /**
+     * Fetch bookings for the owner's dashboard calendar
+     */
+    @GetMapping("/api/calendar/bookings")
+    @ResponseBody
+    public ResponseEntity<?> getCalendarBookings(HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId);
+
+            List<Map<String, Object>> events = new java.util.ArrayList<>();
+            for (BookingDTO booking : bookings) {
+                if (booking.getStartDate() == null || booking.getEndDate() == null)
+                    continue;
+
+                // Determine color based on status
+                String color;
+                switch (booking.getStatus()) {
+                    case "CONFIRMED":
+                        color = "#28a745";
+                        break; // Success Green
+                    case "ACTIVE":
+                        color = "#17a2b8";
+                        break; // Info Blue
+                    case "PENDING":
+                        color = "#ffc107";
+                        break; // Warning Yellow
+                    case "COMPLETED":
+                        color = "#6c757d";
+                        break; // Secondary Gray
+                    case "CANCELLED":
+                        color = "#dc3545";
+                        break; // Danger Red
+                    default:
+                        color = "#4B49AC";
+                        break; // Primary Purple
+                }
+
+                Map<String, Object> event = new java.util.HashMap<>();
+                event.put("id", booking.getBookingId());
+                event.put("title", booking.getVehicleRegistrationNo() + " - " + booking.getRenterName());
+                event.put("start", booking.getStartDate().toString());
+
+                // FullCalendar exclusive end date fix (add 1 day if we want it to include the
+                // end date fully)
+                // But since we have LocalDateTime, it depends on the time component
+                event.put("end", booking.getEndDate().toString());
+
+                event.put("color", color);
+                event.put("url", "/owner/bookings/view/" + booking.getBookingId());
+
+                events.add(event);
+            }
+
+            return ResponseEntity.ok(events);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
