@@ -188,6 +188,15 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Repository: `findByInvoice_Renter_Id(Long renterId)`.
 - [x] **[R6] Revenue Reports**
     - [x] JPQL Aggregation Query for Owner Revenue.
+- [x] **Payment Settings (Owner)**
+    - [x] ToyyibPay BYOK (Bring Your Own Key) integration — owners configure their own secret key and category code.
+    - [x] QR code image upload for alternative payment (DuitNow / TNG eWallet).
+    - [x] Bank account details (bank name, account number, account holder).
+- [x] **Dynamic Payment Methods (Renter)**
+    - [x] Payment page displays only methods the fleet owner has configured.
+    - [x] Card/FPX available only if owner has ToyyibPay configured.
+    - [x] Bank Transfer available only if owner has bank info or QR code set.
+    - [x] Cash at counter always available.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -374,9 +383,13 @@ src/test/java/
 - Configure production database connection
 - Set up proper logging levels and rotation
 - Configure email service for notifications
-- Set up file storage for vehicle images
+- Set up file storage for uploads (configure `app.upload.dir` in application.properties):
+  - `app.upload.profile-images` — User profile photos
+  - `app.upload.payment-proofs` — Payment receipt uploads
+  - `app.upload.qr-codes` — Owner payment QR code images
 - Configure CORS for frontend integration
 - Set up monitoring and health checks
+- Run `V_add_payment_fields.sql` migration if using `ddl-auto=none`
 
 -----
 
@@ -385,7 +398,7 @@ src/test/java/
 ### Core Tables:
 - `users` - Base user table with common attributes
 - `renters` - Renter-specific details (extends users)
-- `fleet_owners` - Owner-specific details (extends users)
+- `fleet_owners` - Owner-specific details (extends users), includes payment config (`toyyibpay_secret_key`, `toyyibpay_category_code`, `payment_qr_url`, `bank_name`, `bank_account_number`, `bank_account_holder`)
 - `platform_admins` - Admin-specific details (extends users)
 - `vehicles` - Vehicle inventory with status and pricing
 - `vehicle_price_history` - Historical pricing data
@@ -395,6 +408,7 @@ src/test/java/
 - `invoices` - Billing information
 - `payments` - Payment transactions
 - `audit_logs` - System audit trail
+- `addresses` - User address with geolocation (latitude/longitude)
 
 ### Key Relationships:
 - One-to-Many: User → Vehicles (for owners)
@@ -421,6 +435,9 @@ src/test/java/
 - `POST /api/owner/vehicles` - Add new vehicle
 - `GET /api/owner/bookings` - Booking requests
 - `GET /api/owner/reports/utilization` - Utilization reports
+- `POST /owner/profile` - Update profile (includes bank info & ToyyibPay config)
+- `POST /owner/profile/qr` - Upload payment QR code image
+- `POST /owner/profile/image` - Upload profile photo
 
 ### Admin Endpoints:
 - `GET /api/admin/users` - User management
