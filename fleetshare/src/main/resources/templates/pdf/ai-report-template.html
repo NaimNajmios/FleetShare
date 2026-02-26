@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 11px;
+        }
+
+        .ai-explanation {
+            margin: 15px 0;
+            padding: 12px 15px;
+            background: #e8f4fd;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .meta-label {
+            color: #666;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .meta-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .data-table th {
+            background-color: #667eea;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .data-table td {
+            font-size: 11px;
+            color: #333;
+        }
+
+        .summary-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 10px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>AI Data Assistant Report</h1>
+        <p class="subtitle">FleetShare Vehicle Rental Platform</p>
+    </div>
+
+    <table style="width: 100%; margin-bottom: 15px;">
+        <tr>
+            <td style="width: 50%; padding: 10px; background: #f8f9fa; text-align: center;">
+                <div class="meta-label">Generated</div>
+                <div class="meta-value" th:text="${report.generatedAt}">26 Feb 2026 17:00</div>
+            </td>
+            <td style="width: 50%; padding: 10px; background: #f8f9fa; text-align: center;">
+                <div class="meta-label">Query</div>
+                <div class="meta-value" th:text="${query}">User's question</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- AI Explanation -->
+    <th:block th:if="${report.reportTitle != null and !report.reportTitle.isEmpty()}">
+        <div class="ai-explanation" th:text="${report.reportTitle}">AI explanation text</div>
+    </th:block>
+
+    <!-- Data Table -->
+    <th:block th:if="${report.data != null and !report.data.isEmpty()}">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th th:each="col : ${report.columns}" th:text="${col}">Column</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${report.data}">
+                    <td th:each="col : ${report.columns}" th:text="${row.get(col) ?: '-'}">Value</td>
+                </tr>
+            </tbody>
+        </table>
+    </th:block>
+
+    <th:block th:if="${report.data == null or report.data.isEmpty()}">
+        <div class="no-data">
+            No tabular data available for this query.
+        </div>
+    </th:block>
+
+    <!-- Summary -->
+    <th:block th:if="${report.summary != null and !report.summary.isEmpty()}">
+        <div class="summary-section">
+            <div class="summary-title">Summary</div>
+            <table style="width: 100%;">
+                <tr>
+                    <th:block th:each="entry : ${report.summary}">
+                        <td style="padding: 5px 15px 5px 0;">
+                            <div class="summary-label" th:text="${entry.key}">Label</div>
+                            <div class="summary-value" th:text="${entry.value}">Value</div>
+                        </td>
+                    </th:block>
+                </tr>
+            </table>
+        </div>
+    </th:block>
+
+    <div class="footer">
+        <p>Generated by FleetShare AI Data Assistant</p>
+        <p>This is a computer-generated document. No signature required.</p>
+    </div>
+</body>
+
+</html>
