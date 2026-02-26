@@ -438,6 +438,13 @@
         <script>
             let lastAiResponse = null;
 
+            function getCsrfToken() {
+                return document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            }
+            function getCsrfHeader() {
+                return document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            }
+
             function setQuery(query) {
                 document.getElementById('ai-query').value = query;
                 document.getElementById('ai-query').focus();
@@ -464,9 +471,16 @@
                 document.getElementById('export-options').style.display = 'none';
 
                 try {
+                    const csrfToken = getCsrfToken();
+                    const csrfHeader = getCsrfHeader();
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (csrfToken && csrfHeader) {
+                        headers[csrfHeader] = csrfToken;
+                    }
+
                     const response = await fetch('/owner/api/ai-query', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: headers,
                         body: JSON.stringify({ query: query })
                     });
 
