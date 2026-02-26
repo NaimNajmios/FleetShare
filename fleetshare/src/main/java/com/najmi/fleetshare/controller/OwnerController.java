@@ -1021,6 +1021,49 @@ public class OwnerController {
         }
     }
 
+    @PostMapping("/api/ai-query/download")
+    @ResponseBody
+    public ResponseEntity<byte[]> downloadAiReport(
+            @RequestBody com.najmi.fleetshare.dto.AiQueryRequest request,
+            @RequestParam(defaultValue = "pdf") String format,
+            HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            com.najmi.fleetshare.dto.AiQueryResponse aiResponse = aiAssistantService.processQuery(
+                    request.getQuery(), ownerId, false, request.getProvider());
+
+            if (!aiResponse.isSuccess()) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            byte[] content;
+            String contentType;
+            String filename;
+
+            if ("csv".equalsIgnoreCase(format)) {
+                content = reportService.generateAiCsvReport(aiResponse);
+                contentType = "text/csv";
+                filename = "ai-report.csv";
+            } else {
+                content = reportService.generateAiPdfReport(aiResponse, request.getQuery());
+                contentType = "application/pdf";
+                filename = "ai-report.pdf";
+            }
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + filename)
+                    .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                    .body(content);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/profile")
     public String profile(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);

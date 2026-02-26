@@ -829,4 +829,41 @@ public class ReportService {
 
         return csv.toString().getBytes();
     }
+
+    // ── AI Report Export ───────────────────────────────────────────────
+
+    /**
+     * Generate PDF report from AI query results.
+     */
+    public byte[] generateAiPdfReport(AiQueryResponse aiResponse, String query) {
+        ReportResponse<Map<String, Object>> report = convertAiToReport(aiResponse);
+        String html = buildAiReportHtml(report, query);
+        return generatePdfFromHtml(html);
+    }
+
+    /**
+     * Generate CSV report from AI query results.
+     */
+    public byte[] generateAiCsvReport(AiQueryResponse aiResponse) {
+        ReportResponse<Map<String, Object>> report = convertAiToReport(aiResponse);
+        return buildCsv(report);
+    }
+
+    private ReportResponse<Map<String, Object>> convertAiToReport(AiQueryResponse ai) {
+        ReportResponse<Map<String, Object>> report = new ReportResponse<>();
+        report.setReportTitle(ai.getExplanation() != null ? ai.getExplanation() : "AI Query Result");
+        report.setGeneratedAt(LocalDateTime.now().format(DATETIME_FORMATTER));
+        report.setPeriod("On-demand AI query");
+        report.setColumns(ai.getColumns() != null ? ai.getColumns() : Collections.emptyList());
+        report.setData(ai.getData() != null ? ai.getData() : Collections.emptyList());
+        report.setSummary(ai.getSummary() != null ? ai.getSummary() : Collections.emptyMap());
+        return report;
+    }
+
+    private String buildAiReportHtml(ReportResponse<Map<String, Object>> report, String query) {
+        Context context = new Context();
+        context.setVariable("report", report);
+        context.setVariable("query", query);
+        return templateEngine.process("pdf/ai-report-template", context);
+    }
 }

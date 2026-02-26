@@ -364,7 +364,10 @@
                                 <div class="results-header">
                                     <h5><i class="mdi mdi-table"></i> Results</h5>
                                     <div class="export-options" id="export-options" style="display: none;">
-                                        <button class="export-btn" onclick="exportCSV()">
+                                        <button class="export-btn" onclick="downloadAiReport('pdf')">
+                                            <i class="mdi mdi-file-pdf-box"></i> PDF
+                                        </button>
+                                        <button class="export-btn" onclick="downloadAiReport('csv')">
                                             <i class="mdi mdi-file-delimited"></i> CSV
                                         </button>
                                         <button class="export-btn" onclick="copyResults()">
@@ -565,27 +568,39 @@
                 }
             }
 
-            function exportCSV() {
-                if (!lastAiResponse || !lastAiResponse.columns || !lastAiResponse.data) return;
-                const cols = lastAiResponse.columns;
-                const rows = lastAiResponse.data;
-                let csv = cols.join(',') + '\n';
-                rows.forEach(row => {
-                    csv += cols.map(c => {
-                        let val = row[c] != null ? String(row[c]) : '';
-                        if (val.includes(',') || val.includes('"') || val.includes('\n')) {
-                            val = '"' + val.replace(/"/g, '""') + '"';
-                        }
-                        return val;
-                    }).join(',') + '\n';
-                });
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'ai-report.csv';
-                a.click();
-                URL.revokeObjectURL(url);
+            async function downloadAiReport(format) {
+                const query = document.getElementById('ai-query').value.trim();
+                if (!query) return;
+
+                try {
+                    const csrfToken = getCsrfToken();
+                    const csrfHeader = getCsrfHeader();
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (csrfToken && csrfHeader) {
+                        headers[csrfHeader] = csrfToken;
+                    }
+
+                    const response = await fetch('/owner/api/ai-query/download?format=' + format, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ query: query })
+                    });
+
+                    if (!response.ok) {
+                        alert('Failed to generate report. Please try again.');
+                        return;
+                    }
+
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'ai-report.' + format;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                } catch (err) {
+                    alert('Download failed. Please try again.');
+                }
             }
 
             function copyResults() {
