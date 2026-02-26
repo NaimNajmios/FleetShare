@@ -465,8 +465,12 @@
                                 th:action="@{/renter/bookings/{id}/payment/change(id=${booking.bookingId})}"
                                 method="POST">
                                 <select name="method" class="payment-method-select" style="margin-bottom: 1rem;">
-                                    <option value="CREDIT_CARD">Credit/Debit Card & FPX</option>
-                                    <option value="BANK_TRANSFER">Bank Transfer / DuitNow QR</option>
+                                    <option
+                                        th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}"
+                                        value="CREDIT_CARD">Credit/Debit Card &amp; FPX</option>
+                                    <option
+                                        th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}"
+                                        value="BANK_TRANSFER">Bank Transfer / DuitNow QR</option>
                                     <option value="CASH">Cash at Counter</option>
                                 </select>
                                 <button type="submit" class="btn-primary-action btn-gateway" style="width: 100%;">
@@ -481,20 +485,27 @@
                         <div class="method-selection-card">
                             <h2 class="section-title">How would you like to pay?</h2>
                             <div class="payment-options-grid" role="radiogroup" aria-label="Payment Method">
-                                <button type="button" class="payment-option-card active" data-value="card" role="radio" aria-checked="true">
+                                <button
+                                    th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}"
+                                    type="button" class="payment-option-card" data-value="card" role="radio"
+                                    aria-checked="false">
                                     <i class="fab fa-cc-visa text-primary mb-2"></i>
                                     <span>Card / FPX</span>
                                 </button>
-                                <button type="button" class="payment-option-card" data-value="transfer" role="radio" aria-checked="false">
+                                <button
+                                    th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}"
+                                    type="button" class="payment-option-card" data-value="transfer" role="radio"
+                                    aria-checked="false">
                                     <i class="fas fa-university text-info mb-2"></i>
                                     <span>Transfer</span>
                                 </button>
-                                <button type="button" class="payment-option-card" data-value="cash" role="radio" aria-checked="false">
+                                <button type="button" class="payment-option-card" data-value="cash" role="radio"
+                                    aria-checked="false">
                                     <i class="fas fa-money-bill-wave text-success mb-2"></i>
                                     <span>Cash</span>
                                 </button>
                             </div>
-                            <input type="hidden" id="paymentMethodValue" value="card">
+                            <input type="hidden" id="paymentMethodValue" value="">
                         </div>
 
                         <div class="dynamic-input-area">
@@ -510,26 +521,37 @@
 
                             <!-- Scenario 2: Bank Transfer -->
                             <div id="content-transfer" class="payment-content hidden">
-                                <!-- QR Code -->
-                                <div
+                                <!-- QR Code - show owner's QR if available -->
+                                <div th:if="${owner != null and owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()}"
+                                    style="margin: 0 auto 1.5rem; text-align: center;">
+                                    <img th:src="${owner.paymentQrUrl}" alt="Payment QR Code"
+                                        style="max-width: 200px; max-height: 200px; border-radius: 0.5rem; border: 1px solid #dee2e6;">
+                                    <p class="text-muted mt-2" style="font-size: 0.85rem;">Scan to pay via DuitNow / TNG
+                                        eWallet</p>
+                                </div>
+                                <div th:unless="${owner != null and owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()}"
                                     style="width: 200px; height: 200px; background: #f8f9fa; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; border-radius: 0.5rem;">
                                     <i class="fas fa-qrcode fa-4x text-muted"></i>
                                 </div>
 
-                                <!-- Bank Details -->
-                                <div
+                                <!-- Bank Details - show owner's bank info if available -->
+                                <div th:if="${owner != null and owner.bankName != null and !owner.bankName.isEmpty()}"
                                     style="background: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; text-align: left; width: 100%; max-width: 400px;">
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                         <span class="text-muted">Bank Name:</span>
-                                        <span style="font-weight: 600;">Maybank</span>
+                                        <span style="font-weight: 600;" th:text="${owner.bankName}">Bank Name</span>
                                     </div>
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <div th:if="${owner.bankAccountNumber != null and !owner.bankAccountNumber.isEmpty()}"
+                                        style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                         <span class="text-muted">Account No:</span>
-                                        <span style="font-weight: 600;">5551-2345-6789</span>
+                                        <span style="font-weight: 600;" th:text="${owner.bankAccountNumber}">Account
+                                            Number</span>
                                     </div>
-                                    <div style="display: flex; justify-content: space-between;">
+                                    <div th:if="${owner.bankAccountHolder != null and !owner.bankAccountHolder.isEmpty()}"
+                                        style="display: flex; justify-content: space-between;">
                                         <span class="text-muted">Account Name:</span>
-                                        <span style="font-weight: 600;">FleetShare Sdn Bhd</span>
+                                        <span style="font-weight: 600;" th:text="${owner.bankAccountHolder}">Account
+                                            Holder</span>
                                     </div>
                                 </div>
 
@@ -738,7 +760,7 @@
 
                     function updatePaymentUI(selected) {
                         // Update hidden input
-                        if(hiddenInput) hiddenInput.value = selected;
+                        if (hiddenInput) hiddenInput.value = selected;
 
                         // Reset all options
                         paymentOptions.forEach(opt => {
@@ -748,7 +770,7 @@
 
                         // Set active option
                         const activeOption = document.querySelector(`.payment-option-card[data-value="${selected}"]`);
-                        if(activeOption) {
+                        if (activeOption) {
                             activeOption.classList.add('active');
                             activeOption.setAttribute('aria-checked', 'true');
                         }
@@ -770,13 +792,19 @@
                         }
                     }
 
+                    // Auto-select the first available payment method on load
+                    const firstOption = paymentOptions[0];
+                    if (firstOption) {
+                        updatePaymentUI(firstOption.dataset.value);
+                    }
+
                     paymentOptions.forEach(option => {
-                        option.addEventListener('click', function() {
+                        option.addEventListener('click', function () {
                             updatePaymentUI(this.dataset.value);
                         });
 
                         // Keyboard support
-                        option.addEventListener('keydown', function(e) {
+                        option.addEventListener('keydown', function (e) {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
                                 updatePaymentUI(this.dataset.value);

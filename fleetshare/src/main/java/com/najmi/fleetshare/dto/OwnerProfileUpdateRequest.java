@@ -46,6 +46,12 @@ public class OwnerProfileUpdateRequest implements Serializable {
     @Size(max = 100, message = "Account holder name must not exceed 100 characters")
     private String bankAccountHolder;
 
+    @Size(max = 255, message = "Secret key must not exceed 255 characters")
+    private String toyyibpaySecretKey;
+
+    @Size(max = 100, message = "Category code must not exceed 100 characters")
+    private String toyyibpayCategoryCode;
+
     // Getters and Setters
 
     public String getBusinessName() {
@@ -142,5 +148,21 @@ public class OwnerProfileUpdateRequest implements Serializable {
 
     public void setBankAccountHolder(String bankAccountHolder) {
         this.bankAccountHolder = bankAccountHolder;
+    }
+
+    public String getToyyibpaySecretKey() {
+        return toyyibpaySecretKey;
+    }
+
+    public void setToyyibpaySecretKey(String toyyibpaySecretKey) {
+        this.toyyibpaySecretKey = toyyibpaySecretKey;
+    }
+
+    public String getToyyibpayCategoryCode() {
+        return toyyibpayCategoryCode;
+    }
+
+    public void setToyyibpayCategoryCode(String toyyibpayCategoryCode) {
+        this.toyyibpayCategoryCode = toyyibpayCategoryCode;
     }
 }

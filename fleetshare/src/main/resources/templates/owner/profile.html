@@ -268,7 +268,8 @@
                             <label class="form-label">ToyyibPay Secret Key</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="toyyibpaySecretKey"
-                                    placeholder="Enter your ToyyibPay secret key" disabled>
+                                    placeholder="Enter your ToyyibPay secret key" disabled
+                                    th:value="${owner != null ? owner.toyyibpaySecretKey : ''}">
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button" id="toggleSecretKey">
                                         <i class="ti-eye"></i>
@@ -281,7 +282,8 @@
                         <div class="form-group">
                             <label class="form-label">ToyyibPay Category Code</label>
                             <input type="text" class="form-control" id="toyyibpayCategoryCode"
-                                placeholder="Enter your category code" disabled>
+                                placeholder="Enter your category code" disabled
+                                th:value="${owner != null ? owner.toyyibpayCategoryCode : ''}">
                             <small class="text-muted">Category code from your ToyyibPay dashboard</small>
                         </div>
 
@@ -644,7 +646,9 @@
                                 longitude: longitudeInput ? longitudeInput.value : '',
                                 bankName: bankNameInput ? bankNameInput.value : '',
                                 bankAccountNumber: bankAccountNumberInput ? bankAccountNumberInput.value : '',
-                                bankAccountHolder: bankAccountHolderInput ? bankAccountHolderInput.value : ''
+                                bankAccountHolder: bankAccountHolderInput ? bankAccountHolderInput.value : '',
+                                toyyibpaySecretKey: toyyibpaySecretKeyInput ? toyyibpaySecretKeyInput.value : '',
+                                toyyibpayCategoryCode: toyyibpayCategoryCodeInput ? toyyibpayCategoryCodeInput.value : ''
                             };
 
                             console.log('Saving profile data...', profileData);
@@ -870,6 +874,14 @@
                     var leafletJS = document.createElement('script');
                     leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
                     leafletJS.onload = function () {
+                        // Fix default marker icon paths (CDN loading issue)
+                        delete L.Icon.Default.prototype._getIconUrl;
+                        L.Icon.Default.mergeOptions({
+                            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+                        });
+
                         leafletMap = L.map('business-map').setView([centerLat, centerLng], zoom);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors'
