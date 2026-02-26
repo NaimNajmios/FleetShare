@@ -58,6 +58,9 @@ public class RenterController {
     private FleetOwnerRepository fleetOwnerRepository;
 
     @Autowired
+    private com.najmi.fleetshare.repository.BookingRepository bookingRepository;
+
+    @Autowired
     private RenterRepository renterRepository;
 
     @Autowired
@@ -414,6 +417,13 @@ public class RenterController {
                 // Fetch current payment if exists
                 com.najmi.fleetshare.entity.Payment currentPayment = paymentService.getPaymentByBookingId(id);
                 model.addAttribute("currentPayment", currentPayment);
+
+                // Fetch fleet owner for dynamic payment methods
+                com.najmi.fleetshare.entity.Booking bookingEntity = bookingRepository.findById(id).orElse(null);
+                if (bookingEntity != null) {
+                    FleetOwner owner = fleetOwnerRepository.findById(bookingEntity.getFleetOwnerId()).orElse(null);
+                    model.addAttribute("owner", owner);
+                }
 
                 return "renter/manage-payment";
             }

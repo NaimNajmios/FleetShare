@@ -39,6 +39,12 @@ public class FleetOwner {
     @Column(name = "bank_account_holder", length = 100)
     private String bankAccountHolder;
 
+    @Column(name = "toyyibpay_secret_key", length = 255)
+    private String toyyibpaySecretKey;
+
+    @Column(name = "toyyibpay_category_code", length = 100)
+    private String toyyibpayCategoryCode;
+
     // Constructors
     public FleetOwner() {
     }
@@ -122,5 +128,21 @@ public class FleetOwner {
 
     public void setBankAccountHolder(String bankAccountHolder) {
         this.bankAccountHolder = bankAccountHolder;
+    }
+
+    public String getToyyibpaySecretKey() {
+        return toyyibpaySecretKey;
+    }
+
+    public void setToyyibpaySecretKey(String toyyibpaySecretKey) {
+        this.toyyibpaySecretKey = toyyibpaySecretKey;
+    }
+
+    public String getToyyibpayCategoryCode() {
+        return toyyibpayCategoryCode;
+    }
+
+    public void setToyyibpayCategoryCode(String toyyibpayCategoryCode) {
+        this.toyyibpayCategoryCode = toyyibpayCategoryCode;
     }
 }

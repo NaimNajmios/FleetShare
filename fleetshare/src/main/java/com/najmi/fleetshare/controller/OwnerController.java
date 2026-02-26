@@ -1041,6 +1041,12 @@ public class OwnerController {
         owner.setBankAccountHolder(
                 request.getBankAccountHolder() != null ? request.getBankAccountHolder().trim() : null);
 
+        // Update ToyyibPay configuration
+        owner.setToyyibpaySecretKey(
+                request.getToyyibpaySecretKey() != null ? request.getToyyibpaySecretKey().trim() : null);
+        owner.setToyyibpayCategoryCode(
+                request.getToyyibpayCategoryCode() != null ? request.getToyyibpayCategoryCode().trim() : null);
+
         owner.setUpdatedAt(LocalDateTime.now());
         fleetOwnerRepository.save(owner);
 
