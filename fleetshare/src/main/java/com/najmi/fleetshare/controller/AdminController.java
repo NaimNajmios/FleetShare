@@ -548,9 +548,32 @@ public class AdminController {
         }
     }
 
+    @Autowired
+    private com.najmi.fleetshare.service.AiAssistantService aiAssistantService;
+
     @GetMapping("/ai-reports")
     public String aiReports(Model model) {
         return "admin/ai-reports";
+    }
+
+    @PostMapping("/api/ai-query")
+    @ResponseBody
+    public ResponseEntity<com.najmi.fleetshare.dto.AiQueryResponse> aiQuery(
+            @RequestBody com.najmi.fleetshare.dto.AiQueryRequest request, HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(com.najmi.fleetshare.dto.AiQueryResponse.error("Unauthorized"));
+        }
+
+        try {
+            com.najmi.fleetshare.dto.AiQueryResponse response = aiAssistantService.processQuery(
+                    request.getQuery(), user.getUserId(), true, request.getProvider());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(com.najmi.fleetshare.dto.AiQueryResponse.error("AI service error: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/vehicles")
