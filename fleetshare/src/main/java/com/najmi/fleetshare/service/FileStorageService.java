@@ -27,6 +27,9 @@ public class FileStorageService {
     @Value("${app.upload.payment-proofs:C:/fleetshare-uploads/payments}")
     private String paymentProofsDir;
 
+    @Value("${app.upload.qr-codes:C:/fleetshare-uploads/qrcodes}")
+    private String qrCodesDir;
+
     /**
      * Initialize upload directories on application startup
      */
@@ -36,6 +39,7 @@ public class FileStorageService {
             Files.createDirectories(Paths.get(vehicleImagesDir));
             Files.createDirectories(Paths.get(profileImagesDir));
             Files.createDirectories(Paths.get(paymentProofsDir));
+            Files.createDirectories(Paths.get(qrCodesDir));
         } catch (IOException e) {
             throw new RuntimeException("Could not create upload directories", e);
         }
@@ -72,6 +76,21 @@ public class FileStorageService {
     }
 
     /**
+     * Store a QR code image
+     * 
+     * @param file    The uploaded QR code image file
+     * @param ownerId The fleet owner ID for naming
+     * @return The relative URL path to access the image
+     */
+    public String storeQrCodeImage(MultipartFile file, Long ownerId) throws IOException {
+        validateImageFile(file);
+        String filename = generateFilename("qr", ownerId, getFileExtension(file.getOriginalFilename()));
+        Path targetPath = Paths.get(qrCodesDir).resolve(filename);
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+        return "/uploads/qrcodes/" + filename;
+    }
+
+    /**
      * Store a payment proof document
      * 
      * @param file      The uploaded file
@@ -81,7 +100,7 @@ public class FileStorageService {
     public String storePaymentProof(MultipartFile file, Long bookingId) throws IOException {
         // Payment proofs can be images or PDFs
         if (!isValidDocumentFile(file)) {
-             throw new IllegalArgumentException("Invalid document type. Allowed: PDF, JPG, PNG");
+            throw new IllegalArgumentException("Invalid document type. Allowed: PDF, JPG, PNG");
         }
         String filename = generateFilename("payment", bookingId, getFileExtension(file.getOriginalFilename()));
         Path targetPath = Paths.get(paymentProofsDir).resolve(filename);
@@ -159,23 +178,31 @@ public class FileStorageService {
 
     private boolean isAllowedImageExtension(String extension) {
         return extension.equals(".jpg") || extension.equals(".jpeg") ||
-               extension.equals(".png") || extension.equals(".gif") ||
-               extension.equals(".webp");
+                extension.equals(".png") || extension.equals(".gif") ||
+                extension.equals(".webp");
     }
 
     private boolean hasValidImageSignature(MultipartFile file) throws IOException {
         try (java.io.InputStream is = file.getInputStream()) {
             byte[] header = new byte[8];
-            if (is.read(header) < 4) return false;
+            if (is.read(header) < 4)
+                return false;
 
             // JPEG: FF D8 FF
-            if (header[0] == (byte) 0xFF && header[1] == (byte) 0xD8 && header[2] == (byte) 0xFF) return true;
+            if (header[0] == (byte) 0xFF && header[1] == (byte) 0xD8 && header[2] == (byte) 0xFF)
+                return true;
             // PNG: 89 50 4E 47
-            if (header[0] == (byte) 0x89 && header[1] == (byte) 0x50 && header[2] == (byte) 0x4E && header[3] == (byte) 0x47) return true;
+            if (header[0] == (byte) 0x89 && header[1] == (byte) 0x50 && header[2] == (byte) 0x4E
+                    && header[3] == (byte) 0x47)
+                return true;
             // GIF: 47 49 46 38
-            if (header[0] == (byte) 0x47 && header[1] == (byte) 0x49 && header[2] == (byte) 0x46 && header[3] == (byte) 0x38) return true;
-             // WEBP (RIFF...WEBP)
-            if (header[0] == (byte) 0x52 && header[1] == (byte) 0x49 && header[2] == (byte) 0x46 && header[3] == (byte) 0x46) return true;
+            if (header[0] == (byte) 0x47 && header[1] == (byte) 0x49 && header[2] == (byte) 0x46
+                    && header[3] == (byte) 0x38)
+                return true;
+            // WEBP (RIFF...WEBP)
+            if (header[0] == (byte) 0x52 && header[1] == (byte) 0x49 && header[2] == (byte) 0x46
+                    && header[3] == (byte) 0x46)
+                return true;
 
             return false;
         }
@@ -213,11 +240,12 @@ public class FileStorageService {
     private boolean hasValidPdfSignature(MultipartFile file) throws IOException {
         try (java.io.InputStream is = file.getInputStream()) {
             byte[] header = new byte[4];
-            if (is.read(header) < 4) return false;
+            if (is.read(header) < 4)
+                return false;
 
             // PDF: 25 50 44 46 (%PDF)
             return header[0] == (byte) 0x25 && header[1] == (byte) 0x50 &&
-                   header[2] == (byte) 0x44 && header[3] == (byte) 0x46;
+                    header[2] == (byte) 0x44 && header[3] == (byte) 0x46;
         }
     }
 }

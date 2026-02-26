@@ -1004,6 +1004,10 @@ public class OwnerController {
             model.addAttribute("user", user);
             model.addAttribute("ownerDetails", user.getOwnerDetails());
 
+            // Fetch FleetOwner entity for payment settings (QR code, bank info)
+            FleetOwner owner = fleetOwnerRepository.findByUserId(user.getUserId()).orElse(null);
+            model.addAttribute("owner", owner);
+
             // Fetch address for the user
             Optional<com.najmi.fleetshare.entity.Address> addressOpt = addressRepository
                     .findLatestAddressByUserId(user.getUserId());
@@ -1029,6 +1033,14 @@ public class OwnerController {
 
         owner.setBusinessName(request.getBusinessName().trim());
         owner.setContactPhone(request.getContactPhone() != null ? request.getContactPhone().trim() : null);
+
+        // Update bank information
+        owner.setBankName(request.getBankName() != null ? request.getBankName().trim() : null);
+        owner.setBankAccountNumber(
+                request.getBankAccountNumber() != null ? request.getBankAccountNumber().trim() : null);
+        owner.setBankAccountHolder(
+                request.getBankAccountHolder() != null ? request.getBankAccountHolder().trim() : null);
+
         owner.setUpdatedAt(LocalDateTime.now());
         fleetOwnerRepository.save(owner);
 
@@ -1138,6 +1150,41 @@ public class OwnerController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/profile/qr")
+    @ResponseBody
+    public ResponseEntity<?> uploadQrCode(
+            @RequestParam("image") MultipartFile file,
+            HttpSession session) {
+        SessionUser sessionUser = SessionHelper.getCurrentUser(session);
+        if (sessionUser == null || sessionUser.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            Long ownerId = sessionUser.getOwnerDetails().getFleetOwnerId();
+
+            // Store the QR code image
+            String qrUrl = fileStorageService.storeQrCodeImage(file, ownerId);
+
+            // Update owner's QR code URL
+            FleetOwner owner = fleetOwnerRepository.findByUserId(sessionUser.getUserId()).orElse(null);
+            if (owner == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Owner not found"));
+            }
+
+            owner.setPaymentQrUrl(qrUrl);
+            owner.setUpdatedAt(LocalDateTime.now());
+            fleetOwnerRepository.save(owner);
+
+            return ResponseEntity.ok(Map.of("success", true, "qrUrl", qrUrl));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload QR code: " + e.getMessage()));
         }
     }
 

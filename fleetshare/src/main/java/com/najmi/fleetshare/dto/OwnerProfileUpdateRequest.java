@@ -37,6 +37,15 @@ public class OwnerProfileUpdateRequest implements Serializable {
     @Pattern(regexp = "^$|^[-+]?((1[0-7]\\d(\\.\\d+)?)|180(\\.0+)?|(\\d{1,2}(\\.\\d+)?))$", message = "Invalid longitude")
     private String longitude;
 
+    @Size(max = 100, message = "Bank name must not exceed 100 characters")
+    private String bankName;
+
+    @Size(max = 50, message = "Bank account number must not exceed 50 characters")
+    private String bankAccountNumber;
+
+    @Size(max = 100, message = "Account holder name must not exceed 100 characters")
+    private String bankAccountHolder;
+
     // Getters and Setters
 
     public String getBusinessName() {
@@ -109,5 +118,29 @@ public class OwnerProfileUpdateRequest implements Serializable {
 
     public void setLongitude(String longitude) {
         this.longitude = longitude;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getBankAccountNumber() {
+        return bankAccountNumber;
+    }
+
+    public void setBankAccountNumber(String bankAccountNumber) {
+        this.bankAccountNumber = bankAccountNumber;
+    }
+
+    public String getBankAccountHolder() {
+        return bankAccountHolder;
+    }
+
+    public void setBankAccountHolder(String bankAccountHolder) {
+        this.bankAccountHolder = bankAccountHolder;
     }
 }
