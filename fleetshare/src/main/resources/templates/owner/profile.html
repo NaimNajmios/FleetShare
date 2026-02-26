@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/owner-layout}" th:with="activePage='profile', pageTitle='My Profile'">
 
@@ -133,12 +133,13 @@
                                 <span th:unless="${ownerDetails != null and ownerDetails.isVerified}"
                                     class="text-muted small">Not yet verified</span>
                             </div>
-                                <div class="mt-2 hidden" id="change-photo-btn">
-                                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="document.getElementById('profileImageInput').click()">
-                                        <i class="mdi mdi-camera"></i> Change Photo
-                                    </button>
-                                </div>
+                            <div class="mt-2 hidden" id="change-photo-btn">
+                                <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                    onclick="document.getElementById('profileImageInput').click()">
+                                    <i class="mdi mdi-camera"></i> Change Photo
+                                </button>
+                            </div>
                         </div>
 
                         <form id="profile-form">
@@ -219,29 +220,35 @@
                         <h4 class="card-title">Business Location</h4>
                         <p class="card-description">Your business location on the map</p>
 
-                        <!-- Map Container -->
-                        <div th:if="${address != null and address.latitude != null and address.longitude != null}">
-                            <div id="business-map" th:data-lat="${address.latitude}" th:data-lng="${address.longitude}"
-                                th:data-name="${ownerDetails != null ? ownerDetails.businessName : 'Business Location'}">
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <small class="text-muted">Latitude: <span
-                                            th:text="${address.latitude}"></span></small>
-                                </div>
-                                <div class="col-md-6">
-                                    <small class="text-muted">Longitude: <span
-                                            th:text="${address.longitude}"></span></small>
-                                </div>
-                            </div>
+                        <!-- Hidden inputs for lat/lng -->
+                        <input type="hidden" id="latitude"
+                            th:value="${address != null and address.latitude != null ? address.latitude : ''}">
+                        <input type="hidden" id="longitude"
+                            th:value="${address != null and address.longitude != null ? address.longitude : ''}">
+
+                        <!-- Map Container (always present) -->
+                        <div id="business-map"
+                            th:data-lat="${address != null and address.latitude != null ? address.latitude : ''}"
+                            th:data-lng="${address != null and address.longitude != null ? address.longitude : ''}"
+                            th:data-name="${ownerDetails != null ? ownerDetails.businessName : 'Business Location'}">
                         </div>
 
-                        <!-- Placeholder when no coordinates -->
-                        <div th:unless="${address != null and address.latitude != null and address.longitude != null}"
-                            class="map-placeholder">
-                            <i class="mdi mdi-map-marker-off"></i>
-                            <p class="mb-0">Location not set</p>
-                            <small>Add latitude and longitude coordinates to display the map</small>
+                        <!-- Edit mode help text (hidden by default) -->
+                        <div id="map-edit-hint" class="hidden mt-2">
+                            <small class="text-muted"><i class="mdi mdi-information-outline mr-1"></i>Click on the map
+                                or drag the marker to set your location</small>
+                        </div>
+
+                        <!-- Coordinate display -->
+                        <div class="row mt-3" id="coord-display">
+                            <div class="col-md-6">
+                                <small class="text-muted">Latitude: <span id="display-lat"
+                                        th:text="${address != null and address.latitude != null ? address.latitude : 'Not set'}"></span></small>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Longitude: <span id="display-lng"
+                                        th:text="${address != null and address.longitude != null ? address.longitude : 'Not set'}"></span></small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -253,7 +260,8 @@
             <div class="col-lg-6 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title"><i class="mdi mdi-credit-card-outline mr-2"></i>ToyyibPay Integration</h4>
+                        <h4 class="card-title"><i class="mdi mdi-credit-card-outline mr-2"></i>ToyyibPay Integration
+                        </h4>
                         <p class="card-description">Configure your ToyyibPay account for payment processing (BYOK)</p>
 
                         <div class="form-group">
@@ -281,7 +289,8 @@
                             <i class="mdi mdi-information-outline mr-2" style="font-size: 1.5rem;"></i>
                             <div>
                                 <strong>Bring Your Own Key (BYOK)</strong><br>
-                                <small>Use your own ToyyibPay account to receive payments directly. Create an account at <a href="https://toyyibpay.com" target="_blank">toyyibpay.com</a></small>
+                                <small>Use your own ToyyibPay account to receive payments directly. Create an account at
+                                    <a href="https://toyyibpay.com" target="_blank">toyyibpay.com</a></small>
                             </div>
                         </div>
                     </div>
@@ -295,8 +304,13 @@
                         <p class="card-description">Upload a QR code for alternative payment methods</p>
 
                         <div class="text-center mb-4">
-                            <div id="qrCodePreview" class="border rounded p-4" style="min-height: 200px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
-                                <div class="text-muted">
+                            <div id="qrCodePreview" class="border rounded p-4"
+                                style="min-height: 200px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                <img th:if="${owner != null and owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()}"
+                                    th:src="${owner.paymentQrUrl}" alt="Payment QR Code"
+                                    style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+                                <div th:unless="${owner != null and owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()}"
+                                    class="text-muted">
                                     <i class="mdi mdi-qrcode" style="font-size: 4rem; opacity: 0.3;"></i>
                                     <p class="mb-0 mt-2">No QR code uploaded</p>
                                 </div>
@@ -306,7 +320,8 @@
                         <div class="form-group">
                             <label class="form-label">Upload QR Code Image</label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="qrCodeUpload" accept="image/*" disabled>
+                                <input type="file" class="custom-file-input" id="qrCodeUpload" accept="image/*"
+                                    disabled>
                                 <label class="custom-file-label" for="qrCodeUpload">Choose file...</label>
                             </div>
                             <small class="text-muted">Accepted formats: PNG, JPG, JPEG (Max 2MB)</small>
@@ -316,7 +331,57 @@
                             <i class="mdi mdi-alert-outline mr-2" style="font-size: 1.5rem;"></i>
                             <div>
                                 <strong>Display Only</strong><br>
-                                <small>This QR code will be shown to renters as an alternative payment option (e.g., DuitNow, Touch n Go)</small>
+                                <small>This QR code will be shown to renters as an alternative payment option (e.g.,
+                                    DuitNow, Touch n Go)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bank Information Row -->
+        <div class="row">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="mdi mdi-bank mr-2"></i>Bank Information</h4>
+                        <p class="card-description">Your bank account details for bank transfer and cash payment options
+                        </p>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">Bank Name</label>
+                                    <input type="text" class="form-control" id="bankName"
+                                        th:value="${owner != null and owner.bankName != null ? owner.bankName : ''}"
+                                        placeholder="e.g., Maybank, CIMB, Bank Islam" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">Account Number</label>
+                                    <input type="text" class="form-control" id="bankAccountNumber"
+                                        th:value="${owner != null and owner.bankAccountNumber != null ? owner.bankAccountNumber : ''}"
+                                        placeholder="Enter your bank account number" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">Account Holder Name</label>
+                                    <input type="text" class="form-control" id="bankAccountHolder"
+                                        th:value="${owner != null and owner.bankAccountHolder != null ? owner.bankAccountHolder : ''}"
+                                        placeholder="Name as per bank account" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="mdi mdi-information-outline mr-2" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Cash &amp; Bank Transfer Payments</strong><br>
+                                <small>This information will be displayed to renters who choose bank transfer or cash
+                                    payment methods. Ensure the details are accurate.</small>
                             </div>
                         </div>
                     </div>
@@ -357,399 +422,556 @@
                 </div>
             </div>
         </div>
-    <!-- Change Password Modal -->
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header bg-primary text-white border-0">
-                    <h5 class="modal-title" id="changePasswordModalLabel">
-                        <i class="ti-key mr-2"></i>Change Password
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form id="password-form">
-                        <div class="mb-3">
-                            <label for="oldPassword" class="form-label">Current Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="oldPassword" required>
-                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('oldPassword')"><i class="mdi mdi-eye"></i></button>
+        <!-- Change Password Modal -->
+        <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="modal-header bg-primary text-white border-0">
+                        <h5 class="modal-title" id="changePasswordModalLabel">
+                            <i class="ti-key mr-2"></i>Change Password
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form id="password-form">
+                            <div class="mb-3">
+                                <label for="oldPassword" class="form-label">Current Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="oldPassword" required>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePasswordVisibility('oldPassword')"><i
+                                            class="mdi mdi-eye"></i></button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">New Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="newPassword" required minlength="8">
-                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('newPassword')"><i class="mdi mdi-eye"></i></button>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="newPassword" required minlength="8">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePasswordVisibility('newPassword')"><i
+                                            class="mdi mdi-eye"></i></button>
+                                </div>
+                                <div class="form-text">Must be at least 8 characters long.</div>
                             </div>
-                            <div class="form-text">Must be at least 8 characters long.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="confirmPassword" required>
-                                <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('confirmPassword')"><i class="mdi mdi-eye"></i></button>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirmPassword" required>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePasswordVisibility('confirmPassword')"><i
+                                            class="mdi mdi-eye"></i></button>
+                                </div>
+                                <div id="passwordMismatch" class="invalid-feedback">Passwords do not match.</div>
                             </div>
-                            <div id="passwordMismatch" class="invalid-feedback">Passwords do not match.</div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btn-submit-password">
-                        <span class="spinner-border spinner-border-sm mr-2 d-none" role="status"></span>Update Password
-                    </button>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btn-submit-password">
+                            <span class="spinner-border spinner-border-sm mr-2 d-none" role="status"></span>Update
+                            Password
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <th:block layout:fragment="extra-js">
-                <script>
-            // Global variables
-            let selectedImageFile = null;
-            let originalValues = {};
+        <th:block layout:fragment="extra-js">
+            <script>
+                // Global variables
+                let selectedImageFile = null;
+                let originalValues = {};
 
-            // Form elements
-            const businessNameInput = document.getElementById('businessName');
-            const contactPhoneInput = document.getElementById('contactPhone');
-            const addressLine1Input = document.getElementById('addressLine1');
-            const addressLine2Input = document.getElementById('addressLine2');
-            const cityInput = document.getElementById('city');
-            const stateInput = document.getElementById('state');
-            const postalCodeInput = document.getElementById('postalCode');
+                // Form elements
+                const businessNameInput = document.getElementById('businessName');
+                const contactPhoneInput = document.getElementById('contactPhone');
+                const addressLine1Input = document.getElementById('addressLine1');
+                const addressLine2Input = document.getElementById('addressLine2');
+                const cityInput = document.getElementById('city');
+                const stateInput = document.getElementById('state');
+                const postalCodeInput = document.getElementById('postalCode');
 
-            const btnEdit = document.getElementById('btn-edit');
-            const btnSave = document.getElementById('btn-save');
-            const btnCancel = document.getElementById('btn-cancel');
+                const btnEdit = document.getElementById('btn-edit');
+                const btnSave = document.getElementById('btn-save');
+                const btnCancel = document.getElementById('btn-cancel');
 
-            const editableFields = [businessNameInput, contactPhoneInput, addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
+                const latitudeInput = document.getElementById('latitude');
+                const longitudeInput = document.getElementById('longitude');
 
-            // Payment fields
-            const toyyibpaySecretKeyInput = document.getElementById('toyyibpaySecretKey');
-            const toyyibpayCategoryCodeInput = document.getElementById('toyyibpayCategoryCode');
-            const qrCodeUploadInput = document.getElementById('qrCodeUpload');
-            const paymentFields = [toyyibpaySecretKeyInput, toyyibpayCategoryCodeInput, qrCodeUploadInput].filter(f => f);
+                const editableFields = [businessNameInput, contactPhoneInput, addressLine1Input, addressLine2Input, cityInput, stateInput, postalCodeInput];
 
-            // Initialize original values
-            editableFields.forEach(field => {
-                if (field) originalValues[field.id] = field.value;
-            });
+                // Bank information fields
+                const bankNameInput = document.getElementById('bankName');
+                const bankAccountNumberInput = document.getElementById('bankAccountNumber');
+                const bankAccountHolderInput = document.getElementById('bankAccountHolder');
+                const bankFields = [bankNameInput, bankAccountNumberInput, bankAccountHolderInput].filter(f => f);
 
-            // Helper to upload profile image
-            async function uploadProfileImage(csrfToken, csrfHeader) {
-                if (!selectedImageFile) return true;
-                const formData = new FormData();
-                formData.append('image', selectedImageFile);
-                const response = await fetch('/owner/profile/image', {
-                    method: 'POST',
-                    headers: { [csrfHeader]: csrfToken },
-                    body: formData
+                // Payment fields
+                const toyyibpaySecretKeyInput = document.getElementById('toyyibpaySecretKey');
+                const toyyibpayCategoryCodeInput = document.getElementById('toyyibpayCategoryCode');
+                const qrCodeUploadInput = document.getElementById('qrCodeUpload');
+                const paymentFields = [toyyibpaySecretKeyInput, toyyibpayCategoryCodeInput, qrCodeUploadInput].filter(f => f);
+
+                // Initialize original values
+                editableFields.forEach(field => {
+                    if (field) originalValues[field.id] = field.value;
                 });
-                const result = await response.json();
-                return response.ok && result.success;
-            }
 
-            function showToast(message, type) {
-                const existing = document.querySelector('.toast-notification');
-                if (existing) existing.remove();
-                const toast = document.createElement('div');
-                toast.className = 'toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
-                toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:1rem 1.5rem;border-radius:0.75rem;color:white;font-weight:500;z-index:9999;opacity:0;transform:translateX(100px);transition:all 0.3s;box-shadow:0 10px 25px rgba(0,0,0,0.2);background:' + (type === 'success' ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#ef4444,#dc2626)');
-                toast.innerHTML = '<i class="mdi ' + (type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle') + ' mr-2"></i>' + message;
-                document.body.appendChild(toast);
-                setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(0)'; }, 10);
-                setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
-            }
+                // Helper to upload profile image
+                async function uploadProfileImage(csrfToken, csrfHeader) {
+                    if (!selectedImageFile) return true;
+                    const formData = new FormData();
+                    formData.append('image', selectedImageFile);
+                    const response = await fetch('/owner/profile/image', {
+                        method: 'POST',
+                        headers: { [csrfHeader]: csrfToken },
+                        body: formData
+                    });
+                    const result = await response.json();
+                    return response.ok && result.success;
+                }
 
-            // Event Listeners
-            if (btnEdit) {
-                btnEdit.addEventListener('click', function () {
-                    editableFields.forEach(field => { if (field) field.disabled = false; });
-                    paymentFields.forEach(field => { if (field) field.disabled = false; });
-                    btnEdit.classList.add('hidden');
-                    btnSave.classList.remove('hidden');
-                    btnCancel.classList.remove('hidden');
-                    const changePhotoBtn = document.getElementById('change-photo-btn');
-                    if (changePhotoBtn) changePhotoBtn.classList.remove('hidden');
-                });
-            }
+                function showToast(message, type) {
+                    const existing = document.querySelector('.toast-notification');
+                    if (existing) existing.remove();
+                    const toast = document.createElement('div');
+                    toast.className = 'toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+                    toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:1rem 1.5rem;border-radius:0.75rem;color:white;font-weight:500;z-index:9999;opacity:0;transform:translateX(100px);transition:all 0.3s;box-shadow:0 10px 25px rgba(0,0,0,0.2);background:' + (type === 'success' ? 'linear-gradient(135deg,#10b981,#059669)' : 'linear-gradient(135deg,#ef4444,#dc2626)');
+                    toast.innerHTML = '<i class="mdi ' + (type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle') + ' mr-2"></i>' + message;
+                    document.body.appendChild(toast);
+                    setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(0)'; }, 10);
+                    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+                }
 
-            if (btnCancel) {
-                btnCancel.addEventListener('click', function () {
-                    editableFields.forEach(field => {
-                        if (field) {
-                            field.value = originalValues[field.id];
-                            field.disabled = true;
+                // Event Listeners
+                if (btnEdit) {
+                    btnEdit.addEventListener('click', function () {
+                        editableFields.forEach(field => { if (field) field.disabled = false; });
+                        bankFields.forEach(field => { if (field) field.disabled = false; });
+                        paymentFields.forEach(field => { if (field) field.disabled = false; });
+                        btnEdit.classList.add('hidden');
+                        btnSave.classList.remove('hidden');
+                        btnCancel.classList.remove('hidden');
+                        const changePhotoBtn = document.getElementById('change-photo-btn');
+                        if (changePhotoBtn) changePhotoBtn.classList.remove('hidden');
+                        // Show map edit hint
+                        var mapEditHint = document.getElementById('map-edit-hint');
+                        if (mapEditHint) mapEditHint.classList.remove('hidden');
+                        // Enable interactive map
+                        enableMapEditing();
+                    });
+                }
+
+                if (btnCancel) {
+                    btnCancel.addEventListener('click', function () {
+                        editableFields.forEach(field => {
+                            if (field) {
+                                field.value = originalValues[field.id];
+                                field.disabled = true;
+                            }
+                        });
+                        paymentFields.forEach(field => { if (field) field.disabled = true; });
+                        bankFields.forEach(field => { if (field) field.disabled = true; });
+                        btnEdit.classList.remove('hidden');
+                        btnSave.classList.add('hidden');
+                        btnCancel.classList.add('hidden');
+                        const changePhotoBtn = document.getElementById('change-photo-btn');
+                        if (changePhotoBtn) changePhotoBtn.classList.add('hidden');
+                        selectedImageFile = null; // Reset selected image
+                        // Hide map edit hint and reset map
+                        var mapEditHint = document.getElementById('map-edit-hint');
+                        if (mapEditHint) mapEditHint.classList.add('hidden');
+                        resetMap();
+                    });
+                }
+
+                if (btnSave) {
+                    btnSave.addEventListener('click', async function () {
+                        try {
+                            console.log('Save button clicked');
+
+                            // CSRF Protection
+                            const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+                            const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+                            if (!csrfTokenMeta || !csrfHeaderMeta) {
+                                throw new Error('CSRF tokens not found');
+                            }
+
+                            const csrfToken = csrfTokenMeta.getAttribute('content');
+                            const csrfHeader = csrfHeaderMeta.getAttribute('content');
+
+                            // Upload profile image first if selected
+                            if (selectedImageFile) {
+                                console.log('Uploading image...');
+                                const imageUploaded = await uploadProfileImage(csrfToken, csrfHeader);
+                                if (!imageUploaded) {
+                                    showToast('Failed to upload profile image', 'error');
+                                    return;
+                                }
+                                selectedImageFile = null;
+                            }
+
+                            // Upload QR code image if selected
+                            const qrFile = qrCodeUploadInput ? qrCodeUploadInput.files[0] : null;
+                            if (qrFile) {
+                                console.log('Uploading QR code...');
+                                const qrFormData = new FormData();
+                                qrFormData.append('image', qrFile);
+                                const qrResponse = await fetch('/owner/profile/qr', {
+                                    method: 'POST',
+                                    headers: { [csrfHeader]: csrfToken },
+                                    body: qrFormData
+                                });
+                                const qrResult = await qrResponse.json();
+                                if (!qrResponse.ok || !qrResult.success) {
+                                    showToast(qrResult.error || 'Failed to upload QR code', 'error');
+                                    return;
+                                }
+                            }
+
+                            const profileData = {
+                                businessName: businessNameInput ? businessNameInput.value : '',
+                                contactPhone: contactPhoneInput ? contactPhoneInput.value : '',
+                                addressLine1: addressLine1Input ? addressLine1Input.value : '',
+                                addressLine2: addressLine2Input ? addressLine2Input.value : '',
+                                city: cityInput ? cityInput.value : '',
+                                state: stateInput ? stateInput.value : '',
+                                postalCode: postalCodeInput ? postalCodeInput.value : '',
+                                latitude: latitudeInput ? latitudeInput.value : '',
+                                longitude: longitudeInput ? longitudeInput.value : '',
+                                bankName: bankNameInput ? bankNameInput.value : '',
+                                bankAccountNumber: bankAccountNumberInput ? bankAccountNumberInput.value : '',
+                                bankAccountHolder: bankAccountHolderInput ? bankAccountHolderInput.value : ''
+                            };
+
+                            console.log('Saving profile data...', profileData);
+                            const response = await fetch('/owner/profile', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    [csrfHeader]: csrfToken
+                                },
+                                body: JSON.stringify(profileData)
+                            });
+
+                            const result = await response.json();
+                            if (response.ok && result.success) {
+                                if (businessNameInput) originalValues['businessName'] = businessNameInput.value;
+                                if (contactPhoneInput) originalValues['contactPhone'] = contactPhoneInput.value;
+
+                                showToast('Profile updated successfully!', 'success');
+
+                                editableFields.forEach(field => { if (field) field.disabled = true; });
+                                paymentFields.forEach(field => { if (field) field.disabled = true; });
+                                bankFields.forEach(field => { if (field) field.disabled = true; });
+
+                                btnEdit.classList.remove('hidden');
+                                btnSave.classList.add('hidden');
+                                btnCancel.classList.add('hidden');
+
+                                const changePhotoBtn = document.getElementById('change-photo-btn');
+                                if (changePhotoBtn) changePhotoBtn.classList.add('hidden');
+
+                                // Reload to show new image if uploaded
+                                setTimeout(() => location.reload(), 1000);
+                            } else {
+                                showToast(result.error || 'Failed to update profile', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error saving profile:', error);
+                            showToast('An error occurred: ' + error.message, 'error');
                         }
                     });
-                    paymentFields.forEach(field => { if (field) field.disabled = true; });
-                    btnEdit.classList.remove('hidden');
-                    btnSave.classList.add('hidden');
-                    btnCancel.classList.add('hidden');
-                    const changePhotoBtn = document.getElementById('change-photo-btn');
-                    if (changePhotoBtn) changePhotoBtn.classList.add('hidden');
-                    selectedImageFile = null; // Reset selected image
-                });
-            }
-
-            if (btnSave) {
-                btnSave.addEventListener('click', async function () {
-                    try {
-                        console.log('Save button clicked');
-                        
-                        // CSRF Protection
-                        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
-                        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-                        
-                        if (!csrfTokenMeta || !csrfHeaderMeta) {
-                            throw new Error('CSRF tokens not found');
-                        }
-                        
-                        const csrfToken = csrfTokenMeta.getAttribute('content');
-                        const csrfHeader = csrfHeaderMeta.getAttribute('content');
-
-                        // Upload profile image first if selected
-                        if (selectedImageFile) {
-                            console.log('Uploading image...');
-                            const imageUploaded = await uploadProfileImage(csrfToken, csrfHeader);
-                            if (!imageUploaded) {
-                                showToast('Failed to upload profile image', 'error');
-                                return;
-                            }
-                            selectedImageFile = null;
-                        }
-
-                                                const profileData = {
-                            businessName: businessNameInput ? businessNameInput.value : '',
-                            contactPhone: contactPhoneInput ? contactPhoneInput.value : '',
-                            addressLine1: addressLine1Input ? addressLine1Input.value : '',
-                            addressLine2: addressLine2Input ? addressLine2Input.value : '',
-                            city: cityInput ? cityInput.value : '',
-                            state: stateInput ? stateInput.value : '',
-                            postalCode: postalCodeInput ? postalCodeInput.value : ''
-                        };
-
-                        console.log('Saving profile data...', profileData);
-                        const response = await fetch('/owner/profile', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                [csrfHeader]: csrfToken
-                            },
-                            body: JSON.stringify(profileData)
-                        });
-                        
-                        const result = await response.json();
-                        if (response.ok && result.success) {
-                            if (businessNameInput) originalValues['businessName'] = businessNameInput.value;
-                            if (contactPhoneInput) originalValues['contactPhone'] = contactPhoneInput.value;
-                            
-                            showToast('Profile updated successfully!', 'success');
-                            
-                            editableFields.forEach(field => { if (field) field.disabled = true; });
-                            paymentFields.forEach(field => { if (field) field.disabled = true; });
-                            
-                            btnEdit.classList.remove('hidden');
-                            btnSave.classList.add('hidden');
-                            btnCancel.classList.add('hidden');
-                            
-                            const changePhotoBtn = document.getElementById('change-photo-btn');
-                            if (changePhotoBtn) changePhotoBtn.classList.add('hidden');
-                            
-                            // Reload to show new image if uploaded
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            showToast(result.error || 'Failed to update profile', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error saving profile:', error);
-                        showToast('An error occurred: ' + error.message, 'error');
-                    }
-                });
-            }
-
-            // Profile Image Input Handler
-            const profileImageInput = document.getElementById('profileImageInput');
-            if (profileImageInput) {
-                profileImageInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    
-                    if (!file.type.startsWith('image/')) {
-                        showToast('Please select an image file', 'error');
-                        return;
-                    }
-                    
-                    if (file.size > 5 * 1024 * 1024) {
-                        showToast('Image must be less than 5MB', 'error');
-                        return;
-                    }
-                    
-                    // Store file for upload on save
-                    selectedImageFile = file;
-                    
-                    // Show preview
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const avatarContainer = document.getElementById('avatar-container');
-                        if (avatarContainer) {
-                            const existingIcon = avatarContainer.querySelector('.ti-user');
-                            const existingImg = avatarContainer.querySelector('img');
-                            
-                            if (existingIcon) existingIcon.style.display = 'none';
-                            if (existingImg) existingImg.style.display = 'none';
-                            
-                            let previewImg = document.getElementById('avatar-preview');
-                            if (!previewImg) {
-                                previewImg = document.createElement('img');
-                                previewImg.id = 'avatar-preview';
-                                previewImg.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
-                                avatarContainer.insertBefore(previewImg, avatarContainer.firstChild);
-                            }
-                            previewImg.src = event.target.result;
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                    
-                    showToast('Image selected. Click Save to apply.', 'success');
-                });
-            }
-
-            // Other Event Listeners
-            const btnChangePassword = document.getElementById('btn-change-password');
-            if (btnChangePassword) {
-                btnChangePassword.addEventListener('click', function () {
-                    // Reset form
-                    document.getElementById('password-form').reset();
-                    document.getElementById('passwordMismatch').style.display = 'none';
-                    document.getElementById('newPassword').classList.remove('is-invalid');
-                    document.getElementById('confirmPassword').classList.remove('is-invalid');
-                    const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
-                    modal.show();
-                });
-            }
-
-            const btnLogout = document.getElementById('btn-logout');
-            if (btnLogout) {
-                btnLogout.addEventListener('click', function () {
-                    if (confirm('Are you sure you want to logout?')) {
-                        window.location.href = '/logout';
-                    }
-                });
-            }
-            window.togglePasswordVisibility = function(fieldId) {
-                const field = document.getElementById(fieldId);
-                const icon = field.nextElementSibling.querySelector('i');
-                if (field.type === 'password') {
-                    field.type = 'text';
-                    icon.classList.remove('mdi-eye');
-                    icon.classList.add('mdi-eye-off');
-                } else {
-                    field.type = 'password';
-                    icon.classList.remove('mdi-eye-off');
-                    icon.classList.add('mdi-eye');
                 }
-            };
 
-            const btnSubmitPassword = document.getElementById('btn-submit-password');
-            if (btnSubmitPassword) {
-                btnSubmitPassword.addEventListener('click', async function () {
-                    const oldPasswordInput = document.getElementById('oldPassword');
-                    const newPasswordInput = document.getElementById('newPassword');
-                    const confirmPasswordInput = document.getElementById('confirmPassword');
-                    const passwordMismatch = document.getElementById('passwordMismatch');
+                // Profile Image Input Handler
+                const profileImageInput = document.getElementById('profileImageInput');
+                if (profileImageInput) {
+                    profileImageInput.addEventListener('change', function (e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
 
-                    if (!oldPasswordInput.value || !newPasswordInput.value || !confirmPasswordInput.value) {
-                        showToast('Please fill in all fields', 'error');
-                        return;
-                    }
-
-                    if (newPasswordInput.value.length < 8) {
-                        showToast('New password must be at least 8 characters', 'error');
-                        return;
-                    }
-
-                    if (newPasswordInput.value !== confirmPasswordInput.value) {
-                        newPasswordInput.classList.add('is-invalid');
-                        confirmPasswordInput.classList.add('is-invalid');
-                        passwordMismatch.style.display = 'block';
-                        return;
-                    } else {
-                        newPasswordInput.classList.remove('is-invalid');
-                        confirmPasswordInput.classList.remove('is-invalid');
-                        passwordMismatch.style.display = 'none';
-                    }
-
-                    const spinner = this.querySelector('.spinner-border');
-                    spinner.classList.remove('d-none');
-                    this.disabled = true;
-
-                    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
-                    try {
-                        const response = await fetch('/owner/profile/password', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                [csrfHeader]: csrfToken
-                            },
-                            body: JSON.stringify({
-                                oldPassword: oldPasswordInput.value,
-                                newPassword: newPasswordInput.value,
-                                confirmPassword: confirmPasswordInput.value
-                            })
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok && result.success) {
-                            showToast('Password updated successfully', 'success');
-                            bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
-                        } else {
-                            showToast(result.error || 'Failed to update password', 'error');
+                        if (!file.type.startsWith('image/')) {
+                            showToast('Please select an image file', 'error');
+                            return;
                         }
-                    } catch (error) {
-                        console.error('Error updating password:', error);
-                        showToast('An error occurred while updating password', 'error');
-                    } finally {
-                        spinner.classList.add('d-none');
-                        this.disabled = false;
+
+                        if (file.size > 5 * 1024 * 1024) {
+                            showToast('Image must be less than 5MB', 'error');
+                            return;
+                        }
+
+                        // Store file for upload on save
+                        selectedImageFile = file;
+
+                        // Show preview
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            const avatarContainer = document.getElementById('avatar-container');
+                            if (avatarContainer) {
+                                const existingIcon = avatarContainer.querySelector('.ti-user');
+                                const existingImg = avatarContainer.querySelector('img');
+
+                                if (existingIcon) existingIcon.style.display = 'none';
+                                if (existingImg) existingImg.style.display = 'none';
+
+                                let previewImg = document.getElementById('avatar-preview');
+                                if (!previewImg) {
+                                    previewImg = document.createElement('img');
+                                    previewImg.id = 'avatar-preview';
+                                    previewImg.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+                                    avatarContainer.insertBefore(previewImg, avatarContainer.firstChild);
+                                }
+                                previewImg.src = event.target.result;
+                            }
+                        };
+                        reader.readAsDataURL(file);
+
+                        showToast('Image selected. Click Save to apply.', 'success');
+                    });
+                }
+
+                // Other Event Listeners
+                const btnChangePassword = document.getElementById('btn-change-password');
+                if (btnChangePassword) {
+                    btnChangePassword.addEventListener('click', function () {
+                        // Reset form
+                        document.getElementById('password-form').reset();
+                        document.getElementById('passwordMismatch').style.display = 'none';
+                        document.getElementById('newPassword').classList.remove('is-invalid');
+                        document.getElementById('confirmPassword').classList.remove('is-invalid');
+                        const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+                        modal.show();
+                    });
+                }
+
+                const btnLogout = document.getElementById('btn-logout');
+                if (btnLogout) {
+                    btnLogout.addEventListener('click', function () {
+                        if (confirm('Are you sure you want to logout?')) {
+                            window.location.href = '/logout';
+                        }
+                    });
+                }
+                window.togglePasswordVisibility = function (fieldId) {
+                    const field = document.getElementById(fieldId);
+                    const icon = field.nextElementSibling.querySelector('i');
+                    if (field.type === 'password') {
+                        field.type = 'text';
+                        icon.classList.remove('mdi-eye');
+                        icon.classList.add('mdi-eye-off');
+                    } else {
+                        field.type = 'password';
+                        icon.classList.remove('mdi-eye-off');
+                        icon.classList.add('mdi-eye');
                     }
-                });
-            }
+                };
+
+                const btnSubmitPassword = document.getElementById('btn-submit-password');
+                if (btnSubmitPassword) {
+                    btnSubmitPassword.addEventListener('click', async function () {
+                        const oldPasswordInput = document.getElementById('oldPassword');
+                        const newPasswordInput = document.getElementById('newPassword');
+                        const confirmPasswordInput = document.getElementById('confirmPassword');
+                        const passwordMismatch = document.getElementById('passwordMismatch');
+
+                        if (!oldPasswordInput.value || !newPasswordInput.value || !confirmPasswordInput.value) {
+                            showToast('Please fill in all fields', 'error');
+                            return;
+                        }
+
+                        if (newPasswordInput.value.length < 8) {
+                            showToast('New password must be at least 8 characters', 'error');
+                            return;
+                        }
+
+                        if (newPasswordInput.value !== confirmPasswordInput.value) {
+                            newPasswordInput.classList.add('is-invalid');
+                            confirmPasswordInput.classList.add('is-invalid');
+                            passwordMismatch.style.display = 'block';
+                            return;
+                        } else {
+                            newPasswordInput.classList.remove('is-invalid');
+                            confirmPasswordInput.classList.remove('is-invalid');
+                            passwordMismatch.style.display = 'none';
+                        }
+
+                        const spinner = this.querySelector('.spinner-border');
+                        spinner.classList.remove('d-none');
+                        this.disabled = true;
+
+                        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+                        try {
+                            const response = await fetch('/owner/profile/password', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    [csrfHeader]: csrfToken
+                                },
+                                body: JSON.stringify({
+                                    oldPassword: oldPasswordInput.value,
+                                    newPassword: newPasswordInput.value,
+                                    confirmPassword: confirmPasswordInput.value
+                                })
+                            });
+
+                            const result = await response.json();
+
+                            if (response.ok && result.success) {
+                                showToast('Password updated successfully', 'success');
+                                bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                            } else {
+                                showToast(result.error || 'Failed to update password', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error updating password:', error);
+                            showToast('An error occurred while updating password', 'error');
+                        } finally {
+                            spinner.classList.add('d-none');
+                            this.disabled = false;
+                        }
+                    });
+                }
 
 
-            // Leaflet Map Initialization
-            (function initMap() {
-                var mapEl = document.getElementById('business-map');
-                if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
-                    var lat = parseFloat(mapEl.dataset.lat);
-                    var lng = parseFloat(mapEl.dataset.lng);
+                // Leaflet Map Initialization
+                var leafletMap = null;
+                var leafletMarker = null;
+                var originalLat = null;
+                var originalLng = null;
+
+                (function initMap() {
+                    var mapEl = document.getElementById('business-map');
+                    if (!mapEl) return;
+
+                    var lat = mapEl.dataset.lat ? parseFloat(mapEl.dataset.lat) : null;
+                    var lng = mapEl.dataset.lng ? parseFloat(mapEl.dataset.lng) : null;
                     var businessName = mapEl.dataset.name || 'Business Location';
-                    
+
+                    // Store originals for cancel
+                    originalLat = lat;
+                    originalLng = lng;
+
+                    // Default center: Malaysia
+                    var defaultLat = 4.2105;
+                    var defaultLng = 101.9758;
+                    var hasCoords = (lat !== null && !isNaN(lat) && lng !== null && !isNaN(lng));
+
+                    var centerLat = hasCoords ? lat : defaultLat;
+                    var centerLng = hasCoords ? lng : defaultLng;
+                    var zoom = hasCoords ? 15 : 6;
+
                     // Load Leaflet JS dynamically
                     var leafletJS = document.createElement('script');
                     leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-                    leafletJS.onload = function() {
-                        var map = L.map('business-map').setView([lat, lng], 15);
+                    leafletJS.onload = function () {
+                        leafletMap = L.map('business-map').setView([centerLat, centerLng], zoom);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap contributors'
-                        }).addTo(map);
-                        L.marker([lat, lng])
-                            .addTo(map)
-                            .bindPopup('<strong>' + businessName + '</strong>')
-                            .openPopup();
-                        setTimeout(function() { map.invalidateSize(); }, 200);
+                            attribution: '&copy; OpenStreetMap contributors'
+                        }).addTo(leafletMap);
+
+                        if (hasCoords) {
+                            leafletMarker = L.marker([lat, lng])
+                                .addTo(leafletMap)
+                                .bindPopup('<strong>' + businessName + '</strong>')
+                                .openPopup();
+                        }
+
+                        setTimeout(function () { leafletMap.invalidateSize(); }, 200);
                     };
                     document.head.appendChild(leafletJS);
+                })();
+
+                function updateCoordDisplay(lat, lng) {
+                    var displayLat = document.getElementById('display-lat');
+                    var displayLng = document.getElementById('display-lng');
+                    if (displayLat) displayLat.textContent = lat !== null ? parseFloat(lat).toFixed(6) : 'Not set';
+                    if (displayLng) displayLng.textContent = lng !== null ? parseFloat(lng).toFixed(6) : 'Not set';
+                }
+
+                function enableMapEditing() {
+                    if (!leafletMap) return;
+
+                    // Make existing marker draggable or create one at center
+                    if (leafletMarker) {
+                        leafletMarker.dragging.enable();
+                        leafletMarker.closePopup();
+                        leafletMarker.bindPopup('<strong>Drag me or click elsewhere</strong>');
+                    } else {
+                        var center = leafletMap.getCenter();
+                        leafletMarker = L.marker([center.lat, center.lng], { draggable: true })
+                            .addTo(leafletMap)
+                            .bindPopup('<strong>Drag me or click elsewhere</strong>')
+                            .openPopup();
+                        // Update hidden inputs
+                        if (latitudeInput) latitudeInput.value = center.lat.toFixed(6);
+                        if (longitudeInput) longitudeInput.value = center.lng.toFixed(6);
+                        updateCoordDisplay(center.lat, center.lng);
+                    }
+
+                    // On marker drag
+                    leafletMarker.on('dragend', function (e) {
+                        var pos = e.target.getLatLng();
+                        if (latitudeInput) latitudeInput.value = pos.lat.toFixed(6);
+                        if (longitudeInput) longitudeInput.value = pos.lng.toFixed(6);
+                        updateCoordDisplay(pos.lat, pos.lng);
+                    });
+
+                    // On map click - move marker
+                    leafletMap.on('click', function (e) {
+                        if (leafletMarker) {
+                            leafletMarker.setLatLng(e.latlng);
+                        }
+                        if (latitudeInput) latitudeInput.value = e.latlng.lat.toFixed(6);
+                        if (longitudeInput) longitudeInput.value = e.latlng.lng.toFixed(6);
+                        updateCoordDisplay(e.latlng.lat, e.latlng.lng);
+                    });
+
+                    setTimeout(function () { leafletMap.invalidateSize(); }, 200);
+                }
+
+                function resetMap() {
+                    if (!leafletMap) return;
+
+                    // Remove click listener
+                    leafletMap.off('click');
+
+                    // Restore original marker position
+                    var hasOriginal = (originalLat !== null && !isNaN(originalLat) && originalLng !== null && !isNaN(originalLng));
+                    if (hasOriginal) {
+                        if (leafletMarker) {
+                            leafletMarker.setLatLng([originalLat, originalLng]);
+                            leafletMarker.dragging.disable();
+                            var businessName = document.getElementById('business-map').dataset.name || 'Business Location';
+                            leafletMarker.bindPopup('<strong>' + businessName + '</strong>').openPopup();
+                        }
+                        leafletMap.setView([originalLat, originalLng], 15);
+                    } else {
+                        if (leafletMarker) {
+                            leafletMap.removeLayer(leafletMarker);
+                            leafletMarker = null;
+                        }
+                        leafletMap.setView([4.2105, 101.9758], 6);
+                    }
+
+                    // Restore hidden inputs
+                    if (latitudeInput) latitudeInput.value = hasOriginal ? originalLat : '';
+                    if (longitudeInput) longitudeInput.value = hasOriginal ? originalLng : '';
+                    updateCoordDisplay(hasOriginal ? originalLat : null, hasOriginal ? originalLng : null);
+
+                    setTimeout(function () { leafletMap.invalidateSize(); }, 200);
                 }
 
                 // Payment Settings - Toggle Secret Key Visibility
                 const toggleSecretKeyBtn = document.getElementById('toggleSecretKey');
                 const secretKeyInput = document.getElementById('toyyibpaySecretKey');
                 if (toggleSecretKeyBtn && secretKeyInput) {
-                    toggleSecretKeyBtn.addEventListener('click', function() {
+                    toggleSecretKeyBtn.addEventListener('click', function () {
                         const icon = this.querySelector('i');
                         if (secretKeyInput.type === 'password') {
                             secretKeyInput.type = 'text';
@@ -767,7 +989,7 @@
                 const qrCodeUpload = document.getElementById('qrCodeUpload');
                 const qrCodePreview = document.getElementById('qrCodePreview');
                 if (qrCodeUpload && qrCodePreview) {
-                    qrCodeUpload.addEventListener('change', function(e) {
+                    qrCodeUpload.addEventListener('change', function (e) {
                         const file = e.target.files[0];
                         if (file) {
                             // Validate file size (max 2MB)
@@ -776,29 +998,28 @@
                                 this.value = '';
                                 return;
                             }
-                            
+
                             // Validate file type
                             if (!file.type.startsWith('image/')) {
                                 alert('Please upload an image file');
                                 this.value = '';
                                 return;
                             }
-                            
+
                             const reader = new FileReader();
-                            reader.onload = function(event) {
+                            reader.onload = function (event) {
                                 qrCodePreview.innerHTML = '<img src="' + event.target.result + '" alt="Payment QR Code" style="max-width: 100%; max-height: 200px; border-radius: 8px;">';
                             };
                             reader.readAsDataURL(file);
-                            
+
                             // Update file label
                             const label = document.querySelector('.custom-file-label');
                             if (label) label.textContent = file.name;
                         }
                     });
                 }
-            })();
-        </script></th:block>
+            </script>
+        </th:block>
 </body>
 
 </html>
-
