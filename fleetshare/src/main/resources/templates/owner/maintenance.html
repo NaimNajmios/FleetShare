@@ -252,7 +252,7 @@
                                         <a th:href="@{/owner/maintenance/view/{id}(id=${record.maintenanceId})}" class="btn btn-sm btn-primary flex-grow-1">View</a>
                                         <button th:if="${record.status != 'COMPLETED' && record.status != 'CANCELLED'}" 
                                             class="btn btn-sm btn-outline-danger" 
-                                            onclick="confirmDelete([[${record.maintenanceId}]])">
+                                            th:onclick="|confirmDelete('${record.maintenanceId}')|">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
                                     </div>
@@ -370,7 +370,6 @@
             </div>
             <!-- End of Schedules Section -->
         </div>
-    </div>
 
     <!-- Add Maintenance Modal -->
     <div class="modal fade" id="addMaintenanceModal" tabindex="-1" aria-hidden="true">
@@ -437,7 +436,7 @@
                     <h5 class="modal-title">Add Maintenance Schedule</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form th:action="@{/owner/maintenance}" method="post">
+                <form th:action="@{/owner/maintenance-schedules/add}" method="post">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Vehicle</label>
@@ -495,6 +494,7 @@
                 </form>
             </div>
         </div>
+    </div>
     </div>
 
     <th:block layout:fragment="extra-js">

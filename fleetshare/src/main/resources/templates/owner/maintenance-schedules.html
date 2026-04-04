@@ -42,7 +42,7 @@
                         <h3 class="font-weight-bold mb-1">Maintenance Schedules</h3>
                         <p class="text-muted mb-0">Set up recurring maintenance schedules for your vehicles</p>
                     </div>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                    <button class="btn btn-primary" id="btn-add-schedule">
                         <i class="mdi mdi-plus me-1"></i> Add Schedule
                     </button>
                 </div>
@@ -56,7 +56,7 @@
                         <i class="mdi mdi-calendar-clock mdi-48px text-muted mb-3"></i>
                         <h4>No Maintenance Schedules</h4>
                         <p class="text-muted">Create recurring schedules to keep your vehicles in top condition.</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                        <button class="btn btn-primary" id="btn-add-schedule-empty">
                             <i class="mdi mdi-plus me-1"></i> Create Schedule
                         </button>
                     </div>
@@ -104,74 +104,107 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Maintenance Schedule</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 900px; width: 90%;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="modal-header border-0 pb-2">
+                        <h5 class="modal-title fw-bold" id="addScheduleModalLabel">
+                            <i class="mdi mdi-calendar-plus text-primary me-1"></i>Create Schedule
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/owner/maintenance-schedules/add}" method="post">
+                        <div class="modal-body" style="padding: 1rem;">
+                            <div class="row g-2">
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Vehicle <span class="text-danger">*</span></label>
+                                    <select class="form-select form-select-sm" name="vehicleId" required style="border-radius: 6px; font-size: 0.75rem;">
+                                        <option value="">Select</option>
+                                        <option th:each="v : ${vehicles}" th:value="${v.vehicleId}"
+                                            th:text="${v.registrationNo}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Type <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" name="maintenanceType" 
+                                        placeholder="Oil Change" required style="border-radius: 6px; font-size: 0.75rem;">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Cost (RM)</label>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="estimatedCost"
+                                        placeholder="0.00" style="border-radius: 6px; font-size: 0.75rem;">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Frequency</label>
+                                    <select class="form-select form-select-sm" name="frequencyType" style="border-radius: 6px; font-size: 0.75rem;">
+                                        <option value="DAILY">Daily</option>
+                                        <option value="WEEKLY">Weekly</option>
+                                        <option value="MONTHLY" selected>Monthly</option>
+                                        <option value="YEARLY">Yearly</option>
+                                        <option value="MILEAGE_BASED">Mileage</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Every</label>
+                                    <input type="number" class="form-control form-control-sm" name="frequencyValue" value="3" required style="border-radius: 6px; font-size: 0.75rem;">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Due Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control form-control-sm" name="nextDueDate" required style="border-radius: 6px; font-size: 0.75rem;">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Due Mileage</label>
+                                    <input type="number" class="form-control form-control-sm" name="nextDueMileage"
+                                        placeholder="km" style="border-radius: 6px; font-size: 0.75rem;">
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end pb-1">
+                                    <div class="form-check form-switch" style="font-size: 0.75rem;">
+                                        <input class="form-check-input" type="checkbox" name="isActive" id="isActive" checked style="font-size: 0.75rem;">
+                                        <label class="form-check-label fw-semibold" for="isActive" style="font-size: 0.75rem;">Active</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Description</label>
+                                    <input type="text" class="form-control form-control-sm" name="description" 
+                                        placeholder="Description" style="border-radius: 6px; font-size: 0.75rem;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold mb-1" style="font-size: 0.75rem;">Notes</label>
+                                    <input type="text" class="form-control form-control-sm" name="notes" 
+                                        placeholder="Notes" style="border-radius: 6px; font-size: 0.75rem;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-2">
+                            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal" style="border-radius: 8px;">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-sm" style="border-radius: 8px;">
+                                <i class="mdi mdi-check me-1"></i>Create Schedule
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <form th:action="@{/owner/maintenance-schedules/add}" method="post">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Vehicle</label>
-                            <select class="form-select" name="vehicleId" required>
-                                <option value="">Select Vehicle</option>
-                                <option th:each="v : ${vehicles}" th:value="${v.vehicleId}"
-                                    th:text="${v.brand + ' ' + v.model + ' (' + v.registrationNo + ')'}"></option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Maintenance Type</label>
-                            <input type="text" class="form-control" name="maintenanceType" placeholder="e.g., Oil Change" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" name="description" rows="2"></textarea>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Frequency Type</label>
-                                <select class="form-select" name="frequencyType">
-                                    <option value="MONTHLY">Monthly</option>
-                                    <option value="YEARLY">Yearly</option>
-                                    <option value="WEEKLY">Weekly</option>
-                                    <option value="MILEAGE_BASED">Mileage Based</option>
-                                </select>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Frequency Value</label>
-                                <input type="number" class="form-control" name="frequencyValue" value="3" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Next Due Date</label>
-                                <input type="date" class="form-control" name="nextDueDate" required>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Next Due Mileage</label>
-                                <input type="number" class="form-control" name="nextDueMileage">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Estimated Cost (RM)</label>
-                            <input type="number" step="0.01" class="form-control" name="estimatedCost">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-control" name="notes" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Schedule</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addScheduleModal = new bootstrap.Modal(document.getElementById('addScheduleModal'));
+        
+        document.getElementById('btn-add-schedule').addEventListener('click', function() {
+            addScheduleModal.show();
+        });
+        
+        var btnAddScheduleEmpty = document.getElementById('btn-add-schedule-empty');
+        if (btnAddScheduleEmpty) {
+            btnAddScheduleEmpty.addEventListener('click', function() {
+                addScheduleModal.show();
+            });
+        }
+    });
+    </script>
 </body>
 </html>
