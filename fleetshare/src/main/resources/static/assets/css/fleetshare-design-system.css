@@ -606,6 +606,24 @@ body .main-panel,
     min-height: calc(100vh - 60px) !important;
 }
 
+/* Sidebar Icon Only Overrides */
+body.sidebar-icon-only .sidebar,
+body.sidebar-icon-only .sidebar-offcanvas,
+body.sidebar-icon-only nav.sidebar,
+body.sidebar-icon-only #sidebar,
+body.sidebar-icon-only .sidebar.sidebar-offcanvas {
+    width: 70px !important;
+    overflow: visible !important;
+}
+
+body.sidebar-icon-only .page-body-wrapper {
+    margin-left: 70px !important;
+}
+
+body.sidebar-icon-only .main-panel {
+    width: calc(100% - 70px) !important;
+}
+
 body .container-scroller,
 .container-scroller {
     overflow: visible !important;
