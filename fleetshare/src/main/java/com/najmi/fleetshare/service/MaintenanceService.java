@@ -235,6 +235,39 @@ public class MaintenanceService {
     }
 
     /**
+     * Update maintenance status with final cost (for completion)
+     */
+    public void updateMaintenanceStatus(Long maintenanceId, VehicleMaintenance.MaintenanceStatus newStatus,
+            Long actorUserId, String remarks, java.math.BigDecimal finalCost) {
+        maintenanceRepository.findById(maintenanceId).ifPresent(maintenance -> {
+            maintenance.setCurrentStatus(newStatus);
+
+            // Update actual times and final cost based on status
+            if (newStatus == VehicleMaintenance.MaintenanceStatus.IN_PROGRESS
+                    && maintenance.getActualStartTime() == null) {
+                maintenance.setActualStartTime(LocalDateTime.now());
+            } else if (newStatus == VehicleMaintenance.MaintenanceStatus.COMPLETED) {
+                if (maintenance.getActualEndTime() == null) {
+                    maintenance.setActualEndTime(LocalDateTime.now());
+                }
+                if (finalCost != null) {
+                    maintenance.setFinalCost(finalCost);
+                }
+            }
+
+            maintenanceRepository.save(maintenance);
+
+            // Log the status change
+            VehicleMaintenanceLog log = new VehicleMaintenanceLog(
+                    maintenanceId,
+                    newStatus,
+                    actorUserId,
+                    remarks);
+            maintenanceLogRepository.save(log);
+        });
+    }
+
+    /**
      * Get maintenance statistics for all records (admin dashboard)
      */
     public com.najmi.fleetshare.dto.MaintenanceStatsDTO getMaintenanceStats() {
@@ -314,5 +347,40 @@ public class MaintenanceService {
         }
 
         return stats;
+    }
+
+    /**
+     * Delete a maintenance record
+     */
+    public void deleteMaintenance(Long maintenanceId) {
+        maintenanceRepository.deleteById(maintenanceId);
+    }
+
+    /**
+     * Update an existing maintenance record
+     */
+    public void updateMaintenance(MaintenanceDTO dto) {
+        maintenanceRepository.findById(dto.getMaintenanceId()).ifPresent(maintenance -> {
+            if (dto.getDescription() != null) {
+                maintenance.setDescription(dto.getDescription());
+            }
+            if (dto.getScheduledDate() != null) {
+                maintenance.setScheduledDate(dto.getScheduledDate());
+            }
+            if (dto.getEstimatedCost() != null) {
+                maintenance.setEstimatedCost(dto.getEstimatedCost());
+            }
+            if (dto.getFinalCost() != null) {
+                maintenance.setFinalCost(dto.getFinalCost());
+            }
+            if (dto.getStatus() != null) {
+                try {
+                    maintenance.setCurrentStatus(VehicleMaintenance.MaintenanceStatus.valueOf(dto.getStatus()));
+                } catch (IllegalArgumentException e) {
+                    // Keep existing status
+                }
+            }
+            maintenanceRepository.save(maintenance);
+        });
     }
 }

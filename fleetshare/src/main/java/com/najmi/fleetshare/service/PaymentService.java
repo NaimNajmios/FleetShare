@@ -531,4 +531,39 @@ public class PaymentService {
         java.math.BigDecimal revenue = paymentRepository.calculateTotalRevenueForOwner(ownerId, statuses);
         return revenue != null ? revenue : java.math.BigDecimal.ZERO;
     }
+
+    /**
+     * Calculates revenue for a specific owner within a date range.
+     *
+     * @param ownerId   Owner ID
+     * @param startDate Start of the period (inclusive)
+     * @param endDate   End of the period (inclusive)
+     * @return Total revenue in the given period
+     */
+    public java.math.BigDecimal getRevenueByOwnerIdAndPeriod(Long ownerId, java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
+        if (ownerInvoices.isEmpty()) {
+            return java.math.BigDecimal.ZERO;
+        }
+
+        Set<Long> invoiceIds = ownerInvoices.stream()
+                .map(Invoice::getInvoiceId)
+                .collect(Collectors.toSet());
+
+        List<Payment> payments = paymentRepository.findByInvoiceIdIn(invoiceIds);
+
+        java.time.LocalDateTime start = startDate.atStartOfDay();
+        java.time.LocalDateTime end = endDate.plusDays(1).atStartOfDay();
+
+        java.math.BigDecimal total = payments.stream()
+                .filter(p -> p.getPaymentStatus() == Payment.PaymentStatus.VERIFIED)
+                .filter(p -> p.getPaymentDate() != null
+                        && !p.getPaymentDate().isBefore(start)
+                        && p.getPaymentDate().isBefore(end))
+                .map(Payment::getAmount)
+                .filter(a -> a != null)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        return total;
+    }
 }

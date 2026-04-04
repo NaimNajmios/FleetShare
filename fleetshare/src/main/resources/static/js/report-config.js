@@ -184,19 +184,6 @@
                     self.toggleComparisonMode(this.checked);
                 });
             }
-
-            const saveNoteBtn = document.getElementById('btn-save-note');
-            if (saveNoteBtn) saveNoteBtn.addEventListener('click', () => self.saveReportNote());
-
-            const addNoteBtn = document.getElementById('btn-add-note');
-            if (addNoteBtn) {
-                addNoteBtn.addEventListener('click', () => {
-                    const notesSection = document.getElementById('report-notes-section');
-                    if (notesSection) {
-                        notesSection.style.display = notesSection.style.display === 'none' ? 'block' : 'none';
-                    }
-                });
-            }
         },
 
         handleCardNavigation: function(e, currentCard) {
@@ -373,18 +360,9 @@
 
             const summaryHtml = data.summary ?
                 `<div class="summary-badges">${Object.entries(data.summary).map(([k, v]) => {
-                    let trend = null;
-                    let displayValue = v;
-                    
-                    if (typeof v === 'object' && v !== null) {
-                        displayValue = v.value || v;
-                        trend = v.trend;
-                    }
-                    
-                    const trendHtml = (trend !== null && trend !== undefined) ? 
-                        `<span class="trend-indicator ${trend > 0 ? 'trend-up' : 'trend-down'}">${trend > 0 ? '↑' : '↓'} ${Math.abs(trend).toFixed(1)}%</span>` : '';
-                    
-                    return `<span class="badge bg-primary">${k}: ${displayValue}${trendHtml}</span>`;
+                    const trend = v.trend ? `<span class="trend-indicator ${v.trend > 0 ? 'trend-up' : 'trend-down'}">${v.trend > 0 ? '↑' : '↓'} ${Math.abs(v.trend).toFixed(1)}%</span>` : '';
+                    const displayValue = typeof v === 'object' ? v.value : v;
+                    return `<span class="badge bg-primary">${k}: ${displayValue}${trend}</span>`;
                 }).join('')}</div>` : '';
 
             const noData = !data.data || data.data.length === 0;
@@ -408,93 +386,6 @@
                 tableSection.style.display = 'block';
                 comparisonSection.style.display = 'none';
             }
-
-            this.loadReportNotes();
-        },
-
-        loadReportNotes: function() {
-            const notesSection = document.getElementById('report-notes-section');
-            const notesList = document.getElementById('report-notes-list');
-            const noteInput = document.getElementById('report-note-input');
-            
-            if (!notesSection || !notesList) return;
-
-            const reportKey = this.getReportKey();
-            const notes = this.getNotes(reportKey) || [];
-            
-            if (notes.length > 0) {
-                notesSection.style.display = 'block';
-                notesList.innerHTML = notes.map((note, index) => `
-                    <div class="report-note-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="report-note-text">${this.escapeHtml(note.text)}</div>
-                                <div class="report-note-meta">${note.timestamp}</div>
-                            </div>
-                            <span class="report-note-delete" onclick="ReportBuilder.deleteNote(${index})">
-                                <i class="mdi mdi-delete"></i>
-                            </span>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                notesSection.style.display = 'none';
-            }
-            
-            if (noteInput) noteInput.value = '';
-        },
-
-        saveReportNote: function() {
-            const noteInput = document.getElementById('report-note-input');
-            const text = noteInput?.value?.trim();
-            
-            if (!text) return;
-            
-            const reportKey = this.getReportKey();
-            const notes = this.getNotes(reportKey) || [];
-            
-            notes.push({
-                text: text,
-                timestamp: new Date().toLocaleString()
-            });
-            
-            localStorage.setItem('report_notes_' + reportKey, JSON.stringify(notes));
-            this.loadReportNotes();
-            
-            if (typeof showToast === 'function') {
-                showToast('Note saved successfully', 'success', 'Note Added');
-            }
-        },
-
-        deleteNote: function(index) {
-            const reportKey = this.getReportKey();
-            const notes = this.getNotes(reportKey) || [];
-            
-            if (index >= 0 && index < notes.length) {
-                notes.splice(index, 1);
-                localStorage.setItem('report_notes_' + reportKey, JSON.stringify(notes));
-                this.loadReportNotes();
-            }
-        },
-
-        getReportKey: function() {
-            const params = this.getReportParams();
-            return `${currentCategory}_${currentReport}_${params.duration}`;
-        },
-
-        getNotes: function(reportKey) {
-            try {
-                const notes = localStorage.getItem('report_notes_' + reportKey);
-                return notes ? JSON.parse(notes) : [];
-            } catch (e) {
-                return [];
-            }
-        },
-
-        escapeHtml: function(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
         },
 
         renderChart: function(data) {

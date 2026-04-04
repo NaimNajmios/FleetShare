@@ -829,14 +829,7 @@ public class ReportService {
     private List<VehicleDTO> getFilteredVehicles(ReportRequest request) {
         if (request.isAdmin()) {
             List<VehicleDTO> vehicles = vehicleManagementService.getAllVehicles();
-            
-            // Handle multiple owner IDs
-            if (request.getOwnerIds() != null && !request.getOwnerIds().isEmpty()) {
-                vehicles = vehicles.stream()
-                        .filter(v -> request.getOwnerIds().contains(v.getFleetOwnerId()))
-                        .collect(Collectors.toList());
-            } else if (request.getOwnerId() != null) {
-                // Fallback to single owner ID for backward compatibility
+            if (request.getOwnerId() != null) {
                 vehicles = vehicles.stream()
                         .filter(v -> request.getOwnerId().equals(v.getFleetOwnerId()))
                         .collect(Collectors.toList());
@@ -851,21 +844,6 @@ public class ReportService {
         List<PaymentDTO> payments;
         if (request.isAdmin()) {
             payments = paymentService.getAllPayments();
-            
-            // Filter by owner IDs if specified - need to get business names
-            if (request.getOwnerIds() != null && !request.getOwnerIds().isEmpty()) {
-                List<String> ownerBusinessNames = getBusinessNamesForOwnerIds(request.getOwnerIds());
-                payments = payments.stream()
-                        .filter(p -> p.getOwnerBusinessName() != null && ownerBusinessNames.contains(p.getOwnerBusinessName()))
-                        .collect(Collectors.toList());
-            } else if (request.getOwnerId() != null) {
-                String businessName = getBusinessNameForOwnerId(request.getOwnerId());
-                if (businessName != null) {
-                    payments = payments.stream()
-                            .filter(p -> businessName.equals(p.getOwnerBusinessName()))
-                            .collect(Collectors.toList());
-                }
-            }
         } else {
             payments = paymentService.getPaymentsByOwnerId(request.getRequesterId());
         }
@@ -880,28 +858,6 @@ public class ReportService {
                     return !paymentDate.isBefore(start) && !paymentDate.isAfter(end);
                 })
                 .collect(Collectors.toList());
-    }
-
-    private List<String> getBusinessNamesForOwnerIds(List<Long> ownerIds) {
-        if (ownerIds == null || ownerIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return userManagementService.getAllFleetOwners().stream()
-                .filter(owner -> ownerIds.contains(owner.getUserId()))
-                .map(owner -> owner.getBusinessName())
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    private String getBusinessNameForOwnerId(Long ownerId) {
-        if (ownerId == null) {
-            return null;
-        }
-        return userManagementService.getAllFleetOwners().stream()
-                .filter(owner -> ownerId.equals(owner.getUserId()))
-                .map(owner -> owner.getBusinessName())
-                .findFirst()
-                .orElse(null);
     }
 
     private List<MaintenanceDTO> getFilteredMaintenance(ReportRequest request) {

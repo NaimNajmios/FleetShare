@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='maintenance-schedules', pageTitle='Maintenance Schedules'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .schedule-card {
+                border-radius: 12px;
+                transition: all 0.3s ease;
+            }
+            .schedule-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            }
+            .due-badge {
+                background: #ff6b6b;
+                color: white;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 0.7rem;
+                font-weight: 600;
+            }
+            .active-badge {
+                background: #38ef7d;
+                color: white;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 0.7rem;
+                font-weight: 600;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Maintenance Schedules</h3>
+                        <p class="text-muted mb-0">Set up recurring maintenance schedules for your vehicles</p>
+                    </div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                        <i class="mdi mdi-plus me-1"></i> Add Schedule
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div th:if="${#lists.isEmpty(schedules)}" class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="mdi mdi-calendar-clock mdi-48px text-muted mb-3"></i>
+                        <h4>No Maintenance Schedules</h4>
+                        <p class="text-muted">Create recurring schedules to keep your vehicles in top condition.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                            <i class="mdi mdi-plus me-1"></i> Create Schedule
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div th:each="schedule : ${schedules}" class="col-md-6 col-xl-4 mb-4">
+                <div class="card schedule-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-1" th:text="${schedule.maintenanceType}">Oil Change</h5>
+                                <span class="text-muted small" th:text="${schedule.vehicleId}">Vehicle ID</span>
+                            </div>
+                            <div>
+                                <span th:if="${schedule.isActive}" class="active-badge">Active</span>
+                                <span th:unless="${schedule.isActive}" class="badge bg-secondary">Inactive</span>
+                            </div>
+                        </div>
+
+                        <p class="small text-muted mb-2" th:text="${schedule.description}">Description</p>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Frequency</small>
+                                <span th:text="${schedule.frequencyValue + ' ' + schedule.frequencyType}">Every 3 Months</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Next Due</small>
+                                <span th:text="${schedule.nextDueDate != null ? #temporals.format(schedule.nextDueDate, 'MMM dd, yyyy') : 'N/A'}">Jan 01, 2025</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small" th:if="${schedule.estimatedCost}">
+                                Est: RM <span th:text="${#numbers.formatDecimal(schedule.estimatedCost, 1, 'COMMA', 0, 'POINT')}">150</span>
+                            </span>
+                            <form th:action="@{/owner/maintenance-schedules/delete/{id}(id=${schedule.scheduleId})}" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this schedule?')">
+                                    <i class="mdi mdi-delete"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Maintenance Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/owner/maintenance-schedules/add}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Vehicle</label>
+                            <select class="form-select" name="vehicleId" required>
+                                <option value="">Select Vehicle</option>
+                                <option th:each="v : ${vehicles}" th:value="${v.vehicleId}"
+                                    th:text="${v.brand + ' ' + v.model + ' (' + v.registrationNo + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Maintenance Type</label>
+                            <input type="text" class="form-control" name="maintenanceType" placeholder="e.g., Oil Change" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="2"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Frequency Type</label>
+                                <select class="form-select" name="frequencyType">
+                                    <option value="MONTHLY">Monthly</option>
+                                    <option value="YEARLY">Yearly</option>
+                                    <option value="WEEKLY">Weekly</option>
+                                    <option value="MILEAGE_BASED">Mileage Based</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Frequency Value</label>
+                                <input type="number" class="form-control" name="frequencyValue" value="3" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Next Due Date</label>
+                                <input type="date" class="form-control" name="nextDueDate" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Next Due Mileage</label>
+                                <input type="number" class="form-control" name="nextDueMileage">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Estimated Cost (RM)</label>
+                            <input type="number" step="0.01" class="form-control" name="estimatedCost">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

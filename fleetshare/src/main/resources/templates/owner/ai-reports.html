@@ -491,7 +491,7 @@
                     document.getElementById('loading-state').style.display = 'none';
 
                     if (!response.ok || !data.success) {
-                        showError(data.error || 'An error occurred while processing your query.');
+                        showError(data.errorMessage || 'An error occurred while processing your query.');
                         return;
                     }
 

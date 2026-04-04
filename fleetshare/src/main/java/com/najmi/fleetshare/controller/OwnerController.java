@@ -12,6 +12,9 @@ import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.dto.PasswordChangeRequest;
 import com.najmi.fleetshare.entity.FleetOwner;
+import com.najmi.fleetshare.entity.MaintenanceSchedule;
+import com.najmi.fleetshare.entity.Vehicle;
+import com.najmi.fleetshare.entity.VehicleMaintenance;
 import com.najmi.fleetshare.entity.VehiclePriceHistory;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import com.najmi.fleetshare.repository.UserRepository;
@@ -94,6 +97,9 @@ public class OwnerController {
     @Autowired
     private com.najmi.fleetshare.service.ReportService reportService;
 
+    @Autowired
+    private com.najmi.fleetshare.service.MaintenanceScheduleService maintenanceScheduleService;
+
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -147,18 +153,8 @@ public class OwnerController {
                         })
                         .count() : 0;
                 
-                // Monthly revenue (simplified - use all payments and filter by date)
-                List<PaymentDTO> allPayments = paymentService.getPaymentsByOwnerId(ownerId);
-                BigDecimal monthlyRevenue = allPayments != null ? allPayments.stream()
-                        .filter(p -> p.getPaymentDate() != null)
-                        .filter(p -> {
-                            LocalDate paymentDate = p.getPaymentDate().toLocalDate();
-                            return !paymentDate.isBefore(monthStart) && !paymentDate.isAfter(today);
-                        })
-                        .filter(p -> "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()) || "VERIFIED".equals(p.getPaymentStatus()))
-                        .map(p -> p.getAmount())
-                        .filter(a -> a != null)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+                // Monthly revenue
+                BigDecimal monthlyRevenue = paymentService.getRevenueByOwnerIdAndPeriod(ownerId, monthStart, today);
                 
                 // Fleet utilization
                 double utilizationRate = 0;
@@ -508,6 +504,10 @@ public class OwnerController {
             List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
             model.addAttribute("vehicles", vehicles);
 
+            // Add schedules for the modal
+            List<MaintenanceSchedule> schedules = maintenanceScheduleService.getActiveSchedules(ownerId);
+            model.addAttribute("schedules", schedules);
+
             // Add empty DTO for the form
             model.addAttribute("maintenanceDTO", new MaintenanceDTO());
         }
@@ -553,6 +553,117 @@ public class OwnerController {
         model.addAttribute("statusLogs", statusLogs);
 
         return "owner/view-maintenance";
+    }
+
+    @PostMapping("/maintenance/update-status")
+    @ResponseBody
+    public String updateMaintenanceStatus(
+            @RequestParam Long maintenanceId,
+            @RequestParam String status,
+            @RequestParam(required = false) String remarks,
+            @RequestParam(required = false) java.math.BigDecimal finalCost,
+            HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "{\"success\": false, \"message\": \"Unauthorized\"}";
+        }
+
+        try {
+            VehicleMaintenance.MaintenanceStatus newStatus = VehicleMaintenance.MaintenanceStatus.valueOf(status);
+            Long actorUserId = user.getUserId();
+            maintenanceService.updateMaintenanceStatus(maintenanceId, newStatus, actorUserId, remarks, finalCost);
+            return "{\"success\": true, \"message\": \"Status updated successfully\"}";
+        } catch (Exception e) {
+            return "{\"success\": false, \"message\": \"" + e.getMessage() + "\"}";
+        }
+    }
+
+    @PostMapping("/maintenance/delete/{maintenanceId}")
+    public String deleteMaintenance(@PathVariable Long maintenanceId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            maintenanceService.deleteMaintenance(maintenanceId);
+            redirectAttributes.addFlashAttribute("successMessage", "Maintenance record deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting maintenance: " + e.getMessage());
+        }
+        return "redirect:/owner/maintenance";
+    }
+
+    @PostMapping("/maintenance/edit")
+    public String editMaintenance(@ModelAttribute MaintenanceDTO maintenanceDTO, HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            maintenanceService.updateMaintenance(maintenanceDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Maintenance record updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating maintenance: " + e.getMessage());
+        }
+        return "redirect:/owner/maintenance/view/" + maintenanceDTO.getMaintenanceId();
+    }
+
+    @GetMapping("/maintenance-schedules")
+    public String maintenanceSchedules(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+        List<MaintenanceSchedule> schedules = maintenanceScheduleService.getAllSchedules(ownerId);
+        model.addAttribute("schedules", schedules);
+
+        List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
+        model.addAttribute("vehicles", vehicles);
+
+        return "owner/maintenance-schedules";
+    }
+
+    @PostMapping("/maintenance-schedules/add")
+    public String addMaintenanceSchedule(@org.springframework.web.bind.annotation.ModelAttribute MaintenanceSchedule schedule,
+            HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            schedule.setFleetOwnerId(user.getOwnerDetails().getFleetOwnerId());
+            schedule.setCreatedAt(java.time.LocalDateTime.now());
+            schedule.setUpdatedAt(java.time.LocalDateTime.now());
+            maintenanceScheduleService.createSchedule(schedule);
+            redirectAttributes.addFlashAttribute("successMessage", "Schedule created successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error creating schedule: " + e.getMessage());
+        }
+        return "redirect:/owner/maintenance-schedules";
+    }
+
+    @PostMapping("/maintenance-schedules/delete/{id}")
+    public String deleteMaintenanceSchedule(@PathVariable Long id, HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            maintenanceScheduleService.deleteSchedule(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Schedule deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting schedule: " + e.getMessage());
+        }
+        return "redirect:/owner/maintenance-schedules";
     }
 
     @GetMapping("/maintenance/vehicle/{vehicleId}")

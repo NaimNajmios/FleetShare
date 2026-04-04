@@ -1,7 +1,6 @@
 package com.najmi.fleetshare.dto;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * DTO for report generation parameters
@@ -15,8 +14,7 @@ public class ReportRequest {
     private LocalDate endDate; // for custom range
     private String status; // filter by status
     private Long vehicleId; // filter by vehicle (Owner)
-    private Long ownerId; // filter by single owner (Admin) - deprecated, use ownerIds instead
-    private List<Long> ownerIds; // filter by multiple owners (Admin)
+    private Long ownerId; // filter by owner (Admin)
     private Long requesterId; // the user requesting the report
     private boolean isAdmin; // context flag
     private String format; // pdf, csv, or excel
@@ -89,14 +87,6 @@ public class ReportRequest {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
-    }
-
-    public List<Long> getOwnerIds() {
-        return ownerIds;
-    }
-
-    public void setOwnerIds(List<Long> ownerIds) {
-        this.ownerIds = ownerIds;
     }
 
     public Long getRequesterId() {

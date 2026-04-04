@@ -3,6 +3,7 @@ package com.najmi.fleetshare.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class MaintenanceDTO {
     private Long maintenanceId;
@@ -18,6 +19,15 @@ public class MaintenanceDTO {
     private BigDecimal finalCost;
     private String status;
     private String ownerBusinessName;
+    private Long serviceProviderId;
+    private String serviceProviderName;
+    private String maintenanceType;
+    private String notes;
+    private String attachments;
+    private String serviceCenterName;
+    private Boolean warrantyApplicable;
+    private LocalDateTime createdAt;
+    private List<PartDTO> parts;
 
     // Constructors
     public MaintenanceDTO() {
@@ -146,5 +156,77 @@ public class MaintenanceDTO {
 
     public void setOwnerBusinessName(String ownerBusinessName) {
         this.ownerBusinessName = ownerBusinessName;
+    }
+
+    public Long getServiceProviderId() {
+        return serviceProviderId;
+    }
+
+    public void setServiceProviderId(Long serviceProviderId) {
+        this.serviceProviderId = serviceProviderId;
+    }
+
+    public String getServiceProviderName() {
+        return serviceProviderName;
+    }
+
+    public void setServiceProviderName(String serviceProviderName) {
+        this.serviceProviderName = serviceProviderName;
+    }
+
+    public String getMaintenanceType() {
+        return maintenanceType;
+    }
+
+    public void setMaintenanceType(String maintenanceType) {
+        this.maintenanceType = maintenanceType;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String attachments) {
+        this.attachments = attachments;
+    }
+
+    public String getServiceCenterName() {
+        return serviceCenterName;
+    }
+
+    public void setServiceCenterName(String serviceCenterName) {
+        this.serviceCenterName = serviceCenterName;
+    }
+
+    public Boolean getWarrantyApplicable() {
+        return warrantyApplicable;
+    }
+
+    public void setWarrantyApplicable(Boolean warrantyApplicable) {
+        this.warrantyApplicable = warrantyApplicable;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public List<PartDTO> getParts() {
+        return parts;
+    }
+
+    public void setParts(List<PartDTO> parts) {
+        this.parts = parts;
     }
 }

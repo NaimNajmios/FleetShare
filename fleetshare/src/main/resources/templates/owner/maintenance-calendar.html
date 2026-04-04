@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='maintenance-calendar', pageTitle='Maintenance Calendar'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .fc-event {
+                cursor: pointer;
+            }
+            .fc-event-main {
+                padding: 2px 4px;
+            }
+            .legend-item {
+                display: inline-flex;
+                align-items: center;
+                margin-right: 15px;
+            }
+            .legend-color {
+                width: 12px;
+                height: 12px;
+                border-radius: 3px;
+                margin-right: 6px;
+            }
+        </style>
+        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Maintenance Calendar</h3>
+                        <p class="text-muted mb-0">Visualize scheduled maintenance and service schedules</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/owner/maintenance}" class="btn btn-outline-primary">
+                            <i class="mdi mdi-list me-1"></i> List View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #f5576c;"></span> Pending
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #4facfe;"></span> In Progress
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #38ef7d;"></span> Completed
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #667eea;"></span> Scheduled
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+        <script th:inline="javascript">
+            const maintenanceRecords = /*[[${maintenanceRecords}]]*/ [];
+            const schedules = /*[[${schedules}]]*/ [];
+
+            const events = [];
+
+            // Add maintenance records as events
+            maintenanceRecords.forEach(record => {
+                let color = '#667eea';
+                if (record.status === 'PENDING') color = '#f5576c';
+                else if (record.status === 'IN_PROGRESS') color = '#4facfe';
+                else if (record.status === 'COMPLETED') color = '#38ef7d';
+                else if (record.status === 'CANCELLED') color = '#adb5bd';
+
+                if (record.scheduledDate) {
+                    events.push({
+                        id: 'm-' + record.maintenanceId,
+                        title: record.vehicleBrand + ' ' + record.vehicleModel + ' - ' + (record.maintenanceType || record.description),
+                        start: record.scheduledDate,
+                        color: color,
+                        url: '/owner/maintenance/view/' + record.maintenanceId
+                    });
+                }
+            });
+
+            // Add schedules as recurring events
+            schedules.forEach(schedule => {
+                if (schedule.nextDueDate && schedule.isActive) {
+                    events.push({
+                        id: 's-' + schedule.scheduleId,
+                        title: 'Scheduled: ' + schedule.maintenanceType + ' (' + schedule.vehicleId + ')',
+                        start: schedule.nextDueDate,
+                        color: '#667eea',
+                        display: 'background'
+                    });
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const calendarEl = document.getElementById('calendar');
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,listWeek'
+                    },
+                    events: events,
+                    eventClick: function(info) {
+                        if (info.event.url) {
+                            window.location.href = info.event.url;
+                        }
+                    },
+                    height: 'auto'
+                });
+                calendar.render();
+            });
+        </script>
+    </th:block>
+</body>
+</html>
