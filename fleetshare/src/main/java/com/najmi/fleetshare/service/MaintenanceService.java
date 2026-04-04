@@ -79,6 +79,7 @@ public class MaintenanceService {
                         maintenance.getFinalCost(),
                         maintenance.getCurrentStatus() != null ? maintenance.getCurrentStatus().name() : "PENDING",
                         ownerBusinessName);
+                dto.setCreatedAt(maintenance.getCreatedAt());
                 maintenanceDTOs.add(dto);
             }
         }
@@ -116,7 +117,7 @@ public class MaintenanceService {
                             .orElse("Unknown Owner");
 
                     if (vehicle != null) {
-                        return new MaintenanceDTO(
+                        MaintenanceDTO dto = new MaintenanceDTO(
                                 maintenance.getMaintenanceId(),
                                 vehicle.getVehicleId(),
                                 vehicle.getRegistrationNo(),
@@ -131,6 +132,8 @@ public class MaintenanceService {
                                 maintenance.getCurrentStatus() != null ? maintenance.getCurrentStatus().name()
                                         : "PENDING",
                                 ownerBusinessName);
+                        dto.setCreatedAt(maintenance.getCreatedAt());
+                        return dto;
                     }
                     return null;
                 })
