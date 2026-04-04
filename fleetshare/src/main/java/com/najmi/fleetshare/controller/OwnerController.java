@@ -505,8 +505,20 @@ public class OwnerController {
             model.addAttribute("vehicles", vehicles);
 
             // Add schedules for the modal
-            List<MaintenanceSchedule> schedules = maintenanceScheduleService.getActiveSchedules(ownerId);
+            List<MaintenanceSchedule> schedules = maintenanceScheduleService.getAllSchedules(ownerId);
             model.addAttribute("schedules", schedules);
+
+            // Add vehicle map for display
+            Map<Long, Vehicle> vehicleMap = vehicles.stream()
+                .collect(java.util.stream.Collectors.toMap(VehicleDTO::getVehicleId, v -> {
+                    Vehicle ve = new Vehicle();
+                    ve.setVehicleId(v.getVehicleId());
+                    ve.setBrand(v.getBrand());
+                    ve.setModel(v.getModel());
+                    ve.setRegistrationNo(v.getRegistrationNo());
+                    return ve;
+                }));
+            model.addAttribute("vehicleMap", vehicleMap);
 
             // Add empty DTO for the form
             model.addAttribute("maintenanceDTO", new MaintenanceDTO());
@@ -646,7 +658,7 @@ public class OwnerController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating schedule: " + e.getMessage());
         }
-        return "redirect:/owner/maintenance-schedules";
+        return "redirect:/owner/maintenance";
     }
 
     @PostMapping("/maintenance-schedules/delete/{id}")
@@ -663,7 +675,7 @@ public class OwnerController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error deleting schedule: " + e.getMessage());
         }
-        return "redirect:/owner/maintenance-schedules";
+        return "redirect:/owner/maintenance";
     }
 
     @GetMapping("/maintenance/vehicle/{vehicleId}")
