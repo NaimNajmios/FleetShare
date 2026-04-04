@@ -30,6 +30,12 @@ A centralized vehicle rental management system built with Spring Boot that conne
 - **Dispute Resolution**: Access audit logs for bookings and payments
 - **System Monitoring**: Track platform metrics and usage statistics
 
+### Platform Features
+- **AI-Powered Analytics**: AI-assisted insights and report generation
+- **Email Notifications**: Automated email alerts for bookings, payments, and updates
+- **PDF Generation**: Generate invoices and receipts in PDF format
+- **DuitNow QR Payment**: QR code-based payment processing
+
 ## 🛠 Tech Stack
 
 ### Backend
@@ -41,11 +47,14 @@ A centralized vehicle rental management system built with Spring Boot that conne
 - **Security**: Spring Security + BCrypt
 - **AOP**: Spring AOP (AspectJ) for logging
 - **PDF Generation**: OpenPDF
+- **Email**: Spring Boot Mail
+- **JSON**: Jackson for AI integration
 
 ### Frontend
 - **Template Engine**: Thymeleaf
-- **UI Framework**: Custom responsive design
+- **UI Framework**: Custom responsive design (Bootstrap-based)
 - **Layout Dialect**: Thymeleaf Layout Dialect
+- **DataTables**: Server-side data tables for management pages
 
 ## 📋 Prerequisites
 
@@ -123,22 +132,37 @@ fleetshare/
 ├── src/main/java/com/najmi/fleetshare/
 │   ├── FleetshareApplication.java      # Main entry point
 │   ├── aspect/                         # AOP logging
-│   ├── config/                         # Security & Web config
+│   ├── config/                         # Security, Web & Async config
 │   ├── controller/                     # MVC controllers
 │   │   ├── AdminController.java
 │   │   ├── AuthController.java
 │   │   ├── OwnerController.java
-│   │   └── RenterController.java
+│   │   ├── RenterController.java
+│   │   └── RootController.java
 │   ├── dto/                            # Data Transfer Objects
 │   ├── entity/                         # JPA entities
 │   ├── exception/                      # Custom exceptions
 │   ├── repository/                     # Data access layer
 │   ├── security/                       # Security components
 │   ├── service/                        # Business logic
+│   │   ├── AiAssistantService.java    # AI analytics
+│   │   ├── EmailService.java           # Email notifications
+│   │   ├── FileStorageService.java     # File uploads
+│   │   ├── InvoiceService.java         # PDF invoices
+│   │   ├── MaintenanceService.java     # Vehicle maintenance
+│   │   ├── PaymentService.java          # Payment processing
+│   │   └── ReceiptService.java          # PDF receipts
 │   └── util/                           # Utility classes
 ├── src/main/resources/
 │   ├── templates/                      # Thymeleaf templates
-│   ├── static/                         # Static assets (CSS, JS, images)
+│   │   ├── admin/                      # Admin pages
+│   │   ├── auth/                       # Login/register
+│   │   ├── layouts/                    # Page layouts
+│   │   ├── owner/                      # Owner pages
+│   │   ├── renter/                     # Renter pages
+│   │   ├── pdf/                        # PDF templates
+│   │   └── fragments/                  # Reusable fragments
+│   ├── static/                         # CSS, JS, images
 │   └── application.properties          # Configuration
 ├── src/test/                           # Test files
 └── db/                                 # Database dumps
@@ -255,6 +279,17 @@ GET  /admin/users
 PATCH /admin/users/{id}/status
 GET  /admin/reports
 GET  /admin/disputes
+GET  /admin/ai-reports
+GET  /admin/maintenance
+GET  /admin/payments
+```
+
+### Additional Features
+```
+POST /ai/query              # AI analytics query
+GET  /invoices/{id}/pdf     # Generate invoice PDF
+GET  /receipts/{id}/pdf     # Generate receipt PDF
+POST /email/test             # Test email configuration
 ```
 
 ## 🧪 Testing
@@ -283,6 +318,16 @@ DB_PASSWORD=your_password
 # File Upload
 UPLOAD_DIR=C:/fleetshare-uploads
 MAX_FILE_SIZE=10MB
+
+# Email (SMTP)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_app_password
+
+# AI Assistant (Optional)
+ai.api.key=your_api_key
+ai.api.endpoint=https://api.example.com/v1
 ```
 
 ## 🚢 Deployment
@@ -368,6 +413,16 @@ Scopes: `auth`, `owner`, `renter`, `admin`, `booking`, `payment`, `vehicle`
 - Clear browser cache
 - Check static resource path configuration
 - Verify files exist in `src/main/resources/static/`
+
+**Email Service Issues**
+- Verify SMTP configuration in `application.properties`
+- Check mail server credentials
+- For Gmail, enable App Passwords (not regular password)
+
+**AI Reports Not Working**
+- Verify API key is configured
+- Check network connectivity to AI service
+- Review application logs for errors
 
 ## 📚 Additional Resources
 

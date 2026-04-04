@@ -4,6 +4,9 @@ import com.najmi.fleetshare.dto.*;
 import com.najmi.fleetshare.entity.Vehicle;
 import com.najmi.fleetshare.repository.*;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -53,6 +56,110 @@ public class ReportService {
      * Generate report data based on request parameters
      */
     public ReportResponse<Map<String, Object>> generateReportData(ReportRequest request) {
+        ReportResponse<Map<String, Object>> response = switch (request.getCategory()) {
+            case "booking" -> generateBookingReport(request);
+            case "vehicle" -> generateVehicleReport(request);
+            case "payment" -> generatePaymentReport(request);
+            case "maintenance" -> generateMaintenanceReport(request);
+            case "user" -> generateUserReport(request);
+            default -> throw new IllegalArgumentException("Unknown report category: " + request.getCategory());
+        };
+
+        if (request.isComparisonMode()) {
+            response.setComparisonData(generateComparisonData(request, response));
+        }
+
+        return response;
+    }
+
+    /**
+     * Generate comparison data for period-over-period comparison
+     */
+    private ComparisonData generateComparisonData(ReportRequest request, ReportResponse<Map<String, Object>> currentReport) {
+        ReportRequest comparisonRequest = createComparisonRequest(request);
+        ReportResponse<Map<String, Object>> previousReport = generateReportDataInternal(comparisonRequest);
+
+        ComparisonData comparison = new ComparisonData();
+        comparison.setPeriodALabel("Current Period");
+        comparison.setPeriodBLabel("Previous Period");
+        comparison.setPeriodAStart(request.getEffectiveStartDate().format(DATE_FORMATTER));
+        comparison.setPeriodAEnd(request.getEffectiveEndDate().format(DATE_FORMATTER));
+        comparison.setPeriodBStart(comparisonRequest.getEffectiveStartDate().format(DATE_FORMATTER));
+        comparison.setPeriodBEnd(comparisonRequest.getEffectiveEndDate().format(DATE_FORMATTER));
+
+        List<ComparisonData.ComparisonRow> rows = new ArrayList<>();
+
+        Map<String, Object> currentSummary = currentReport.getSummary();
+        Map<String, Object> previousSummary = previousReport.getSummary();
+
+        if (currentSummary != null && previousSummary != null) {
+            for (Map.Entry<String, Object> entry : currentSummary.entrySet()) {
+                String key = entry.getKey();
+                Object currentValue = entry.getValue();
+                Object previousValue = previousSummary.get(key);
+
+                if (previousValue != null) {
+                    String currentStr = extractNumericValue(currentValue);
+                    String previousStr = extractNumericValue(previousValue);
+
+                    double current = parseNumeric(currentStr);
+                    double previous = parseNumeric(previousStr);
+                    double change = 0;
+                    boolean isPercentage = false;
+
+                    if (previous != 0) {
+                        change = ((current - previous) / previous) * 100;
+                        isPercentage = true;
+                    }
+
+                    rows.add(new ComparisonData.ComparisonRow(
+                            key,
+                            currentStr,
+                            previousStr,
+                            change,
+                            isPercentage
+                    ));
+                } else {
+                    rows.add(new ComparisonData.ComparisonRow(
+                            key,
+                            extractDisplayValue(currentValue),
+                            "N/A",
+                            0,
+                            false
+                    ));
+                }
+            }
+        }
+
+        comparison.setRows(rows);
+        return comparison;
+    }
+
+    /**
+     * Create a request for the comparison period
+     */
+    private ReportRequest createComparisonRequest(ReportRequest original) {
+        ReportRequest comparison = new ReportRequest();
+        comparison.setCategory(original.getCategory());
+        comparison.setReportType(original.getReportType());
+        comparison.setDuration(original.getDuration());
+        comparison.setStatus(original.getStatus());
+        comparison.setVehicleId(original.getVehicleId());
+        comparison.setOwnerId(original.getOwnerId());
+        comparison.setRequesterId(original.getRequesterId());
+        comparison.setAdmin(original.isAdmin());
+        comparison.setComparisonMode(false);
+
+        comparison.setStartDate(original.getComparisonStartDate());
+        comparison.setEndDate(original.getComparisonEndDate());
+
+        return comparison;
+    }
+
+    /**
+     * Generate report without comparison to avoid recursion
+     */
+    private ReportResponse<Map<String, Object>> generateReportDataInternal(ReportRequest request) {
         return switch (request.getCategory()) {
             case "booking" -> generateBookingReport(request);
             case "vehicle" -> generateVehicleReport(request);
@@ -61,6 +168,26 @@ public class ReportService {
             case "user" -> generateUserReport(request);
             default -> throw new IllegalArgumentException("Unknown report category: " + request.getCategory());
         };
+    }
+
+    private String extractNumericValue(Object value) {
+        if (value == null) return "0";
+        String str = value.toString();
+        str = str.replaceAll("[^\\d.-]", "");
+        return str.isEmpty() ? "0" : str;
+    }
+
+    private String extractDisplayValue(Object value) {
+        if (value == null) return "-";
+        return value.toString();
+    }
+
+    private double parseNumeric(String str) {
+        try {
+            return Double.parseDouble(str.replace(",", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     /**
@@ -702,7 +829,14 @@ public class ReportService {
     private List<VehicleDTO> getFilteredVehicles(ReportRequest request) {
         if (request.isAdmin()) {
             List<VehicleDTO> vehicles = vehicleManagementService.getAllVehicles();
-            if (request.getOwnerId() != null) {
+            
+            // Handle multiple owner IDs
+            if (request.getOwnerIds() != null && !request.getOwnerIds().isEmpty()) {
+                vehicles = vehicles.stream()
+                        .filter(v -> request.getOwnerIds().contains(v.getFleetOwnerId()))
+                        .collect(Collectors.toList());
+            } else if (request.getOwnerId() != null) {
+                // Fallback to single owner ID for backward compatibility
                 vehicles = vehicles.stream()
                         .filter(v -> request.getOwnerId().equals(v.getFleetOwnerId()))
                         .collect(Collectors.toList());
@@ -717,6 +851,21 @@ public class ReportService {
         List<PaymentDTO> payments;
         if (request.isAdmin()) {
             payments = paymentService.getAllPayments();
+            
+            // Filter by owner IDs if specified - need to get business names
+            if (request.getOwnerIds() != null && !request.getOwnerIds().isEmpty()) {
+                List<String> ownerBusinessNames = getBusinessNamesForOwnerIds(request.getOwnerIds());
+                payments = payments.stream()
+                        .filter(p -> p.getOwnerBusinessName() != null && ownerBusinessNames.contains(p.getOwnerBusinessName()))
+                        .collect(Collectors.toList());
+            } else if (request.getOwnerId() != null) {
+                String businessName = getBusinessNameForOwnerId(request.getOwnerId());
+                if (businessName != null) {
+                    payments = payments.stream()
+                            .filter(p -> businessName.equals(p.getOwnerBusinessName()))
+                            .collect(Collectors.toList());
+                }
+            }
         } else {
             payments = paymentService.getPaymentsByOwnerId(request.getRequesterId());
         }
@@ -731,6 +880,28 @@ public class ReportService {
                     return !paymentDate.isBefore(start) && !paymentDate.isAfter(end);
                 })
                 .collect(Collectors.toList());
+    }
+
+    private List<String> getBusinessNamesForOwnerIds(List<Long> ownerIds) {
+        if (ownerIds == null || ownerIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return userManagementService.getAllFleetOwners().stream()
+                .filter(owner -> ownerIds.contains(owner.getUserId()))
+                .map(owner -> owner.getBusinessName())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private String getBusinessNameForOwnerId(Long ownerId) {
+        if (ownerId == null) {
+            return null;
+        }
+        return userManagementService.getAllFleetOwners().stream()
+                .filter(owner -> ownerId.equals(owner.getUserId()))
+                .map(owner -> owner.getBusinessName())
+                .findFirst()
+                .orElse(null);
     }
 
     private List<MaintenanceDTO> getFilteredMaintenance(ReportRequest request) {
@@ -828,6 +999,150 @@ public class ReportService {
         }
 
         return csv.toString().getBytes();
+    }
+
+    /**
+     * Generate Excel report with formatted cells, headers, and auto-fit columns
+     */
+    public byte[] generateExcelReport(ReportRequest request) {
+        ReportResponse<Map<String, Object>> reportData = generateReportData(request);
+
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+
+            Sheet sheet = workbook.createSheet("Report");
+
+            // Create styles
+            CellStyle headerStyle = workbook.createCellStyle();
+            org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerStyle.setBorderBottom(BorderStyle.THIN);
+            headerStyle.setBorderTop(BorderStyle.THIN);
+            headerStyle.setBorderLeft(BorderStyle.THIN);
+            headerStyle.setBorderRight(BorderStyle.THIN);
+
+            CellStyle dataStyle = workbook.createCellStyle();
+            dataStyle.setBorderBottom(BorderStyle.THIN);
+            dataStyle.setBorderTop(BorderStyle.THIN);
+            dataStyle.setBorderLeft(BorderStyle.THIN);
+            dataStyle.setBorderRight(BorderStyle.THIN);
+            dataStyle.setWrapText(true);
+
+            CellStyle titleStyle = workbook.createCellStyle();
+            org.apache.poi.ss.usermodel.Font titleFont = workbook.createFont();
+            titleFont.setBold(true);
+            titleFont.setFontHeightInPoints((short) 14);
+            titleStyle.setFont(titleFont);
+
+            CellStyle summaryStyle = workbook.createCellStyle();
+            org.apache.poi.ss.usermodel.Font summaryFont = workbook.createFont();
+            summaryFont.setBold(true);
+            summaryStyle.setFont(summaryFont);
+
+            // Title row
+            Row titleRow = sheet.createRow(0);
+            Cell titleCell = titleRow.createCell(0);
+            titleCell.setCellValue(reportData.getReportTitle());
+            titleCell.setCellStyle(titleStyle);
+
+            // Period row
+            Row periodRow = sheet.createRow(1);
+            Cell periodCell = periodRow.createCell(0);
+            periodCell.setCellValue("Period: " + reportData.getPeriod());
+            periodCell.setCellStyle(dataStyle);
+
+            // Generated at row
+            Row genRow = sheet.createRow(2);
+            Cell genCell = genRow.createCell(0);
+            genCell.setCellValue("Generated: " + reportData.getGeneratedAt());
+            genCell.setCellStyle(dataStyle);
+
+            // Headers row
+            int headerRowNum = 4;
+            Row headerRow = sheet.createRow(headerRowNum);
+            List<String> columns = reportData.getColumns();
+            for (int i = 0; i < columns.size(); i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns.get(i));
+                cell.setCellStyle(headerStyle);
+            }
+
+            // Data rows
+            int dataRowNum = headerRowNum + 1;
+            for (Map<String, Object> dataRow : reportData.getData()) {
+                Row row = sheet.createRow(dataRowNum++);
+                for (int i = 0; i < columns.size(); i++) {
+                    Cell cell = row.createCell(i);
+                    Object value = dataRow.get(columns.get(i));
+                    if (value != null) {
+                        setCellValue(cell, value);
+                    } else {
+                        cell.setCellValue("-");
+                    }
+                    cell.setCellStyle(dataStyle);
+                }
+            }
+
+            // Summary section
+            if (reportData.getSummary() != null && !reportData.getSummary().isEmpty()) {
+                int summaryRowNum = dataRowNum + 2;
+                Row summaryTitleRow = sheet.createRow(summaryRowNum);
+                Cell summaryTitleCell = summaryTitleRow.createCell(0);
+                summaryTitleCell.setCellValue("Summary");
+                summaryTitleCell.setCellStyle(summaryStyle);
+
+                int summaryDataRowNum = summaryRowNum + 1;
+                for (Map.Entry<String, Object> entry : reportData.getSummary().entrySet()) {
+                    Row row = sheet.createRow(summaryDataRowNum++);
+                    Cell keyCell = row.createCell(0);
+                    keyCell.setCellValue(entry.getKey());
+                    keyCell.setCellStyle(summaryStyle);
+
+                    Cell valueCell = row.createCell(1);
+                    setCellValue(valueCell, entry.getValue());
+                    valueCell.setCellStyle(dataStyle);
+                }
+            }
+
+            // Auto-size columns
+            for (int i = 0; i < columns.size(); i++) {
+                sheet.autoSizeColumn(i);
+                int width = sheet.getColumnWidth(i);
+                if (width < 3000) {
+                    sheet.setColumnWidth(i, 3000);
+                } else if (width > 15000) {
+                    sheet.setColumnWidth(i, 15000);
+                }
+            }
+
+            // Freeze header row
+            sheet.createFreezePane(0, headerRowNum + 1);
+
+            workbook.write(os);
+            return os.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate Excel report: " + e.getMessage(), e);
+        }
+    }
+
+    private void setCellValue(Cell cell, Object value) {
+        if (value instanceof Number) {
+            cell.setCellValue(((Number) value).doubleValue());
+        } else if (value != null) {
+            String str = value.toString();
+            try {
+                cell.setCellValue(Double.parseDouble(str.replace(",", "").replace("RM ", "").replace("RM", "").trim()));
+            } catch (NumberFormatException e) {
+                cell.setCellValue(str);
+            }
+        } else {
+            cell.setCellValue("-");
+        }
     }
 
     // ── AI Report Export ───────────────────────────────────────────────

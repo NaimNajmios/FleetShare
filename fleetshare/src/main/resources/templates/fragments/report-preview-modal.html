@@ -1,0 +1,217 @@
+<th:block xmlns:th="http://www.w3.thymeleaf.org" th:fragment="preview-modal">
+    <style>
+        #previewModal .modal-dialog {
+            max-width: 900px;
+        }
+
+        @media (max-width: 768px) {
+            #previewModal .modal-dialog {
+                max-width: calc(100% - 1rem);
+                margin: 0.5rem auto;
+            }
+        }
+
+        #previewModal .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        #previewModal .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        #previewModal .summary-badges {
+            margin-bottom: 1rem;
+        }
+
+        #previewModal .summary-badges .badge {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-height: 350px;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.75rem;
+            border: 1px solid #e9ecef;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                max-height: 250px;
+            }
+        }
+
+        .trend-up {
+            color: #10b981;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        .trend-indicator {
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        .comparison-table th {
+            background: #f8f9fa;
+        }
+
+        .comparison-table th.period-a {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .comparison-table th.period-b {
+            background: rgba(17, 153, 142, 0.1);
+        }
+
+        .comparison-table th.change-col {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .period-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .period-badge.period-a {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .period-badge.period-b {
+            background: rgba(17, 153, 142, 0.2);
+            color: #11998e;
+        }
+
+        .report-notes-section {
+            background: #fffbeb;
+            border: 1px solid #fbbf24;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .report-notes-section h6 {
+            color: #d97706;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .report-notes-section textarea {
+            border-color: #fbbf24;
+            font-size: 0.875rem;
+        }
+
+        .report-notes-section textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        }
+
+        .report-notes-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .report-note-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-note-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .report-note-text {
+            font-size: 0.875rem;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        .report-note-meta {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .report-note-delete {
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .report-note-delete:hover {
+            color: #dc2626;
+        }
+    </style>
+
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="previewModalLabel">
+                        <i class="mdi mdi-table me-2"></i>Report Preview
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="loading-indicator" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Generating report...</p>
+                    </div>
+                    <div id="preview-content" style="display: none;"></div>
+                    <div class="chart-container" id="chart-container" style="display: none;">
+                        <canvas id="reportChart" aria-label="Report chart visualization"></canvas>
+                    </div>
+                    <div id="preview-table-content" style="display: none;"></div>
+                    <div id="comparison-table-content" style="display: none;"></div>
+                    
+                    <div class="report-notes-section" id="report-notes-section" style="display: none;">
+                        <h6><i class="mdi mdi-note-text"></i> Report Notes</h6>
+                        <div id="report-notes-list" class="report-notes-list mb-3"></div>
+                        <div class="input-group">
+                            <textarea class="form-control" id="report-note-input" rows="2" placeholder="Add a note about this report..."></textarea>
+                            <button class="btn btn-warning" type="button" id="btn-save-note">
+                                <i class="mdi mdi-content-save"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-add-note">
+                        <i class="mdi mdi-note-plus me-1"></i> Add Note
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="modal-btn-csv">
+                        <i class="mdi mdi-file-excel me-1"></i> CSV
+                    </button>
+                    <button type="button" class="btn btn-primary" id="modal-btn-excel">
+                        <i class="mdi mdi-microsoft-excel me-1"></i> Excel
+                    </button>
+                    <button type="button" class="btn-generate" id="modal-btn-pdf">
+                        <i class="mdi mdi-file-pdf-box me-1"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>

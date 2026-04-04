@@ -89,6 +89,33 @@
             background-color: #f3f4f6;
         }
 
+        .toast-retry {
+            flex-shrink: 0;
+            background: transparent;
+            border: 1px solid #d1d5db;
+            color: #3b82f6;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .toast-retry:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .toast-retry i {
+            font-size: 1rem;
+        }
+
         /* Success Variant */
         .toast-success {
             border-left-color: #10b981;
@@ -186,10 +213,84 @@
                         toast.classList.add('show');
                     });
 
-                    const duration = type === 'error' ? 6000 : 4000;
+                    const duration = type === 'error' ? 8000 : 4000;
                     setTimeout(() => {
                         this.dismiss(toast);
                     }, duration);
+                },
+
+                showWithRetry(message, type, title, retryCallback) {
+                    if (!this.container) return;
+
+                    let iconClass = 'mdi-information';
+                    let defaultTitle = 'Info';
+
+                    switch (type) {
+                        case 'success':
+                            iconClass = 'mdi-check-circle';
+                            defaultTitle = 'Success';
+                            break;
+                        case 'error':
+                            iconClass = 'mdi-alert-circle';
+                            defaultTitle = 'Error';
+                            break;
+                        case 'warning':
+                            iconClass = 'mdi-alert';
+                            defaultTitle = 'Warning';
+                            break;
+                    }
+
+                    if (!title) title = defaultTitle;
+
+                    const toast = document.createElement('div');
+                    toast.className = `toast-notification toast-${type}`;
+                    toast.setAttribute('role', 'alert');
+
+                    let retryBtn = '';
+                    if (retryCallback) {
+                        retryBtn = `<button class="toast-retry" aria-label="Retry">
+                            <i class="mdi mdi-refresh"></i> Retry
+                        </button>`;
+                    }
+
+                    toast.innerHTML = `
+                        <div class="toast-icon">
+                            <i class="mdi ${iconClass}"></i>
+                        </div>
+                        <div class="toast-content">
+                            <div class="toast-title">${title}</div>
+                            <div class="toast-message">${message}</div>
+                        </div>
+                        <button class="toast-close" aria-label="Close">
+                            <i class="mdi mdi-close" style="font-size: 1.2rem;"></i>
+                        </button>
+                        ${retryBtn}
+                    `;
+
+                    const closeBtn = toast.querySelector('.toast-close');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            this.dismiss(toast);
+                        });
+                    }
+
+                    const retryBtnEl = toast.querySelector('.toast-retry');
+                    if (retryBtnEl && retryCallback) {
+                        retryBtnEl.addEventListener('click', () => {
+                            this.dismiss(toast);
+                            retryCallback();
+                        });
+                    }
+
+                    this.container.appendChild(toast);
+
+                    requestAnimationFrame(() => {
+                        toast.classList.add('show');
+                    });
+
+                    setTimeout(() => {
+                        this.dismiss(toast);
+                    }, type === 'error' ? 10000 : 5000);
                 },
 
                 dismiss(toast) {
@@ -202,6 +303,8 @@
             };
 
             window.showToast = (msg, type, title) => Toast.show(msg, type, title);
+            window.showToastWithRetry = (msg, type, title, retryCallback) => 
+                Toast.showWithRetry(msg, type, title, retryCallback);
 
             document.addEventListener('DOMContentLoaded', function () {
                 // Flash Attributes - check if variables exist before using

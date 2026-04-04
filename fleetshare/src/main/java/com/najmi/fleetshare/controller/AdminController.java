@@ -155,6 +155,26 @@ public class AdminController {
                     .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
             model.addAttribute("totalRevenue", totalRevenue);
 
+            // Quick stats for widget
+            LocalDate today = LocalDate.now();
+            long todayBookings = allBookings != null ? allBookings.stream()
+                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().toLocalDate().equals(today))
+                    .count() : 0;
+            BigDecimal todayRevenue = allPayments != null ? allPayments.stream()
+                    .filter(p -> p.getPaymentDate() != null && p.getPaymentDate().toLocalDate().equals(today))
+                    .filter(p -> "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                    .map(p -> p.getAmount())
+                    .filter(a -> a != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+            
+            long activeUsers = allRenters != null ? allRenters.stream()
+                    .filter(r -> r.getIsActive() != null && r.getIsActive())
+                    .count() : 0;
+
+            model.addAttribute("todayBookings", todayBookings);
+            model.addAttribute("todayRevenue", todayRevenue);
+            model.addAttribute("activeUsers", activeUsers);
+
         } catch (Exception e) {
             e.printStackTrace();
             // Set defaults on error
@@ -170,6 +190,9 @@ public class AdminController {
             model.addAttribute("pendingBookings", 0);
             model.addAttribute("recentBookings", new java.util.ArrayList<>());
             model.addAttribute("totalRevenue", BigDecimal.ZERO);
+            model.addAttribute("todayBookings", 0);
+            model.addAttribute("todayRevenue", BigDecimal.ZERO);
+            model.addAttribute("activeUsers", 0);
         }
 
         return "admin/dashboard";
@@ -501,6 +524,7 @@ public class AdminController {
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long ownerId,
+            @RequestParam(required = false) Boolean comparisonMode,
             @RequestParam(defaultValue = "pdf") String format,
             HttpSession session) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -517,6 +541,7 @@ public class AdminController {
             request.setOwnerId(ownerId);
             request.setRequesterId(user.getUserId());
             request.setAdmin(true);
+            request.setComparisonMode(comparisonMode != null && comparisonMode);
 
             if (startDate != null && !startDate.isEmpty()) {
                 request.setStartDate(java.time.LocalDate.parse(startDate));
@@ -529,14 +554,22 @@ public class AdminController {
             String contentType;
             String filename;
 
-            if ("csv".equalsIgnoreCase(format)) {
-                content = reportService.generateCsvReport(request);
-                contentType = "text/csv";
-                filename = reportType + "-report.csv";
-            } else {
-                content = reportService.generatePdfReport(request);
-                contentType = "application/pdf";
-                filename = reportType + "-report.pdf";
+            switch (format.toLowerCase()) {
+                case "csv" -> {
+                    content = reportService.generateCsvReport(request);
+                    contentType = "text/csv";
+                    filename = reportType + "-report.csv";
+                }
+                case "excel" -> {
+                    content = reportService.generateExcelReport(request);
+                    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    filename = reportType + "-report.xlsx";
+                }
+                default -> {
+                    content = reportService.generatePdfReport(request);
+                    contentType = "application/pdf";
+                    filename = reportType + "-report.pdf";
+                }
             }
 
             return ResponseEntity.ok()
@@ -544,6 +577,7 @@ public class AdminController {
                     .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
                     .body(content);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }

@@ -1,0 +1,186 @@
+<th:block xmlns:th="http://www.w3.thymeleaf.org" th:fragment="quick-stats-widget(role)">
+
+    <style>
+        .quick-stats-widget {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-stats-widget h5 {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .quick-stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .quick-stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-stat-label i {
+            color: #667eea;
+        }
+
+        .quick-stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .quick-stat-value.positive {
+            color: #10b981;
+        }
+
+        .quick-stat-value.negative {
+            color: #ef4444;
+        }
+
+        .quick-stat-change {
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .quick-stat-link {
+            font-size: 0.8rem;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .quick-stat-link:hover {
+            color: #764ba2;
+        }
+
+        .quick-stats-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-stats-actions .btn {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+        }
+    </style>
+
+    <div class="quick-stats-widget">
+        <h5>
+            <i class="mdi mdi-chart-line"></i>
+            Quick Stats
+        </h5>
+
+        <th:block th:if="${role == 'owner'}">
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-calendar-check"></i>
+                    Bookings (This Month)
+                </span>
+                <span class="quick-stat-value" th:text="${monthlyBookings ?: 0}">0</span>
+            </div>
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-currency-usd"></i>
+                    Revenue (This Month)
+                </span>
+                <span class="quick-stat-value">
+                    RM <span th:text="${#numbers.formatDecimal(monthlyRevenue ?: 0, 0, 0)}">0</span>
+                    <span class="quick-stat-change" 
+                          th:if="${revenueChange != null}"
+                          th:classappend="${revenueChange >= 0 ? 'positive' : 'negative'}"
+                          th:text="${revenueChange >= 0 ? '+' : ''} + ${#numbers.formatDecimal(revenueChange, 1, 1)} + '%'">
+                    </span>
+                </span>
+            </div>
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-car"></i>
+                    Fleet Utilization
+                </span>
+                <span class="quick-stat-value" th:text="${utilizationRate ?: 0} + '%'">0%</span>
+            </div>
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-wrench"></i>
+                    Maintenance Due
+                </span>
+                <span class="quick-stat-value" th:text="${upcomingMaintenance ?: 0}">0</span>
+            </div>
+        </th:block>
+
+        <th:block th:if="${role == 'admin'}">
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-calendar-check"></i>
+                    Bookings (Today)
+                </span>
+                <span class="quick-stat-value" th:text="${todayBookings ?: 0}">0</span>
+            </div>
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-currency-usd"></i>
+                    Revenue (Today)
+                </span>
+                <span class="quick-stat-value">
+                    RM <span th:text="${#numbers.formatDecimal(todayRevenue ?: 0, 0, 0)}">0</span>
+                </span>
+            </div>
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-account-group"></i>
+                    Active Users
+                </span>
+                <span class="quick-stat-value" th:text="${activeUsers ?: 0}">0</span>
+            </div>
+            <div class="quick-stat-item">
+                <span class="quick-stat-label">
+                    <i class="mdi mdi-car"></i>
+                    Platform Vehicles
+                </span>
+                <span class="quick-stat-value" th:text="${totalVehicles ?: 0}">0</span>
+            </div>
+        </th:block>
+
+        <div class="quick-stats-actions">
+            <th:block th:if="${role == 'owner'}">
+                <a th:href="@{/owner/reports}" class="btn btn-outline-primary btn-sm">
+                    <i class="mdi mdi-file-document me-1"></i> Full Report
+                </a>
+                <a th:href="@{/owner/reports(duration='thisMonth', category='booking')}" class="btn btn-light btn-sm">
+                    <i class="mdi mdi-calendar me-1"></i> Monthly
+                </a>
+            </th:block>
+            <th:block th:if="${role == 'admin'}">
+                <a th:href="@{/admin/reports}" class="btn btn-outline-primary btn-sm">
+                    <i class="mdi mdi-file-document me-1"></i> Full Report
+                </a>
+                <a th:href="@{/admin/reports(duration='today', category='booking')}" class="btn btn-light btn-sm">
+                    <i class="mdi mdi-calendar me-1"></i> Today
+                </a>
+            </th:block>
+        </div>
+    </div>
+</th:block>

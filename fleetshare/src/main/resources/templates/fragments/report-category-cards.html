@@ -1,0 +1,116 @@
+<th:block xmlns:th="http://www.w3.thymeleaf.org" th:fragment="category-cards(activeCategory)">
+    <style>
+        .report-category-card {
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .report-category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .report-category-card.active {
+            border-color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .report-category-card .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .report-category-card .category-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .cat-booking {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .cat-vehicle {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .cat-payment {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .cat-maintenance {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .cat-user {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+    </style>
+
+    <div class="row mb-4">
+        <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+            <div class="report-category-card cat-booking" 
+                 data-category="booking"
+                 th:classappend="${activeCategory == 'booking' ? ' active' : ''}"
+                 role="option"
+                 tabindex="0"
+                 aria-selected="true">
+                <i class="mdi mdi-calendar-check category-icon"></i>
+                <span class="category-label">Booking</span>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+            <div class="report-category-card cat-vehicle"
+                 data-category="vehicle"
+                 th:classappend="${activeCategory == 'vehicle' ? ' active' : ''}"
+                 role="option"
+                 tabindex="0"
+                 aria-selected="false">
+                <i class="mdi mdi-car category-icon"></i>
+                <span class="category-label">Vehicle</span>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+            <div class="report-category-card cat-payment"
+                 data-category="payment"
+                 th:classappend="${activeCategory == 'payment' ? ' active' : ''}"
+                 role="option"
+                 tabindex="0"
+                 aria-selected="false">
+                <i class="mdi mdi-currency-usd category-icon"></i>
+                <span class="category-label">Payment</span>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+            <div class="report-category-card cat-maintenance"
+                 data-category="maintenance"
+                 th:classappend="${activeCategory == 'maintenance' ? ' active' : ''}"
+                 role="option"
+                 tabindex="0"
+                 aria-selected="false">
+                <i class="mdi mdi-wrench category-icon"></i>
+                <span class="category-label">Maintenance</span>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-6 mb-3 mb-xl-0">
+            <div class="report-category-card cat-user"
+                 data-category="user"
+                 th:classappend="${activeCategory == 'user' ? ' active' : ''}"
+                 role="option"
+                 tabindex="0"
+                 aria-selected="false">
+                <i class="mdi mdi-account-group category-icon"></i>
+                <span class="category-label">User</span>
+            </div>
+        </div>
+    </div>
+</th:block>

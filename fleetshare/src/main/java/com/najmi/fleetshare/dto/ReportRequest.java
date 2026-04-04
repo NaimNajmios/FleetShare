@@ -1,6 +1,7 @@
 package com.najmi.fleetshare.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * DTO for report generation parameters
@@ -14,10 +15,12 @@ public class ReportRequest {
     private LocalDate endDate; // for custom range
     private String status; // filter by status
     private Long vehicleId; // filter by vehicle (Owner)
-    private Long ownerId; // filter by owner (Admin)
+    private Long ownerId; // filter by single owner (Admin) - deprecated, use ownerIds instead
+    private List<Long> ownerIds; // filter by multiple owners (Admin)
     private Long requesterId; // the user requesting the report
     private boolean isAdmin; // context flag
-    private String format; // pdf or csv
+    private String format; // pdf, csv, or excel
+    private boolean comparisonMode; // enable period comparison
 
     // Default constructor
     public ReportRequest() {
@@ -88,6 +91,14 @@ public class ReportRequest {
         this.ownerId = ownerId;
     }
 
+    public List<Long> getOwnerIds() {
+        return ownerIds;
+    }
+
+    public void setOwnerIds(List<Long> ownerIds) {
+        this.ownerIds = ownerIds;
+    }
+
     public Long getRequesterId() {
         return requesterId;
     }
@@ -110,6 +121,14 @@ public class ReportRequest {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public boolean isComparisonMode() {
+        return comparisonMode;
+    }
+
+    public void setComparisonMode(boolean comparisonMode) {
+        this.comparisonMode = comparisonMode;
     }
 
     /**
@@ -143,6 +162,37 @@ public class ReportRequest {
             case "thisMonth" -> today;
             case "lastMonth" -> today.minusMonths(1).withDayOfMonth(today.minusMonths(1).lengthOfMonth());
             default -> today;
+        };
+    }
+
+    /**
+     * Calculate comparison period start date (previous equivalent period)
+     */
+    public LocalDate getComparisonStartDate() {
+        LocalDate currentStart = getEffectiveStartDate();
+        LocalDate currentEnd = getEffectiveEndDate();
+        long periodDays = java.time.temporal.ChronoUnit.DAYS.between(currentStart, currentEnd) + 1;
+        return currentStart.minusDays(periodDays);
+    }
+
+    /**
+     * Calculate comparison period end date
+     */
+    public LocalDate getComparisonEndDate() {
+        return getEffectiveStartDate().minusDays(1);
+    }
+
+    /**
+     * Get duration label for display
+     */
+    public String getDurationLabel() {
+        return switch (duration) {
+            case "today" -> "Today";
+            case "last7" -> "Last 7 Days";
+            case "thisMonth" -> "This Month";
+            case "lastMonth" -> "Last Month";
+            case "custom" -> "Custom Range";
+            default -> "Last 30 Days";
         };
     }
 }

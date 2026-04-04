@@ -1,5 +1,8 @@
+# FleetShare Application Configuration Example
+# Copy this file to application.properties and fill in your actual values.
+# Do NOT commit application.properties with sensitive keys.
+
 spring.application.name=fleetshare
-spring.profiles.active=local
 
 # MySQL Database Configuration
 spring.datasource.url=jdbc:mysql://localhost:3307/fleetshareplayground
@@ -7,19 +10,10 @@ spring.datasource.username=root
 spring.datasource.password=admin
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-# H2 In-Memory Database for UI Testing (disabled)
-#spring.datasource.url=jdbc:h2:mem:testdb
-#spring.datasource.driverClassName=org.h2.Driver
-#spring.datasource.username=sa
-#spring.datasource.password=
-
 # JPA Configuration
 spring.jpa.hibernate.ddl-auto=none
 spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
-
-# Disable H2 console
-#spring.h2.console.enabled=true
 
 # Error Handling Configuration
 server.error.whitelabel.enabled=false
@@ -35,42 +29,37 @@ spring.servlet.multipart.enabled=true
 spring.servlet.multipart.max-file-size=10MB
 spring.servlet.multipart.max-request-size=10MB
 
-# Fix for FileCountLimitExceededException - every form field counts as a "part"
+# Tomcat Part Count Configuration
 server.tomcat.max-part-count=100
 
+# Directory Paths
 app.upload.dir=C:/fleetshare-uploads
 app.upload.vehicle-images=${app.upload.dir}/vehicles
 app.upload.profile-images=${app.upload.dir}/profiles
 app.upload.payment-proofs=${app.upload.dir}/payments
 app.upload.qr-codes=${app.upload.dir}/qrcodes
 
-# DevTools - Prevent restart on static resource changes
-spring.devtools.restart.additional-exclude=static/**,public/**,assets/**
-
-# Static Resource Caching - Prevents icons from disappearing
-spring.web.resources.cache.period=3600
-spring.web.resources.chain.cache=true
-
 # AI Assistant Configuration
-# Supported providers: groq, cerebras, openrouter
+# Replace with your actual API keys or set them as environment variables
 ai.assistant.provider=groq
-ai.assistant.groq.api-key=${GROQ_API_KEY:}
+ai.assistant.groq.api-key=${GROQ_API_KEY:your_groq_api_key_here}
 ai.assistant.groq.model=llama-3.3-70b-versatile
 ai.assistant.groq.url=https://api.groq.com/openai/v1/chat/completions
+
 ai.assistant.cerebras.api-key=${CEREBRAS_API_KEY:}
 ai.assistant.cerebras.model=llama-3.3-70b
 ai.assistant.cerebras.url=https://api.cerebras.ai/v1/chat/completions
+
 ai.assistant.openrouter.api-key=${OPENROUTER_API_KEY:}
 ai.assistant.openrouter.model=meta-llama/llama-3.3-70b-instruct:free
 ai.assistant.openrouter.url=https://openrouter.ai/api/v1/chat/completions
 ai.assistant.max-data-rows=50
 
-# Email Configuration Base (Used for Mail Service)
+# Email Configuration
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
 spring.mail.username=${MAIL_USERNAME:fleetshare.my@gmail.com}
-spring.mail.password=${MAIL_PASSWORD:bduqcajwaboallqu}
+spring.mail.password=${MAIL_PASSWORD:your_app_password_here}
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
-# Default sender address
 app.mail.from=${MAIL_FROM:fleetshare.my@gmail.com}

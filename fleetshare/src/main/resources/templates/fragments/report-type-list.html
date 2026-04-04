@@ -1,0 +1,60 @@
+<th:block xmlns:th="http://www.w3.thymeleaf.org" th:fragment="type-list">
+    <style>
+        .report-type-card {
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-type-card:hover {
+            border-color: var(--bs-primary);
+            background: #f8f9ff;
+        }
+
+        .report-type-card.selected {
+            border-color: var(--bs-primary);
+            background: #f0f4ff;
+        }
+
+        .report-type-card .report-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .report-type-card .report-desc {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin: 0;
+        }
+    </style>
+
+    <div id="report-types-container">
+        <div class="report-type-card selected" 
+             data-report="monthly-revenue"
+             role="option"
+             tabindex="0"
+             aria-selected="true">
+            <div class="report-name">Monthly Revenue</div>
+            <p class="report-desc">Revenue breakdown by month</p>
+        </div>
+        <div class="report-type-card" 
+             data-report="utilization-rate"
+             role="option"
+             tabindex="0"
+             aria-selected="false">
+            <div class="report-name">Utilization Rate</div>
+            <p class="report-desc">Fleet utilization analysis</p>
+        </div>
+        <div class="report-type-card" 
+             data-report="booking-summary"
+             role="option"
+             tabindex="0"
+             aria-selected="false">
+            <div class="report-name">Booking Summary</div>
+            <p class="report-desc">All bookings overview</p>
+        </div>
+    </div>
+</th:block>

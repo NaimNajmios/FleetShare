@@ -44,6 +44,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +132,61 @@ public class OwnerController {
                 // Optimized: Fetch total revenue using database aggregation
                 BigDecimal totalRevenue = paymentService.getTotalRevenueByOwnerId(ownerId);
                 model.addAttribute("totalRevenue", totalRevenue);
+
+                // Quick stats for widget
+                LocalDate today = LocalDate.now();
+                LocalDate monthStart = today.withDayOfMonth(1);
+                
+                // Monthly bookings
+                List<BookingDTO> allOwnerBookings = bookingService.getBookingsByOwnerId(ownerId);
+                long monthlyBookings = allOwnerBookings != null ? allOwnerBookings.stream()
+                        .filter(b -> b.getCreatedAt() != null)
+                        .filter(b -> {
+                            LocalDate created = b.getCreatedAt().toLocalDate();
+                            return !created.isBefore(monthStart) && !created.isAfter(today);
+                        })
+                        .count() : 0;
+                
+                // Monthly revenue (simplified - use all payments and filter by date)
+                List<PaymentDTO> allPayments = paymentService.getPaymentsByOwnerId(ownerId);
+                BigDecimal monthlyRevenue = allPayments != null ? allPayments.stream()
+                        .filter(p -> p.getPaymentDate() != null)
+                        .filter(p -> {
+                            LocalDate paymentDate = p.getPaymentDate().toLocalDate();
+                            return !paymentDate.isBefore(monthStart) && !paymentDate.isAfter(today);
+                        })
+                        .filter(p -> "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()) || "VERIFIED".equals(p.getPaymentStatus()))
+                        .map(p -> p.getAmount())
+                        .filter(a -> a != null)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+                
+                // Fleet utilization
+                double utilizationRate = 0;
+                if (vehicles != null && !vehicles.isEmpty()) {
+                    long totalDays = 30;
+                    long rentedDays = allOwnerBookings != null ? allOwnerBookings.stream()
+                            .filter(b -> "COMPLETED".equals(b.getStatus()) || "ACTIVE".equals(b.getStatus()))
+                            .filter(b -> b.getStartDate() != null && b.getEndDate() != null)
+                            .mapToLong(b -> {
+                                LocalDate start = b.getStartDate().toLocalDate();
+                                LocalDate end = b.getEndDate().toLocalDate();
+                                return Math.max(0, ChronoUnit.DAYS.between(start.isBefore(monthStart) ? monthStart : start, end.isAfter(today) ? today : end) + 1);
+                            })
+                            .sum() : 0;
+                    utilizationRate = (rentedDays * 100.0) / (vehicles.size() * totalDays);
+                }
+                
+                // Upcoming maintenance
+                List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByOwnerId(ownerId);
+                long upcomingMaintenance = maintenanceRecords != null ? maintenanceRecords.stream()
+                        .filter(m -> "SCHEDULED".equals(m.getStatus()) || "PENDING".equals(m.getStatus()))
+                        .filter(m -> m.getScheduledDate() != null && !m.getScheduledDate().isBefore(today))
+                        .count() : 0;
+                
+                model.addAttribute("monthlyBookings", monthlyBookings);
+                model.addAttribute("monthlyRevenue", monthlyRevenue != null ? monthlyRevenue : BigDecimal.ZERO);
+                model.addAttribute("utilizationRate", String.format("%.1f", utilizationRate));
+                model.addAttribute("upcomingMaintenance", upcomingMaintenance);
 
                 // Pass vehicles list for status overview
                 model.addAttribute("vehicles", vehicles);
@@ -945,6 +1001,7 @@ public class OwnerController {
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long vehicleId,
+            @RequestParam(required = false) Boolean comparisonMode,
             @RequestParam(defaultValue = "pdf") String format,
             HttpSession session) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -961,6 +1018,7 @@ public class OwnerController {
             request.setVehicleId(vehicleId);
             request.setRequesterId(user.getOwnerDetails().getFleetOwnerId());
             request.setAdmin(false);
+            request.setComparisonMode(comparisonMode != null && comparisonMode);
 
             if (startDate != null && !startDate.isEmpty()) {
                 request.setStartDate(LocalDate.parse(startDate));
@@ -973,14 +1031,22 @@ public class OwnerController {
             String contentType;
             String filename;
 
-            if ("csv".equalsIgnoreCase(format)) {
-                content = reportService.generateCsvReport(request);
-                contentType = "text/csv";
-                filename = reportType + "-report.csv";
-            } else {
-                content = reportService.generatePdfReport(request);
-                contentType = "application/pdf";
-                filename = reportType + "-report.pdf";
+            switch (format.toLowerCase()) {
+                case "csv" -> {
+                    content = reportService.generateCsvReport(request);
+                    contentType = "text/csv";
+                    filename = reportType + "-report.csv";
+                }
+                case "excel" -> {
+                    content = reportService.generateExcelReport(request);
+                    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    filename = reportType + "-report.xlsx";
+                }
+                default -> {
+                    content = reportService.generatePdfReport(request);
+                    contentType = "application/pdf";
+                    filename = reportType + "-report.pdf";
+                }
             }
 
             return ResponseEntity.ok()
@@ -988,6 +1054,7 @@ public class OwnerController {
                     .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
                     .body(content);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }

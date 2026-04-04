@@ -17,6 +17,7 @@ public class ReportResponse<T> {
     private List<String> columns;
     private List<T> data;
     private Map<String, Object> summary;
+    private ComparisonData comparisonData;
 
     // Default constructor
     public ReportResponse() {
@@ -55,6 +56,11 @@ public class ReportResponse<T> {
 
     public ReportResponse<T> withSummary(Map<String, Object> summary) {
         this.summary = summary;
+        return this;
+    }
+
+    public ReportResponse<T> withComparisonData(ComparisonData comparisonData) {
+        this.comparisonData = comparisonData;
         return this;
     }
 
@@ -113,5 +119,13 @@ public class ReportResponse<T> {
 
     public void setSummary(Map<String, Object> summary) {
         this.summary = summary;
+    }
+
+    public ComparisonData getComparisonData() {
+        return comparisonData;
+    }
+
+    public void setComparisonData(ComparisonData comparisonData) {
+        this.comparisonData = comparisonData;
     }
 }
