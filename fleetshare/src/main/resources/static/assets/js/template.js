@@ -78,6 +78,12 @@
         body.toggleClass('sidebar-hidden');
       } else {
         body.toggleClass('sidebar-icon-only');
+        // Persist sidebar state using localStorage
+        if (body.hasClass('sidebar-icon-only')) {
+            localStorage.setItem('sidebarState', 'collapsed');
+        } else {
+            localStorage.setItem('sidebarState', 'expanded');
+        }
       }
     });
 
