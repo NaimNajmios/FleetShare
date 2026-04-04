@@ -528,9 +528,32 @@ public class OwnerController {
 
     @org.springframework.web.bind.annotation.PostMapping("/maintenance/add")
     public String addMaintenance(@org.springframework.web.bind.annotation.ModelAttribute MaintenanceDTO maintenanceDTO,
-            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes, HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+        
+        Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+        
+        // Validate before creation
+        Map<String, Object> validation = maintenanceService.validateMaintenanceCreation(maintenanceDTO, ownerId);
+        Boolean isValid = (Boolean) validation.get("valid");
+        
+        if (!isValid) {
+            List<String> errors = (List<String>) validation.get("errors");
+            redirectAttributes.addFlashAttribute("errorMessage", String.join("; ", errors));
+            return "redirect:/owner/maintenance";
+        }
+        
+        // Show warnings but allow creation
+        List<String> warnings = (List<String>) validation.get("warnings");
+        if (warnings != null && !warnings.isEmpty()) {
+            redirectAttributes.addFlashAttribute("warningMessage", String.join("; ", warnings));
+        }
+        
         try {
-            maintenanceService.addMaintenance(maintenanceDTO, null);
+            maintenanceService.addMaintenance(maintenanceDTO, user.getUserId());
             redirectAttributes.addFlashAttribute("successMessage", "Maintenance record added successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error adding maintenance record: " + e.getMessage());
@@ -649,8 +672,26 @@ public class OwnerController {
             return "redirect:/login";
         }
 
+        Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+
+        // Validate before creation
+        Map<String, Object> validation = maintenanceScheduleService.validateScheduleCreation(schedule, ownerId);
+        Boolean isValid = (Boolean) validation.get("valid");
+
+        if (!isValid) {
+            List<String> errors = (List<String>) validation.get("errors");
+            redirectAttributes.addFlashAttribute("errorMessage", String.join("; ", errors));
+            return "redirect:/owner/maintenance-schedules";
+        }
+
+        // Show warnings but allow creation
+        List<String> warnings = (List<String>) validation.get("warnings");
+        if (warnings != null && !warnings.isEmpty()) {
+            redirectAttributes.addFlashAttribute("warningMessage", String.join("; ", warnings));
+        }
+
         try {
-            schedule.setFleetOwnerId(user.getOwnerDetails().getFleetOwnerId());
+            schedule.setFleetOwnerId(ownerId);
             schedule.setCreatedAt(java.time.LocalDateTime.now());
             schedule.setUpdatedAt(java.time.LocalDateTime.now());
             maintenanceScheduleService.createSchedule(schedule);
@@ -658,7 +699,7 @@ public class OwnerController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating schedule: " + e.getMessage());
         }
-        return "redirect:/owner/maintenance";
+        return "redirect:/owner/maintenance-schedules";
     }
 
     @PostMapping("/maintenance-schedules/delete/{id}")

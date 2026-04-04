@@ -15,9 +15,12 @@ import com.najmi.fleetshare.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MaintenanceService {
@@ -36,6 +39,68 @@ public class MaintenanceService {
 
     @Autowired
     private UserRepository userRepository;
+
+    /**
+     * Validates maintenance creation inputs
+     * @return Map with keys: valid (boolean), errors (List), warnings (List)
+     */
+    public Map<String, Object> validateMaintenanceCreation(MaintenanceDTO dto, Long ownerId) {
+        Map<String, Object> result = new HashMap<>();
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+
+        // 1. Vehicle exists
+        if (dto.getVehicleId() == null) {
+            errors.add("Vehicle is required");
+        } else {
+            Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId()).orElse(null);
+            if (vehicle == null) {
+                errors.add("Vehicle not found");
+            } else {
+                // 2. Vehicle belongs to owner (security check)
+                if (!vehicle.getFleetOwnerId().equals(ownerId)) {
+                    errors.add("You do not own this vehicle");
+                } else {
+                    // 7. Check for duplicate (same vehicle + same scheduled date + PENDING/IN_PROGRESS)
+                    if (dto.getScheduledDate() != null) {
+                        List<VehicleMaintenance> existing = maintenanceRepository.findByVehicleId(dto.getVehicleId());
+                        boolean hasDuplicate = existing.stream()
+                            .filter(m -> m.getScheduledDate() != null)
+                            .filter(m -> m.getScheduledDate().equals(dto.getScheduledDate()))
+                            .anyMatch(m -> m.getCurrentStatus() == VehicleMaintenance.MaintenanceStatus.PENDING 
+                                        || m.getCurrentStatus() == VehicleMaintenance.MaintenanceStatus.IN_PROGRESS);
+                        if (hasDuplicate) {
+                            warnings.add("A maintenance record already exists for this vehicle on the selected date");
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Description required
+        if (dto.getDescription() == null || dto.getDescription().trim().isEmpty()) {
+            errors.add("Description is required");
+        } else if (dto.getDescription().length() > 1000) {
+            // 4. Description too long - truncate
+            dto.setDescription(dto.getDescription().substring(0, 1000));
+            warnings.add("Description was truncated to 1000 characters");
+        }
+
+        // 5. Estimated cost must be non-negative
+        if (dto.getEstimatedCost() != null && dto.getEstimatedCost().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            errors.add("Estimated cost cannot be negative");
+        }
+
+        // 6. Past scheduled date - warning only
+        if (dto.getScheduledDate() != null && dto.getScheduledDate().isBefore(LocalDate.now())) {
+            warnings.add("Scheduled date is in the past");
+        }
+
+        result.put("valid", errors.isEmpty());
+        result.put("errors", errors);
+        result.put("warnings", warnings);
+        return result;
+    }
 
     /**
      * Fetches all maintenance records with vehicle and owner information

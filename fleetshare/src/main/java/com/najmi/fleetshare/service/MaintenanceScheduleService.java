@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Service
@@ -23,6 +25,73 @@ public class MaintenanceScheduleService {
 
     @Autowired
     private VehicleRepository vehicleRepository;
+
+    /**
+     * Validates schedule creation inputs
+     * @return Map with keys: valid (boolean), errors (List), warnings (List)
+     */
+    public Map<String, Object> validateScheduleCreation(MaintenanceSchedule schedule, Long ownerId) {
+        Map<String, Object> result = new HashMap<>();
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+
+        // 1. Vehicle exists and belongs to owner
+        if (schedule.getVehicleId() == null) {
+            errors.add("Vehicle is required");
+        } else {
+            Vehicle vehicle = vehicleRepository.findById(schedule.getVehicleId()).orElse(null);
+            if (vehicle == null) {
+                errors.add("Vehicle not found");
+            } else if (!vehicle.getFleetOwnerId().equals(ownerId)) {
+                errors.add("You do not own this vehicle");
+            } else {
+                // 5. Check duplicate (same vehicle + maintenance type + is_active)
+                List<MaintenanceSchedule> existing = scheduleRepository.findByVehicleId(schedule.getVehicleId());
+                boolean hasDuplicate = existing.stream()
+                    .filter(s -> s.getIsActive() != null && s.getIsActive())
+                    .filter(s -> s.getMaintenanceType() != null && s.getMaintenanceType().equals(schedule.getMaintenanceType()))
+                    .anyMatch(s -> true);
+                if (hasDuplicate) {
+                    warnings.add("An active schedule already exists for this maintenance type on this vehicle");
+                }
+
+                // 6. Mileage-based: next due mileage > current mileage
+                if (schedule.getFrequencyType() == MaintenanceSchedule.FrequencyType.MILEAGE_BASED) {
+                    Integer nextMileage = schedule.getNextDueMileage();
+                    Integer currentMileage = vehicle.getMileage();
+                    if (nextMileage != null && currentMileage != null && nextMileage <= currentMileage) {
+                        warnings.add("Next due mileage should be greater than current vehicle mileage");
+                    }
+                }
+            }
+        }
+
+        // 2. Maintenance type required
+        if (schedule.getMaintenanceType() == null || schedule.getMaintenanceType().trim().isEmpty()) {
+            errors.add("Maintenance type is required");
+        }
+
+        // 3. Frequency type and value valid
+        if (schedule.getFrequencyType() == null) {
+            errors.add("Frequency type is required");
+        } else if (schedule.getFrequencyType() != MaintenanceSchedule.FrequencyType.MILEAGE_BASED) {
+            if (schedule.getFrequencyValue() == null || schedule.getFrequencyValue() <= 0) {
+                errors.add("Frequency value must be positive");
+            }
+        }
+
+        // 4. Past next due date - warning only (for date-based)
+        if (schedule.getFrequencyType() != MaintenanceSchedule.FrequencyType.MILEAGE_BASED) {
+            if (schedule.getNextDueDate() != null && schedule.getNextDueDate().isBefore(LocalDate.now())) {
+                warnings.add("Next due date is in the past");
+            }
+        }
+
+        result.put("valid", errors.isEmpty());
+        result.put("errors", errors);
+        result.put("warnings", warnings);
+        return result;
+    }
 
     public List<MaintenanceSchedule> getAllSchedules(Long ownerId) {
         try {
