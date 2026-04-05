@@ -372,11 +372,11 @@
 
             <!-- Filter Tabs -->
             <div class="filter-tabs" role="tablist" aria-label="Booking Status Filters" th:if="${!#lists.isEmpty(bookings)}">
-                <button class="filter-tab active" role="tab" aria-selected="true" data-filter="all" onclick="filterBookings('all', this)">
-                    All
-                </button>
                 <button class="filter-tab" role="tab" aria-selected="false" data-filter="upcoming" onclick="filterBookings('upcoming', this)">
                     Upcoming
+                </button>
+                <button class="filter-tab active" role="tab" aria-selected="true" data-filter="all" onclick="filterBookings('all', this)">
+                    All
                 </button>
                 <button class="filter-tab" role="tab" aria-selected="false" data-filter="active" onclick="filterBookings('active', this)">
                     Active
@@ -541,7 +541,7 @@
     <th:block layout:fragment="extra-js">
         <script>
             // State management
-            let currentFilter = 'all';
+            let currentFilter = 'upcoming';
             let currentSearch = '';
 
             function filterBookings(filterType, tabElement) {
@@ -659,8 +659,10 @@
                         currentSearch = '';
                         this.style.display = 'none';
                         searchInput.focus();
-                        applyFilters(); // Apply immediately when cleared
+                        applyFilters();
                     });
+
+                    applyFilters();
                 }
 
                 // Accessibility: Keyboard Navigation for Tabs

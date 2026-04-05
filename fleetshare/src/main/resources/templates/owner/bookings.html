@@ -151,7 +151,7 @@
         <!-- KPI Cards Row -->
         <div class="row mb-4">
             <div class="col-xl-2 col-md-4 col-6 mb-3 mb-xl-0">
-                <div class="kpi-card kpi-pending" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
+                <div class="kpi-card kpi-pending active" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
                     <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
                     <div class="kpi-label">Pending</div>
                     <i class="mdi mdi-clock-outline kpi-icon"></i>
@@ -229,6 +229,7 @@
                             <input type="text" class="form-control" id="booking-search"
                                 placeholder="Search renter, vehicle..." style="width: 250px;">
                             <select class="form-select" id="status-filter" style="width: 150px;">
+                                <option value="PENDING" selected>Pending</option>
                                 <option value="">All Status</option>
                                 <option value="PENDING">Pending</option>
                                 <option value="CONFIRMED">Confirmed</option>
@@ -391,7 +392,7 @@
         <script th:inline="javascript">
             // State
             let currentView = 'grid';
-            let currentStatusFilter = 'all';
+            let currentStatusFilter = 'PENDING';
 
             // Chart data from server
             const bookingStats = {
@@ -542,6 +543,7 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const savedView = localStorage.getItem('bookingViewPreference') || 'grid';
                 setView(savedView);
+                filterBookings();
             });
         </script>
     </th:block>
