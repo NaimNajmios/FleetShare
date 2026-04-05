@@ -108,12 +108,12 @@ public class MaintenanceService {
      * @return List of MaintenanceDTO objects
      */
     public List<MaintenanceDTO> getAllMaintenance() {
-        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findAll();
+        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByIsDeletedFalse();
         return mapToDTOs(maintenanceList);
     }
 
     public List<MaintenanceDTO> getMaintenanceByVehicleId(Long vehicleId) {
-        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByVehicleId(vehicleId);
+        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByVehicleIdAndIsDeletedFalse(vehicleId);
         return mapToDTOs(maintenanceList);
     }
 
@@ -145,6 +145,7 @@ public class MaintenanceService {
                         maintenance.getCurrentStatus() != null ? maintenance.getCurrentStatus().name() : "PENDING",
                         ownerBusinessName);
                 dto.setCreatedAt(maintenance.getCreatedAt());
+                dto.setMaintenanceType(maintenance.getMaintenanceType());
                 maintenanceDTOs.add(dto);
             }
         }
@@ -159,7 +160,7 @@ public class MaintenanceService {
      * @return List of MaintenanceDTO objects for owner's vehicles
      */
     public List<MaintenanceDTO> getMaintenanceByOwnerId(Long ownerId) {
-        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByFleetOwnerId(ownerId);
+        List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByFleetOwnerIdAndIsDeletedFalse(ownerId);
         return mapToDTOs(maintenanceList);
     }
 
@@ -239,6 +240,7 @@ public class MaintenanceService {
         VehicleMaintenance maintenance = new VehicleMaintenance();
         maintenance.setVehicleId(dto.getVehicleId());
         maintenance.setDescription(dto.getDescription());
+        maintenance.setMaintenanceType(dto.getMaintenanceType());
         maintenance.setScheduledDate(dto.getScheduledDate());
         maintenance.setEstimatedCost(dto.getEstimatedCost());
         maintenance.setCreatedAt(LocalDateTime.now());
@@ -339,7 +341,7 @@ public class MaintenanceService {
      * Get maintenance statistics for all records (admin dashboard)
      */
     public com.najmi.fleetshare.dto.MaintenanceStatsDTO getMaintenanceStats() {
-        List<VehicleMaintenance> allMaintenance = maintenanceRepository.findAll();
+        List<VehicleMaintenance> allMaintenance = maintenanceRepository.findByIsDeletedFalse();
         return calculateStats(allMaintenance);
     }
 
@@ -347,7 +349,7 @@ public class MaintenanceService {
      * Get maintenance statistics for a specific fleet owner
      */
     public com.najmi.fleetshare.dto.MaintenanceStatsDTO getMaintenanceStatsByOwnerId(Long ownerId) {
-        List<VehicleMaintenance> ownerMaintenance = maintenanceRepository.findByFleetOwnerId(ownerId);
+        List<VehicleMaintenance> ownerMaintenance = maintenanceRepository.findByFleetOwnerIdAndIsDeletedFalse(ownerId);
         return calculateStats(ownerMaintenance);
     }
 
@@ -418,10 +420,14 @@ public class MaintenanceService {
     }
 
     /**
-     * Delete a maintenance record
+     * Soft delete a maintenance record (archive)
      */
     public void deleteMaintenance(Long maintenanceId) {
-        maintenanceRepository.deleteById(maintenanceId);
+        maintenanceRepository.findById(maintenanceId).ifPresent(maintenance -> {
+            maintenance.setIsDeleted(true);
+            maintenance.setDeletedAt(LocalDateTime.now());
+            maintenanceRepository.save(maintenance);
+        });
     }
 
     /**
@@ -431,6 +437,9 @@ public class MaintenanceService {
         maintenanceRepository.findById(dto.getMaintenanceId()).ifPresent(maintenance -> {
             if (dto.getDescription() != null) {
                 maintenance.setDescription(dto.getDescription());
+            }
+            if (dto.getMaintenanceType() != null) {
+                maintenance.setMaintenanceType(dto.getMaintenanceType());
             }
             if (dto.getScheduledDate() != null) {
                 maintenance.setScheduledDate(dto.getScheduledDate());

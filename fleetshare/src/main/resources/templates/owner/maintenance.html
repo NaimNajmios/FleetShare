@@ -52,17 +52,6 @@
             .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
             .table-view { display: block; }
             .chart-container { height: 280px; }
-            
-            .nav-tabs-custom .nav-link { border: none; color: var(--fs-text-secondary); padding: 12px 20px; }
-            .nav-tabs-custom .nav-link.active { background: transparent; color: var(--bs-primary); border-bottom: 3px solid var(--bs-primary); }
-            
-            .schedule-card { border-radius: var(--fs-border-radius); transition: var(--fs-transition-smooth); }
-            .schedule-card:hover { transform: translateY(-3px); box-shadow: var(--fs-shadow-card-hover); }
-            .due-badge { background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
-            .active-badge { background: #38ef7d; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
-            
-            .section-card { display: none; }
-            .section-card.active { display: block; }
 
             .filter-input { width: 200px; }
             .filter-select { width: 180px; }
@@ -90,6 +79,7 @@
 
 <body>
     <div layout:fragment="content">
+        <!-- Header -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -98,9 +88,6 @@
                         <p class="text-muted mb-0">Track, manage, and analyze your vehicle maintenance</p>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-                            <i class="mdi mdi-calendar-plus me-1"></i> Add Schedule
-                        </button>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
                             <i class="mdi mdi-plus me-1"></i> Add Maintenance
                         </button>
@@ -109,268 +96,188 @@
             </div>
         </div>
 
-        <ul class="nav nav-tabs-custom nav-fill mb-4" role="tablist">
-            <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#records-section" type="button">
-                    <i class="mdi mdi-wrench me-1"></i> Records
-                </button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#schedules-section" type="button">
-                    <i class="mdi mdi-calendar-clock me-1"></i> Schedules
-                </button>
-            </li>
-        </ul>
-
-        <div class="tab-content">
-            <!-- Records Section -->
-            <div class="tab-pane fade show active" id="records-section">
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="kpi-card kpi-pending active" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
-                            <div class="kpi-value" th:text="${stats?.pendingCount ?: 0}">0</div>
-                            <div class="kpi-label">Pending</div>
-                            <i class="mdi mdi-clock-outline kpi-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="kpi-card kpi-progress" data-filter="IN_PROGRESS" onclick="filterByStatus('IN_PROGRESS', this)">
-                            <div class="kpi-value" th:text="${stats?.inProgressCount ?: 0}">0</div>
-                            <div class="kpi-label">In Progress</div>
-                            <i class="mdi mdi-wrench kpi-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="kpi-card kpi-completed" data-filter="COMPLETED" onclick="filterByStatus('COMPLETED', this)">
-                            <div class="kpi-value" th:text="${stats?.completedCount ?: 0}">0</div>
-                            <div class="kpi-label">Completed</div>
-                            <i class="mdi mdi-check-circle kpi-icon"></i>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="kpi-card kpi-cost" data-filter="all" onclick="filterByStatus('all', this)">
-                            <div class="kpi-value" th:text="'RM ' + ${#numbers.formatDecimal(stats?.totalFinalCost ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0</div>
-                            <div class="kpi-label">Total Cost</div>
-                            <i class="mdi mdi-currency-usd kpi-icon"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-5 mb-4 mb-md-0">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Status Distribution</h5>
-                                <div class="chart-container"><canvas id="statusChart"></canvas></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-7">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">Monthly Maintenance Cost</h5>
-                                <div class="chart-container"><canvas id="costChart"></canvas></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body py-3">
-                                <div class="d-flex flex-wrap gap-2 align-items-center">
-                                    <input type="text" class="form-control filter-input" id="maintenance-search" placeholder="Search...">
-                                    <select class="form-select filter-select" id="vehicle-filter">
-                                        <option value="">All Vehicles</option>
-                                        <option th:each="v : ${vehicles}" th:value="${v.vehicleId}" th:text="${v.brand + ' ' + v.model}"></option>
-                                    </select>
-                                    <select class="form-select filter-select" id="status-filter">
-                                        <option value="PENDING" selected>Pending</option>
-                                        <option value="">All Status</option>
-                                        <option value="PENDING">Pending</option>
-                                        <option value="IN_PROGRESS">In Progress</option>
-                                        <option value="COMPLETED">Completed</option>
-                                        <option value="CANCELLED">Cancelled</option>
-                                    </select>
-                                    <input type="date" class="form-control filter-date" id="date-from" title="From Date">
-                                    <input type="date" class="form-control filter-date" id="date-to" title="To Date">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="clearFilters()" title="Clear Filters">
-                                        <i class="mdi mdi-filter-remove"></i>
-                                    </button>
-                                    <div class="ms-auto btn-group" role="group">
-                                        <button type="button" class="btn btn-outline-primary active" id="btn-grid-view" onclick="setView('grid')">
-                                            <i class="mdi mdi-view-grid"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-primary" id="btn-table-view" onclick="setView('table')">
-                                            <i class="mdi mdi-table"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12">
-                        <div th:if="${#lists.isEmpty(maintenanceRecords)}" class="card">
-                            <div class="card-body text-center py-5">
-                                <div class="empty-state-wrapper">
-                                    <i class="mdi mdi-wrench mdi-48px text-muted mb-3 empty-state-icon"></i>
-                                    <h4>No Maintenance Records</h4>
-                                    <p class="text-muted">Create your first maintenance record to get started.</p>
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
-                                        <i class="mdi mdi-plus me-1"></i> Add Maintenance
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="grid-view-container" class="grid-view" th:unless="${#lists.isEmpty(maintenanceRecords)}">
-                            <div th:each="record : ${maintenanceRecords}" class="maintenance-card card maintenance-item"
-                                th:data-status="${record.status}"
-                                th:data-vehicle-id="${record.vehicleId}"
-                                th:data-scheduled-date="${record.scheduledDate}"
-                                th:data-search="${record.maintenanceId + ' ' + record.vehicleBrand + ' ' + record.vehicleModel + ' ' + record.description}">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h5 class="mb-0 vehicle-name" th:text="${record.vehicleBrand + ' ' + record.vehicleModel}">Vehicle</h5>
-                                            <span class="vehicle-plate" th:text="${record.vehicleRegistrationNo}">Plate</span>
-                                        </div>
-                                        <span th:if="${record.status == 'PENDING'}" class="badge" style="background: #f59e0b; color: white;">Pending</span>
-                                        <span th:if="${record.status == 'IN_PROGRESS'}" class="badge" style="background: #3b82f6; color: white;">In Progress</span>
-                                        <span th:if="${record.status == 'COMPLETED'}" class="badge bg-success">Completed</span>
-                                        <span th:if="${record.status == 'CANCELLED'}" class="badge bg-secondary">Cancelled</span>
-                                    </div>
-                                        <p class="small text-muted mb-2" th:text="${#strings.abbreviate(record.description, 60)}">Description</p>
-                                    <div class="d-flex justify-content-between">
-                                        <small th:text="${record.scheduledDate != null ? #temporals.format(record.scheduledDate, 'MMM dd, yyyy') : 'N/A'}">Date</small>
-                                        <strong class="cost-value" th:text="${record.finalCost != null ? 'RM ' + #numbers.formatDecimal(record.finalCost, 1, 'COMMA', 0, 'POINT') : (record.estimatedCost != null ? 'RM ' + #numbers.formatDecimal(record.estimatedCost, 1, 'COMMA', 0, 'POINT') : '-')}">Cost</strong>
-                                    </div>
-                                    <div class="d-flex gap-1 mt-2">
-                                        <a th:href="@{/owner/maintenance/view/{id}(id=${record.maintenanceId})}" class="btn btn-sm btn-primary flex-grow-1">View</a>
-                                        <button th:if="${record.status != 'COMPLETED' && record.status != 'CANCELLED'}" 
-                                            class="btn btn-sm btn-outline-danger" 
-                                            th:onclick="|confirmDelete('${record.maintenanceId}')|">
-                                            <i class="mdi mdi-delete"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="table-view-container" class="table-view" style="display: none;" th:unless="${#lists.isEmpty(maintenanceRecords)}">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Vehicle</th>
-                                                    <th>Description</th>
-                                                    <th>Scheduled</th>
-                                                    <th>Cost</th>
-                                                    <th>Status</th>
-                                                    <th></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="record : ${maintenanceRecords}" class="maintenance-item"
-                                                    th:data-status="${record.status}"
-                                                    th:data-vehicle-id="${record.vehicleId}"
-                                                    th:data-scheduled-date="${record.scheduledDate}">
-                                                    <td th:text="'#' + ${record.maintenanceId}">#1</td>
-                                                    <td th:text="${record.vehicleBrand + ' ' + record.vehicleModel}">Vehicle</td>
-                                                    <td th:text="${#strings.abbreviate(record.description, 30)}">Desc</td>
-                                                    <td th:text="${record.scheduledDate != null ? #temporals.format(record.scheduledDate, 'yyyy-MM-dd') : 'N/A'}">Date</td>
-                                                    <td th:text="${record.finalCost != null ? 'RM ' + #numbers.formatDecimal(record.finalCost, 1, 'COMMA', 0, 'POINT') : '-'}">Cost</td>
-                                                    <td>
-                                                        <span th:if="${record.status == 'PENDING'}" class="badge" style="background: #f59e0b; color: white;">Pending</span>
-                                                        <span th:if="${record.status == 'IN_PROGRESS'}" class="badge" style="background: #3b82f6; color: white;">In Progress</span>
-                                                        <span th:if="${record.status == 'COMPLETED'}" class="badge bg-success">Completed</span>
-                                                        <span th:if="${record.status == 'CANCELLED'}" class="badge bg-secondary">Cancelled</span>
-                                                    </td>
-                                                    <td><a th:href="@{/owner/maintenance/view/{id}(id=${record.maintenanceId})}" class="btn btn-sm btn-outline-primary"><i class="mdi mdi-eye"></i></a></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- KPI Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="kpi-card kpi-pending active" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
+                    <div class="kpi-value" th:text="${stats?.pendingCount ?: 0}">0</div>
+                    <div class="kpi-label">Pending</div>
+                    <i class="mdi mdi-clock-outline kpi-icon"></i>
                 </div>
             </div>
-
-            <!-- End of Records Section -->
-
-            <!-- Schedules Section -->
-            <div class="tab-pane fade" id="schedules-section">
-                <div class="row">
-                    <div th:if="${#lists.isEmpty(schedules)}" class="col-12">
-                        <div class="card">
-                            <div class="card-body text-center py-5">
-                                <div class="empty-state-wrapper">
-                                    <i class="mdi mdi-calendar-clock mdi-48px text-muted mb-3 empty-state-icon"></i>
-                                    <h4>No Maintenance Schedules</h4>
-                                    <p class="text-muted">Create recurring schedules to keep your vehicles in top condition.</p>
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-                                        <i class="mdi mdi-plus me-1"></i> Create Schedule
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div th:each="schedule : ${schedules}" class="col-md-6 col-xl-4 mb-4">
-                        <div class="card maintenance-card h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div>
-                                        <h5 class="mb-1 vehicle-name" th:text="${schedule.maintenanceType}">Oil Change</h5>
-                                        <th:block th:with="vehicle=${vehicleMap.get(schedule.vehicleId)}">
-                                            <span class="vehicle-plate" th:text="${vehicle?.brand + ' ' + vehicle?.model + ' (' + vehicle?.registrationNo + ')'}">Vehicle</span>
-                                        </th:block>
-                                    </div>
-                                    <div>
-                                        <span th:if="${schedule.isActive}" class="active-badge">Active</span>
-                                        <span th:unless="${schedule.isActive}" class="badge bg-secondary">Inactive</span>
-                                    </div>
-                                </div>
-
-                                <p class="small text-muted mb-2" th:text="${schedule.description}">Description</p>
-
-                                <div class="row mb-3">
-                                    <div class="col-6">
-                                        <small class="text-muted d-block">Frequency</small>
-                                        <span th:text="${schedule.frequencyValue + ' ' + schedule.frequencyType}">Every 3 Months</span>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="text-muted d-block">Next Due</small>
-                                        <span th:text="${schedule.nextDueDate != null ? #temporals.format(schedule.nextDueDate, 'MMM dd, yyyy') : 'N/A'}">Jan 01, 2025</span>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted small" th:if="${schedule.estimatedCost}">
-                                        Est: RM <span th:text="${#numbers.formatDecimal(schedule.estimatedCost, 1, 'COMMA', 0, 'POINT')}">150</span>
-                                    </span>
-                                    <form th:action="@{/owner/maintenance-schedules/delete/{id}(id=${schedule.scheduleId})}" method="post">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this schedule?')">
-                                            <i class="mdi mdi-delete"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="kpi-card kpi-progress" data-filter="IN_PROGRESS" onclick="filterByStatus('IN_PROGRESS', this)">
+                    <div class="kpi-value" th:text="${stats?.inProgressCount ?: 0}">0</div>
+                    <div class="kpi-label">In Progress</div>
+                    <i class="mdi mdi-wrench kpi-icon"></i>
                 </div>
             </div>
-            <!-- End of Schedules Section -->
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="kpi-card kpi-completed" data-filter="COMPLETED" onclick="filterByStatus('COMPLETED', this)">
+                    <div class="kpi-value" th:text="${stats?.completedCount ?: 0}">0</div>
+                    <div class="kpi-label">Completed</div>
+                    <i class="mdi mdi-check-circle kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="kpi-card kpi-cost" data-filter="all" onclick="filterByStatus('all', this)">
+                    <div class="kpi-value" th:text="'RM ' + ${#numbers.formatDecimal(stats?.totalFinalCost ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0</div>
+                    <div class="kpi-label">Total Cost</div>
+                    <i class="mdi mdi-currency-usd kpi-icon"></i>
+                </div>
+            </div>
         </div>
+
+        <!-- Charts -->
+        <div class="row mb-4">
+            <div class="col-md-5 mb-4 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Status Distribution</h5>
+                        <div class="chart-container"><canvas id="statusChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Monthly Maintenance Cost</h5>
+                        <div class="chart-container"><canvas id="costChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="text" class="form-control filter-input" id="maintenance-search" placeholder="Search...">
+                            <select class="form-select filter-select" id="vehicle-filter">
+                                <option value="">All Vehicles</option>
+                                <option th:each="v : ${vehicles}" th:value="${v.vehicleId}" th:text="${v.brand + ' ' + v.model}"></option>
+                            </select>
+                            <select class="form-select filter-select" id="status-filter">
+                                <option value="PENDING" selected>Pending</option>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                                <option value="">All Status</option>
+                            </select>
+                            <input type="date" class="form-control filter-date" id="date-from" title="From Date">
+                            <input type="date" class="form-control filter-date" id="date-to" title="To Date">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearFilters()" title="Clear Filters">
+                                <i class="mdi mdi-filter-remove"></i>
+                            </button>
+                            <div class="ms-auto btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active" id="btn-grid-view" onclick="setView('grid')">
+                                    <i class="mdi mdi-view-grid"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-table-view" onclick="setView('table')">
+                                    <i class="mdi mdi-table"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records -->
+        <div class="row">
+            <div class="col-12">
+                <div th:if="${#lists.isEmpty(maintenanceRecords)}" class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="empty-state-wrapper">
+                            <i class="mdi mdi-wrench mdi-48px text-muted mb-3 empty-state-icon"></i>
+                            <h4>No Maintenance Records</h4>
+                            <p class="text-muted">Create your first maintenance record to get started.</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
+                                <i class="mdi mdi-plus me-1"></i> Add Maintenance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="grid-view-container" class="grid-view" th:unless="${#lists.isEmpty(maintenanceRecords)}">
+                    <div th:each="record : ${maintenanceRecords}" class="maintenance-card card maintenance-item"
+                        th:data-status="${record.status}"
+                        th:data-vehicle-id="${record.vehicleId}"
+                        th:data-scheduled-date="${record.scheduledDate}"
+                        th:data-search="${record.maintenanceId + ' ' + record.vehicleBrand + ' ' + record.vehicleModel + ' ' + record.description}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="mb-0 vehicle-name" th:text="${record.vehicleBrand + ' ' + record.vehicleModel}">Vehicle</h5>
+                                    <span class="vehicle-plate" th:text="${record.vehicleRegistrationNo}">Plate</span>
+                                </div>
+                                <span th:if="${record.status == 'PENDING'}" class="badge" style="background: #f59e0b; color: white;">Pending</span>
+                                <span th:if="${record.status == 'IN_PROGRESS'}" class="badge" style="background: #3b82f6; color: white;">In Progress</span>
+                                <span th:if="${record.status == 'COMPLETED'}" class="badge bg-success">Completed</span>
+                                <span th:if="${record.status == 'CANCELLED'}" class="badge bg-secondary">Cancelled</span>
+                            </div>
+                            <p class="small text-muted mb-2" th:text="${#strings.abbreviate(record.description, 60)}">Description</p>
+                            <div class="d-flex justify-content-between">
+                                <small th:text="${record.scheduledDate != null ? #temporals.format(record.scheduledDate, 'MMM dd, yyyy') : 'N/A'}">Date</small>
+                                <strong class="cost-value" th:text="${record.finalCost != null ? 'RM ' + #numbers.formatDecimal(record.finalCost, 1, 'COMMA', 0, 'POINT') : (record.estimatedCost != null ? 'RM ' + #numbers.formatDecimal(record.estimatedCost, 1, 'COMMA', 0, 'POINT') : '-')}">Cost</strong>
+                            </div>
+                            <div class="d-flex gap-1 mt-2">
+                                <a th:href="@{/owner/maintenance/view/{id}(id=${record.maintenanceId})}" class="btn btn-sm btn-primary flex-grow-1">View</a>
+                                <button th:if="${record.status != 'COMPLETED' && record.status != 'CANCELLED'}" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    th:onclick="|confirmDelete('${record.maintenanceId}')|">
+                                    <i class="mdi mdi-delete"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="table-view-container" class="table-view" style="display: none;" th:unless="${#lists.isEmpty(maintenanceRecords)}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Vehicle</th>
+                                            <th>Description</th>
+                                            <th>Scheduled</th>
+                                            <th>Cost</th>
+                                            <th>Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="record : ${maintenanceRecords}" class="maintenance-item"
+                                            th:data-status="${record.status}"
+                                            th:data-vehicle-id="${record.vehicleId}"
+                                            th:data-scheduled-date="${record.scheduledDate}">
+                                            <td th:text="'#' + ${record.maintenanceId}">#1</td>
+                                            <td th:text="${record.vehicleBrand + ' ' + record.vehicleModel}">Vehicle</td>
+                                            <td th:text="${#strings.abbreviate(record.description, 30)}">Desc</td>
+                                            <td th:text="${record.scheduledDate != null ? #temporals.format(record.scheduledDate, 'yyyy-MM-dd') : 'N/A'}">Date</td>
+                                            <td th:text="${record.finalCost != null ? 'RM ' + #numbers.formatDecimal(record.finalCost, 1, 'COMMA', 0, 'POINT') : '-'}">Cost</td>
+                                            <td>
+                                                <span th:if="${record.status == 'PENDING'}" class="badge" style="background: #f59e0b; color: white;">Pending</span>
+                                                <span th:if="${record.status == 'IN_PROGRESS'}" class="badge" style="background: #3b82f6; color: white;">In Progress</span>
+                                                <span th:if="${record.status == 'COMPLETED'}" class="badge bg-success">Completed</span>
+                                                <span th:if="${record.status == 'CANCELLED'}" class="badge bg-secondary">Cancelled</span>
+                                            </td>
+                                            <td><a th:href="@{/owner/maintenance/view/{id}(id=${record.maintenanceId})}" class="btn btn-sm btn-outline-primary"><i class="mdi mdi-eye"></i></a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Add Maintenance Modal -->
     <div class="modal fade" id="addMaintenanceModal" tabindex="-1" aria-hidden="true">
@@ -413,75 +320,6 @@
         </div>
     </div>
 
-    <!-- Add Schedule Modal -->
-    <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Maintenance Schedule</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form th:action="@{/owner/maintenance-schedules/add}" method="post">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Vehicle</label>
-                            <select class="form-select" name="vehicleId" required>
-                                <option value="">Select Vehicle</option>
-                                <option th:each="v : ${vehicles}" th:value="${v.vehicleId}" th:text="${v.brand + ' ' + v.model + ' (' + v.registrationNo + ')'}"></option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Maintenance Type</label>
-                            <input type="text" class="form-control" name="maintenanceType" placeholder="e.g., Oil Change" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" name="description" rows="2"></textarea>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Frequency Type</label>
-                                <select class="form-select" name="frequencyType">
-                                    <option value="MONTHLY">Monthly</option>
-                                    <option value="YEARLY">Yearly</option>
-                                    <option value="WEEKLY">Weekly</option>
-                                    <option value="MILEAGE_BASED">Mileage Based</option>
-                                </select>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Frequency Value</label>
-                                <input type="number" class="form-control" name="frequencyValue" value="3" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Next Due Date</label>
-                                <input type="date" class="form-control" name="nextDueDate" required>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label">Next Due Mileage</label>
-                                <input type="number" class="form-control" name="nextDueMileage">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Estimated Cost (RM)</label>
-                            <input type="number" step="0.01" class="form-control" name="estimatedCost">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-control" name="notes" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Schedule</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    </div>
-
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
             let currentView = 'grid';
@@ -492,8 +330,8 @@
                 inProgress: /*[[${stats?.inProgressCount ?: 0}]]*/ 0,
                 completed: /*[[${stats?.completedCount ?: 0}]]*/ 0,
                 cancelled: /*[[${stats?.cancelledCount ?: 0}]]*/ 0,
-                monthlyLabels: /*[[${stats?.monthlyCountData?.keySet() ?: {}}]]*/[],
-                monthlyCosts: /*[[${stats?.monthlyCostData?.values() ?: {}}]]*/[]
+                monthlyLabels: /*[[${stats?.monthlyCountData?.keySet() ?: {}}]]*/ [],
+                monthlyCosts: /*[[${stats?.monthlyCostData?.values() ?: {}}]]*/ []
             };
 
             // Status Chart
@@ -539,7 +377,7 @@
 
             function filterMaintenance() {
                 const searchTerm = document.getElementById('maintenance-search').value.toLowerCase();
-                const statusValue = document.getElementById('status-filter').value || (currentStatusFilter !== 'all' ? currentStatusFilter : '');
+                const statusValue = document.getElementById('status-filter').value;
                 const vehicleValue = document.getElementById('vehicle-filter').value;
                 const dateFrom = document.getElementById('date-from').value;
                 const dateTo = document.getElementById('date-to').value;
@@ -547,7 +385,7 @@
                 document.querySelectorAll('.maintenance-item').forEach(item => {
                     const searchText = (item.dataset.search || '').toLowerCase();
                     const itemStatus = item.dataset.status || '';
-                    const itemVehicleId = item.dataset.vehicleId || '';
+                    const itemVehicleId = String(item.dataset.vehicleId || '');
                     const itemDate = item.dataset.scheduledDate || '';
                     
                     const matchesSearch = !searchTerm || searchText.includes(searchTerm);
@@ -561,19 +399,17 @@
 
             function clearFilters() {
                 document.getElementById('maintenance-search').value = '';
-                document.getElementById('status-filter').value = '';
+                document.getElementById('status-filter').value = 'PENDING';
                 document.getElementById('vehicle-filter').value = '';
                 document.getElementById('date-from').value = '';
                 document.getElementById('date-to').value = '';
-                currentStatusFilter = 'all';
+                currentStatusFilter = 'PENDING';
                 filterMaintenance();
             }
 
+            // Event listeners
             document.getElementById('maintenance-search').addEventListener('input', filterMaintenance);
-            document.getElementById('status-filter').addEventListener('change', () => {
-                currentStatusFilter = document.getElementById('status-filter').value || 'all';
-                filterMaintenance();
-            });
+            document.getElementById('status-filter').addEventListener('change', filterMaintenance);
             document.getElementById('vehicle-filter').addEventListener('change', filterMaintenance);
             document.getElementById('date-from').addEventListener('change', filterMaintenance);
             document.getElementById('date-to').addEventListener('change', filterMaintenance);
@@ -581,7 +417,7 @@
             filterMaintenance();
 
             function confirmDelete(maintenanceId) {
-                if (confirm('Are you sure you want to delete this maintenance record?')) {
+                if (confirm('Are you sure you want to archive this maintenance record?')) {
                     fetch('/owner/maintenance/delete/' + maintenanceId, {
                         method: 'POST',
                         headers: {
@@ -592,7 +428,7 @@
                         if (response.ok) {
                             window.location.href = '/owner/maintenance';
                         } else {
-                            alert('Error deleting maintenance record');
+                            alert('Error archiving maintenance record');
                         }
                     })
                     .catch(error => {

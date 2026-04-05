@@ -2,10 +2,8 @@ package com.najmi.fleetshare.service;
 
 import com.najmi.fleetshare.entity.Vehicle;
 import com.najmi.fleetshare.entity.VehicleMaintenance;
-import com.najmi.fleetshare.entity.MaintenanceSchedule;
 import com.najmi.fleetshare.repository.VehicleMaintenanceRepository;
 import com.najmi.fleetshare.repository.VehicleRepository;
-import com.najmi.fleetshare.repository.MaintenanceScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +22,6 @@ public class PredictiveMaintenanceService {
 
     @Autowired
     private VehicleMaintenanceRepository maintenanceRepository;
-
-    @Autowired
-    private MaintenanceScheduleRepository scheduleRepository;
 
     public List<Map<String, Object>> getVehicleRiskScores(Long ownerId) {
         List<Vehicle> vehicles = vehicleRepository.findByFleetOwnerId(ownerId);
@@ -115,11 +110,6 @@ public class PredictiveMaintenanceService {
 
         if (vehicle.getMileage() != null && vehicle.getMileage() > 75000) {
             recommendations.add("Inspect transmission and engine components");
-        }
-
-        List<MaintenanceSchedule> schedules = scheduleRepository.findByVehicleId(vehicle.getVehicleId());
-        if (schedules.isEmpty()) {
-            recommendations.add("Set up recurring maintenance schedule");
         }
 
         if (vehicle.getManufacturingYear() != null) {

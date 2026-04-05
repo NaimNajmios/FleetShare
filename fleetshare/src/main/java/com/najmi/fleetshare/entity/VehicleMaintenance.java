@@ -23,6 +23,9 @@ public class VehicleMaintenance {
     @Column(name = "description", nullable = false, length = 1000)
     private String description;
 
+    @Column(name = "maintenance_type", length = 100)
+    private String maintenanceType;
+
     @Column(name = "scheduled_date")
     private LocalDate scheduledDate;
 
@@ -44,6 +47,12 @@ public class VehicleMaintenance {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     // Enum for status
     public enum MaintenanceStatus {
@@ -85,6 +94,14 @@ public class VehicleMaintenance {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getMaintenanceType() {
+        return maintenanceType;
+    }
+
+    public void setMaintenanceType(String maintenanceType) {
+        this.maintenanceType = maintenanceType;
     }
 
     public LocalDate getScheduledDate() {
@@ -141,5 +158,21 @@ public class VehicleMaintenance {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

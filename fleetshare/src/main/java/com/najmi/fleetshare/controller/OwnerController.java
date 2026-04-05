@@ -12,7 +12,6 @@ import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.dto.PasswordChangeRequest;
 import com.najmi.fleetshare.entity.FleetOwner;
-import com.najmi.fleetshare.entity.MaintenanceSchedule;
 import com.najmi.fleetshare.entity.Vehicle;
 import com.najmi.fleetshare.entity.VehicleMaintenance;
 import com.najmi.fleetshare.entity.VehiclePriceHistory;
@@ -96,9 +95,6 @@ public class OwnerController {
 
     @Autowired
     private com.najmi.fleetshare.service.ReportService reportService;
-
-    @Autowired
-    private com.najmi.fleetshare.service.MaintenanceScheduleService maintenanceScheduleService;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -504,10 +500,6 @@ public class OwnerController {
             List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
             model.addAttribute("vehicles", vehicles);
 
-            // Add schedules for the modal
-            List<MaintenanceSchedule> schedules = maintenanceScheduleService.getAllSchedules(ownerId);
-            model.addAttribute("schedules", schedules);
-
             // Add vehicle map for display
             Map<Long, Vehicle> vehicleMap = vehicles.stream()
                 .collect(java.util.stream.Collectors.toMap(VehicleDTO::getVehicleId, v -> {
@@ -623,7 +615,7 @@ public class OwnerController {
 
         try {
             maintenanceService.deleteMaintenance(maintenanceId);
-            redirectAttributes.addFlashAttribute("successMessage", "Maintenance record deleted successfully!");
+            redirectAttributes.addFlashAttribute("successMessage", "Maintenance record archived successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error deleting maintenance: " + e.getMessage());
         }
@@ -645,78 +637,6 @@ public class OwnerController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating maintenance: " + e.getMessage());
         }
         return "redirect:/owner/maintenance/view/" + maintenanceDTO.getMaintenanceId();
-    }
-
-    @GetMapping("/maintenance-schedules")
-    public String maintenanceSchedules(HttpSession session, Model model) {
-        SessionUser user = SessionHelper.getCurrentUser(session);
-        if (user == null || user.getOwnerDetails() == null) {
-            return "redirect:/login";
-        }
-
-        Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-        List<MaintenanceSchedule> schedules = maintenanceScheduleService.getAllSchedules(ownerId);
-        model.addAttribute("schedules", schedules);
-
-        List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
-        model.addAttribute("vehicles", vehicles);
-
-        return "owner/maintenance-schedules";
-    }
-
-    @PostMapping("/maintenance-schedules/add")
-    public String addMaintenanceSchedule(@org.springframework.web.bind.annotation.ModelAttribute MaintenanceSchedule schedule,
-            HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
-        SessionUser user = SessionHelper.getCurrentUser(session);
-        if (user == null || user.getOwnerDetails() == null) {
-            return "redirect:/login";
-        }
-
-        Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-
-        // Validate before creation
-        Map<String, Object> validation = maintenanceScheduleService.validateScheduleCreation(schedule, ownerId);
-        Boolean isValid = (Boolean) validation.get("valid");
-
-        if (!isValid) {
-            List<String> errors = (List<String>) validation.get("errors");
-            redirectAttributes.addFlashAttribute("errorMessage", String.join("; ", errors));
-            return "redirect:/owner/maintenance-schedules";
-        }
-
-        // Show warnings but allow creation
-        List<String> warnings = (List<String>) validation.get("warnings");
-        if (warnings != null && !warnings.isEmpty()) {
-            redirectAttributes.addFlashAttribute("warningMessage", String.join("; ", warnings));
-        }
-
-        try {
-            schedule.setFleetOwnerId(ownerId);
-            schedule.setCreatedAt(java.time.LocalDateTime.now());
-            schedule.setUpdatedAt(java.time.LocalDateTime.now());
-            maintenanceScheduleService.createSchedule(schedule);
-            redirectAttributes.addFlashAttribute("successMessage", "Schedule created successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error creating schedule: " + e.getMessage());
-        }
-        return "redirect:/owner/maintenance-schedules";
-    }
-
-    @PostMapping("/maintenance-schedules/delete/{id}")
-    public String deleteMaintenanceSchedule(@PathVariable Long id, HttpSession session,
-            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
-        SessionUser user = SessionHelper.getCurrentUser(session);
-        if (user == null || user.getOwnerDetails() == null) {
-            return "redirect:/login";
-        }
-
-        try {
-            maintenanceScheduleService.deleteSchedule(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Schedule deleted successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting schedule: " + e.getMessage());
-        }
-        return "redirect:/owner/maintenance";
     }
 
     @GetMapping("/maintenance/vehicle/{vehicleId}")
