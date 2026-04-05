@@ -16,6 +16,9 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AiAssistantService {
+
+    private static final Logger log = LoggerFactory.getLogger(AiAssistantService.class);
 
     @Autowired
     private BookingService bookingService;
@@ -71,6 +76,14 @@ public class AiAssistantService {
             .build();
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy");
+
+    @PostConstruct
+    public void init() {
+        String maskedKey = (groqApiKey != null && !groqApiKey.isEmpty()) 
+            ? groqApiKey.substring(0, Math.min(8, groqApiKey.length())) + "..." 
+            : "NOT LOADED";
+        log.info("GROQ_API_KEY status: {}", maskedKey);
+    }
 
     /**
      * Process a natural-language query against the fleet data.
