@@ -19,17 +19,43 @@
 </head>
 
 <body class="auth-page">
+    <div class="auth-bg-decoration">
+        <div class="auth-bg-circle auth-bg-circle-1"></div>
+        <div class="auth-bg-circle auth-bg-circle-2"></div>
+        <div class="auth-bg-circle auth-bg-circle-3"></div>
+    </div>
+    
+    <div class="auth-noise-overlay"></div>
+    
     <div class="auth-container">
         <div class="auth-card">
             <!-- Brand Logo -->
             <div class="auth-brand">
-                <div class="auth-brand-logo">&#128663; FleetShare</div>
+                <div class="auth-brand-logo">
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="44" height="44" rx="12" fill="url(#logoBgGradient)"/>
+                        <path d="M10 28V20C10 18.8954 10.8954 18 12 18H20L24 22H32C33.1046 22 34 22.8954 34 24V28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="16" cy="30" r="3" stroke="white" stroke-width="2.5"/>
+                        <circle cx="28" cy="30" r="3" stroke="white" stroke-width="2.5"/>
+                        <path d="M10 24H8C7.44772 24 7 24.4477 7 25V27C7 27.5523 7.44772 28 8 28H10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="logoBgGradient" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#2563eb"/>
+                                <stop offset="1" stop-color="#3b82f6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="brand-text">FleetShare</span>
+                </div>
             </div>
 
             <!-- Header -->
             <div class="auth-header">
-                <h1 class="auth-title">Welcome Back to FleetShare</h1>
-                <p class="auth-subtitle">Please sign in to continue to your account</p>
+                <h1 class="auth-title">Welcome Back</h1>
+                <p class="auth-subtitle">
+                    <i class="mdi mdi-lock-open-outline label-icon"></i>
+                    Sign in to access your fleet dashboard
+                </p>
             </div>
 
             <!-- Error Messages -->
@@ -37,55 +63,69 @@
                 <i class="mdi mdi-alert-circle" aria-hidden="true"></i>
                 <span>Invalid email or password. Please try again.</span>
             </div>
-            <div th:if="${param.logout}" class="form-helper text-success mb-4" role="status">
-                You have been logged out successfully.
+            <div th:if="${param.logout}" class="form-success mb-4" role="status">
+                <i class="mdi mdi-check-circle" aria-hidden="true"></i>
+                <span>You have been logged out successfully.</span>
             </div>
 
             <!-- Login Form -->
             <form class="auth-form" id="loginForm" th:action="@{/login}" method="post">
-                <!-- Email (Spring Security uses 'username' as default) -->
-                <div class="form-group">
-                    <label class="form-label" for="username">Email</label>
-                    <input type="text" class="form-input" id="username" name="username" placeholder="Enter your email"
+                <!-- Email -->
+                <div class="form-group animate-field" style="--delay: 0ms">
+                    <label class="form-label" for="username">
+                        <i class="mdi mdi-email-outline label-icon"></i>
+                        Email Address
+                    </label>
+                    <input type="text" class="form-input" id="username" name="username" placeholder="you@example.com"
                         required autocomplete="username">
                 </div>
 
                 <!-- Password -->
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
+                <div class="form-group animate-field" style="--delay: 80ms">
+                    <label class="form-label" for="password">
+                        <i class="mdi mdi-lock-outline label-icon"></i>
+                        Password
+                    </label>
                     <div class="input-wrapper">
                         <input type="password" class="form-input form-input-with-icon" id="password" name="password"
                             placeholder="Enter your password" required autocomplete="current-password">
                         <i class="mdi mdi-eye-off-outline input-icon-right" id="togglePassword" role="button"
                            aria-label="Show password" tabindex="0"></i>
                     </div>
+                </div>
+
+                <!-- Remember Me & Forgot Password Row -->
+                <div class="form-row-group animate-field" style="--delay: 160ms">
+                    <div class="form-toggle-wrapper">
+                        <input type="checkbox" class="form-toggle" id="remember-me" name="remember-me">
+                        <label class="form-toggle-label" for="remember-me">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">Keep me signed in</span>
+                        </label>
+                    </div>
                     <a href="#" class="auth-link forgot-password-link">Forgot Password?</a>
                 </div>
 
-                <!-- Keep me signed in -->
-                <div class="form-group">
-                    <div class="form-checkbox-wrapper">
-                        <input type="checkbox" class="form-checkbox" id="remember-me" name="remember-me">
-                        <label class="form-checkbox-label" for="remember-me">
-                            Keep me signed in
-                        </label>
-                    </div>
-                </div>
-
                 <!-- Login Button -->
-                <div class="form-group mb-0">
+                <div class="form-group mb-0 animate-field" style="--delay: 240ms">
                     <button type="submit" class="btn btn-primary" id="loginButton">
-                        <span class="btn-text">Login</span>
-                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span class="btn-text">
+                            <i class="mdi mdi-login"></i>
+                            Sign In
+                        </span>
+                        <span class="btn-loader d-none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Signing in...
+                        </span>
                     </button>
                 </div>
             </form>
 
             <!-- Footer -->
-            <div class="auth-footer">
+            <div class="auth-footer animate-field" style="--delay: 320ms">
                 <p class="auth-footer-text">
                     Don't have an account?
-                    <a href="/register" class="auth-link">Sign up</a>
+                    <a href="/register" class="auth-link auth-link-cta">Sign up</a>
                 </p>
             </div>
         </div>
@@ -93,25 +133,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Password Toggle
             const togglePassword = document.querySelector('#togglePassword');
             const password = document.querySelector('#password');
 
             if (togglePassword && password) {
                 togglePassword.addEventListener('click', function (e) {
-                    // toggle the type attribute
                     const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
                     password.setAttribute('type', type);
-
-                    // toggle the eye icon
                     this.classList.toggle('mdi-eye-outline');
                     this.classList.toggle('mdi-eye-off-outline');
-
-                    // update aria-label
                     this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
                 });
 
-                // Add keyboard support for accessibility
                 togglePassword.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -120,24 +153,18 @@
                 });
             }
 
-            // Form Loading State
             const loginForm = document.getElementById('loginForm');
             const loginButton = document.getElementById('loginButton');
 
             if (loginForm && loginButton) {
                 loginForm.addEventListener('submit', function() {
                     if (loginForm.checkValidity()) {
-                        loginButton.classList.add('btn-loading-inline');
+                        loginButton.classList.add('btn-loading');
                         loginButton.disabled = true;
-
-                        // Show spinner
-                        const spinner = loginButton.querySelector('.spinner-border');
-                        if (spinner) {
-                            spinner.classList.remove('d-none');
-                        }
-
-                        // Ensure button maintains width
-                        loginButton.style.width = loginButton.offsetWidth + 'px';
+                        const btnText = loginButton.querySelector('.btn-text');
+                        const btnLoader = loginButton.querySelector('.btn-loader');
+                        if (btnText) btnText.classList.add('d-none');
+                        if (btnLoader) btnLoader.classList.remove('d-none');
                     }
                 });
             }
