@@ -161,11 +161,13 @@ These elements are planned for upcoming modules to enhance functionality and rob
 ### ✅ Checklist
 
 - [x] **[R4] Maintenance Logging**
-    - [x] CRUD Endpoints for Maintenance.
+    - [x] CRUD Endpoints for Maintenance (`MaintenanceService`).
 - [x] **[R3] Auto-Availability Integration**
     - [x] Service Logic: When Maintenance is `ACTIVE`, set Vehicle `status` = `MAINTENANCE`.
-- [x] **Maintenance History**
+- [x] **Maintenance History & Scheduling**
     - [x] `List<MaintenanceDTO> getMaintenanceHistory(Long vehicleId)`.
+    - [x] Maintenance scheduling UI layout with dedicated owner and admin views.
+    - [x] Maintenance timeline interface (`view-maintenance.html`).
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -229,6 +231,22 @@ These elements are planned for upcoming modules to enhance functionality and rob
     * Annotate the entire `AdminController` with `@PreAuthorize("hasRole('PLATFORM_ADMIN')")`.
 * **Audit:**
     * Consider **Spring Data Envers** for easy historical auditing of entities if the custom log tables become too complex to manage manually.
+
+-----
+
+## 🎨 Frontend UI & Design System
+
+**Objective:** Provide a consistent, responsive, and robust user interface across all roles utilizing native HTML/CSS and Thymeleaf.
+
+### ✅ Checklist
+
+- [x] **Core Style Architecture**
+    - [x] Implemented `fleetshare-design-system.css` featuring centralized CSS variables and consistent UI components (cards, badges, modals, typography).
+- [x] **JavaScript Functionality**
+    - [x] Included `template.js` for handling sidebar navigation collapse/expansion, UI styling logic, and initial page component setup.
+- [x] **Layout & Templating**
+    - [x] Base layouts established: `admin-layout.html` and `owner-layout.html`.
+    - [x] Integration of reusable Thymeleaf fragments (sidebar, header, and generic modals).
 
 -----
 
@@ -346,14 +364,15 @@ src/test/java/
 - Store audit logs in a dedicated database table
 
 ### R24: Notification System
-- Implement email notifications for booking confirmations, status updates
-- Add in-app notifications for real-time updates
-- Support for SMS notifications (optional)
+- [x] Implement email sending service with HTML template support and asynchronous processing
+- [ ] Add in-app notifications for real-time updates
+- [ ] Support for SMS notifications (optional)
 
 ### R25: Reporting & Analytics
-- Generate utilization reports for fleet owners
-- Platform-wide analytics for administrators
-- Financial reporting and revenue tracking
+- [x] Generate utilization reports for fleet owners
+- [x] Platform-wide analytics for administrators
+- [x] FleetShare AI Data Assistant (Dynamic queries via Groq LLM API) for administrators and owners
+- [ ] Financial reporting and revenue tracking
 
 -----
 
