@@ -30,7 +30,7 @@
     <th:block layout:fragment="extra-css"></th:block>
 </head>
 
-<body>
+<body data-role="owner">
     <script>
         if (localStorage.getItem('sidebarState') === 'collapsed') {
             document.body.classList.add('sidebar-icon-only');
@@ -95,6 +95,7 @@
     <script th:src="@{/assets/js/template.js}"></script>
     <script th:src="@{/assets/js/settings.js}"></script>
     <script th:src="@{/assets/js/todolist.js}"></script>
+    <script th:src="@{/assets/js/search.js}"></script>
     <!-- endinject -->
     <!-- Custom js for this page-->
     <script th:src="@{/assets/js/jquery.cookie.js}" type="text/javascript"></script>

@@ -10,15 +10,31 @@
             <span class="icon-menu"></span>
         </button>
         <ul class="navbar-nav mr-lg-2">
-            <li class="nav-item nav-search d-none d-lg-block">
+            <li class="nav-item nav-search d-none d-lg-block position-relative">
                 <div class="input-group">
                     <div class="input-group-prepend hover-cursor" id="navbar-search-icon">
                         <span class="input-group-text" id="search">
                             <i class="icon-search"></i>
                         </span>
                     </div>
-                    <input type="text" class="form-control" id="navbar-search-input" placeholder="Search now"
+                    <input type="text" class="form-control" id="navbar-search-input" placeholder="Search vehicles, bookings..."
                         aria-label="search" aria-describedby="search">
+                </div>
+                <div class="search-results-dropdown" id="searchResultsDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto;">
+                    <div class="search-loading" id="searchLoading" style="display: none;">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span class="ms-2">Searching...</span>
+                        </div>
+                    </div>
+                    <div class="search-no-results" id="searchNoResults" style="display: none;">
+                        <div class="text-center py-3 text-muted">
+                            <p class="mb-0">No results found</p>
+                        </div>
+                    </div>
+                    <div class="search-results-list" id="searchResultsList"></div>
                 </div>
             </li>
         </ul>

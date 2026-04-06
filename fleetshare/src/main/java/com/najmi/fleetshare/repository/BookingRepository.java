@@ -41,4 +41,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     java.util.Optional<BookingDTO> findBookingDetailsById(@Param("bookingId") Long bookingId);
 
     List<Booking> findByVehicleId(Long vehicleId);
+
+    @Query("SELECT b FROM Booking b WHERE " +
+           "CAST(b.bookingId AS string) LIKE CONCAT('%', :term, '%')")
+    List<Booking> searchAll(@Param("term") String term);
+
+    @Query("SELECT b FROM Booking b WHERE b.fleetOwnerId = :ownerId AND " +
+           "CAST(b.bookingId AS string) LIKE CONCAT('%', :term, '%')")
+    List<Booking> searchByOwner(@Param("ownerId") Long ownerId, @Param("term") String term);
 }

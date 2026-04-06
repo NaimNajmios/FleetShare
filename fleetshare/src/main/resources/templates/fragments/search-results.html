@@ -1,0 +1,21 @@
+<div class="search-results-dropdown" id="searchResultsDropdown" style="display: none;">
+  <div class="search-results-content">
+    <div th:fragment="searchResults" id="searchResultsContent">
+      <div class="search-loading" id="searchLoading" style="display: none;">
+        <div class="text-center py-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <span class="ms-2">Searching...</span>
+        </div>
+      </div>
+      <div class="search-no-results" id="searchNoResults" style="display: none;">
+        <div class="text-center py-3 text-muted">
+          <i class="ti-search"></i>
+          <p class="mb-0">No results found</p>
+        </div>
+      </div>
+      <div class="search-results-list" id="searchResultsList"></div>
+    </div>
+  </div>
+</div>
