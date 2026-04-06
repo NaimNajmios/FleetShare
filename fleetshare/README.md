@@ -156,24 +156,30 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 ## 🔧 Module 4: Maintenance Management
 
-**Objective:** Track vehicle health and prevent bookings during maintenance.
+**Objective:** Track vehicle health, manage maintenance lifecycle, and prevent bookings during maintenance.
 
 ### ✅ Checklist
 
 - [x] **[R4] Maintenance Logging**
-    - [x] CRUD Endpoints for Maintenance (`MaintenanceService`).
+    - [x] Full CRUD via `MaintenanceService` (add, update, soft-delete, view by vehicle/owner).
+    - [x] Input validation with duplicate detection and business-rule warnings (`validateMaintenanceCreation`).
 - [x] **[R3] Auto-Availability Integration**
-    - [x] Service Logic: When Maintenance is `ACTIVE`, set Vehicle `status` = `MAINTENANCE`.
-- [x] **Maintenance History & Scheduling**
-    - [x] `List<MaintenanceDTO> getMaintenanceHistory(Long vehicleId)`.
-    - [x] Maintenance scheduling UI layout with dedicated owner and admin views.
-    - [x] Maintenance timeline interface (`view-maintenance.html`).
+    - [x] Service Logic: When Maintenance is `IN_PROGRESS`, set Vehicle `status` = `MAINTENANCE`.
+- [x] **Maintenance History & Status Tracking**
+    - [x] `VehicleMaintenanceLog` entity for full status audit trail (actor, timestamp, remarks).
+    - [x] Status lifecycle: `PENDING` → `IN_PROGRESS` → `COMPLETED` / `CANCELLED`.
+    - [x] Automatic timestamping: `actualStartTime` on `IN_PROGRESS`, `actualEndTime` on `COMPLETED`.
+- [x] **Maintenance Dashboard & Analytics**
+    - [x] Owner maintenance dashboard with KPI cards (total, pending, in-progress, completed).
+    - [x] `MaintenanceStatsDTO` providing monthly aggregation, cost summaries, and average cost per record.
+    - [x] Visualization charts for monthly maintenance count and cost trends.
+    - [x] Filtering and search within maintenance records.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
-* **Service Logic:**
-    * In `MaintenanceService.createMaintenance()`, perform the overlap check similar to Booking Creation.
-    * Use **Spring Events** (`ApplicationEventPublisher`) to decouple logic: Publish `MaintenanceCreatedEvent` -> Listener updates Vehicle Status.
+* **Entity:** `VehicleMaintenance` — unified entity with fields for scheduling, cost tracking (`estimatedCost`, `finalCost`), status enum, and soft-delete support (`isDeleted`, `deletedAt`).
+* **Repository:** `VehicleMaintenanceRepository` with queries: `findByIsDeletedFalse`, `findByFleetOwnerIdAndIsDeletedFalse`, `findByVehicleIdAndIsDeletedFalse`.
+* **Removed:** Legacy `MaintenanceSchedule` entity, `MaintenanceScheduleDTO`, `MaintenanceScheduleRepository`, `MaintenanceScheduleService`, `maintenance-calendar.html`, `maintenance-schedules.html` — consolidated into the unified `VehicleMaintenance` system.
 
 -----
 
@@ -242,11 +248,16 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 - [x] **Core Style Architecture**
     - [x] Implemented `fleetshare-design-system.css` featuring centralized CSS variables and consistent UI components (cards, badges, modals, typography).
+- [x] **Authentication Pages**
+    - [x] Redesigned login page (`login.html`) with responsive CSS (`auth.css`) and custom styling.
 - [x] **JavaScript Functionality**
     - [x] Included `template.js` for handling sidebar navigation collapse/expansion, UI styling logic, and initial page component setup.
 - [x] **Layout & Templating**
     - [x] Base layouts established: `admin-layout.html` and `owner-layout.html`.
     - [x] Integration of reusable Thymeleaf fragments (sidebar, header, and generic modals).
+- [x] **Booking & Maintenance Templates**
+    - [x] Improved booking management views for renter (`my-bookings.html`), owner (`bookings.html`), and admin (`bookings.html`).
+    - [x] Updated maintenance views for owner and admin dashboards.
 
 -----
 
@@ -265,6 +276,8 @@ These elements are planned for upcoming modules to enhance functionality and rob
 * `spring-boot-starter-data-jpa` (Database Access)
 * `spring-boot-starter-security` (Auth & RBAC)
 * `spring-boot-starter-validation` (Form Validation)
+* `spring-boot-starter-mail` (Email / SMTP)
+* `spring-dotenv` (Environment variable management via `.env`)
 * `mysql-connector-j` (Driver)
 * `lombok` (Optional, for reducing boilerplate code)
 
@@ -332,7 +345,14 @@ src/main/java/
 │   │   └── CustomAuthenticationSuccessHandler.java
 │   │
 │   ├── service/                        # Business Logic
-│   │   └── UserSessionService.java     # Session management service
+│   │   ├── UserSessionService.java     # Session management service
+│   │   ├── AiAssistantService.java     # Multi-provider LLM AI Data Assistant
+│   │   ├── MaintenanceService.java     # Maintenance CRUD, validation, stats
+│   │   ├── BookingService.java         # Booking lifecycle management
+│   │   ├── VehicleManagementService.java # Vehicle fleet operations
+│   │   ├── PaymentService.java         # Payment processing & history
+│   │   ├── EmailService.java           # Async email with HTML templates
+│   │   └── PredictiveMaintenanceService.java # Predictive analytics
 │   │
 │   └── util/                           # Utilities
 │       └── SessionHelper.java
@@ -371,7 +391,7 @@ src/test/java/
 ### R25: Reporting & Analytics
 - [x] Generate utilization reports for fleet owners
 - [x] Platform-wide analytics for administrators
-- [x] FleetShare AI Data Assistant (Dynamic queries via Groq LLM API) for administrators and owners
+- [x] FleetShare AI Data Assistant with multi-provider LLM support (Groq / Cerebras / OpenRouter) for administrators and owners
 - [ ] Financial reporting and revenue tracking
 
 -----
@@ -406,9 +426,9 @@ src/test/java/
   - `app.upload.profile-images` — User profile photos
   - `app.upload.payment-proofs` — Payment receipt uploads
   - `app.upload.qr-codes` — Owner payment QR code images
+- Configure AI assistant API keys in `.env` (`ai.assistant.groq.api-key`, `ai.assistant.cerebras.api-key`, `ai.assistant.openrouter.api-key`)
 - Configure CORS for frontend integration
 - Set up monitoring and health checks
-- Run `V_add_payment_fields.sql` migration if using `ddl-auto=none`
 
 -----
 
@@ -423,7 +443,8 @@ src/test/java/
 - `vehicle_price_history` - Historical pricing data
 - `bookings` - Reservation records
 - `booking_status_log` - Audit trail for booking status changes
-- `maintenance_logs` - Vehicle maintenance records
+- `vehiclemaintenance` - Vehicle maintenance records with status lifecycle & soft-delete
+- `vehicle_maintenance_log` - Audit trail for maintenance status changes
 - `invoices` - Billing information
 - `payments` - Payment transactions
 - `audit_logs` - System audit trail
@@ -434,6 +455,7 @@ src/test/java/
 - One-to-Many: Vehicle → Bookings
 - One-to-Many: Booking → BookingStatusLog
 - One-to-Many: Invoice → Payments
+- One-to-Many: VehicleMaintenance → VehicleMaintenanceLog
 
 -----
 
@@ -453,6 +475,10 @@ src/test/java/
 - `GET /api/owner/vehicles` - Manage vehicle fleet
 - `POST /api/owner/vehicles` - Add new vehicle
 - `GET /api/owner/bookings` - Booking requests
+- `GET /owner/maintenance` - Maintenance dashboard with KPI and charts
+- `POST /owner/maintenance` - Create maintenance record
+- `POST /owner/maintenance/{id}/status` - Update maintenance status
+- `GET /owner/ai-reports` - AI Data Assistant
 - `GET /api/owner/reports/utilization` - Utilization reports
 - `POST /owner/profile` - Update profile (includes bank info & ToyyibPay config)
 - `POST /owner/profile/qr` - Upload payment QR code image
