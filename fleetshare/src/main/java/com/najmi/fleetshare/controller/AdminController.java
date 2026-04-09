@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.math.BigDecimal;
@@ -40,6 +41,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -285,19 +288,30 @@ public class AdminController {
     }
 
     @PostMapping("/maintenance/update-status")
-    @ResponseBody
     public String updateMaintenanceStatus(
             @RequestParam Long maintenanceId,
             @RequestParam String status,
             @RequestParam(required = false) String remarks,
-            @RequestParam(required = false) java.math.BigDecimal finalCost) {
+            @RequestParam(required = false) java.math.BigDecimal finalCost,
+            RedirectAttributes redirectAttributes,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
         try {
             VehicleMaintenance.MaintenanceStatus newStatus = VehicleMaintenance.MaintenanceStatus.valueOf(status);
-            Long actorUserId = 1L; // Admin user ID (use session user in real implementation)
+            Long actorUserId = 1L;
             maintenanceService.updateMaintenanceStatus(maintenanceId, newStatus, actorUserId, remarks, finalCost);
-            return "{\"success\": true, \"message\": \"Status updated successfully\"}";
+            
+            if ("XMLHttpRequest".equals(requestedWith)) {
+                return "{\"success\": true, \"message\": \"Status updated successfully\"}";
+            }
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Maintenance status updated successfully!");
+            return "redirect:/admin/maintenance/view/" + maintenanceId;
         } catch (Exception e) {
-            return "{\"success\": false, \"message\": \"" + e.getMessage() + "\"}";
+            if ("XMLHttpRequest".equals(requestedWith)) {
+                return "{\"success\": false, \"message\": \"" + e.getMessage() + "\"}";
+            }
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating status: " + e.getMessage());
+            return "redirect:/admin/maintenance/view/" + maintenanceId;
         }
     }
 

@@ -188,6 +188,17 @@
                             style="font-size: 1rem; padding: 0.5rem 1rem;">Completed</span>
                         <span th:if="${maintenance.status == 'CANCELLED'}" class="badge badge-danger"
                             style="font-size: 1rem; padding: 0.5rem 1rem;">Cancelled</span>
+                        <div th:if="${maintenance.status != 'COMPLETED' && maintenance.status != 'CANCELLED'}" class="mt-3 d-flex gap-2 justify-content-xl-end">
+                            <button th:if="${maintenance.status == 'PENDING'}" type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#startWorkModal">
+                                <i class="mdi mdi-play me-1"></i> Start Work
+                            </button>
+                            <button th:if="${maintenance.status == 'IN_PROGRESS'}" type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#completeModal">
+                                <i class="mdi mdi-check me-1"></i> Complete
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                <i class="mdi mdi-close me-1"></i> Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -348,6 +359,105 @@
             </div>
         </div>
     </div>
+
+    <!-- Start Work Modal -->
+    <div class="modal fade" id="startWorkModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="mdi mdi-play-circle me-2"></i>Start Maintenance Work</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/maintenance/update-status}" method="POST">
+                    <input type="hidden" name="maintenanceId" th:value="${maintenance.maintenanceId}">
+                    <input type="hidden" name="status" value="IN_PROGRESS">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-body">
+                        <p>Start working on this maintenance?</p>
+                        <div class="mb-3">
+                            <label class="form-label">Remarks (optional)</label>
+                            <textarea name="remarks" class="form-control" rows="2" placeholder="Add any notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-info"><i class="mdi mdi-play"></i> Start Work</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complete Maintenance Modal -->
+    <div class="modal fade" id="completeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="mdi mdi-check-circle me-2"></i>Complete Maintenance</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/maintenance/update-status}" method="POST">
+                    <input type="hidden" name="maintenanceId" th:value="${maintenance.maintenanceId}">
+                    <input type="hidden" name="status" value="COMPLETED">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Final Cost (RM)</label>
+                            <input type="number" step="0.01" class="form-control" name="finalCost" 
+                                th:value="${maintenance.estimatedCost}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Completion Remarks</label>
+                            <textarea name="remarks" class="form-control" rows="3" 
+                                placeholder="Enter any completion notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success"><i class="mdi mdi-check"></i> Mark Complete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Maintenance Modal -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="mdi mdi-close-circle me-2"></i>Cancel Maintenance</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/maintenance/update-status}" method="POST">
+                    <input type="hidden" name="maintenanceId" th:value="${maintenance.maintenanceId}">
+                    <input type="hidden" name="status" value="CANCELLED">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <i class="mdi mdi-alert"></i> This action cannot be undone.
+                        </div>
+                        <p>Are you sure you want to cancel this maintenance record?</p>
+                        <div class="mb-3">
+                            <label class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
+                            <textarea name="remarks" class="form-control" rows="3" 
+                                placeholder="Reason for cancellation..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back</button>
+                        <button type="submit" class="btn btn-danger"><i class="mdi mdi-close-circle"></i> Cancel Maintenance</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            console.log('View maintenance page loaded');
+        </script>
+    </th:block>
 </body>
 
 </html>
