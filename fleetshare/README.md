@@ -230,6 +230,9 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Read-only view of `BookingStatusLog` and `PaymentStatusLog`.
 - [x] **[R21] Platform Reporting**
     - [x] **Service:** `AdminReportService` gathering counts via `long userCount = userRepository.count();`.
+- [x] **Global Platform Search**
+    - [x] Cross-entity search mechanism spanning vehicles, bookings, renters, and fleet owners.
+    - [x] Search controller exposing backend REST endpoints.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -252,9 +255,10 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Redesigned login page (`login.html`) with responsive CSS (`auth.css`) and custom styling.
 - [x] **JavaScript Functionality**
     - [x] Included `template.js` for handling sidebar navigation collapse/expansion, UI styling logic, and initial page component setup.
+    - [x] Built real-time unified search UI with `search.js` bridging REST API queries to frontend templates.
 - [x] **Layout & Templating**
     - [x] Base layouts established: `admin-layout.html` and `owner-layout.html`.
-    - [x] Integration of reusable Thymeleaf fragments (sidebar, header, and generic modals).
+    - [x] Integration of reusable Thymeleaf fragments (sidebar, header, reusable navigation bars, and generic modals).
 - [x] **Booking & Maintenance Templates**
     - [x] Improved booking management views for renter (`my-bookings.html`), owner (`bookings.html`), and admin (`bookings.html`).
     - [x] Updated maintenance views for owner and admin dashboards.
@@ -488,6 +492,7 @@ src/test/java/
 - `GET /api/admin/users` - User management
 - `GET /api/admin/reports/platform` - Platform analytics
 - `PATCH /api/admin/users/{id}/status` - User status management
+- `GET /api/search` - Global platform search endpoint
 
 -----
 

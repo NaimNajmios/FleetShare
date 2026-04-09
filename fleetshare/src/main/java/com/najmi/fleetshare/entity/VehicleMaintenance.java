@@ -54,6 +54,10 @@ public class VehicleMaintenance {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "previous_vehicle_status")
+    private Vehicle.VehicleStatus previousVehicleStatus;
+
     // Enum for status
     public enum MaintenanceStatus {
         PENDING, IN_PROGRESS, COMPLETED, CANCELLED
@@ -174,5 +178,13 @@ public class VehicleMaintenance {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public Vehicle.VehicleStatus getPreviousVehicleStatus() {
+        return previousVehicleStatus;
+    }
+
+    public void setPreviousVehicleStatus(Vehicle.VehicleStatus previousVehicleStatus) {
+        this.previousVehicleStatus = previousVehicleStatus;
     }
 }

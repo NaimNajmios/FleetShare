@@ -9,6 +9,7 @@ import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.dto.PasswordChangeRequest;
 import com.najmi.fleetshare.entity.PlatformAdmin;
+import com.najmi.fleetshare.entity.VehicleMaintenance;
 import com.najmi.fleetshare.repository.PlatformAdminRepository;
 import com.najmi.fleetshare.service.BookingService;
 import com.najmi.fleetshare.service.MaintenanceService;
@@ -281,6 +282,23 @@ public class AdminController {
         model.addAttribute("statusLogs", statusLogs);
 
         return "admin/view-maintenance";
+    }
+
+    @PostMapping("/maintenance/update-status")
+    @ResponseBody
+    public String updateMaintenanceStatus(
+            @RequestParam Long maintenanceId,
+            @RequestParam String status,
+            @RequestParam(required = false) String remarks,
+            @RequestParam(required = false) java.math.BigDecimal finalCost) {
+        try {
+            VehicleMaintenance.MaintenanceStatus newStatus = VehicleMaintenance.MaintenanceStatus.valueOf(status);
+            Long actorUserId = 1L; // Admin user ID (use session user in real implementation)
+            maintenanceService.updateMaintenanceStatus(maintenanceId, newStatus, actorUserId, remarks, finalCost);
+            return "{\"success\": true, \"message\": \"Status updated successfully\"}";
+        } catch (Exception e) {
+            return "{\"success\": false, \"message\": \"" + e.getMessage() + "\"}";
+        }
     }
 
     @GetMapping("/bookings")

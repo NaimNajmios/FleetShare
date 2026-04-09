@@ -276,7 +276,7 @@ public class MaintenanceService {
     }
 
     /**
-     * Update maintenance status and log the change
+     * Update maintenance status and log the change with vehicle status synchronization
      */
     public void updateMaintenanceStatus(Long maintenanceId, VehicleMaintenance.MaintenanceStatus newStatus,
             Long actorUserId, String remarks) {
@@ -292,6 +292,9 @@ public class MaintenanceService {
                 maintenance.setActualEndTime(LocalDateTime.now());
             }
 
+            // Sync vehicle status
+            syncVehicleStatus(maintenance, newStatus);
+
             maintenanceRepository.save(maintenance);
 
             // Log the status change
@@ -305,7 +308,7 @@ public class MaintenanceService {
     }
 
     /**
-     * Update maintenance status with final cost (for completion)
+     * Update maintenance status with final cost (for completion) with vehicle status synchronization
      */
     public void updateMaintenanceStatus(Long maintenanceId, VehicleMaintenance.MaintenanceStatus newStatus,
             Long actorUserId, String remarks, java.math.BigDecimal finalCost) {
@@ -325,6 +328,9 @@ public class MaintenanceService {
                 }
             }
 
+            // Sync vehicle status
+            syncVehicleStatus(maintenance, newStatus);
+
             maintenanceRepository.save(maintenance);
 
             // Log the status change
@@ -335,6 +341,35 @@ public class MaintenanceService {
                     remarks);
             maintenanceLogRepository.save(log);
         });
+    }
+
+    /**
+     * Synchronize vehicle status based on maintenance status
+     */
+    private void syncVehicleStatus(VehicleMaintenance maintenance, VehicleMaintenance.MaintenanceStatus newStatus) {
+        Vehicle vehicle = vehicleRepository.findById(maintenance.getVehicleId()).orElse(null);
+        if (vehicle == null) return;
+
+        switch (newStatus) {
+            case IN_PROGRESS:
+                // Save current vehicle status before changing to maintenance
+                maintenance.setPreviousVehicleStatus(vehicle.getStatus());
+                vehicle.setStatus(Vehicle.VehicleStatus.MAINTENANCE);
+                break;
+            case COMPLETED:
+            case CANCELLED:
+                // Restore vehicle to previous status (or AVAILABLE if no previous)
+                Vehicle.VehicleStatus previousStatus = maintenance.getPreviousVehicleStatus();
+                if (previousStatus != null) {
+                    vehicle.setStatus(previousStatus);
+                } else {
+                    vehicle.setStatus(Vehicle.VehicleStatus.AVAILABLE);
+                }
+                break;
+            default:
+                break;
+        }
+        vehicleRepository.save(vehicle);
     }
 
     /**
