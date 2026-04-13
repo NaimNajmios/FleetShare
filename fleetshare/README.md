@@ -170,10 +170,10 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Status lifecycle: `PENDING` → `IN_PROGRESS` → `COMPLETED` / `CANCELLED`.
     - [x] Automatic timestamping: `actualStartTime` on `IN_PROGRESS`, `actualEndTime` on `COMPLETED`.
 - [x] **Maintenance Dashboard & Analytics**
-    - [x] Owner maintenance dashboard with KPI cards (total, pending, in-progress, completed).
+    - [x] Owner maintenance dashboard with KPI cards, filtering, and charts.
+    - [x] Administrative oversight dashboard covering platform-wide maintenance (`/admin/maintenance`).
+    - [x] Detailed historical timeline tracking view for specific records (`view-maintenance.html`) for both Owners and Admins.
     - [x] `MaintenanceStatsDTO` providing monthly aggregation, cost summaries, and average cost per record.
-    - [x] Visualization charts for monthly maintenance count and cost trends.
-    - [x] Filtering and search within maintenance records.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -480,6 +480,7 @@ src/test/java/
 - `POST /api/owner/vehicles` - Add new vehicle
 - `GET /api/owner/bookings` - Booking requests
 - `GET /owner/maintenance` - Maintenance dashboard with KPI and charts
+- `GET /owner/maintenance/{id}` - Detailed maintenance tracking timeline
 - `POST /owner/maintenance` - Create maintenance record
 - `POST /owner/maintenance/{id}/status` - Update maintenance status
 - `GET /owner/ai-reports` - AI Data Assistant
@@ -490,6 +491,8 @@ src/test/java/
 
 ### Admin Endpoints:
 - `GET /api/admin/users` - User management
+- `GET /admin/maintenance` - Platform-wide maintenance oversight
+- `GET /admin/maintenance/{id}` - Detailed maintenance tracking view
 - `GET /api/admin/reports/platform` - Platform analytics
 - `PATCH /api/admin/users/{id}/status` - User status management
 - `GET /api/search` - Global platform search endpoint
