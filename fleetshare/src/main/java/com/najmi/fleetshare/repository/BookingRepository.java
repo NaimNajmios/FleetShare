@@ -2,11 +2,13 @@ package com.najmi.fleetshare.repository;
 
 import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.entity.Booking;
+import com.najmi.fleetshare.entity.BookingStatusLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -49,4 +51,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b WHERE b.fleetOwnerId = :ownerId AND " +
            "CAST(b.bookingId AS string) LIKE CONCAT('%', :term, '%')")
     List<Booking> searchByOwner(@Param("ownerId") Long ownerId, @Param("term") String term);
+
+    @Query("SELECT b FROM Booking b WHERE b.vehicleId = :vehicleId " +
+           "AND b.startDate < :endDate AND b.endDate > :startDate " +
+           "AND b.bookingId IN (SELECT bsl.bookingId FROM BookingStatusLog bsl " +
+           "  WHERE bsl.bookingId = b.bookingId AND bsl.statusValue IN :statuses " +
+           "  AND bsl.statusTimestamp = (SELECT MAX(b2.statusTimestamp) FROM BookingStatusLog b2 WHERE b2.bookingId = b.bookingId))")
+    List<Booking> findOverlappingBookingsWithActiveStatus(@Param("vehicleId") Long vehicleId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("statuses") List<BookingStatusLog.BookingStatus> statuses);
 }

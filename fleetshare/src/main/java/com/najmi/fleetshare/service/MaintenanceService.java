@@ -2,11 +2,14 @@ package com.najmi.fleetshare.service;
 
 import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.MaintenanceLogDTO;
+import com.najmi.fleetshare.entity.Booking;
+import com.najmi.fleetshare.entity.BookingStatusLog;
 import com.najmi.fleetshare.entity.User;
 import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.entity.Vehicle;
 import com.najmi.fleetshare.entity.VehicleMaintenance;
 import com.najmi.fleetshare.entity.VehicleMaintenanceLog;
+import com.najmi.fleetshare.repository.BookingRepository;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import com.najmi.fleetshare.repository.VehicleMaintenanceLogRepository;
 import com.najmi.fleetshare.repository.VehicleMaintenanceRepository;
@@ -40,6 +43,9 @@ public class MaintenanceService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BookingRepository bookingRepository;
+
     /**
      * Validates maintenance creation inputs
      * @return Map with keys: valid (boolean), errors (List), warnings (List)
@@ -71,6 +77,21 @@ public class MaintenanceService {
                                         || m.getCurrentStatus() == VehicleMaintenance.MaintenanceStatus.IN_PROGRESS);
                         if (hasDuplicate) {
                             warnings.add("A maintenance record already exists for this vehicle on the selected date");
+                        }
+
+                        // 8. Check for booking conflicts (entire day)
+                        List<BookingStatusLog.BookingStatus> activeStatuses = List.of(
+                            BookingStatusLog.BookingStatus.CONFIRMED,
+                            BookingStatusLog.BookingStatus.ACTIVE,
+                            BookingStatusLog.BookingStatus.PENDING
+                        );
+                        LocalDateTime dayStart = dto.getScheduledDate().atStartOfDay();
+                        LocalDateTime dayEnd = dto.getScheduledDate().plusDays(1).atStartOfDay();
+                        List<Booking> conflictingBookings = bookingRepository.findOverlappingBookingsWithActiveStatus(
+                            dto.getVehicleId(), dayStart, dayEnd, activeStatuses);
+                        if (!conflictingBookings.isEmpty()) {
+                            warnings.add("Warning: There are " + conflictingBookings.size() + 
+                                " booking(s) that overlap with this maintenance date. Please contact the renter(s) to reschedule if needed.");
                         }
                     }
                 }
