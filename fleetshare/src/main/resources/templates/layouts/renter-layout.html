@@ -9,6 +9,22 @@
     <title th:text="${pageTitle} + ' - FleetShare'">FleetShare</title>
     <!-- Font Awesome 6 for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom padding override -->
+    <style>
+        body[data-role="renter"] .content-wrapper {
+            padding: 1rem 0.5rem;
+        }
+        body[data-role="renter"] .navbar-brand-wrapper {
+            padding-left: 0.5rem;
+            width: 200px;
+        }
+        body[data-role="renter"] .navbar-brand-wrapper .navbar-brand {
+            font-size: 1.25rem;
+        }
+        body[data-role="renter"] .navbar-menu-wrapper {
+            padding-right: 0.5rem;
+        }
+    </style>
     <!-- plugins:css -->
     <link rel="stylesheet" th:href="@{/assets/vendors/feather/feather.css}">
     <link rel="stylesheet" th:href="@{/assets/vendors/ti-icons/css/themify-icons.css}">
