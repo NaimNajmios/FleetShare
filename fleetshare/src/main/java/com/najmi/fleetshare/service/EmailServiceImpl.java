@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -74,6 +75,31 @@ public class EmailServiceImpl implements EmailService {
             logger.info("Successfully sent simple email to: {}", to);
         } catch (Exception e) {
             logger.error("Failed to send simple email to: " + to, e);
+        }
+    }
+
+    @Override
+    @Async
+    public void sendHtmlEmailWithAttachment(String to, String subject, String templateName, Map<String, Object> templateModel, String attachmentFilename, byte[] attachmentData, String contentType) {
+        try {
+            Context thymeleafContext = new Context();
+            thymeleafContext.setVariables(templateModel);
+            String htmlBody = templateEngine.process(templateName, thymeleafContext);
+
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
+            
+            // Add attachment
+            helper.addAttachment(attachmentFilename, new ByteArrayResource(attachmentData), contentType);
+
+            javaMailSender.send(message);
+            logger.info("HTML Email with attachment sent to " + to);
+        } catch (MessagingException e) {
+            logger.error("Failed to send HTML email with attachment to: " + to, e);
         }
     }
 }

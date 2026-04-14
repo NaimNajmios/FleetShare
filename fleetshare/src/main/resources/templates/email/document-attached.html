@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Document Attached</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px;">
+    <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <!-- Header -->
+        <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px;">
+            <h2 style="color: #4B49AC; margin: 0;">FleetShare</h2>
+            <p style="color: #6c757d; font-size: 14px; margin-top: 5px;" th:text="${headerText}">Your Document</p>
+        </div>
+
+        <!-- Body Content -->
+        <p style="font-size: 16px; line-height: 1.5;" th:text="'Hello ' + ${renterName} + ','">Hello User,</p>
+        <p style="font-size: 16px; line-height: 1.5;" th:text="${messageBody}">Please find your required document attached below.</p>
+        
+        <div style="background-color: #e8eaff; padding: 15px; border-radius: 6px; margin: 20px 0;">
+            <span style="font-weight: 600; color: #4B49AC;">Attached Document:</span> 
+            <span th:text="${documentName}">Document.pdf</span>
+        </div>
+        
+        <!-- Footer -->
+        <p style="font-size: 14px; color: #6c757d; margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+            Thank you for using FleetShare!<br><br>
+            If you have any questions, please reply to this email or contact the fleet owner directly.<br>
+            FleetShare &copy; <span th:text="${#dates.year(#dates.createNow())}">2025</span>
+        </p>
+    </div>
+</body>
+</html>

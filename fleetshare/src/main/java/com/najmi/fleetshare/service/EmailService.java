@@ -19,6 +19,11 @@ public interface EmailService {
     void sendHtmlEmail(String to, String subject, String templateName, Map<String, Object> templateModel);
 
     /**
+     * Sends an HTML formatted email with an attachment.
+     */
+    void sendHtmlEmailWithAttachment(String to, String subject, String templateName, Map<String, Object> templateModel, String attachmentFilename, byte[] attachmentData, String contentType);
+
+    /**
      * Sends a simple text email.
      * 
      * @param to      The recipient's email address

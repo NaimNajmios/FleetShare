@@ -1503,6 +1503,122 @@ public class OwnerController {
         }
     }
 
+    @Autowired
+    private com.najmi.fleetshare.service.EmailService emailService;
+
+    /**
+     * Email invoice PDF to the renter
+     */
+    @PostMapping("/bookings/{id}/invoice/email")
+    public String emailInvoice(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            com.najmi.fleetshare.entity.Invoice invoice = invoiceService.getInvoiceByBookingId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
+            
+            // Verify ownership
+            if (!invoice.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Unauthorized access.");
+                return "redirect:/owner/bookings/view/" + id;
+            }
+            
+            BookingDTO booking = bookingService.getBookingDetails(id);
+
+            if (booking.getRenterEmail() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Renter email not found.");
+                return "redirect:/owner/bookings/view/" + id;
+            }
+
+            byte[] pdf = invoiceService.generateInvoicePdf(invoice.getInvoiceId());
+
+            java.util.Map<String, Object> emailModel = new java.util.HashMap<>();
+            emailModel.put("headerText", "Your Invoice");
+            emailModel.put("renterName", booking.getRenterName());
+            emailModel.put("messageBody", "Please find the invoice for your booking (" + booking.getVehicleRegistrationNo() + ") attached below.");
+            emailModel.put("documentName", "Invoice-" + invoice.getInvoiceNumber() + ".pdf");
+
+            emailService.sendHtmlEmailWithAttachment(
+                    booking.getRenterEmail(),
+                    "Invoice for Booking #" + invoice.getInvoiceNumber(),
+                    "email/document-attached",
+                    emailModel,
+                    "invoice-" + invoice.getInvoiceNumber() + ".pdf",
+                    pdf,
+                    "application/pdf"
+            );
+
+            redirectAttributes.addFlashAttribute("successMessage", "Invoice emailed successfully to renter.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to email invoice: " + e.getMessage());
+        }
+        
+        return "redirect:/owner/bookings/view/" + id;
+    }
+
+    /**
+     * Email receipt PDF to the renter
+     */
+    @PostMapping("/bookings/{id}/receipt/email")
+    public String emailReceipt(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            com.najmi.fleetshare.entity.Invoice invoice = invoiceService.getInvoiceByBookingId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
+                    
+            // Verify ownership
+            if (!invoice.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Unauthorized access.");
+                return "redirect:/owner/bookings/view/" + id;
+            }
+                    
+            com.najmi.fleetshare.entity.Payment payment = receiptService.getPaymentByInvoiceId(invoice.getInvoiceId())
+                    .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+            BookingDTO booking = bookingService.getBookingDetails(id);
+
+            if (!receiptService.canGenerateReceipt(payment.getPaymentId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Receipt cannot be generated yet.");
+                return "redirect:/owner/bookings/view/" + id;
+            }
+
+            if (booking.getRenterEmail() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Renter email not found.");
+                return "redirect:/owner/bookings/view/" + id;
+            }
+
+            byte[] pdf = receiptService.generateReceiptPdf(payment.getPaymentId());
+
+            java.util.Map<String, Object> emailModel = new java.util.HashMap<>();
+            emailModel.put("headerText", "Your Receipt");
+            emailModel.put("renterName", booking.getRenterName());
+            emailModel.put("messageBody", "Please find the payment receipt for your booking (" + booking.getVehicleRegistrationNo() + ") attached below.");
+            emailModel.put("documentName", "Receipt-" + invoice.getInvoiceNumber() + ".pdf");
+
+            emailService.sendHtmlEmailWithAttachment(
+                    booking.getRenterEmail(),
+                    "Receipt for Booking #" + invoice.getInvoiceNumber(),
+                    "email/document-attached",
+                    emailModel,
+                    "receipt-" + invoice.getInvoiceNumber() + ".pdf",
+                    pdf,
+                    "application/pdf"
+            );
+
+            redirectAttributes.addFlashAttribute("successMessage", "Receipt emailed successfully to renter.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to email receipt: " + e.getMessage());
+        }
+        
+        return "redirect:/owner/bookings/view/" + id;
+    }
+
     /**
      * Fetch bookings for the owner's dashboard calendar
      */

@@ -497,18 +497,33 @@
                 <div class="action-panel mt-3">
                     <div class="card-header-custom">Documents</div>
                     
-                    <!-- Invoice Download -->
-                    <a th:href="@{/owner/bookings/{id}/invoice(id=${booking.bookingId})}" 
-                       class="btn btn-outline-primary btn-block mb-2">
-                        <i class="mdi mdi-file-document"></i> Download Invoice
-                    </a>
+                    <!-- Invoice Download & Email -->
+                    <div class="d-flex mb-2">
+                        <a th:href="@{/owner/bookings/{id}/invoice(id=${booking.bookingId})}" 
+                           class="btn btn-outline-primary flex-grow-1" style="border-top-right-radius:0; border-bottom-right-radius:0;">
+                            <i class="mdi mdi-file-document"></i> Download Invoice
+                        </a>
+                        <form th:action="@{/owner/bookings/{id}/invoice/email(id=${booking.bookingId})}" method="POST" 
+                              onsubmit="return confirm('Are you sure you want to email the invoice to the renter?');">
+                            <button type="submit" class="btn btn-outline-primary h-100" style="border-top-left-radius:0; border-bottom-left-radius:0; border-left:none;" title="Email Invoice">
+                                <i class="mdi mdi-email"></i>
+                            </button>
+                        </form>
+                    </div>
                     
-                    <!-- Receipt Download (only if payment verified) -->
-                    <a th:if="${booking.paymentStatus == 'VERIFIED'}"
-                       th:href="@{/owner/bookings/{id}/receipt(id=${booking.bookingId})}" 
-                       class="btn btn-success btn-block mb-2">
-                        <i class="mdi mdi-receipt"></i> Download Receipt
-                    </a>
+                    <!-- Receipt Download & Email (only if payment verified) -->
+                    <div th:if="${booking.paymentStatus == 'VERIFIED'}" class="d-flex mb-2">
+                        <a th:href="@{/owner/bookings/{id}/receipt(id=${booking.bookingId})}" 
+                           class="btn btn-success flex-grow-1" style="border-top-right-radius:0; border-bottom-right-radius:0;">
+                            <i class="mdi mdi-receipt"></i> Download Receipt
+                        </a>
+                        <form th:action="@{/owner/bookings/{id}/receipt/email(id=${booking.bookingId})}" method="POST"
+                              onsubmit="return confirm('Are you sure you want to email the receipt to the renter?');">
+                            <button type="submit" class="btn btn-success h-100" style="border-top-left-radius:0; border-bottom-left-radius:0; border-left-color: rgba(255,255,255,0.5);" title="Email Receipt">
+                                <i class="mdi mdi-email"></i>
+                            </button>
+                        </form>
+                    </div>
                     
                     <!-- Receipt unavailable message -->
                     <div th:if="${booking.paymentStatus != 'VERIFIED'}" 
