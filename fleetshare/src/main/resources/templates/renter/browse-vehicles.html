@@ -5,6 +5,7 @@
 <head>
     <th:block layout:fragment="extra-css">
         <link rel="stylesheet" href="/css/browse-vehicles-ux.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <style>
             :root {
                 --primary-color: #4B49AC;
@@ -36,15 +37,13 @@
                 padding: 2rem;
                 box-shadow: var(--card-shadow);
                 border: 1px solid rgba(0, 0, 0, 0.02);
+                height: min-content;
             }
 
             @media (min-width: 992px) {
                 .filter-sidebar {
                     position: sticky;
                     top: 100px;
-                    height: fit-content;
-                    max-height: calc(100vh - 120px);
-                    overflow-y: auto;
                 }
             }
 
@@ -433,6 +432,123 @@
                 from { opacity: 0; transform: translateY(10px); }
                 to { opacity: 1; transform: translateY(0); }
             }
+
+            /* Redesigned Date Picker Styles */
+            .date-filter-group {
+                margin-bottom: 1rem;
+            }
+
+            .date-input-with-icon {
+                position: relative;
+            }
+
+            .date-input-with-icon .form-control {
+                padding-left: 2.5rem;
+                border-radius: 10px;
+                background: #f8f9fa;
+                border: 1px solid #e0e0e0;
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+            }
+
+            .date-input-with-icon .form-control:focus {
+                background: white;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(75, 73, 172, 0.1);
+            }
+
+            .date-input-with-icon .date-icon {
+                position: absolute;
+                left: 0.75rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-muted);
+                font-size: 0.9rem;
+                z-index: 5;
+                pointer-events: none;
+            }
+
+            .day-of-week-label {
+                font-size: 0.7rem;
+                color: var(--primary-color);
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 0.4rem;
+                padding-left: 0.5rem;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                min-height: 1.2em;
+            }
+
+            .day-of-week-label.visible {
+                opacity: 1;
+            }
+
+            .date-connector {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.25rem 0;
+            }
+
+            .date-connector .fas {
+                color: #adb5bd;
+                font-size: 0.85rem;
+            }
+
+            /* Quick Select Pills */
+            .quick-select-pills {
+                display: flex;
+                gap: 0.4rem;
+                margin-top: 0.75rem;
+                flex-wrap: wrap;
+            }
+
+            .quick-select-pill {
+                font-size: 0.75rem;
+                padding: 0.35rem 0.65rem;
+                border-radius: 50px;
+                border: 1px solid #dee2e6;
+                background: white;
+                color: var(--text-muted);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                font-weight: 500;
+            }
+
+            .quick-select-pill:hover {
+                background: #f8f9fa;
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+            }
+
+            .quick-select-pill.active {
+                background: #e8e8f4;
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+                font-weight: 600;
+            }
+
+            /* Search Button */
+            .btn-search-dates {
+                width: 100%;
+                padding: 0.6rem;
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-top: 0.75rem;
+            }
+
+            .btn-search-dates:hover {
+                background: #3f3e91;
+                transform: translateY(-1px);
+            }
         </style>
     </th:block>
 </head>
@@ -454,19 +570,38 @@
                     </div>
 
                     <!-- Rental Dates Filter -->
-                    <div class="filter-group">
+                    <div class="filter-group date-filter-group">
                         <div class="filter-group-title">Rental Dates</div>
-                        <div class="d-flex flex-column gap-2 mb-3">
-                            <div>
-                                <label for="filterPickupDate" class="form-label small text-muted mb-1 fw-bold">Pickup Date</label>
-                                <input type="date" id="filterPickupDate" class="form-control" th:value="${pickupDate}">
-                            </div>
-                            <div>
-                                <label for="filterReturnDate" class="form-label small text-muted mb-1 fw-bold">Return Date</label>
-                                <input type="date" id="filterReturnDate" class="form-control" th:value="${returnDate}">
-                            </div>
+                        
+                        <!-- Pickup Date -->
+                        <div class="date-input-with-icon mb-2">
+                            <i class="fas fa-calendar-alt date-icon text-primary"></i>
+                            <input type="text" id="filterPickupDate" class="form-control" placeholder="Select pickup date" th:value="${pickupDate}">
                         </div>
-                        <button type="button" class="btn btn-primary w-100 btn-sm" onclick="applyDateFilter()">Search Availability</button>
+                        <div id="pickupDayLabel" class="day-of-week-label"></div>
+                        
+                        <!-- Connector -->
+                        <div class="date-connector">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        
+                        <!-- Return Date -->
+                        <div class="date-input-with-icon mb-2">
+                            <i class="fas fa-calendar-check date-icon text-success"></i>
+                            <input type="text" id="filterReturnDate" class="form-control" placeholder="Select return date" th:value="${returnDate}">
+                        </div>
+                        <div id="returnDayLabel" class="day-of-week-label"></div>
+                        
+                        <!-- Quick Select Pills -->
+                        <div class="quick-select-pills">
+                            <button type="button" class="quick-select-pill" onclick="addDays(1)" data-days="1">1 Day</button>
+                            <button type="button" class="quick-select-pill" onclick="addDays(3)" data-days="3">3 Days</button>
+                            <button type="button" class="quick-select-pill" onclick="addDays(7)" data-days="7">1 Week</button>
+                        </div>
+                        
+                        <button type="button" class="btn-search-dates" onclick="applyDateFilter()">
+                            <i class="fas fa-search me-1"></i> Search Availability
+                        </button>
                     </div>
 
                     <!-- Category Filter -->
@@ -779,7 +914,93 @@
     </main>
 
     <th:block layout:fragment="extra-js">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <script>
+            // Redesigned Date Picker Functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const pickupInput = document.getElementById('filterPickupDate');
+                const returnInput = document.getElementById('filterReturnDate');
+                const pickupDayLabel = document.getElementById('pickupDayLabel');
+                const returnDayLabel = document.getElementById('returnDayLabel');
+                const pills = document.querySelectorAll('.quick-select-pill');
+
+                const now = new Date();
+                const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+                function getDayOfWeek(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    return days[date.getUTCDay()];
+                }
+
+                function updateDateContext() {
+                    const pickupDay = getDayOfWeek(pickupInput.value);
+                    const returnDay = getDayOfWeek(returnInput.value);
+
+                    if (pickupDay) {
+                        pickupDayLabel.textContent = pickupDay;
+                        pickupDayLabel.classList.add('visible');
+                    } else {
+                        pickupDayLabel.classList.remove('visible');
+                    }
+
+                    if (returnDay) {
+                        returnDayLabel.textContent = returnDay;
+                        returnDayLabel.classList.add('visible');
+                    } else {
+                        returnDayLabel.classList.remove('visible');
+                    }
+                }
+
+                window.addDays = function(days) {
+                    if (!pickupInput.value) {
+                        pickupInput.value = todayStr;
+                        if (fpPickup) fpPickup.setDate(todayStr);
+                    }
+
+                    const pickup = new Date(pickupInput.value);
+                    const newReturn = new Date(pickup);
+                    newReturn.setDate(pickup.getDate() + days);
+
+                    const newReturnStr = newReturn.toISOString().split('T')[0];
+                    returnInput.value = newReturnStr;
+                    if (fpReturn) fpReturn.setDate(newReturnStr);
+
+                    updateDateContext();
+                    applyDateFilter();
+                };
+
+                const commonConfig = {
+                    dateFormat: 'Y-m-d',
+                    minDate: todayStr,
+                    allowInput: true,
+                    onClose: function(selectedDates, dateStr, instance) {
+                        if (instance.input.id === 'filterPickupDate' && dateStr) {
+                            if (fpReturn) fpReturn.set('minDate', dateStr);
+                            if (!returnInput.value || returnInput.value < dateStr) {
+                                const returnDate = new Date(dateStr);
+                                returnDate.setDate(returnDate.getDate() + 1);
+                                const returnStr = returnDate.toISOString().split('T')[0];
+                                returnInput.value = returnStr;
+                                if (fpReturn) fpReturn.setDate(returnStr);
+                            }
+                        }
+                        updateDateContext();
+                    }
+                };
+
+                let fpPickup, fpReturn;
+                if (pickupInput && returnInput) {
+                    fpPickup = flatpickr(pickupInput, Object.assign({}, commonConfig));
+                    fpReturn = flatpickr(returnInput, Object.assign({}, commonConfig));
+
+                    if (pickupInput.value || returnInput.value) {
+                        updateDateContext();
+                    }
+                }
+            });
+
             // ... existing JS ...
             function applyDateFilter() {
                 const pickup = document.getElementById('filterPickupDate').value;
