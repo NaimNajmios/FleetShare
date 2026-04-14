@@ -75,6 +75,9 @@ public class RenterController {
     @Autowired
     private com.najmi.fleetshare.service.ReceiptService receiptService;
 
+    @Autowired
+    private com.najmi.fleetshare.service.ToyyibPayService toyyibPayService;
+
     @GetMapping("/vehicles")
     public String browseVehicles(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -508,6 +511,71 @@ public class RenterController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to upload receipt: " + e.getMessage());
+            return "redirect:/renter/bookings/" + id + "/payment";
+        }
+    }
+
+    /**
+     * Initiates a gateway payment via ToyyibPay (BYOK).
+     * Creates a bill on ToyyibPay using the owner's credentials and redirects the renter
+     * to the ToyyibPay payment page.
+     */
+    @PostMapping("/bookings/{id}/payment/gateway")
+    public String processGatewayPayment(@PathVariable Long id, HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // 1. Validate booking ownership
+            com.najmi.fleetshare.dto.BookingDTO booking = bookingService.getBookingDetails(id);
+            if (booking == null || !booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
+                return "redirect:/renter/bookings";
+            }
+
+            // 2. Get fleet owner and validate ToyyibPay credentials
+            com.najmi.fleetshare.entity.Booking bookingEntity = bookingRepository.findById(id).orElse(null);
+            if (bookingEntity == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
+                return "redirect:/renter/bookings";
+            }
+
+            FleetOwner owner = fleetOwnerRepository.findById(bookingEntity.getFleetOwnerId()).orElse(null);
+            if (owner == null || owner.getToyyibpaySecretKey() == null || owner.getToyyibpaySecretKey().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Online payment is not available for this owner. Please choose another payment method.");
+                return "redirect:/renter/bookings/" + id + "/payment";
+            }
+
+            // 3. Create or reuse payment record
+            com.najmi.fleetshare.entity.Payment payment = paymentService.processGatewayPayment(id);
+
+            // 4. Create ToyyibPay bill (only if no bill code exists yet)
+            if (payment.getToyyibpayBillCode() == null || payment.getToyyibpayBillCode().isEmpty()) {
+                // Get renter details for bill
+                String renterEmail = user.getEmail();
+                String renterName = user.getRenterDetails().getFullName();
+                String renterPhone = user.getRenterDetails().getPhoneNumber();
+
+                String billCode = toyyibPayService.createBill(
+                        owner, payment, booking, renterEmail, renterPhone, renterName);
+
+                // Store bill code and persist
+                payment.setToyyibpayBillCode(billCode);
+                payment = paymentService.savePayment(payment);
+            }
+
+            // 5. Redirect to ToyyibPay payment page
+            String paymentUrl = toyyibPayService.getPaymentUrl(payment.getToyyibpayBillCode());
+            return "redirect:" + paymentUrl;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Failed to initiate online payment: " + e.getMessage());
             return "redirect:/renter/bookings/" + id + "/payment";
         }
     }

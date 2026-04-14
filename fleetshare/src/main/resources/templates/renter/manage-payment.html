@@ -631,6 +631,11 @@
                         CONFIRM PAY LATER
                     </button>
                 </form>
+
+                <form id="gatewayPaymentForm"
+                    th:action="@{/renter/bookings/{id}/payment/gateway(id=${booking.bookingId})}"
+                    method="POST" style="display: none;">
+                </form>
             </div>
         </div>
 
@@ -813,7 +818,13 @@
                     });
 
                     // Button Actions
-                    if (btnCard) btnCard.addEventListener('click', () => alert('Redirecting to Payment Gateway...'));
+                    if (btnCard) {
+                        btnCard.addEventListener('click', function() {
+                            btnCard.disabled = true;
+                            btnCard.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Redirecting to gateway...';
+                            document.getElementById('gatewayPaymentForm').submit();
+                        });
+                    }
 
                     // Upload Zone for Bank Transfer
                     const uploadZone = document.getElementById('uploadZone');

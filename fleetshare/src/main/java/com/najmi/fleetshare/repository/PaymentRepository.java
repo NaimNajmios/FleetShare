@@ -5,10 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByInvoiceId(Long invoiceId);
+
+    Optional<Payment> findByToyyibpayBillCode(String toyyibpayBillCode);
 
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Payment p WHERE p.invoiceId IN :invoiceIds")
     List<Payment> findByInvoiceIdIn(java.util.Collection<Long> invoiceIds);

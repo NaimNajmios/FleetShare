@@ -39,6 +39,12 @@ public class Payment {
     @Column(name = "verified_by_user_id")
     private Long verifiedByUserId;
 
+    @Column(name = "toyyibpay_bill_code", length = 50)
+    private String toyyibpayBillCode;
+
+    @Column(name = "gateway_ref_no", length = 100)
+    private String gatewayRefNo;
+
     // Enums
     public enum PaymentMethod {
         CREDIT_CARD, BANK_TRANSFER, QR_PAYMENT, CASH
@@ -123,5 +129,21 @@ public class Payment {
 
     public void setVerifiedByUserId(Long verifiedByUserId) {
         this.verifiedByUserId = verifiedByUserId;
+    }
+
+    public String getToyyibpayBillCode() {
+        return toyyibpayBillCode;
+    }
+
+    public void setToyyibpayBillCode(String toyyibpayBillCode) {
+        this.toyyibpayBillCode = toyyibpayBillCode;
+    }
+
+    public String getGatewayRefNo() {
+        return gatewayRefNo;
+    }
+
+    public void setGatewayRefNo(String gatewayRefNo) {
+        this.gatewayRefNo = gatewayRefNo;
     }
 }

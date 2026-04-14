@@ -34,7 +34,7 @@ public class SecurityConfig {
                                                                                 +
                                                                                 "object-src 'none'; " +
                                                                                 "base-uri 'self'; " +
-                                                                                "form-action 'self'; " +
+                                                                                "form-action 'self' https://toyyibpay.com https://dev.toyyibpay.com; " +
                                                                                 "frame-ancestors 'self';"))
                                                 .httpStrictTransportSecurity(hsts -> hsts
                                                                 .includeSubDomains(true)
@@ -50,6 +50,7 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 // Public pages
                                                 .requestMatchers("/", "/register", "/api/test/email/**").permitAll()
+                                                .requestMatchers("/api/payment/toyyibpay/**").permitAll()
                                                 .requestMatchers("/login").permitAll()
                                                 // Role-based URL protection
                                                 .requestMatchers("/admin/**").hasRole("PLATFORM_ADMIN")
@@ -66,7 +67,9 @@ public class SecurityConfig {
                                                 .logoutSuccessUrl("/login?logout")
                                                 .permitAll())
                                 .exceptionHandling(ex -> ex
-                                                .accessDeniedPage("/access-denied"));
+                                                .accessDeniedPage("/access-denied"))
+                                .csrf(csrf -> csrf
+                                                .ignoringRequestMatchers("/api/payment/toyyibpay/callback"));
 
                 return http.build();
         }

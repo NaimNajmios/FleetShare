@@ -566,4 +566,78 @@ public class PaymentService {
 
         return total;
     }
+
+    /**
+     * Processes a gateway (ToyyibPay) payment for a booking.
+     * Creates or reuses a payment record with CREDIT_CARD method and PENDING status.
+     *
+     * @param bookingId The booking ID
+     * @return The created or existing Payment entity
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment processGatewayPayment(Long bookingId) {
+        // 1. Find Invoice
+        List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
+        if (invoices.isEmpty()) {
+            throw new IllegalArgumentException("No invoice found for booking ID: " + bookingId);
+        }
+        Invoice invoice = invoices.get(0);
+
+        // 2. Check if payment already exists
+        List<Payment> existingPayments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+        for (Payment p : existingPayments) {
+            if (p.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
+                throw new IllegalStateException("Payment already completed for this booking.");
+            }
+            // Reuse existing CREDIT_CARD + PENDING payment
+            if (p.getPaymentMethod() == Payment.PaymentMethod.CREDIT_CARD
+                    && p.getPaymentStatus() == Payment.PaymentStatus.PENDING) {
+                return p;
+            }
+        }
+
+        // 3. Create Payment
+        Payment payment = new Payment();
+        payment.setInvoiceId(invoice.getInvoiceId());
+        payment.setAmount(invoice.getTotalAmount());
+        payment.setPaymentMethod(Payment.PaymentMethod.CREDIT_CARD);
+        payment.setPaymentStatus(Payment.PaymentStatus.PENDING);
+        payment.setPaymentDate(java.time.LocalDateTime.now());
+        payment.setTransactionReference("GATEWAY-" + System.currentTimeMillis());
+        payment = paymentRepository.save(payment);
+
+        // 4. Log Status
+        PaymentStatusLog log = new PaymentStatusLog();
+        log.setPaymentId(payment.getPaymentId());
+        log.setStatusValue(Payment.PaymentStatus.PENDING);
+        log.setStatusTimestamp(java.time.LocalDateTime.now());
+        Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+        if (renter != null) {
+            log.setActorUserId(renter.getUserId());
+        }
+        log.setRemarks("Online payment (Card/FPX) initiated via ToyyibPay");
+        paymentStatusLogRepository.save(log);
+
+        return payment;
+    }
+
+    /**
+     * Finds a payment by its ToyyibPay bill code.
+     *
+     * @param billCode The ToyyibPay bill code
+     * @return Optional containing the payment
+     */
+    public java.util.Optional<Payment> findByBillCode(String billCode) {
+        return paymentRepository.findByToyyibpayBillCode(billCode);
+    }
+
+    /**
+     * Saves a payment entity (used after updating bill code or other fields).
+     *
+     * @param payment The payment to save
+     * @return The saved payment
+     */
+    public Payment savePayment(Payment payment) {
+        return paymentRepository.save(payment);
+    }
 }
