@@ -191,7 +191,7 @@
             }
 
             .btn-manage {
-                background: #6c757d;
+                background: var(--primary-color, #4B49AC);
                 color: white;
                 padding: 0.75rem 1.5rem;
                 border: none;
@@ -211,7 +211,7 @@
             }
 
             .btn-manage:hover {
-                background: #5a6268;
+                background: #3f3e91;
                 color: white;
             }
 
@@ -372,7 +372,7 @@
                     <i class="fas fa-arrow-left"></i> Back to Bookings
                 </a>
                 <h1 class="page-title">View Your Booking</h1>
-                <p class="page-subtitle">// BOOKING DETAILS //</p>
+                <p class="page-subtitle" th:text="'Reference ID: #' + ${booking.bookingId}">Reference ID</p>
             </div>
 
             <!-- Status Banner -->
@@ -426,11 +426,7 @@
                                 <span class="info-value"
                                     th:text="${booking != null ? booking.bookingId : '21'}">21</span>
                             </div>
-                            <div class="info-item">
-                                <span class="info-label">Renter ID</span>
-                                <span class="info-value"
-                                    th:text="${booking != null ? booking.renterId : '2019'}">2019</span>
-                            </div>
+
                             <div class="info-item">
                                 <span class="info-label">Start Date</span>
                                 <span class="info-value"

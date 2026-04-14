@@ -253,7 +253,7 @@
                 align-items: center;
                 gap: 0.5rem;
                 padding: 0.75rem 1.5rem;
-                background: #4b49ac;
+                background: var(--primary-color, #4B49AC);
                 color: white;
                 border-radius: 0.5rem;
                 font-weight: 500;
@@ -313,8 +313,8 @@
 
             .filter-tab.active {
                 background: #e8e8f4;
-                color: #4b49ac;
-                border-color: #4b49ac;
+                color: var(--primary-color, #4B49AC);
+                border-color: var(--primary-color, #4B49AC);
                 font-weight: 600;
             }
 
@@ -335,7 +335,7 @@
 
             /* Status Borders for clearer scanning */
             .booking-card.status-border-pending { border-left: 5px solid #ffc107; }
-            .booking-card.status-border-confirmed { border-left: 5px solid #0d6efd; }
+            .booking-card.status-border-confirmed { border-left: 5px solid var(--primary-color, #4B49AC); }
             .booking-card.status-border-active { border-left: 5px solid #00897b; }
             .booking-card.status-border-completed { border-left: 5px solid #2e7d32; }
             .booking-card.status-border-cancelled { border-left: 5px solid #dc3545; }
