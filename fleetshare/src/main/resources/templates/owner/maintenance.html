@@ -73,7 +73,41 @@
                 0%, 100% { transform: translateY(0); }
                 50% { transform: translateY(-8px); }
             }
+
+            /* Flatpickr unavailable date styling */
+            .flatpickr-day.booked-date {
+                background: #fff3cd !important;
+                border-color: #ffc107 !important;
+                color: #856404 !important;
+            }
+            .flatpickr-day.booked-date::after {
+                content: '📅';
+                font-size: 8px;
+                position: absolute;
+                bottom: 2px;
+                right: 2px;
+            }
+            .flatpickr-day.booked-date:hover {
+                background: #ffeaa7 !important;
+            }
+
+            /* Booking conflict warning in modal */
+            .booking-conflict-warning {
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                border-radius: 8px;
+                padding: 10px 15px;
+                margin-top: 10px;
+                display: none;
+            }
+            .booking-conflict-warning.show {
+                display: block;
+            }
+            .booking-conflict-warning i {
+                color: #856404;
+            }
         </style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     </th:block>
 </head>
 
@@ -301,7 +335,12 @@
                                 <div class="row">
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Scheduled Date</label>
-                                        <input type="date" class="form-control" name="scheduledDate" required>
+                                        <input type="text" class="form-control" id="scheduledDate" name="scheduledDate" 
+                                            placeholder="Select date" required>
+                                        <div class="booking-conflict-warning" id="bookingConflictWarning">
+                                            <i class="mdi mdi-alert me-1"></i>
+                                            <span id="conflictMessage">Selected date has an existing booking.</span>
+                                        </div>
                                     </div>
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Est. Cost (RM)</label>
@@ -472,7 +511,156 @@
                     modal.hide();
                 }
             });
+
+            // Flatpickr initialization for booking-aware date picker
+            let maintenanceDatePicker = null;
+            let unavailableDateRanges = [];
+
+            function initMaintenanceDatePicker(vehicleId) {
+                const dateInput = document.getElementById('scheduledDate');
+                if (!dateInput) return;
+                
+                // Destroy existing instance
+                if (maintenanceDatePicker) {
+                    maintenanceDatePicker.destroy();
+                    maintenanceDatePicker = null;
+                }
+
+                // Create basic date picker first (will update when data loads)
+                maintenanceDatePicker = flatpickr(dateInput, {
+                    dateFormat: 'Y-m-d',
+                    minDate: 'today',
+                    disable: []
+                });
+
+                if (!vehicleId) {
+                    dateInput.placeholder = 'Select vehicle first';
+                    return;
+                }
+
+                // Fetch unavailable dates for this vehicle
+                fetch('/owner/bookings/vehicle/' + vehicleId + '/unavailable-dates')
+                    .then(response => response.json())
+                    .then(ranges => {
+                        unavailableDateRanges = ranges;
+                        
+                        // Destroy and recreate with highlight logic
+                        if (maintenanceDatePicker) {
+                            maintenanceDatePicker.destroy();
+                        }
+                        
+                        maintenanceDatePicker = flatpickr(dateInput, {
+                            dateFormat: 'Y-m-d',
+                            minDate: 'today',
+                            disable: [],
+                            onChange: function(selectedDates, dateStr) {
+                                checkForBookingConflict(dateStr);
+                            },
+                            onMonthChange: function(selectedDates, dateStr, instance) {
+                                highlightBookedDates();
+                            },
+                            onYearChange: function(selectedDates, dateStr, instance) {
+                                highlightBookedDates();
+                            },
+                            onReady: function(selectedDates, dateStr, instance) {
+                                highlightBookedDates();
+                            }
+                        });
+                        
+                        // Initial highlight
+                        highlightBookedDates();
+                    })
+                    .catch(err => {
+                        console.error('Error fetching unavailable dates:', err);
+                    });
+            }
+
+            function isDateInUnavailableRange(dateStr) {
+                if (!dateStr || unavailableDateRanges.length === 0) return false;
+                const date = new Date(dateStr);
+                for (const range of unavailableDateRanges) {
+                    const from = new Date(range.from);
+                    const to = new Date(range.to);
+                    // Include the end date
+                    to.setDate(to.getDate() + 1);
+                    if (date >= from && date < to) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function checkForBookingConflict(dateStr) {
+                const conflictWarning = document.getElementById('bookingConflictWarning');
+                if (dateStr && isDateInUnavailableRange(dateStr)) {
+                    conflictWarning.classList.add('show');
+                } else {
+                    conflictWarning.classList.remove('show');
+                }
+            }
+
+            function highlightBookedDates() {
+                if (!maintenanceDatePicker || unavailableDateRanges.length === 0) return;
+                
+                setTimeout(() => {
+                    const calendarContainer = maintenanceDatePicker.calendarContainer;
+                    if (!calendarContainer) return;
+                    
+                    const days = calendarContainer.querySelectorAll('.flatpickr-day');
+                    days.forEach(day => {
+                        if (!day.dateObj) return;
+                        const dateStr = maintenanceDatePicker.formatDate(day.dateObj, 'Y-m-d');
+                        if (isDateInUnavailableRange(dateStr)) {
+                            day.classList.add('booked-date');
+                        } else {
+                            day.classList.remove('booked-date');
+                        }
+                    });
+                }, 0);
+            }
+
+            // Initialize when vehicle selection changes
+            document.querySelector('#addMaintenanceModal select[name="vehicleId"]')?.addEventListener('change', function() {
+                initMaintenanceDatePicker(this.value);
+            });
+
+            // Initialize when modal is fully shown
+            document.getElementById('addMaintenanceModal')?.addEventListener('shown.bs.modal', function() {
+                const vehicleSelect = document.querySelector('#addMaintenanceModal select[name="vehicleId"]');
+                if (vehicleSelect?.value) {
+                    initMaintenanceDatePicker(vehicleSelect.value);
+                } else {
+                    // Initialize with empty state
+                    const dateInput = document.getElementById('scheduledDate');
+                    if (dateInput && !maintenanceDatePicker) {
+                        maintenanceDatePicker = flatpickr(dateInput, {
+                            dateFormat: 'Y-m-d',
+                            minDate: 'today'
+                        });
+                    }
+                }
+            });
+
+            // Reset when modal closes
+            document.getElementById('addMaintenanceModal')?.addEventListener('hidden.bs.modal', function() {
+                document.getElementById('bookingConflictWarning')?.classList.remove('show');
+                // Reset form
+                this.querySelector('form')?.reset();
+                unavailableDateRanges = [];
+                if (maintenanceDatePicker) {
+                    maintenanceDatePicker.clear();
+                }
+            });
+            
+            // Also initialize for page load
+            document.addEventListener('DOMContentLoaded', function() {
+                const vehicleSelect = document.querySelector('#addMaintenanceModal select[name="vehicleId"]');
+                if (vehicleSelect?.value) {
+                    initMaintenanceDatePicker(vehicleSelect.value);
+                }
+            });
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     </th:block>
 </body>
 </html>
