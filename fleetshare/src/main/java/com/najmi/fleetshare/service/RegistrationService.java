@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Service to handle user registration with transactional support.
@@ -24,17 +26,20 @@ public class RegistrationService {
     private final RenterRepository renterRepository;
     private final FleetOwnerRepository fleetOwnerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     public RegistrationService(UserRepository userRepository,
             AddressRepository addressRepository,
             RenterRepository renterRepository,
             FleetOwnerRepository fleetOwnerRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            EmailService emailService) {
         this.userRepository = userRepository;
         this.addressRepository = addressRepository;
         this.renterRepository = renterRepository;
         this.fleetOwnerRepository = fleetOwnerRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     /**
@@ -95,6 +100,18 @@ public class RegistrationService {
         } else if (role == UserRole.FLEET_OWNER) {
             createFleetOwnerProfile(savedUser.getUserId(), dto.getFullName(), dto.getPhoneNumber());
         }
+
+        // 8. Send Welcome Email
+        Map<String, Object> emailModel = new HashMap<>();
+        emailModel.put("userName", dto.getFullName());
+        emailModel.put("role", role.name());
+        
+        emailService.sendHtmlEmail(
+            savedUser.getEmail(), 
+            "Welcome to FleetShare!", 
+            "email/welcome-email", 
+            emailModel
+        );
     }
 
     /**

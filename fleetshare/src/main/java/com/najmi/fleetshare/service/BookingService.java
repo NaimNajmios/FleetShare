@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +49,9 @@ public class BookingService {
 
     @Autowired
     private BookingPriceSnapshotRepository bookingPriceSnapshotRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Fetches all bookings with related information
@@ -358,6 +362,39 @@ public class BookingService {
                 remarks != null && !remarks.trim().isEmpty() ? remarks.trim() : getDefaultRemarks(targetStatus));
         statusLogRepository.save(statusLog);
 
+        String statusName = targetStatus.name();
+        String finalRemarks = remarks != null && !remarks.trim().isEmpty() ? remarks.trim() : getDefaultRemarks(targetStatus);
+        
+        // Notify Renter
+        Renter renter = renterRepository.findById(booking.getRenterId()).orElse(null);
+        if (renter != null) {
+            User renterUser = userRepository.findById(renter.getUserId()).orElse(null);
+            if (renterUser != null && renterUser.getEmail() != null) {
+                Map<String, Object> emailModel = new HashMap<>();
+                emailModel.put("userName", renter.getFullName());
+                emailModel.put("bookingId", booking.getBookingId());
+                emailModel.put("newStatus", statusName);
+                emailModel.put("remarks", finalRemarks);
+                
+                emailService.sendHtmlEmail(renterUser.getEmail(), "Booking Status Updated to " + statusName, "email/booking-status-update", emailModel);
+            }
+        }
+        
+        // Notify Owner
+        FleetOwner owner = fleetOwnerRepository.findById(booking.getFleetOwnerId()).orElse(null);
+        if (owner != null) {
+            User ownerUser = userRepository.findById(owner.getUserId()).orElse(null);
+            if (ownerUser != null && ownerUser.getEmail() != null) {
+                Map<String, Object> emailModel = new HashMap<>();
+                emailModel.put("userName", owner.getBusinessName());
+                emailModel.put("bookingId", booking.getBookingId());
+                emailModel.put("newStatus", statusName);
+                emailModel.put("remarks", finalRemarks);
+                
+                emailService.sendHtmlEmail(ownerUser.getEmail(), "Booking Status Updated to " + statusName, "email/booking-status-update", emailModel);
+            }
+        }
+
         return booking;
     }
 
@@ -572,6 +609,25 @@ public class BookingService {
         invoice.setStatus(Invoice.InvoiceStatus.ISSUED);
         invoice.setRemarks("Auto-generated invoice for Booking #" + booking.getBookingId());
         invoiceRepository.save(invoice);
+
+        // 7. Send Email Notifications
+        Map<String, Object> emailModel = new HashMap<>();
+        emailModel.put("bookingId", booking.getBookingId());
+        emailModel.put("vehicleDetails", vehicle.getBrand() + " " + vehicle.getModel() + " (" + vehicle.getRegistrationNo() + ")");
+        emailModel.put("startDate", startDate.atStartOfDay());
+        emailModel.put("endDate", endDate.atTime(23, 59, 59));
+
+        User renterUser = userRepository.findById(renter.getUserId()).orElse(null);
+        if (renterUser != null && renterUser.getEmail() != null) {
+            emailModel.put("userName", renter.getFullName());
+            emailService.sendHtmlEmail(renterUser.getEmail(), "Booking Initialized", "email/booking-created", emailModel);
+        }
+
+        User ownerUser = userRepository.findById(owner.getUserId()).orElse(null);
+        if (ownerUser != null && ownerUser.getEmail() != null) {
+            emailModel.put("userName", owner.getBusinessName());
+            emailService.sendHtmlEmail(ownerUser.getEmail(), "New Booking Request", "email/booking-created", emailModel);
+        }
 
         return booking;
     }

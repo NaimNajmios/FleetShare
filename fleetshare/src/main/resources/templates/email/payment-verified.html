@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Verified</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        .header { background-color: #28a745; color: #fff; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; }
+        h1 { margin: 0; font-size: 24px; }
+        .content { margin-top: 20px; font-size: 16px; line-height: 1.5; color: #333; }
+        .footer { margin-top: 30px; font-size: 12px; color: #999; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payment Verified</h1>
+        </div>
+        <div class="content">
+            <p>Hi <strong th:text="${renterName}">Renter</strong>,</p>
+            <p>Great news! Your payment for Booking ID: #<span th:text="${bookingId}">0</span> has been verified successfully.</p>
+            <p>You can now download your receipt or view full booking details from your renter dashboard.</p>
+        </div>
+        <div class="footer">
+            &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2026</span> FleetShare. All Rights Reserved.
+        </div>
+    </div>
+</body>
+</html>

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,6 +40,9 @@ public class PaymentService {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Fetches all payments with related information
@@ -282,6 +286,18 @@ public class PaymentService {
                 log.setRemarks("Bank transfer receipt re-uploaded");
                 paymentStatusLogRepository.save(log);
 
+                // Notify Owner
+                FleetOwner owner = fleetOwnerRepository.findById(invoice.getFleetOwnerId()).orElse(null);
+                if (owner != null) {
+                    User ownerUser = userRepository.findById(owner.getUserId()).orElse(null);
+                    if (ownerUser != null && ownerUser.getEmail() != null) {
+                        Map<String, Object> emailModel = new HashMap<>();
+                        emailModel.put("ownerName", owner.getBusinessName());
+                        emailModel.put("bookingId", invoice.getBookingId());
+                        emailService.sendHtmlEmail(ownerUser.getEmail(), "Action Required: Receipt Uploaded", "email/payment-receipt-uploaded", emailModel);
+                    }
+                }
+
                 return p;
             }
         }
@@ -311,6 +327,18 @@ public class PaymentService {
         }
         log.setRemarks("Bank transfer receipt submitted");
         paymentStatusLogRepository.save(log);
+
+        // Notify Owner
+        FleetOwner owner = fleetOwnerRepository.findById(invoice.getFleetOwnerId()).orElse(null);
+        if (owner != null) {
+            User ownerUser = userRepository.findById(owner.getUserId()).orElse(null);
+            if (ownerUser != null && ownerUser.getEmail() != null) {
+                Map<String, Object> emailModel = new HashMap<>();
+                emailModel.put("ownerName", owner.getBusinessName());
+                emailModel.put("bookingId", invoice.getBookingId());
+                emailService.sendHtmlEmail(ownerUser.getEmail(), "Action Required: Receipt Uploaded", "email/payment-receipt-uploaded", emailModel);
+            }
+        }
 
         return payment;
     }
@@ -350,6 +378,18 @@ public class PaymentService {
         if (invoice != null) {
             invoice.setStatus(Invoice.InvoiceStatus.PAID);
             invoiceRepository.save(invoice);
+
+            // Notify Renter
+            Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+            if (renter != null) {
+                User renterUser = userRepository.findById(renter.getUserId()).orElse(null);
+                if (renterUser != null && renterUser.getEmail() != null) {
+                    Map<String, Object> emailModel = new HashMap<>();
+                    emailModel.put("renterName", renter.getFullName());
+                    emailModel.put("bookingId", invoice.getBookingId());
+                    emailService.sendHtmlEmail(renterUser.getEmail(), "Payment Verified", "email/payment-verified", emailModel);
+                }
+            }
         }
 
         return payment;
