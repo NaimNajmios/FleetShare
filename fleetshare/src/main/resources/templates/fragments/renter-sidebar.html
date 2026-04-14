@@ -1,0 +1,28 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar" th:fragment="sidebar">
+    <ul class="nav">
+        <li class="nav-item" th:classappend="${activePage == 'home'} ? 'active'">
+            <a class="nav-link" th:href="@{/renter/home}">
+                <i class="icon-grid menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'vehicles'} ? 'active'">
+            <a class="nav-link" th:href="@{/renter/vehicles}">
+                <i class="mdi mdi-car menu-icon"></i>
+                <span class="menu-title">Browse Vehicles</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'bookings'} ? 'active'">
+            <a class="nav-link" th:href="@{/renter/bookings}">
+                <i class="mdi mdi-calendar-check menu-icon"></i>
+                <span class="menu-title">My Bookings</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${activePage == 'profile'} ? 'active'">
+            <a class="nav-link" th:href="@{/renter/profile}">
+                <i class="icon-head menu-icon"></i>
+                <span class="menu-title">My Profile</span>
+            </a>
+        </li>
+    </ul>
+</nav>
