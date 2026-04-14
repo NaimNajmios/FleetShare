@@ -458,20 +458,20 @@
                 <div class="filter-group">
                     <div class="filter-group-title">Category</div>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="sedan" onchange="applyFilters()"> Sedan
+                        <input type="checkbox" name="category" value="sedan" onchange="applyFilters(true)"> Sedan
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="suv" onchange="applyFilters()"> SUV
+                        <input type="checkbox" name="category" value="suv" onchange="applyFilters(true)"> SUV
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="hatchback" onchange="applyFilters()"> Hatchback
+                        <input type="checkbox" name="category" value="hatchback" onchange="applyFilters(true)"> Hatchback
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="convertible" onchange="applyFilters()">
+                        <input type="checkbox" name="category" value="convertible" onchange="applyFilters(true)">
                         Convertible
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="mpv" onchange="applyFilters()"> MPV
+                        <input type="checkbox" name="category" value="mpv" onchange="applyFilters(true)"> MPV
                     </label>
                 </div>
 
@@ -479,10 +479,10 @@
                 <div class="filter-group">
                     <div class="filter-group-title">Transmission</div>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="transmission" value="auto" onchange="applyFilters()"> Automatic
+                        <input type="checkbox" name="transmission" value="auto" onchange="applyFilters(true)"> Automatic
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="transmission" value="manual" onchange="applyFilters()"> Manual
+                        <input type="checkbox" name="transmission" value="manual" onchange="applyFilters(true)"> Manual
                     </label>
                 </div>
 
@@ -493,12 +493,12 @@
                         <div class="input-group flex-nowrap price-filter-group" style="flex: 1;">
                             <span class="input-group-text bg-light border-end-0 text-muted px-2">RM</span>
                             <input type="number" id="minPrice" class="form-control price-input border-start-0 ps-1" placeholder="Min" aria-label="Minimum Price"
-                                oninput="applyFilters()">
+                                oninput="applyFilters(true)">
                         </div>
                         <div class="input-group flex-nowrap price-filter-group" style="flex: 1;">
                             <span class="input-group-text bg-light border-end-0 text-muted px-2">RM</span>
                             <input type="number" id="maxPrice" class="form-control price-input border-start-0 ps-1" placeholder="Max" aria-label="Maximum Price"
-                                oninput="applyFilters()">
+                                oninput="applyFilters(true)">
                         </div>
                     </div>
                 </div>
@@ -506,7 +506,7 @@
 
                 <!-- Mobile Filter Footer -->
                 <div class="filter-footer d-lg-none">
-                    <button id="mobileFilterBtn" class="btn btn-primary w-100 py-2 fw-bold rounded-pill" type="button" data-bs-dismiss="offcanvas" data-bs-target="#filterSidebar">
+                    <button id="mobileFilterBtn" class="btn btn-primary w-100 py-2 fw-bold rounded-pill" type="button" onclick="applyFiltersAndClose()">
                         Show <span id="mobileResultCountText">Results</span>
                     </button>
                 </div>
@@ -581,9 +581,9 @@
                                 <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}" class="stretched-link"
                                     style="display: block; width: 100%; height: 100%; text-decoration: none;"
                                     aria-hidden="true" tabindex="-1">
-                                    <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                                    <img th:if="${!#strings.isEmpty(vehicle.vehicleImageUrl)}"
                                         th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image">
-                                    <div th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}"
+                                    <div th:if="${#strings.isEmpty(vehicle.vehicleImageUrl)}"
                                         class="vehicle-placeholder-icon">
                                         <i class="fas fa-car"></i>
                                     </div>
@@ -592,7 +592,7 @@
                                     aria-label="Quick View">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <div class="price-badge" th:text="'RM' + ${vehicle.ratePerDay} + '/day'">RM55/day</div>
+                                <div class="price-badge" th:text="${'RM' + #numbers.formatDecimal(vehicle.ratePerDay, 0, 'COMMA', 0, 'POINT') + '/day'}">RM55/day</div>
                             </div>
 
                             <div class="vehicle-details">
@@ -652,6 +652,9 @@
                         <h3 style="margin-bottom: 0.5rem; font-weight: 700; color: #2C3E50;">No Vehicles Available</h3>
                         <p style="max-width: 400px; margin: 0 auto;">There are currently no vehicles available for rent.
                             Please check back later for new listings.</p>
+                        <a href="/renter/home" class="btn btn-outline-primary mt-4" style="border-radius: 50px; padding: 0.6rem 2rem;">
+                            <i class="fas fa-home me-2"></i> Go to Home
+                        </a>
                     </div>
 
                     <!-- No Filter Results State -->
@@ -764,11 +767,16 @@
         <script>
             // ... existing JS ...
             function removeFilter(type, value) {
+                // Input validation - prevent empty or invalid values
+                if (!value && type !== 'price' && type !== 'search') {
+                    return;
+                }
+                
                 if (type === 'category') {
-                    const el = document.querySelector(`input[name="category"][value="${value}"]`);
+                    const el = document.querySelector(`input[name="category"][value="${CSS.escape(value)}"]`);
                     if (el) el.checked = false;
                 } else if (type === 'transmission') {
-                    const el = document.querySelector(`input[name="transmission"][value="${value}"]`);
+                    const el = document.querySelector(`input[name="transmission"][value="${CSS.escape(value)}"]`);
                     if (el) el.checked = false;
                 } else if (type === 'price') {
                     const min = document.getElementById('minPrice');
@@ -782,7 +790,18 @@
                         toggleClearButton(el);
                     }
                 }
+                
+                // Invalidate sort cache when filters change
+                cachedSort = null;
                 applyFilters();
+            }
+
+            function applyFiltersAndClose() {
+                applyFilters();
+                const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('filterSidebar'));
+                if (offcanvas) {
+                    offcanvas.hide();
+                }
             }
 
             function addFilterChip(type, value, label) {
@@ -806,6 +825,7 @@
             }
 
             let currentSort = 'recommended';
+            let cachedSort = null;
 
             // Initialize original order on load
             document.addEventListener('DOMContentLoaded', () => {
@@ -816,6 +836,9 @@
 
             function setSort(sortType, btn) {
                 currentSort = sortType;
+                
+                // Invalidate sort cache to force re-sort
+                cachedSort = null;
 
                 // Update active state
                 btn.closest('.dropdown-menu').querySelectorAll('.dropdown-item').forEach(item => {
@@ -823,19 +846,23 @@
                 });
                 btn.classList.add('active');
 
-                // Update dropdown button text (optional, but nice)
-                // const sortLabel = btn.textContent.trim();
-                // btn.closest('.dropdown').querySelector('span').textContent = sortLabel;
-
                 applyFilters();
             }
 
-            function applyFilters() {
+            function applyFilters(autoClose = false) {
                 const container = document.getElementById('vehicleGrid');
                 const cards = Array.from(document.querySelectorAll('.vehicle-card'));
                 const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
                 const activeFiltersContainer = document.getElementById('activeFilters');
                 activeFiltersContainer.innerHTML = ''; // Clear existing chips
+
+                // Auto-close offcanvas on mobile after filter change
+                if (autoClose && window.innerWidth < 992) {
+                    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('filterSidebar'));
+                    if (offcanvas) {
+                        offcanvas.hide();
+                    }
+                }
 
                 // Get checked categories
                 const checkedCategoriesInputs = Array.from(document.querySelectorAll('input[name="category"]:checked'));
@@ -876,22 +903,30 @@
                     addFilterChip('search', 'search', `Search: "${document.getElementById('vehicleSearch').value}"`);
                 }
 
-                // Sorting Logic
-                cards.sort((a, b) => {
-                    if (currentSort === 'price-asc') {
-                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-                    } else if (currentSort === 'price-desc') {
-                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-                    } else if (currentSort === 'year-desc') {
-                        return parseInt(b.dataset.year) - parseInt(a.dataset.year);
-                    } else {
-                        // Default / Recommended
-                        return parseInt(a.dataset.originalIndex) - parseInt(b.dataset.originalIndex);
-                    }
-                });
+                // Sorting Logic - only re-sort when sort option changes (performance optimization)
+                if (cachedSort !== currentSort) {
+                    cachedSort = currentSort;
+                    cards.sort((a, b) => {
+                        const priceA = parseFloat(a.dataset.price) || 0;
+                        const priceB = parseFloat(b.dataset.price) || 0;
+                        const yearA = parseInt(a.dataset.year) || 2000;
+                        const yearB = parseInt(b.dataset.year) || 2000;
+                        
+                        if (currentSort === 'price-asc') {
+                            return priceA - priceB;
+                        } else if (currentSort === 'price-desc') {
+                            return priceB - priceA;
+                        } else if (currentSort === 'year-desc') {
+                            return yearB - yearA;
+                        } else {
+                            // Default / Recommended
+                            return parseInt(a.dataset.originalIndex) - parseInt(b.dataset.originalIndex);
+                        }
+                    });
 
-                // Re-append in order (this moves them in DOM)
-                cards.forEach(card => container.appendChild(card));
+                    // Re-append in sorted order
+                    cards.forEach(card => container.appendChild(card));
+                }
 
                 let visibleCount = 0;
 
@@ -959,6 +994,8 @@
                 searchInput.value = '';
                 toggleClearButton(searchInput);
 
+                // Invalidate sort cache
+                cachedSort = null;
                 applyFilters();
             }
 
@@ -1002,32 +1039,40 @@
 
             // Quick View Functionality
             function openQuickView(btn) {
-                // Get the card element (parent of the button's container)
                 const card = btn.closest('.vehicle-card');
+                if (!card) {
+                    console.error('Quick view: vehicle card not found');
+                    return;
+                }
 
-                // Extract data from attributes
+                const dataset = card.dataset;
+                
                 const data = {
-                    title: card.dataset.brand + ' ' + card.dataset.model,
-                    category: card.dataset.category,
-                    price: card.dataset.price,
-                    transmission: card.dataset.transmission,
-                    fuel: card.dataset.fuel,
-                    year: card.dataset.year,
-                    seats: card.dataset.seats,
-                    image: card.dataset.image,
-                    owner: card.dataset.owner,
-                    location: card.dataset.location,
-                    id: card.dataset.id
+                    title: (dataset.brand || '') + ' ' + (dataset.model || ''),
+                    category: dataset.category || 'sedan',
+                    price: parseFloat(dataset.price) || 0,
+                    transmission: dataset.transmission || 'Auto',
+                    fuel: dataset.fuel || 'Petrol',
+                    year: dataset.year || new Date().getFullYear(),
+                    seats: dataset.seats || '5 Seats',
+                    image: dataset.image || null,
+                    owner: dataset.owner || 'Unknown Owner',
+                    location: dataset.location || 'Unknown',
+                    id: dataset.id
                 };
 
-                // Populate Modal Elements
+                const priceFormatted = data.price.toLocaleString('en-MY', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+
                 document.getElementById('qvTitle').textContent = data.title;
                 document.getElementById('qvCategory').textContent = data.category.toUpperCase();
-                document.getElementById('qvPrice').textContent = 'RM ' + data.price;
+                document.getElementById('qvPrice').textContent = 'RM ' + priceFormatted;
                 document.getElementById('qvTransmission').textContent = data.transmission;
-                document.getElementById('qvFuel').textContent = data.fuel || 'N/A';
-                document.getElementById('qvYear').textContent = data.year || 'N/A';
-                document.getElementById('qvSeats').textContent = data.seats || '5 Seats';
+                document.getElementById('qvFuel').textContent = data.fuel;
+                document.getElementById('qvYear').textContent = data.year;
+                document.getElementById('qvSeats').textContent = data.seats;
                 document.getElementById('qvOwner').querySelector('span').textContent = data.owner;
                 document.getElementById('qvLocation').textContent = data.location;
 
@@ -1036,7 +1081,6 @@
                     imgEl.src = data.image;
                     imgEl.style.display = 'block';
                 } else {
-                    // Fallback if no image
                     imgEl.src = '';
                     imgEl.style.display = 'none';
                     imgEl.parentElement.style.backgroundColor = '#e9ecef';
@@ -1044,13 +1088,10 @@
 
                 document.getElementById('qvDetailsLink').href = '/renter/vehicles/' + data.id;
 
-                // Open Modal
-                const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('quickViewModal'));
                 modal.show();
 
-                // Manage focus: return focus to button when closed
-                const modalEl = document.getElementById('quickViewModal');
-                modalEl.addEventListener('hidden.bs.modal', function () {
+                document.getElementById('quickViewModal').addEventListener('hidden.bs.modal', function () {
                     btn.focus();
                 }, { once: true });
             }
