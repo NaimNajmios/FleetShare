@@ -14,6 +14,8 @@ public class ReportResponse<T> {
     private String generatedAt;
     private String period;
     private String generatedBy;
+    private String reportType;
+    private String filters;
     private List<String> columns;
     private List<T> data;
     private Map<String, Object> summary;
@@ -41,6 +43,16 @@ public class ReportResponse<T> {
 
     public ReportResponse<T> withGeneratedBy(String generatedBy) {
         this.generatedBy = generatedBy;
+        return this;
+    }
+
+    public ReportResponse<T> withReportType(String reportType) {
+        this.reportType = reportType;
+        return this;
+    }
+
+    public ReportResponse<T> withFilters(String filters) {
+        this.filters = filters;
         return this;
     }
 
@@ -95,6 +107,22 @@ public class ReportResponse<T> {
 
     public void setGeneratedBy(String generatedBy) {
         this.generatedBy = generatedBy;
+    }
+
+    public String getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(String reportType) {
+        this.reportType = reportType;
+    }
+
+    public String getFilters() {
+        return filters;
+    }
+
+    public void setFilters(String filters) {
+        this.filters = filters;
     }
 
     public List<String> getColumns() {

@@ -1117,6 +1117,7 @@ public class OwnerController {
             request.setVehicleId(vehicleId);
             request.setRequesterId(user.getOwnerDetails().getFleetOwnerId());
             request.setAdmin(false);
+            request.setFormat(format);
             request.setComparisonMode(comparisonMode != null && comparisonMode);
 
             if (startDate != null && !startDate.isEmpty()) {

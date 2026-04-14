@@ -65,11 +65,109 @@ public class ReportService {
             default -> throw new IllegalArgumentException("Unknown report category: " + request.getCategory());
         };
 
+        setReportMetadata(response, request);
+
         if (request.isComparisonMode()) {
             response.setComparisonData(generateComparisonData(request, response));
         }
 
         return response;
+    }
+
+    /**
+     * Set common metadata for all reports
+     */
+    private void setReportMetadata(ReportResponse<Map<String, Object>> response, ReportRequest request) {
+        response.setGeneratedAt(LocalDateTime.now().format(DATETIME_FORMATTER));
+        
+        try {
+            String startDate = request.getEffectiveStartDate() != null ? 
+                request.getEffectiveStartDate().format(DATE_FORMATTER) : "N/A";
+            String endDate = request.getEffectiveEndDate() != null ? 
+                request.getEffectiveEndDate().format(DATE_FORMATTER) : "N/A";
+            response.setPeriod(startDate + " - " + endDate);
+        } catch (Exception e) {
+            response.setPeriod("Custom Range");
+        }
+        
+        String reportTypeName = getReportTypeName(
+            request != null ? request.getCategory() : null,
+            request != null ? request.getReportType() : null
+        );
+        response.setReportType(reportTypeName);
+        
+        if (request != null && request.getRequesterId() != null) {
+            response.setGeneratedBy(request.getRequesterId().toString());
+        } else {
+            response.setGeneratedBy("System");
+        }
+        
+        String filters = buildFilterString(request);
+        response.setFilters(filters);
+    }
+
+    /**
+     * Get human-readable report type name
+     */
+    private String getReportTypeName(String category, String reportType) {
+        if (category == null || reportType == null) {
+            return reportType != null ? reportType.replace("-", " ") : "Report";
+        }
+        
+        String key = category + "-" + reportType;
+        
+        if ("booking-monthly-revenue".equals(key)) return "Monthly Revenue Report";
+        if ("booking-utilization-rate".equals(key)) return "Utilization Rate Report";
+        if ("booking-booking-summary".equals(key)) return "Booking Summary Report";
+        if ("vehicle-vehicle-performance".equals(key)) return "Vehicle Performance Report";
+        if ("vehicle-fleet-status".equals(key)) return "Fleet Status Report";
+        if ("vehicle-maintenance-due".equals(key)) return "Maintenance Due Report";
+        if ("payment-payment-summary".equals(key)) return "Payment Summary Report";
+        if ("payment-outstanding-payments".equals(key)) return "Outstanding Payments Report";
+        if ("payment-revenue-analysis".equals(key)) return "Revenue Analysis Report";
+        if ("maintenance-maintenance-history".equals(key)) return "Maintenance History Report";
+        if ("maintenance-cost-analysis".equals(key)) return "Cost Analysis Report";
+        if ("maintenance-upcoming-maintenance".equals(key)) return "Upcoming Maintenance Report";
+        if ("user-user-activity".equals(key)) return "User Activity Report";
+        if ("user-top-customers".equals(key)) return "Top Customers Report";
+        if ("user-user-demographics".equals(key)) return "User Demographics Report";
+        
+        return reportType.replace("-", " ");
+    }
+
+    /**
+     * Build filter string for display
+     */
+    private String buildFilterString(ReportRequest request) {
+        List<String> filters = new ArrayList<>();
+        
+        if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+            filters.add("Status: " + request.getStatus());
+        }
+        if (request.getVehicleId() != null) {
+            filters.add("Vehicle ID: " + request.getVehicleId());
+        }
+        if (request.getOwnerId() != null) {
+            filters.add("Owner ID: " + request.getOwnerId());
+        }
+        
+        String duration = request.getDuration();
+        if (duration == null) {
+            duration = "Not Set";
+        } else if ("today".equals(duration)) {
+            duration = "Today";
+        } else if ("last7".equals(duration)) {
+            duration = "Last 7 Days";
+        } else if ("thisMonth".equals(duration)) {
+            duration = "This Month";
+        } else if ("lastMonth".equals(duration)) {
+            duration = "Last Month";
+        } else if ("custom".equals(duration)) {
+            duration = "Custom Range";
+        }
+        filters.add("Duration: " + duration);
+        
+        return String.join(" | ", filters);
     }
 
     /**

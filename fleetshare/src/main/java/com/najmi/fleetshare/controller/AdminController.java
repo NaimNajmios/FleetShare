@@ -573,6 +573,7 @@ public class AdminController {
             request.setOwnerId(ownerId);
             request.setRequesterId(user.getUserId());
             request.setAdmin(true);
+            request.setFormat(format);
             request.setComparisonMode(comparisonMode != null && comparisonMode);
 
             if (startDate != null && !startDate.isEmpty()) {
