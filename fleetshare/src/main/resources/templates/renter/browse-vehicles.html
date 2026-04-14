@@ -307,7 +307,6 @@
             .spec-icon {
                 font-size: 1.1rem;
                 margin-bottom: 0.4rem;
-                color: var(--secondary-color);
             }
 
             .location-info {
@@ -619,17 +618,17 @@
 
                                 <div class="vehicle-specs">
                                     <div class="spec-item">
-                                        <i class="fas fa-tachometer-alt spec-icon"></i>
+                                        <i class="fas fa-tachometer-alt spec-icon text-info"></i>
                                         <span th:text="${vehicle.mileage != null ? vehicle.mileage + ' km' : 'N/A'}">15k
                                             km</span>
                                     </div>
                                     <div class="spec-item">
-                                        <i class="fas fa-cog spec-icon"></i>
+                                        <i class="fas fa-cog spec-icon text-warning"></i>
                                         <span
                                             th:text="${vehicle.transmissionType != null ? vehicle.transmissionType : 'Auto'}">Auto</span>
                                     </div>
                                     <div class="spec-item">
-                                        <i class="fas fa-users spec-icon"></i>
+                                        <i class="fas fa-users spec-icon text-success"></i>
                                         <span>5 Seats</span>
                                     </div>
                                 </div>
@@ -701,7 +700,7 @@
                                     <div class="row g-2 mb-4">
                                         <div class="col-6">
                                             <div class="d-flex align-items-center p-2 rounded bg-light">
-                                                <i class="fas fa-cog text-primary me-2"></i>
+                                                <i class="fas fa-cog text-warning me-2"></i>
                                                 <div>
                                                     <small class="d-block text-muted"
                                                         style="font-size: 0.7rem;">Transmission</small>
@@ -711,7 +710,7 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="d-flex align-items-center p-2 rounded bg-light">
-                                                <i class="fas fa-gas-pump text-primary me-2"></i>
+                                                <i class="fas fa-gas-pump text-info me-2"></i>
                                                 <div>
                                                     <small class="d-block text-muted" style="font-size: 0.7rem;">Fuel
                                                         Type</small>
@@ -731,7 +730,7 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="d-flex align-items-center p-2 rounded bg-light">
-                                                <i class="fas fa-users text-primary me-2"></i>
+                                                <i class="fas fa-users text-success me-2"></i>
                                                 <div>
                                                     <small class="d-block text-muted"
                                                         style="font-size: 0.7rem;">Seats</small>

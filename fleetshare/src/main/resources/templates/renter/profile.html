@@ -440,7 +440,7 @@
                             <img th:if="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
                                 th:src="${user.profileImageUrl}" alt="Profile Photo">
                             <i th:unless="${user != null and user.profileImageUrl != null and !user.profileImageUrl.isEmpty()}"
-                                class="fas fa-user"></i>
+                                class="fas fa-user text-primary" style="font-size: 4rem;"></i>
 
                             <!-- Overlay for Edit/Drag State -->
                             <div class="avatar-overlay">
@@ -559,7 +559,7 @@
                 <!-- Placeholder when no coordinates -->
                 <div th:unless="${address != null and address.latitude != null and address.longitude != null}"
                     class="map-placeholder">
-                    <i class="fas fa-map-marker-slash"></i>
+                    <i class="fas fa-map-marker-slash text-secondary"></i>
                     <p style="margin: 0; font-weight: 500;">Location not set</p>
                     <small>Add latitude and longitude coordinates to display the map</small>
                 </div>
@@ -574,7 +574,7 @@
 
                 <div class="settings-row">
                     <span class="settings-label">
-                        <i class="fas fa-key"></i> Change Password
+                        <i class="fas fa-key text-warning me-2"></i> Change Password
                     </span>
                     <button class="btn-change" id="btn-change-password">Change</button>
                 </div>
@@ -582,7 +582,7 @@
                 <!-- Logout Section - Softer Design -->
                 <div class="logout-section">
                     <div class="logout-section-header">
-                        <h5><i class="fas fa-sign-out-alt"></i> Session</h5>
+                        <h5><i class="fas fa-sign-out-alt text-danger me-2"></i> Session</h5>
                     </div>
                     <p>End your current session and return to the login page.</p>
                     <button class="btn-logout" id="btn-logout">

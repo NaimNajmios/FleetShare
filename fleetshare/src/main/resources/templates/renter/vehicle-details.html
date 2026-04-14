@@ -124,7 +124,6 @@
 
             .spec-icon {
                 font-size: 1.25rem;
-                color: var(--primary-color);
                 margin-bottom: 0.5rem;
                 display: block;
             }
@@ -322,32 +321,32 @@
                         <h3 class="section-title"><i class="fas fa-cogs text-primary"></i> Vehicle Specifications</h3>
                         <div class="specs-grid">
                             <div class="spec-box">
-                                <i class="fas fa-car-side spec-icon"></i>
+                                <i class="fas fa-car-side spec-icon text-primary"></i>
                                 <span class="spec-label">Category</span>
                                 <span class="spec-value" th:text="${vehicle.category}">Sedan</span>
                             </div>
                             <div class="spec-box">
-                                <i class="fas fa-gas-pump spec-icon"></i>
+                                <i class="fas fa-gas-pump spec-icon text-info"></i>
                                 <span class="spec-label">Fuel Type</span>
                                 <span class="spec-value" th:text="${vehicle.fuelType}">Petrol</span>
                             </div>
                             <div class="spec-box">
-                                <i class="fas fa-cog spec-icon"></i>
+                                <i class="fas fa-cog spec-icon text-warning"></i>
                                 <span class="spec-label">Transmission</span>
                                 <span class="spec-value" th:text="${vehicle.transmissionType}">Auto</span>
                             </div>
                             <div class="spec-box">
-                                <i class="fas fa-calendar spec-icon"></i>
+                                <i class="fas fa-calendar spec-icon text-secondary"></i>
                                 <span class="spec-label">Year</span>
                                 <span class="spec-value" th:text="${vehicle.manufacturingYear}">2022</span>
                             </div>
                             <div class="spec-box">
-                                <i class="fas fa-tachometer-alt spec-icon"></i>
+                                <i class="fas fa-tachometer-alt spec-icon text-danger"></i>
                                 <span class="spec-label">Mileage</span>
                                 <span class="spec-value" th:text="${vehicle.mileage + ' km'}">20k km</span>
                             </div>
                             <div class="spec-box">
-                                <i class="fas fa-users spec-icon"></i>
+                                <i class="fas fa-users spec-icon text-success"></i>
                                 <span class="spec-label">Capacity</span>
                                 <!-- Logic for seats based on category -->
                                 <span class="spec-value" th:with="cat=${vehicle.category}"

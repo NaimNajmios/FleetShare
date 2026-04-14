@@ -78,7 +78,7 @@
             }
 
             .price-highlight {
-                color: #0d6efd;
+                color: var(--primary-color, #4B49AC);
                 font-size: 1.25rem;
                 font-weight: 700;
             }
@@ -123,7 +123,7 @@
             }
 
             .step.active .step-circle {
-                background: #4B49AC;
+                background: var(--primary-color, #4B49AC);
                 color: white;
                 box-shadow: 0 0 0 4px rgba(75, 73, 172, 0.2);
             }
@@ -142,7 +142,7 @@
             }
 
             .step.active .step-label {
-                color: #4B49AC;
+                color: var(--primary-color, #4B49AC);
             }
 
             .step-line {
@@ -179,15 +179,15 @@
 
             .quick-select-pill:hover {
                 background: #f8f9fa;
-                border-color: #4B49AC;
-                color: #4B49AC;
+                border-color: var(--primary-color, #4B49AC);
+                color: var(--primary-color, #4B49AC);
                 transform: translateY(-1px);
             }
 
             .quick-select-pill.active {
                 background: #e8e8f4;
-                border-color: #4B49AC;
-                color: #4B49AC;
+                border-color: var(--primary-color, #4B49AC);
+                color: var(--primary-color, #4B49AC);
                 font-weight: 600;
             }
 
@@ -490,7 +490,7 @@
                     <div class="row g-2 mb-2 align-items-start">
                         <div class="col-md-5">
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                <span class="input-group-text"><i class="fas fa-calendar-alt text-primary"></i></span>
                                 <div class="form-floating">
                                     <input type="text" id="pickupDate" name="pickupDate" class="form-control"
                                         placeholder="Select date" required aria-required="true">
@@ -508,7 +508,7 @@
                         </div>
                         <div class="col-md-5">
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+                                <span class="input-group-text"><i class="fas fa-calendar-check text-success"></i></span>
                                 <div class="form-floating">
                                     <input type="text" id="returnDate" name="returnDate" class="form-control"
                                         placeholder="Select date" required aria-required="true"
@@ -532,15 +532,15 @@
                                 style="letter-spacing: 0.5px; font-size: 0.7rem;">Quick Select:</span>
                             <button type="button" class="quick-select-pill" onclick="addDays(1)" data-days="1"
                                 aria-label="Select 1 Day Duration">
-                                <i class="fas fa-clock"></i> 1 Day
+                                <i class="fas fa-clock text-info"></i> 1 Day
                             </button>
                             <button type="button" class="quick-select-pill" onclick="addDays(3)" data-days="3"
                                 aria-label="Select 3 Days Duration">
-                                <i class="fas fa-calendar-week"></i> 3 Days
+                                <i class="fas fa-calendar-week text-warning"></i> 3 Days
                             </button>
                             <button type="button" class="quick-select-pill" onclick="addDays(7)" data-days="7"
                                 aria-label="Select 1 Week Duration">
-                                <i class="fas fa-calendar"></i> 1 Week
+                                <i class="fas fa-calendar text-primary"></i> 1 Week
                             </button>
                         </div>
                     </div>
@@ -553,7 +553,7 @@
                         </div>
                         <div id="durationDisplay" class="duration-display hidden" role="status">
                             <div class="d-flex align-items-center gap-2">
-                                <i class="fas fa-hourglass-half"></i>
+                                <i class="fas fa-hourglass-half text-success"></i>
                                 <span id="durationText">Select dates</span>
                             </div>
                             <div class="duration-bar">

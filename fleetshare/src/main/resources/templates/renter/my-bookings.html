@@ -159,7 +159,6 @@
             }
 
             .detail-item i {
-                color: #6c757d;
                 width: 18px;
             }
 
@@ -434,13 +433,13 @@
                                 Toyota Camry
                             </h3>
                             <div class="detail-item mb-2">
-                                <i class="fas fa-hashtag"></i>
+                                <i class="fas fa-hashtag text-secondary"></i>
                                 <span th:text="${booking.vehicleRegistrationNo}">WXY 1234</span>
                             </div>
 
                             <div class="booking-details">
                                 <div class="detail-item">
-                                    <i class="fas fa-calendar-check"></i>
+                                    <i class="fas fa-calendar-check text-primary"></i>
                                     <div>
                                         <span class="detail-label">Start:</span>
                                         <span th:text="${#temporals.format(booking.startDate, 'dd MMM yyyy, HH:mm')}">
@@ -450,7 +449,7 @@
                                 </div>
 
                                 <div class="detail-item">
-                                    <i class="fas fa-calendar-times"></i>
+                                    <i class="fas fa-calendar-times text-warning"></i>
                                     <div>
                                         <span class="detail-label">End:</span>
                                         <span th:text="${#temporals.format(booking.endDate, 'dd MMM yyyy, HH:mm')}">
@@ -460,7 +459,7 @@
                                 </div>
 
                                 <div class="detail-item" th:if="${booking.totalCost != null}">
-                                    <i class="fas fa-money-bill-wave"></i>
+                                    <i class="fas fa-money-bill-wave text-success"></i>
                                     <div>
                                         <span class="detail-label">Total:</span>
                                         <span th:text="'RM ' + ${booking.totalCost}">RM 300.00</span>

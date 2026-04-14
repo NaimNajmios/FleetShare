@@ -49,9 +49,7 @@
                 gap: 0.75rem;
             }
 
-            .card-header i {
-                color: #0d6efd;
-            }
+
 
             /* Vehicle Summary */
             .vehicle-summary {
@@ -130,7 +128,7 @@
             .total-amount {
                 font-size: 1.5rem;
                 font-weight: 800;
-                color: #0d6efd;
+                color: var(--primary-color, #4B49AC);
             }
 
             /* Action Buttons */
@@ -223,7 +221,7 @@
             <!-- A. Vehicle Summary -->
             <div class="info-card">
                 <div class="card-header">
-                    <i class="fas fa-car"></i> Vehicle Summary
+                    <i class="fas fa-car text-primary"></i> Vehicle Summary
                 </div>
                 <div class="vehicle-summary">
                     <img th:if="${vehicle.vehicleImageUrl != null}" th:src="${vehicle.vehicleImageUrl}"
@@ -244,7 +242,7 @@
             <!-- B. Client Details -->
             <div class="info-card">
                 <div class="card-header">
-                    <i class="fas fa-user"></i> Client Details
+                    <i class="fas fa-user text-success"></i> Client Details
                 </div>
                 <div class="details-grid">
                     <div class="detail-item">
@@ -269,7 +267,7 @@
             <!-- C. Booking Details -->
             <div class="info-card">
                 <div class="card-header">
-                    <i class="fas fa-calendar-alt"></i> Booking Details
+                    <i class="fas fa-calendar-alt text-info"></i> Booking Details
                 </div>
                 <div class="details-grid">
                     <div class="detail-item">

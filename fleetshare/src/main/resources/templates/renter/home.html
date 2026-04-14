@@ -208,34 +208,15 @@
 
             .stats-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
                 gap: 1.5rem;
             }
 
-            .stat-item {
-                text-align: center;
-                padding: 1rem;
+            .renter-stat-card {
                 background: #f8f9fa;
+                border: 1px solid #e9ecef;
+                padding: 1.25rem;
                 border-radius: 1rem;
-                transition: transform 0.2s;
-            }
-
-            .stat-item:hover {
-                transform: translateY(-2px);
-                background: #fff;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            }
-
-            .stat-value {
-                font-size: 2rem;
-                font-weight: 700;
-                color: var(--primary-color);
-                margin-bottom: 0.25rem;
-            }
-
-            .stat-label {
-                font-size: 0.875rem;
-                color: var(--text-muted);
             }
 
             /* Recent Activity Section */
@@ -449,21 +430,49 @@
                     <h3><i class="fas fa-chart-bar"></i> Your Activity</h3>
                 </div>
                 <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" th:text="${totalBookings != null ? totalBookings : 0}">0</div>
-                        <div class="stat-label">Total Bookings</div>
+                    <div class="stat-card renter-stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 fs-6">Total Bookings</p>
+                                <h3 class="fw-bold mb-0 text-dark" th:text="${totalBookings != null ? totalBookings : 0}">0</h3>
+                            </div>
+                            <div class="stat-icon primary">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" th:text="${activeBookings != null ? activeBookings : 0}">0</div>
-                        <div class="stat-label">Active Rentals</div>
+                    <div class="stat-card renter-stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 fs-6">Active Rentals</p>
+                                <h3 class="fw-bold mb-0 text-dark" th:text="${activeBookings != null ? activeBookings : 0}">0</h3>
+                            </div>
+                            <div class="stat-icon warning">
+                                <i class="fas fa-key"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" th:text="${completedBookings != null ? completedBookings : 0}">0</div>
-                        <div class="stat-label">Completed</div>
+                    <div class="stat-card renter-stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 fs-6">Completed</p>
+                                <h3 class="fw-bold mb-0 text-dark" th:text="${completedBookings != null ? completedBookings : 0}">0</h3>
+                            </div>
+                            <div class="stat-icon success">
+                                <i class="fas fa-flag-checkered"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" th:text="${pendingBookings != null ? pendingBookings : 0}">0</div>
-                        <div class="stat-label">Pending</div>
+                    <div class="stat-card renter-stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 fs-6">Pending</p>
+                                <h3 class="fw-bold mb-0 text-dark" th:text="${pendingBookings != null ? pendingBookings : 0}">0</h3>
+                            </div>
+                            <div class="stat-icon info">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

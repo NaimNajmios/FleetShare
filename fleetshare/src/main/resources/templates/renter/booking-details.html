@@ -158,9 +158,7 @@
                 color: #495057;
             }
 
-            .spec-chip i {
-                color: #6c757d;
-            }
+
 
             .payment-breakdown {
                 background: #f8f9fa;
@@ -537,16 +535,16 @@
 
                         <div class="vehicle-specs">
                             <div class="spec-chip" th:if="${booking != null and booking.vehicleFuelType != null}">
-                                <i class="fas fa-gas-pump"></i>
+                                <i class="fas fa-gas-pump text-info"></i>
                                 <span th:text="${booking.vehicleFuelType}">Petrol</span>
                             </div>
                             <div class="spec-chip"
                                 th:if="${booking != null and booking.vehicleTransmissionType != null}">
-                                <i class="fas fa-cog"></i>
+                                <i class="fas fa-cog text-warning"></i>
                                 <span th:text="${booking.vehicleTransmissionType}">Automatic</span>
                             </div>
                             <div class="spec-chip" th:if="${booking != null and booking.vehicleCategory != null}">
-                                <i class="fas fa-car"></i>
+                                <i class="fas fa-car text-primary"></i>
                                 <span th:text="${booking.vehicleCategory}">SUV</span>
                             </div>
                         </div>
