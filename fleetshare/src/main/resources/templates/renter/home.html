@@ -51,7 +51,7 @@
                 font-weight: 700;
                 color: var(--text-dark);
                 margin-bottom: 1rem;
-                line-height: 1.2;
+                line-height: 1.35;
             }
 
             .hero-subtitle {
@@ -133,17 +133,18 @@
                 align-items: center;
                 gap: 1rem;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-                transition: all 0.3s ease;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                 text-decoration: none;
                 color: inherit;
                 border: 1px solid transparent;
             }
 
             .action-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+                transform: translateY(-4px) scale(1.01);
+                box-shadow: 0 12px 28px rgba(75, 73, 172, 0.15);
                 border-color: var(--primary-color);
                 color: inherit;
+                cursor: pointer;
             }
 
             .action-icon {
@@ -350,16 +351,16 @@
                 letter-spacing: 0.5px;
             }
 
-            .status-pending { background: #fff8e1; color: #b7791f; }
-            .status-confirmed { background: #e3f2fd; color: #1976d2; }
-            .status-active { background: #e0f2f1; color: #00897b; }
-            .status-completed { background: #e8f5e9; color: #2e7d32; }
-            .status-cancelled { background: #ffebee; color: #c62828; }
+            .status-pending { background: #FEF3C7; color: #D97706; }
+            .status-confirmed { background: #E0E7FF; color: #4B49AC; }
+            .status-active { background: #EDE9FE; color: #7C3AED; }
+            .status-completed { background: #D1FAE5; color: #059669; }
+            .status-cancelled { background: #FEE2E2; color: #DC2626; }
 
             /* Responsive */
             @media (max-width: 768px) {
                 .hero-section {
-                    flex-direction: column;
+                    flex-direction: column-reverse;
                     text-align: center;
                     padding: 2rem;
                 }
@@ -527,7 +528,8 @@
                         <div th:if="${booking.status == 'PENDING'}" class="position-absolute end-0 bottom-0 mb-3 me-3 z-2">
                              <a th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}"
                                 class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
-                                <i class="fas fa-credit-card me-1"></i> Pay
+                                <i class="fas fa-credit-card me-1"></i> 
+                                Pay <span th:if="${booking.totalCost != null}" th:text="'RM ' + ${#numbers.formatDecimal(booking.totalCost, 0, 'COMMA', 0, 'POINT')}">0</span>
                              </a>
                         </div>
                     </div>
