@@ -61,4 +61,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("statuses") List<BookingStatusLog.BookingStatus> statuses);
+
+    @Query("SELECT DISTINCT b.vehicleId FROM Booking b WHERE " +
+           "b.startDate < :endDate AND b.endDate > :startDate " +
+           "AND b.bookingId IN (SELECT bsl.bookingId FROM BookingStatusLog bsl " +
+           "  WHERE bsl.bookingId = b.bookingId AND bsl.statusValue IN :statuses " +
+           "  AND bsl.statusTimestamp = (SELECT MAX(b2.statusTimestamp) FROM BookingStatusLog b2 WHERE b2.bookingId = b.bookingId))")
+    List<Long> findUnavailableVehicleIds(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("statuses") List<BookingStatusLog.BookingStatus> statuses);
 }

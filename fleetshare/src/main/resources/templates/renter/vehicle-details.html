@@ -411,7 +411,7 @@
                                 <li><i class="fas fa-check-circle"></i> 24/7 Roadside Support</li>
                             </ul>
 
-                            <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}"
+                            <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId}, pickupDate=${pickupDate}, returnDate=${returnDate})}"
                                class="book-btn pulse-button">
                                 Choose Dates & Book
                             </a>
@@ -434,7 +434,7 @@
                     <small class="text-muted">/day</small>
                 </div>
             </div>
-            <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId})}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+            <a th:href="@{/renter/vehicles/{id}/book(id=${vehicle.vehicleId}, pickupDate=${pickupDate}, returnDate=${returnDate})}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
                 Book Now
             </a>
         </div>

@@ -453,6 +453,22 @@
                         <a href="#" class="clear-filters" onclick="clearAllFilters()">Clear All</a>
                     </div>
 
+                    <!-- Rental Dates Filter -->
+                    <div class="filter-group">
+                        <div class="filter-group-title">Rental Dates</div>
+                        <div class="d-flex flex-column gap-2 mb-3">
+                            <div>
+                                <label for="filterPickupDate" class="form-label small text-muted mb-1 fw-bold">Pickup Date</label>
+                                <input type="date" id="filterPickupDate" class="form-control" th:value="${pickupDate}">
+                            </div>
+                            <div>
+                                <label for="filterReturnDate" class="form-label small text-muted mb-1 fw-bold">Return Date</label>
+                                <input type="date" id="filterReturnDate" class="form-control" th:value="${returnDate}">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100 btn-sm" onclick="applyDateFilter()">Search Availability</button>
+                    </div>
+
                     <!-- Category Filter -->
                 <div class="filter-group">
                     <div class="filter-group-title">Category</div>
@@ -577,7 +593,7 @@
                                       data-id=${vehicle.vehicleId}">
 
                             <div class="vehicle-image-container">
-                                <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}" class="stretched-link"
+                                <a th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId}, pickupDate=${pickupDate}, returnDate=${returnDate})}" class="stretched-link"
                                     style="display: block; width: 100%; height: 100%; text-decoration: none;"
                                     aria-hidden="true" tabindex="-1">
                                     <img th:if="${!#strings.isEmpty(vehicle.vehicleImageUrl)}"
@@ -634,7 +650,7 @@
                                 </div>
 
                                 <a href="#" class="book-now-btn position-relative z-2"
-                                    th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId})}">
+                                    th:href="@{/renter/vehicles/{id}(id=${vehicle.vehicleId}, pickupDate=${pickupDate}, returnDate=${returnDate})}">
                                     View Details
                                 </a>
                             </div>
@@ -765,6 +781,20 @@
     <th:block layout:fragment="extra-js">
         <script>
             // ... existing JS ...
+            function applyDateFilter() {
+                const pickup = document.getElementById('filterPickupDate').value;
+                const returnD = document.getElementById('filterReturnDate').value;
+                if (!pickup || !returnD) {
+                    alert('Please select both pickup and return dates.');
+                    return;
+                }
+                if (new Date(pickup) > new Date(returnD)) {
+                    alert('Return date must be after pickup date.');
+                    return;
+                }
+                window.location.href = `/renter/vehicles?pickupDate=${pickup}&returnDate=${returnD}`;
+            }
+
             function removeFilter(type, value) {
                 // Input validation - prevent empty or invalid values
                 if (!value && type !== 'price' && type !== 'search') {
@@ -992,6 +1022,13 @@
                 const searchInput = document.getElementById('vehicleSearch');
                 searchInput.value = '';
                 toggleClearButton(searchInput);
+
+                // Date Reset Logic
+                const filterPickupDate = document.getElementById('filterPickupDate');
+                if (filterPickupDate && filterPickupDate.value) {
+                    window.location.href = '/renter/vehicles';
+                    return;
+                }
 
                 // Invalidate sort cache
                 cachedSort = null;

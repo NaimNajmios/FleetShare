@@ -79,7 +79,10 @@ public class RenterController {
     private com.najmi.fleetshare.service.ToyyibPayService toyyibPayService;
 
     @GetMapping("/vehicles")
-    public String browseVehicles(HttpSession session, Model model) {
+    public String browseVehicles(
+            @RequestParam(value = "pickupDate", required = false) String pickupDateStr,
+            @RequestParam(value = "returnDate", required = false) String returnDateStr,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null) {
             model.addAttribute("user", user);
@@ -89,15 +92,26 @@ public class RenterController {
         }
 
         // Fetch available vehicles directly from DB
-        // TODO: Add pagination
-        List<VehicleDTO> availableVehicles = vehicleManagementService.getAvailableVehicles();
+        List<VehicleDTO> availableVehicles;
+        if (pickupDateStr != null && returnDateStr != null && !pickupDateStr.trim().isEmpty() && !returnDateStr.trim().isEmpty()) {
+            java.time.LocalDate pickupDate = java.time.LocalDate.parse(pickupDateStr);
+            java.time.LocalDate returnDate = java.time.LocalDate.parse(returnDateStr);
+            availableVehicles = vehicleManagementService.getAvailableVehicles(pickupDate, returnDate);
+            model.addAttribute("pickupDate", pickupDateStr);
+            model.addAttribute("returnDate", returnDateStr);
+        } else {
+            availableVehicles = vehicleManagementService.getAvailableVehicles();
+        }
 
         model.addAttribute("vehicles", availableVehicles);
         return "renter/browse-vehicles";
     }
 
     @GetMapping("/vehicles/{id}")
-    public String vehicleDetails(@PathVariable Long id, HttpSession session, Model model) {
+    public String vehicleDetails(@PathVariable Long id, 
+            @RequestParam(value = "pickupDate", required = false) String pickupDateStr,
+            @RequestParam(value = "returnDate", required = false) String returnDateStr,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null) {
             model.addAttribute("user", user);
@@ -109,6 +123,11 @@ public class RenterController {
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(id);
         if (vehicle == null) {
             return "redirect:/renter/vehicles";
+        }
+
+        if (pickupDateStr != null && returnDateStr != null && !pickupDateStr.trim().isEmpty() && !returnDateStr.trim().isEmpty()) {
+            model.addAttribute("pickupDate", pickupDateStr);
+            model.addAttribute("returnDate", returnDateStr);
         }
 
         model.addAttribute("vehicle", vehicle);
@@ -116,7 +135,10 @@ public class RenterController {
     }
 
     @GetMapping("/vehicles/{id}/book")
-    public String bookingForm(@PathVariable Long id, HttpSession session, Model model) {
+    public String bookingForm(@PathVariable Long id, 
+            @RequestParam(value = "pickupDate", required = false) String pickupDateStr,
+            @RequestParam(value = "returnDate", required = false) String returnDateStr,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null) {
             model.addAttribute("user", user);
@@ -128,6 +150,11 @@ public class RenterController {
         VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(id);
         if (vehicle == null) {
             return "redirect:/renter/vehicles";
+        }
+
+        if (pickupDateStr != null && returnDateStr != null && !pickupDateStr.trim().isEmpty() && !returnDateStr.trim().isEmpty()) {
+            model.addAttribute("pickupDate", pickupDateStr);
+            model.addAttribute("returnDate", returnDateStr);
         }
 
         model.addAttribute("vehicle", vehicle);

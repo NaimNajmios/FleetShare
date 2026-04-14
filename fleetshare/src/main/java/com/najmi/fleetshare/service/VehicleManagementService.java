@@ -40,6 +40,9 @@ public class VehicleManagementService {
         @Autowired
         private AddressRepository addressRepository;
 
+        @Autowired
+        private com.najmi.fleetshare.repository.BookingRepository bookingRepository;
+
         /**
          * Fetches all vehicles with their pricing and owner information
          * Optimized to avoid N+1 problem.
@@ -66,6 +69,36 @@ public class VehicleManagementService {
                         return Collections.emptyList();
                 }
                 return mapVehiclesToDTOs(vehicles);
+        }
+
+        /**
+         * Fetches available vehicles filtered by a specific date range.
+         *
+         * @param startDate Rental start date
+         * @param endDate   Rental end date
+         * @return List of VehicleDTO objects
+         */
+        public List<VehicleDTO> getAvailableVehicles(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+                List<VehicleDTO> availableVehicles = getAvailableVehicles();
+                if (startDate == null || endDate == null || availableVehicles.isEmpty()) {
+                        return availableVehicles;
+                }
+
+                LocalDateTime startDateTime = startDate.atStartOfDay();
+                LocalDateTime endDateTime = endDate.atStartOfDay();
+
+                List<com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus> activeStatuses = 
+                        java.util.Arrays.asList(
+                                com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.PENDING,
+                                com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CONFIRMED,
+                                com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.ACTIVE
+                        );
+
+                List<Long> unavailableIds = bookingRepository.findUnavailableVehicleIds(startDateTime, endDateTime, activeStatuses);
+
+                return availableVehicles.stream()
+                        .filter(v -> !unavailableIds.contains(v.getVehicleId()))
+                        .collect(Collectors.toList());
         }
 
         private List<VehicleDTO> mapVehiclesToDTOs(List<Vehicle> vehicles) {
