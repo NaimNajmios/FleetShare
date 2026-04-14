@@ -303,6 +303,9 @@
             if (!this.validateDateRange()) return;
 
             const self = this;
+            if (window.FleetShareAnalytics) {
+                FleetShareAnalytics.reportGenerate(currentCategory, currentReport, 'preview');
+            }
             document.getElementById('loading-indicator').style.display = 'block';
             document.getElementById('preview-content').style.display = 'none';
             document.getElementById('chart-container').style.display = 'none';
@@ -521,6 +524,10 @@
 
         downloadReport: function(format) {
             if (!this.validateDateRange()) return;
+
+            if (window.FleetShareAnalytics) {
+                FleetShareAnalytics.reportDownload(format, currentReport);
+            }
 
             const params = this.getReportParams();
             const queryString = new URLSearchParams({

@@ -15,14 +15,20 @@ import java.util.stream.Collectors;
 public class ReportChartService {
 
     // Chart color palette (matches frontend chartConfigs)
+    // Using RGBA for transparency matching Chart.js default alpha of 0.7
     private static final String[] BAR_COLORS = {
+            "rgba(102, 126, 234, 0.7)", "rgba(118, 75, 162, 0.8)", "rgba(17, 153, 142, 0.7)", "rgba(56, 239, 125, 0.7)",
+            "rgba(250, 112, 154, 0.7)", "rgba(254, 225, 64, 0.7)", "rgba(79, 172, 254, 0.7)", "rgba(240, 147, 251, 0.7)"
+    };
+
+    private static final String[] BAR_BORDER_COLORS = {
             "#667eea", "#764ba2", "#11998e", "#38ef7d",
             "#fa709a", "#fee140", "#4facfe", "#f093fb"
     };
 
     private static final String[] DOUGHNUT_COLORS = {
-            "#667eea", "#764ba2", "#11998e", "#38ef7d",
-            "#fa709a", "#fee140", "#4facfe", "#f093fb"
+            "rgba(102, 126, 234, 0.7)", "rgba(118, 75, 162, 0.8)", "rgba(17, 153, 142, 0.7)", "rgba(56, 239, 125, 0.7)",
+            "rgba(250, 112, 154, 0.7)", "rgba(254, 225, 64, 0.7)", "rgba(79, 172, 254, 0.7)", "rgba(240, 147, 251, 0.7)"
     };
 
     /**
@@ -128,13 +134,16 @@ public class ReportChartService {
             int barH = (int) (chartHeight * val / maxVal);
             double x = marginLeft + i * (barWidth + gap) + gap / 2;
             int y = marginTop + chartHeight - barH;
-            String barColor = BAR_COLORS[i % BAR_COLORS.length];
-            if (color != null)
-                barColor = color;
+            String barFillColor = BAR_COLORS[i % BAR_COLORS.length];
+            String barBorderColor = BAR_BORDER_COLORS[i % BAR_BORDER_COLORS.length];
+            if (color != null) {
+                barFillColor = color.replace("0.7)", "0.7)");
+                barBorderColor = color;
+            }
 
             sb.append(String.format(
-                    "<rect x=\"%.1f\" y=\"%d\" width=\"%.1f\" height=\"%d\" fill=\"%s\" rx=\"2\" opacity=\"0.85\"/>",
-                    x, y, barWidth, barH, barColor));
+                    "<rect x=\"%.1f\" y=\"%d\" width=\"%.1f\" height=\"%d\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1\" rx=\"2\"/>",
+                    x, y, barWidth, barH, barFillColor, barBorderColor));
 
             // Value on top
             sb.append(String.format(
@@ -206,9 +215,12 @@ public class ReportChartService {
             double val = values.get(i);
             int barW = (int) (chartWidth * val / maxVal);
             int y = marginTop + i * (barHeight + barGap);
-            String barColor = BAR_COLORS[i % BAR_COLORS.length];
-            if (color != null)
-                barColor = color;
+            String barFillColor = BAR_COLORS[i % BAR_COLORS.length];
+            String barBorderColor = BAR_BORDER_COLORS[i % BAR_BORDER_COLORS.length];
+            if (color != null) {
+                barFillColor = color.replace("0.7)", "0.7)");
+                barBorderColor = color;
+            }
 
             // Label
             sb.append(String.format(
@@ -217,8 +229,8 @@ public class ReportChartService {
 
             // Bar
             sb.append(String.format(
-                    "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" rx=\"3\" opacity=\"0.8\"/>",
-                    marginLeft, y, barW, barHeight, barColor));
+                    "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1\" rx=\"3\"/>",
+                    marginLeft, y, barW, barHeight, barFillColor, barBorderColor));
 
             // Value
             String valText = isPercent ? String.format("%.1f%%", val) : formatNumber(val);
@@ -299,14 +311,14 @@ public class ReportChartService {
                 "<text x=\"%d\" y=\"%d\" font-size=\"11\" font-weight=\"bold\" fill=\"#333\" text-anchor=\"middle\">RM %s</text>",
                 cx, cy + 4, formatNumber(total)));
 
-        // Legend
+        // Legend with matching colors
         int legendX = 360;
         int legendY = 45;
         for (int i = 0; i < count; i++) {
             double pct = (values.get(i) / total) * 100;
             sb.append(String.format(
                     "<rect x=\"%d\" y=\"%d\" width=\"12\" height=\"12\" rx=\"2\" fill=\"%s\"/>",
-                    legendX, legendY + i * 22, DOUGHNUT_COLORS[i % DOUGHNUT_COLORS.length]));
+                    legendX, legendY + i * 22, BAR_BORDER_COLORS[i % BAR_BORDER_COLORS.length]));
             sb.append(String.format(
                     "<text x=\"%d\" y=\"%d\" font-size=\"10\" fill=\"#333\">%s (%.1f%%)</text>",
                     legendX + 18, legendY + i * 22 + 10, escapeXml(labels.get(i)), pct));
