@@ -2,202 +2,319 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8" />
     <style>
+        /* Professional Report Styles for OpenHTMLtoPDF */
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                font-size: 9px;
+                color: #666;
+            }
+            @bottom-left {
+                content: "FleetShare - Confidential Report";
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                font-size: 9px;
+                color: #999;
+            }
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            color: #333;
-            font-size: 12px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #4B49AC;
-            padding-bottom: 15px;
-        }
-
-        .header h1 {
-            color: #4B49AC;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #2c3e50;
+            line-height: 1.5;
             margin: 0;
-            font-size: 22px;
-        }
-
-        .header .subtitle {
-            color: #666;
-            margin: 5px 0 0 0;
+            padding: 0;
             font-size: 11px;
         }
 
-        .meta-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
+        /* Colors */
+        :root {
+            --primary: #4B49AC;
+            --primary-light: #7978E9;
+            --secondary: #98BDFF;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --success: #28a745;
+            --border: #e9ecef;
         }
 
-        .meta-item {
-            text-align: center;
+        .header-container {
+            display: table;
+            width: 100%;
+            border-bottom: 2px solid #4B49AC;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header-left {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .header-right {
+            display: table-cell;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4B49AC;
+            margin-bottom: 4px;
+        }
+
+        .report-title {
+            font-size: 18px;
+            color: #34495e;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .tagline {
+            font-size: 10px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Metadata Section */
+        .meta-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 25px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .meta-row {
+            display: table-row;
+        }
+
+        .meta-cell {
+            display: table-cell;
+            padding: 12px 15px;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .meta-cell:last-child {
+            border-right: none;
         }
 
         .meta-label {
-            color: #666;
-            font-size: 10px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #7f8c8d;
             text-transform: uppercase;
+            margin-bottom: 4px;
         }
 
         .meta-value {
-            font-weight: bold;
-            color: #333;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2c3e50;
         }
 
+        /* Summary Section */
+        .summary-container {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4B49AC;
+            margin-bottom: 15px;
+            border-left: 4px solid #4B49AC;
+            padding-left: 10px;
+        }
+
+        .summary-grid {
+            display: table;
+            width: 100%;
+            border-spacing: 10px 0;
+            margin: 0 -10px;
+        }
+
+        .summary-card {
+            display: table-cell;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f4f9 100%);
+            border: 1px solid #e0e6ed;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            width: 25%;
+        }
+
+        .summary-card-label {
+            font-size: 10px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .summary-card-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4B49AC;
+        }
+
+        /* Data Table */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 10px 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
         }
 
         .data-table th {
             background-color: #4B49AC;
             color: white;
-            font-size: 11px;
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 10px;
             font-weight: 600;
-        }
-
-        .data-table tr:nth-child(even) {
-            background-color: #f8f9fa;
+            text-transform: uppercase;
+            border: 1px solid #4B49AC;
         }
 
         .data-table td {
-            font-size: 11px;
-            color: #333;
+            padding: 10px 12px;
+            border-bottom: 1px solid #e9ecef;
+            color: #444;
+            vertical-align: middle;
         }
 
-        .summary-section {
-            margin-top: 20px;
-            padding: 15px;
-            background: linear-gradient(135deg, #4B49AC15 0%, #7978E915 100%);
-            border-radius: 6px;
-            border-left: 4px solid #4B49AC;
+        .data-table tr:nth-child(even) {
+            background-color: #fafbfc;
         }
 
-        .summary-title {
-            font-weight: bold;
-            color: #4B49AC;
-            margin-bottom: 10px;
-            font-size: 13px;
+        .data-table tr:hover {
+            background-color: #f1f4f9;
         }
 
-        .summary-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .summary-item {
-            min-width: 120px;
-        }
-
-        .summary-label {
-            color: #666;
-            font-size: 10px;
-        }
-
-        .summary-value {
-            font-weight: bold;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .footer {
+        /* Chart Section */
+        .chart-box {
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
             text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chart-box svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Footer */
+        .report-footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 9px;
+        }
+
+        .signature-space {
             margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-            color: #666;
-            font-size: 10px;
+            display: table;
+            width: 100%;
+        }
+
+        .signature-box {
+            display: table-cell;
+            width: 50%;
+            padding-top: 40px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 200px;
+            margin-bottom: 5px;
         }
 
         .no-data {
             text-align: center;
-            padding: 40px;
-            color: #666;
+            padding: 50px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            color: #7f8c8d;
             font-style: italic;
-        }
-
-        .chart-section {
-            margin: 15px 0 20px 0;
-            padding: 15px;
-            background: #fafbfc;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .chart-section svg {
-            max-width: 100%;
-            height: auto;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1 th:text="${report.reportTitle}">Report Title</h1>
-        <p class="subtitle">FleetShare Vehicle Rental Platform</p>
+    <div class="header-container">
+        <div class="header-left">
+            <div class="brand-name">FleetShare</div>
+            <div class="tagline">Vehicle Rental Management System</div>
+        </div>
+        <div class="header-right">
+            <h1 class="report-title" th:text="${report.reportTitle}">Report Title</h1>
+            <div style="font-size: 10px; color: #7f8c8d;" th:text="${#strings.toUpperCase(request.category) + ' REPORT'}">BOOKING REPORT</div>
+        </div>
     </div>
 
-    <table style="width: 100%; margin-bottom: 20px;">
-        <tr>
-            <td style="width: 25%; padding: 10px; background: #f8f9fa; text-align: center;">
-                <div class="meta-label">Generated</div>
-                <div class="meta-value" th:text="${report.generatedAt}">26 Jan 2026 14:00</div>
-            </td>
-            <td style="width: 25%; padding: 10px; background: #f8f9fa; text-align: center;">
-                <div class="meta-label">Period</div>
-                <div class="meta-value" th:text="${report.period}">01 Jan 2026 - 26 Jan 2026</div>
-            </td>
-            <td style="width: 25%; padding: 10px; background: #f8f9fa; text-align: center;">
-                <div class="meta-label">Category</div>
-                <div class="meta-value" th:text="${#strings.toUpperCase(request.category)}">BOOKING</div>
-            </td>
-            <td style="width: 25%; padding: 10px; background: #f8f9fa; text-align: center;">
-                <div class="meta-label">Report Type</div>
-                <div class="meta-value" th:text="${report.reportType}">Monthly Revenue</div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 25%; padding: 10px; background: #e8eaf6; text-align: center;">
+    <!-- Metadata Grid -->
+    <div class="meta-grid">
+        <div class="meta-row">
+            <div class="meta-cell">
+                <div class="meta-label">Generated Date</div>
+                <div class="meta-value" th:text="${report.generatedAt}">26 Apr 2026 14:00</div>
+            </div>
+            <div class="meta-cell">
+                <div class="meta-label">Report Period</div>
+                <div class="meta-value" th:text="${report.period}">01 Apr 2026 - 26 Apr 2026</div>
+            </div>
+            <div class="meta-cell">
                 <div class="meta-label">Generated By</div>
-                <div class="meta-value" th:text="${report.generatedBy}">Admin User</div>
-            </td>
-            <td style="width: 25%; padding: 10px; background: #e8eaf6; text-align: center;">
-                <div class="meta-label">Format</div>
-                <div class="meta-value" th:text="${#strings.toUpperCase(request.format)}">PDF</div>
-            </td>
-            <td style="width: 50%; padding: 10px; background: #e8eaf6; text-align: center;" colspan="2">
+                <div class="meta-value" th:text="${report.generatedBy}">System Administrator</div>
+            </div>
+        </div>
+        <div class="meta-row">
+            <div class="meta-cell" colspan="2">
                 <div class="meta-label">Filters Applied</div>
-                <div class="meta-value" th:text="${report.filters}">Duration: Last 7 Days</div>
-            </td>
-        </tr>
-    </table>
+                <div class="meta-value" th:text="${report.filters}">Duration: This Month | Status: COMPLETED</div>
+            </div>
+            <div class="meta-cell">
+                <div class="meta-label">Output Format</div>
+                <div class="meta-value" th:text="${#strings.toUpperCase(request.format)}">PDF</div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Chart visualization (SVG) for applicable report types -->
+    <!-- Chart Visualization -->
     <th:block th:if="${chartSvg != null}">
-        <div class="chart-section" th:utext="${chartSvg}">
+        <div class="section-title">Visual Analytics</div>
+        <div class="chart-box" th:utext="${chartSvg}">
             <!-- SVG chart rendered here -->
         </div>
     </th:block>
 
+    <!-- Summary Cards -->
+    <th:block th:if="${report.summary != null and !report.summary.isEmpty()}">
+        <div class="summary-container">
+            <div class="section-title">Key Performance Indicators</div>
+            <div class="summary-grid">
+                <th:block th:each="entry, iter : ${report.summary}">
+                    <div class="summary-card">
+                        <div class="summary-card-label" th:text="${entry.key}">Label</div>
+                        <div class="summary-card-value" th:text="${entry.value}">Value</div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </th:block>
+
+    <!-- Data Detail Section -->
+    <div class="section-title">Detailed Records</div>
     <th:block th:if="${report.data != null and !report.data.isEmpty()}">
         <table class="data-table">
             <thead>
@@ -215,29 +332,15 @@
 
     <th:block th:if="${report.data == null or report.data.isEmpty()}">
         <div class="no-data">
-            No data available for the selected criteria.
+            <p>No detailed records found matching the specified filters and timeframe.</p>
         </div>
     </th:block>
 
-    <th:block th:if="${report.summary != null and !report.summary.isEmpty()}">
-        <div class="summary-section">
-            <div class="summary-title">Summary</div>
-            <table style="width: 100%;">
-                <tr>
-                    <th:block th:each="entry : ${report.summary}">
-                        <td style="padding: 5px 15px 5px 0;">
-                            <div class="summary-label" th:text="${entry.key}">Label</div>
-                            <div class="summary-value" th:text="${entry.value}">Value</div>
-                        </td>
-                    </th:block>
-                </tr>
-            </table>
-        </div>
-    </th:block>
-
-    <div class="footer">
-        <p>Generated by FleetShare Report Builder</p>
-        <p>This is a computer-generated document. No signature required.</p>
+    <!-- Footer -->
+    <div class="report-footer">
+        <p>This report was generated automatically by the FleetShare Platform.</p>
+        <p>Copyright &#169; 2026 FleetShare Rental System. All rights reserved.</p>
+        <p style="margin-top: 10px; font-weight: bold;">COMPUTER GENERATED DOCUMENT - NO SIGNATURE REQUIRED</p>
     </div>
 </body>
 

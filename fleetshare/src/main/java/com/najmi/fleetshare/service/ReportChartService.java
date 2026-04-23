@@ -17,13 +17,13 @@ public class ReportChartService {
     // Chart color palette (matches frontend chartConfigs)
     // Using RGBA for transparency matching Chart.js default alpha of 0.7
     private static final String[] BAR_COLORS = {
-            "rgba(102, 126, 234, 0.7)", "rgba(118, 75, 162, 0.8)", "rgba(17, 153, 142, 0.7)", "rgba(56, 239, 125, 0.7)",
-            "rgba(250, 112, 154, 0.7)", "rgba(254, 225, 64, 0.7)", "rgba(79, 172, 254, 0.7)", "rgba(240, 147, 251, 0.7)"
+            "rgba(75, 73, 172, 0.7)", "rgba(121, 120, 233, 0.7)", "rgba(152, 189, 255, 0.7)", "rgba(40, 167, 69, 0.7)",
+            "rgba(102, 126, 234, 0.7)", "rgba(118, 75, 162, 0.7)", "rgba(17, 153, 142, 0.7)", "rgba(79, 172, 254, 0.7)"
     };
 
     private static final String[] BAR_BORDER_COLORS = {
-            "#667eea", "#764ba2", "#11998e", "#38ef7d",
-            "#fa709a", "#fee140", "#4facfe", "#f093fb"
+            "#4B49AC", "#7978E9", "#98BDFF", "#28a745",
+            "#667eea", "#764ba2", "#11998e", "#4facfe"
     };
 
     private static final String[] DOUGHNUT_COLORS = {
