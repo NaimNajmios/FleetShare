@@ -776,3 +776,21 @@ body .container-scroller,
 .icon-warning { color: #ffc107 !important; }
 .icon-info { color: #17a2b8 !important; }
 .icon-danger { color: #dc3545 !important; }
+
+/* Form Select Contrast Fix for Maintenance Modal */
+.modal .form-select {
+    color: var(--fs-text-primary);
+    background-color: var(--fs-surface);
+    border-color: var(--fs-border);
+}
+
+.modal .form-select:focus {
+    border-color: var(--fs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+}
+
+.modal .form-select option {
+    color: var(--fs-text-primary);
+    background-color: var(--fs-surface);
+    padding: 0.5rem;
+}

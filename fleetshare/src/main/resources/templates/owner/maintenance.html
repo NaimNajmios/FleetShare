@@ -25,6 +25,18 @@
                 --fs-bg-surface: #f8f9fa;
             }
 
+            /* Fix for dropdown text contrast in maintenance modal */
+            #addMaintenanceModal .form-select,
+            #addMaintenanceModal .form-select option {
+                color: #1a1a2e !important;
+                background-color: #fff;
+            }
+            
+            #addMaintenanceModal .form-select:focus {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.15);
+            }
+
             .kpi-card {
                 border-radius: var(--fs-border-radius);
                 padding: 1.25rem;
