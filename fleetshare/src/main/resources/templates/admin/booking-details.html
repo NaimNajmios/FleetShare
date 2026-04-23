@@ -280,7 +280,34 @@
                 background-color: #ffe5d0;
                 color: #fd7e14;
             }
-        </style>
+
+            .badge-verified {
+                background-color: #d4edda;
+                color: #155724;
+            }
+
+            .badge-failed {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+
+            .timeline-item.status-VERIFIED::before {
+                background: #28a745;
+                box-shadow: 0 0 0 2px #28a745;
+            }
+
+            .timeline-item.status-FAILED::before {
+                background: #dc3545;
+                box-shadow: 0 0 0 2px #dc3545;
+            }
+
+            .timeline-item.status-VERIFIED .timeline-content {
+                border-left-color: #28a745;
+            }
+
+            .timeline-item.status-FAILED .timeline-content {
+                border-left-color: #dc3545;
+            }
     </th:block>
 </head>
 
@@ -592,6 +619,36 @@
                     <div th:if="${#lists.isEmpty(statusLogs)}" class="no-data">
                         <i class="mdi mdi-timeline-text" style="font-size: 2rem;"></i>
                         <p>No status changes recorded yet</p>
+                    </div>
+                </div>
+
+                <!-- Payment Status Timeline -->
+                <div class="info-card mt-3">
+                    <div class="card-header-custom">Payment Status Timeline</div>
+
+                    <div th:if="${!#lists.isEmpty(paymentStatusLogs)}" class="timeline">
+                        <div th:each="log : ${paymentStatusLogs}" th:class="'timeline-item status-' + ${log.status}">
+                            <div class="timeline-content">
+                                <div class="timeline-status">
+                                    <span th:if="${log.status == 'PENDING'}"
+                                        class="status-badge badge-pending">Pending</span>
+                                    <span th:if="${log.status == 'VERIFIED'}"
+                                        class="status-badge badge-verified">Verified</span>
+                                    <span th:if="${log.status == 'FAILED'}"
+                                        class="status-badge badge-failed">Failed</span>
+                                </div>
+                                <div class="timeline-actor" th:text="'By: ' + ${log.actorName}">By: admin@example.com
+                                </div>
+                                <div class="timeline-time"
+                                    th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">01 Jan 2024 10:00
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(paymentStatusLogs)}" class="no-data">
+                        <i class="mdi mdi-timeline-text" style="font-size: 2rem;"></i>
+                        <p>No payment status changes recorded yet</p>
                     </div>
                 </div>
             </div>

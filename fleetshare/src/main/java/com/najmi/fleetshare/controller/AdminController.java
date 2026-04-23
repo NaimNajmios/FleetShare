@@ -394,6 +394,13 @@ public class AdminController {
         List<BookingLogDTO> statusLogs = bookingService.getBookingStatusLogsDTO(bookingId);
         model.addAttribute("statusLogs", statusLogs);
 
+        // Get payment status logs for timeline
+        com.najmi.fleetshare.entity.Payment payment = paymentService.getPaymentByBookingId(bookingId);
+        if (payment != null) {
+            java.util.List<com.najmi.fleetshare.dto.PaymentStatusLogDTO> paymentStatusLogs = paymentService.getPaymentStatusLogsDTO(payment.getPaymentId());
+            model.addAttribute("paymentStatusLogs", paymentStatusLogs);
+        }
+
         return "admin/booking-details";
     }
 
