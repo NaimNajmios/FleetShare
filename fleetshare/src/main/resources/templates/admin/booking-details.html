@@ -4,6 +4,7 @@
 
 <head>
     <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <style>
             .booking-header {
                 background: white;
@@ -422,6 +423,17 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Location Simulation -->
+                <div th:if="${booking.status == 'ACTIVE'}" class="info-card mt-3">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <span><i class="mdi mdi-map-marker-radius text-primary me-2"></i>Live Location (Simulated)</span>
+                        <div class="spinner-grow spinner-grow-sm text-success" role="status" style="width: 1.5rem; height: 1.5rem;">
+                            <span class="visually-hidden">Live</span>
+                        </div>
+                    </div>
+                    <div id="bookingMap" style="height: 350px; width: 100%; border-radius: 0.5rem; z-index: 1;"></div>
+                </div>
             </div>
 
             <!-- Right Column: Action Panel & Timeline -->
@@ -718,6 +730,52 @@
             </div>
         </div>
     </div>
+
+    <th:block layout:fragment="extra-js">
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            document.addEventListener("DOMContentLoaded", function () {
+                const bookingStatus = /*[[${booking.status}]]*/ 'UNKNOWN';
+                if (bookingStatus === 'ACTIVE') {
+                    const mapContainer = document.getElementById('bookingMap');
+                    if (mapContainer) {
+                        const klLat = 3.1412;
+                        const klLng = 101.6865;
+                        const map = L.map('bookingMap').setView([klLat, klLng], 14);
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(map);
+
+                        const carIcon = L.divIcon({
+                            className: 'custom-car-icon',
+                            html: '<div style="background-color: #4B49AC; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(0,0,0,0.3); border: 2px solid white;"><i class="mdi mdi-car"></i></div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        });
+
+                        let currentLat = klLat;
+                        let currentLng = klLng;
+                        
+                        const marker = L.marker([currentLat, currentLng], { icon: carIcon }).addTo(map);
+                        
+                        setInterval(function() {
+                            const latDrift = (Math.random() - 0.5) * 0.001;
+                            const lngDrift = (Math.random() - 0.5) * 0.001;
+                            
+                            currentLat += latDrift;
+                            currentLng += lngDrift;
+                            
+                            marker.setLatLng([currentLat, currentLng]);
+                            map.panTo([currentLat, currentLng], {animate: true});
+                        }, 2500);
+                    }
+                }
+            });
+            /*]]>*/
+        </script>
+    </th:block>
 </body>
 
 </html>
