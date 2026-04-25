@@ -755,11 +755,13 @@
                             tabs[nextIndex].focus();
                             tabs[nextIndex].click(); // Automatically select on navigate
                         }
-});
+                    });
+                }
+                initCountdowns();
             });
 
 // Countdown Timer for Pending Bookings
-            (function initCountdowns() {
+            function initCountdowns() {
                 const countdownBadges = document.querySelectorAll('.countdown-badge');
                 if (countdownBadges.length === 0) return;
 
@@ -844,7 +846,7 @@
                     updateCountdown();
                     setInterval(updateCountdown, 1000);
                 });
-            })();
+            }
             /*]]>*/
         </script>
     </th:block>
