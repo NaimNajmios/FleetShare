@@ -11,13 +11,13 @@
     --fs-primary-glow: rgba(37, 99, 235, 0.15);
 
     /* Background Colors */
-    --fs-bg-main: #f0f4f8;
+    --fs-bg-main: #f8fafc;
     --fs-bg-card: #ffffff;
 
     /* Text Colors */
-    --fs-text-primary: #1e293b;
-    --fs-text-secondary: #64748b;
-    --fs-text-muted: #94a3b8;
+    --fs-text-primary: #0f172a;
+    --fs-text-secondary: #334155;
+    --fs-text-muted: #4b5563;
 
     /* Error States */
     --fs-error: #dc2626;
@@ -61,16 +61,16 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --fs-bg-main: #0f172a;
-        --fs-bg-card: #1e293b;
-        --fs-text-primary: #f1f5f9;
-        --fs-text-secondary: #94a3b8;
-        --fs-text-muted: #64748b;
+        --fs-bg-main: #0b0f1a;
+        --fs-bg-card: #161c2d;
+        --fs-text-primary: #ffffff;
+        --fs-text-secondary: #e2e8f0;
+        --fs-text-muted: #b4beca;
         --fs-primary-glow: rgba(59, 130, 246, 0.25);
-        --fs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-        --fs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-        --fs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-        --fs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+        --fs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+        --fs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+        --fs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+        --fs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
     }
 }
 
@@ -184,6 +184,17 @@ body.auth-page {
     animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+    .auth-card {
+        background: rgba(22, 28, 45, 0.85);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 15px rgba(37, 99, 235, 0.1);
+    }
 }
 
 .auth-card::before {
@@ -222,18 +233,32 @@ body.auth-page {
     gap: var(--fs-spacing-sm);
 }
 
-.auth-brand-logo svg {
+.auth-logo-icon {
     filter: drop-shadow(0 4px 8px rgba(37, 99, 235, 0.25));
 }
 
 .brand-text {
     font-size: 1.625rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--fs-primary) 0%, var(--fs-primary-light) 100%);
+    letter-spacing: -0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+}
+
+.brand-fleet {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: -0.5px;
+}
+
+.brand-share {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-left: -1px;
 }
 
 /* ============================================
@@ -313,13 +338,19 @@ body.auth-page {
     width: 100%;
     padding: 0.8125rem 1rem;
     font-size: 0.9375rem;
-    border: 2px solid #e2e8f0;
+    border: 2px solid #94a3b8;
     border-radius: var(--fs-radius-md);
     transition: all var(--fs-transition-base);
     background: var(--fs-bg-card);
     color: var(--fs-text-primary);
     font-family: inherit;
     box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+    .form-input {
+        border-color: #334155;
+    }
 }
 
 .form-input:focus {
@@ -330,7 +361,8 @@ body.auth-page {
 }
 
 .form-input::placeholder {
-    color: var(--fs-text-muted);
+    color: #6b7280;
+    opacity: 0.9;
 }
 
 .form-input:focus::placeholder {
@@ -885,12 +917,32 @@ body.auth-page {
 .alert-success {
     background: var(--fs-success-light);
     color: var(--fs-success);
-    border: 1px solid var(--fs-success-border);
+border: 1px solid var(--fs-success-border);
 }
 
 /* ============================================
-   Label Icons
+   Form Checkbox Label
    ============================================ */
+
+.form-checkbox-label {
+    color: var(--fs-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: block;
+}
+
+.form-checkbox-label .auth-link {
+    color: var(--fs-primary);
+    font-weight: 500;
+}
+
+.form-checkbox-label .auth-link:hover {
+    color: var(--fs-primary-hover);
+}
+
+/* ============================================
+    Label Icons
+    ============================================ */
 
 .label-icon {
     margin-right: 0.25rem;
@@ -931,6 +983,13 @@ body.auth-page {
     border-bottom: 1px solid #e2e8f0;
 }
 
+@media (prefers-color-scheme: dark) {
+    .auth-divider::before,
+    .auth-divider::after {
+        border-bottom-color: #334155;
+    }
+}
+
 .auth-divider span {
     padding: 0 1rem;
     color: var(--fs-text-muted);
@@ -955,13 +1014,19 @@ body.auth-page {
     gap: 0.5rem;
     padding: 0.75rem 1rem;
     background: var(--fs-bg-card);
-    border: 2px solid #e2e8f0;
+    border: 2px solid #cbd5e1;
     border-radius: var(--fs-radius-md);
     color: var(--fs-text-primary);
     font-weight: 500;
     font-size: 0.875rem;
     cursor: pointer;
     transition: all var(--fs-transition-base);
+}
+
+@media (prefers-color-scheme: dark) {
+    .btn-social {
+        border-color: #334155;
+    }
 }
 
 .btn-social:hover:not(:disabled) {
@@ -985,12 +1050,25 @@ body.auth-page {
 .btn-secondary {
     background: #f1f5f9;
     color: var(--fs-text-primary);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
 }
 
 .btn-secondary:hover {
     background: #e2e8f0;
-    border-color: #cbd5e1;
+    border-color: #94a3b8;
+}
+
+@media (prefers-color-scheme: dark) {
+    .btn-secondary {
+        background: #334155;
+        border-color: #475569;
+        color: #ffffff;
+    }
+    
+    .btn-secondary:hover {
+        background: #475569;
+        border-color: #64748b;
+    }
 }
 
 /* ============================================

@@ -63,6 +63,10 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .successHandler(customAuthenticationSuccessHandler())
                                                 .failureUrl("/login?error=true"))
+                                .rememberMe(remember -> remember
+                                                .key("fleetshare-remember-me-key")
+                                                .tokenValiditySeconds(1209600)
+                                                .rememberMeParameter("remember-me"))
                                 .logout(logout -> logout
                                                 .logoutSuccessUrl("/login?logout")
                                                 .permitAll())
