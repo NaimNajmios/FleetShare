@@ -549,6 +549,15 @@
                 background: #3f3e91;
                 transform: translateY(-1px);
             }
+
+            /* Location filter dropdown styles */
+            #filterState, #filterCity {
+                color: var(--text-dark, #212529);
+            }
+            #filterState option, #filterCity option {
+                color: var(--text-dark, #212529);
+                background: white;
+            }
         </style>
     </th:block>
 </head>
@@ -634,6 +643,31 @@
                     <label class="custom-checkbox">
                         <input type="checkbox" name="transmission" value="manual" onchange="applyFilters(true)"> Manual
                     </label>
+                </div>
+
+                <!-- Location Filter -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Location</div>
+                    <select id="filterState" class="form-select form-select-sm mb-2" onchange="onStateChange()">
+                        <option value="">All States</option>
+                        <option value="Johor">Johor</option>
+                        <option value="Kedah">Kedah</option>
+                        <option value="Kelantan">Kelantan</option>
+                        <option value="Melaka">Melaka</option>
+                        <option value="Negeri Sembilan">Negeri Sembilan</option>
+                        <option value="Pahang">Pahang</option>
+                        <option value="Perak">Perak</option>
+                        <option value="Perlis">Perlis</option>
+                        <option value="Pulau Pinang">Pulau Pinang</option>
+                        <option value="Sabah">Sabah</option>
+                        <option value="Sarawak">Sarawak</option>
+                        <option value="Selangor">Selangor</option>
+                        <option value="Terengganu">Terengganu</option>
+                        <option value="Kuala Lumpur">Kuala Lumpur</option>
+                    </select>
+                    <select id="filterCity" class="form-select form-select-sm" onchange="applyFilters(true)" disabled>
+                        <option value="">Select City</option>
+                    </select>
                 </div>
 
                 <!-- Price Range Filter -->
@@ -724,6 +758,8 @@
                                       data-mileage=${vehicle.mileage != null ? vehicle.mileage + ' km' : 'N/A'},
                                       data-image=${vehicle.vehicleImageUrl},
                                       data-owner=${vehicle.ownerBusinessName},
+                                      data-state=${vehicle.state != null ? vehicle.state : ''},
+                                      data-city=${vehicle.city != null ? vehicle.city : ''},
                                       data-location=${(vehicle.city != null ? vehicle.city : '') + (vehicle.city != null and vehicle.state != null ? ', ' : '') + (vehicle.state != null ? vehicle.state : '')},
                                       data-id=${vehicle.vehicleId}">
 
@@ -1039,6 +1075,14 @@
                         el.value = '';
                         toggleClearButton(el);
                     }
+                } else if (type === 'location') {
+                    const stateSelect = document.getElementById('filterState');
+                    const citySelect = document.getElementById('filterCity');
+                    if (stateSelect) stateSelect.value = '';
+                    if (citySelect) {
+                        citySelect.value = '';
+                        citySelect.disabled = true;
+                    }
                 }
                 
                 // Invalidate sort cache when filters change
@@ -1153,6 +1197,15 @@
                     addFilterChip('search', 'search', `Search: "${document.getElementById('vehicleSearch').value}"`);
                 }
 
+                // Location filters
+                const selectedState = document.getElementById('filterState')?.value || '';
+                const selectedCity = document.getElementById('filterCity')?.value || '';
+
+                // Add location chips
+                if (selectedState) {
+                    addFilterChip('location', selectedState, selectedState + (selectedCity ? ', ' + selectedCity : ''));
+                }
+
                 // Sorting Logic - only re-sort when sort option changes (performance optimization)
                 if (cachedSort !== currentSort) {
                     cachedSort = currentSort;
@@ -1183,17 +1236,22 @@
                 cards.forEach(card => {
                     const category = card.dataset.category;
                     const transmission = card.dataset.transmission;
-                    const price = parseFloat(card.dataset.price);
+const price = parseFloat(card.dataset.price);
                     const brand = card.dataset.brand;
                     const model = card.dataset.model;
                     const title = (brand + ' ' + model).toLowerCase();
+                    const cardState = (card.dataset.state || '').toLowerCase();
+                    const cardCity = (card.dataset.city || '').toLowerCase();
 
                     const matchesCategory = checkedCategories.length === 0 || checkedCategories.includes(category);
                     const matchesTransmission = checkedTransmissions.length === 0 || checkedTransmissions.includes(transmission);
                     const matchesPrice = price >= minPrice && price <= maxPrice;
                     const matchesSearch = title.includes(searchInput);
+                    const matchesState = !selectedState || cardState.includes(selectedState.toLowerCase()) || cardState.includes(selectedState.toLowerCase().replace(' ', ''));
+                    const matchesCity = !selectedCity || cardCity.includes(selectedCity.toLowerCase()) || cardCity.includes(selectedCity.toLowerCase().replace(' ', ''));
+                    const matchesLocation = matchesState && matchesCity;
 
-                    if (matchesCategory && matchesTransmission && matchesPrice && matchesSearch) {
+                    if (matchesCategory && matchesTransmission && matchesPrice && matchesSearch && matchesLocation) {
                         card.style.display = 'flex'; // Changed to flex for the card layout
                         card.classList.add('animate-fade-in'); // Add animation class
                         visibleCount++;
@@ -1243,6 +1301,15 @@
                 const searchInput = document.getElementById('vehicleSearch');
                 searchInput.value = '';
                 toggleClearButton(searchInput);
+
+                // Reset location filters
+                const stateSelect = document.getElementById('filterState');
+                const citySelect = document.getElementById('filterCity');
+                if (stateSelect) stateSelect.value = '';
+                if (citySelect) {
+                    citySelect.value = '';
+                    citySelect.disabled = true;
+                }
 
                 // Date Reset Logic
                 const filterPickupDate = document.getElementById('filterPickupDate');
@@ -1351,6 +1418,55 @@
                 document.getElementById('quickViewModal').addEventListener('hidden.bs.modal', function () {
                     btn.focus();
                 }, { once: true });
+            }
+
+            // City data by state
+            const citiesByState = {
+                'Johor': ['Johor Bahru', 'Skudai', 'Kulai', 'Batu Pahat', 'Muar', 'Pontian', 'Kluang', 'Segamat'],
+                'Kedah': ['Alor Setar', 'Sungai Petani', 'Kulim', 'Langkawi', 'Kuala Nerang', 'Pendang', 'Sik', 'Baling'],
+                'Kelantan': ['Kota Bharu', 'Tumpat', 'Pasir Mas', 'Kuala Krai', ' Tanah Merah', 'Machang', 'Jertih', 'Gua Musang'],
+                'Melaka': ['Melaka City', 'Batu Berendam', 'Ayer Keroh', 'Klebang', 'Bandar Hilir', 'Durian Tunggal', 'Jasin'],
+                'Negeri Sembilan': ['Seremban', 'Port Dickson', 'Kuala Pilah', 'Tampin', 'Rembau', 'Nilai', 'Bahau'],
+                'Pahang': ['Kuantan', 'Mentakab', 'Temerloh', 'Bentong', 'Raub', 'Jerantut', 'Kuala Lipis', 'Kemayan'],
+                'Perak': ['Ipoh', 'Taiping', 'Sitiawan', 'Teluk Intan', 'Batu Gajah', 'Kuala Kangsar', 'Simpang', 'Parit Buntar'],
+                'Perlis': ['Kangar', 'Araud', 'Padang Besar', 'Kuala Perlis', 'Simpang Tiga'],
+                'Pulau Pinang': ['George Town', ' Butterworth', 'Bukit Mertajam', 'Prai', 'Tanjung Tokong', 'Batu Ferringhi', 'Jelutong'],
+                'Sabah': ['Kota Kinabalu', 'Sandakan', 'Tawau', 'Lahad Datu', 'Keningau', 'Putatan', 'Donggongon', 'Semporna'],
+                'Sarawak': ['Kuching', 'Miri', 'Sibu', 'Batang Lupar', 'Sri Aman', 'Mukah', 'Sarikei', 'Betong'],
+                'Selangor': ['Shah Alam', 'Klang', 'Petaling Jaya', 'Kuala Langat', 'Kuala Selangor', 'Gombak', 'Hulu Langat', 'Sabang Bernam', 'Bangi', 'Rawang'],
+                'Terengganu': ['Kuala Terengganu', 'Kemaman', 'Dungun', 'Besut', 'Setiu', 'Hulu Terengganu', 'Marang'],
+                'Kuala Lumpur': ['Kuala Lumpur', 'Sentul', 'Brickfields', 'Pudu', 'Bangsar', 'Ampang', 'Cheras', 'Kepong', 'Setapak']
+            };
+
+            function onStateChange() {
+                const stateSelect = document.getElementById('filterState');
+                const citySelect = document.getElementById('filterCity');
+                const selectedState = stateSelect?.value || '';
+
+                if (!selectedState) {
+                    if (citySelect) {
+                        citySelect.innerHTML = '<option value="">Select City</option>';
+                        citySelect.disabled = true;
+                    }
+                    applyFilters(true);
+                    return;
+                }
+
+                if (citySelect && citiesByState[selectedState]) {
+                    citySelect.innerHTML = '<option value="">All Cities</option>';
+                    citiesByState[selectedState].forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                    citySelect.disabled = false;
+                } else if (citySelect) {
+                    citySelect.innerHTML = '<option value="">Select City</option>';
+                    citySelect.disabled = true;
+                }
+
+                applyFilters(true);
             }
         </script>
     </th:block>
