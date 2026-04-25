@@ -961,18 +961,28 @@
                         return;
                     }
 
-                    const minutes = Math.floor(diff / 60000);
+                    const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+                    const days = Math.floor((diff % (7 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+                    const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                    const minutes = Math.floor((diff % (60 * 60 * 1000)) / 60000);
                     const seconds = Math.floor((diff % 60000) / 1000);
 
-                    if (minutes < 5) {
+                    if (minutes < 5 && hours === 0 && days === 0 && weeks === 0) {
                         countdownDisplay.classList.remove('warning');
                         countdownDisplay.classList.add('danger');
-                    } else if (minutes < 15) {
+                    } else if (minutes < 15 && hours === 0 && days === 0 && weeks === 0) {
                         countdownDisplay.classList.remove('danger');
                         countdownDisplay.classList.add('warning');
                     }
 
-                    countdownDisplay.textContent = minutes + 'm ' + (seconds < 10 ? '0' : '') + seconds + 's';
+                    let displayParts = [];
+                    if (weeks > 0) displayParts.push(weeks + 'w');
+                    if (days > 0 || weeks > 0) displayParts.push(days + 'd');
+                    if (hours > 0 || days > 0 || weeks > 0) displayParts.push(hours + 'h');
+                    displayParts.push(minutes + 'm');
+                    displayParts.push((seconds < 10 ? '0' : '') + seconds + 's');
+
+                    countdownDisplay.textContent = displayParts.join(' ');
                 }
 
                 updateCountdown();
