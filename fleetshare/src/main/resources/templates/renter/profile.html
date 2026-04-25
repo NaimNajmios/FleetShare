@@ -538,30 +538,42 @@
                 </div>
             </div>
 
-            <!-- Location Map Card -->
+<!-- Location Map Card -->
             <div class="profile-card">
                 <div class="card-header">
                     <h3 class="card-title">My Location</h3>
                     <p class="card-subtitle">Your location on the map</p>
                 </div>
 
-                <!-- Map Container -->
-                <div th:if="${address != null and address.latitude != null and address.longitude != null}">
-                    <div id="renter-map" th:data-lat="${address.latitude}" th:data-lng="${address.longitude}"
-                        th:data-name="${renterDetails != null ? renterDetails.fullName : 'My Location'}">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                        <small style="color: #6c757d;">Latitude: <span th:text="${address.latitude}"></span></small>
-                        <small style="color: #6c757d;">Longitude: <span th:text="${address.longitude}"></span></small>
-                    </div>
+                <!-- Hidden inputs for lat/lng -->
+                <input type="hidden" id="latitude"
+                    th:value="${address != null and address.latitude != null ? address.latitude : ''}">
+                <input type="hidden" id="longitude"
+                    th:value="${address != null and address.longitude != null ? address.longitude : ''}">
+
+                <!-- Map Container (always present) -->
+                <div id="renter-map"
+                    th:data-lat="${address != null and address.latitude != null ? address.latitude : ''}"
+                    th:data-lng="${address != null and address.longitude != null ? address.longitude : ''}"
+                    th:data-name="${renterDetails != null ? renterDetails.fullName : 'My Location'}">
                 </div>
 
-                <!-- Placeholder when no coordinates -->
-                <div th:unless="${address != null and address.latitude != null and address.longitude != null}"
-                    class="map-placeholder">
-                    <i class="fas fa-map-marker-slash text-secondary"></i>
-                    <p style="margin: 0; font-weight: 500;">Location not set</p>
-                    <small>Add latitude and longitude coordinates to display the map</small>
+                <!-- Edit mode help text (hidden by default) -->
+                <div id="map-edit-hint" class="hidden mt-2">
+                    <small class="text-muted"><i class="fas fa-info-circle mr-1"></i>Click on the map
+                        or drag the marker to set your location</small>
+                </div>
+
+                <!-- Coordinate display -->
+                <div class="row mt-3" id="coord-display">
+                    <div class="col-md-6">
+                        <small class="text-muted">Latitude: <span id="display-lat"
+                                th:text="${address != null and address.latitude != null ? address.latitude : 'Not set'}"></span></small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Longitude: <span id="display-lng"
+                                th:text="${address != null and address.longitude != null ? address.longitude : 'Not set'}"></span></small>
+                    </div>
                 </div>
             </div>
 
@@ -653,6 +665,10 @@
         <script>
             let isEditMode = false;
             let selectedImageFile = null;
+            let leafletMap = null;
+            let leafletMarker = null;
+            let originalLat = null;
+            let originalLng = null;
 
             const fullNameInput = document.getElementById('fullName');
             const phoneNumberInput = document.getElementById('phoneNumber');
@@ -661,6 +677,8 @@
             const cityInput = document.getElementById('city');
             const stateInput = document.getElementById('state');
             const postalCodeInput = document.getElementById('postalCode');
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
             const btnUpload = document.getElementById('btn-upload-image');
             const editActions = document.getElementById('edit-actions');
             const viewActions = document.getElementById('view-actions');
@@ -689,11 +707,15 @@
 
                 // Enable dropzone visual
                 document.getElementById('avatar-dropzone').classList.add('editable');
+
+                // Enable map editing
+                enableMapEditing();
             });
 
             btnCancel.addEventListener('click', function (e) {
                 e.preventDefault();
                 exitEditMode(true);
+                resetMap();
             });
 
             // Helper to upload profile image
@@ -733,7 +755,9 @@
                         addressLine2: addressLine2Input.value,
                         city: cityInput.value,
                         state: stateInput.value,
-                        postalCode: postalCodeInput.value
+                        postalCode: postalCodeInput.value,
+                        latitude: latitudeInput ? latitudeInput.value : '',
+                        longitude: longitudeInput ? longitudeInput.value : ''
                     };
 
                     const response = await fetch('/renter/profile', {
@@ -771,15 +795,17 @@
                     editableFields.forEach(field => {
                         if (field) field.value = originalValues[field.id];
                     });
-                    selectedImageFile = null; // Reset image selection
+                    selectedImageFile = null;
                 }
                 editableFields.forEach(field => { if (field) field.disabled = true; });
                 btnUpload.classList.add('hidden');
                 editActions.classList.add('hidden');
                 viewActions.classList.remove('hidden');
 
-                // Disable dropzone visual
                 document.getElementById('avatar-dropzone').classList.remove('editable');
+
+                const mapEditHint = document.getElementById('map-edit-hint');
+                if (mapEditHint) mapEditHint.classList.add('hidden');
             }
 
             // Image Upload Handling
@@ -984,31 +1010,141 @@
 
             btnUpload.classList.add('hidden');
 
-            // Leaflet Map Initializations
+            // Leaflet Map Initialization with Edit Mode Support
             (function initMap() {
                 var mapEl = document.getElementById('renter-map');
-                if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
-                    var lat = parseFloat(mapEl.dataset.lat);
-                    var lng = parseFloat(mapEl.dataset.lng);
-                    var locationName = mapEl.dataset.name || 'My Location';
+                if (!mapEl) return;
 
-                    // Load Leaflet JS dynamically
-                    var leafletJS = document.createElement('script');
-                    leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-                    leafletJS.onload = function () {
-                        var map = L.map('renter-map').setView([lat, lng], 15);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap contributors'
-                        }).addTo(map);
-                        L.marker([lat, lng])
-                            .addTo(map)
+                var lat = mapEl.dataset.lat ? parseFloat(mapEl.dataset.lat) : null;
+                var lng = mapEl.dataset.lng ? parseFloat(mapEl.dataset.lng) : null;
+                var locationName = mapEl.dataset.name || 'My Location';
+
+                // Store originals for cancel
+                originalLat = lat;
+                originalLng = lng;
+
+                // Default center: Malaysia
+                var defaultLat = 4.2105;
+                var defaultLng = 101.9758;
+                var hasCoords = (lat !== null && !isNaN(lat) && lng !== null && !isNaN(lng));
+
+                var centerLat = hasCoords ? lat : defaultLat;
+                var centerLng = hasCoords ? lng : defaultLng;
+                var zoom = hasCoords ? 15 : 6;
+
+                // Load Leaflet JS dynamically
+                var leafletJS = document.createElement('script');
+                leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                leafletJS.onload = function () {
+                    // Fix default marker icon paths (CDN loading issue)
+                    delete L.Icon.Default.prototype._getIconUrl;
+                    L.Icon.Default.mergeOptions({
+                        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+                    });
+
+                    leafletMap = L.map('renter-map').setView([centerLat, centerLng], zoom);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(leafletMap);
+
+                    if (hasCoords) {
+                        leafletMarker = L.marker([lat, lng])
+                            .addTo(leafletMap)
                             .bindPopup('<strong>' + locationName + '</strong>')
                             .openPopup();
-                        setTimeout(function () { map.invalidateSize(); }, 200);
-                    };
-                    document.head.appendChild(leafletJS);
-                }
+                    }
+
+                    setTimeout(function () { leafletMap.invalidateSize(); }, 200);
+                };
+                document.head.appendChild(leafletJS);
             })();
+
+            function updateCoordDisplay(lat, lng) {
+                var displayLat = document.getElementById('display-lat');
+                var displayLng = document.getElementById('display-lng');
+                if (displayLat) displayLat.textContent = lat !== null ? parseFloat(lat).toFixed(6) : 'Not set';
+                if (displayLng) displayLng.textContent = lng !== null ? parseFloat(lng).toFixed(6) : 'Not set';
+            }
+
+            function enableMapEditing() {
+                if (!leafletMap) return;
+
+                const mapEditHint = document.getElementById('map-edit-hint');
+                if (mapEditHint) mapEditHint.classList.remove('hidden');
+
+                // Make existing marker draggable or create one at center
+                if (leafletMarker) {
+                    leafletMarker.dragging.enable();
+                    leafletMarker.closePopup();
+                    leafletMarker.bindPopup('<strong>Drag me or click elsewhere</strong>');
+                } else {
+                    var center = leafletMap.getCenter();
+                    leafletMarker = L.marker([center.lat, center.lng], { draggable: true })
+                        .addTo(leafletMap)
+                        .bindPopup('<strong>Drag me or click elsewhere</strong>')
+                        .openPopup();
+                    if (latitudeInput) latitudeInput.value = center.lat.toFixed(6);
+                    if (longitudeInput) longitudeInput.value = center.lng.toFixed(6);
+                    updateCoordDisplay(center.lat, center.lng);
+                }
+
+                // On marker drag
+                leafletMarker.on('dragend', function (e) {
+                    var pos = e.target.getLatLng();
+                    if (latitudeInput) latitudeInput.value = pos.lat.toFixed(6);
+                    if (longitudeInput) longitudeInput.value = pos.lng.toFixed(6);
+                    updateCoordDisplay(pos.lat, pos.lng);
+                });
+
+                // On map click - move marker
+                leafletMap.on('click', function (e) {
+                    if (leafletMarker) {
+                        leafletMarker.setLatLng(e.latlng);
+                    }
+                    if (latitudeInput) latitudeInput.value = e.latlng.lat.toFixed(6);
+                    if (longitudeInput) longitudeInput.value = e.latlng.lng.toFixed(6);
+                    updateCoordDisplay(e.latlng.lat, e.latlng.lng);
+                });
+
+                setTimeout(function () { leafletMap.invalidateSize(); }, 200);
+            }
+
+            function resetMap() {
+                if (!leafletMap) return;
+
+                // Remove click listener
+                leafletMap.off('click');
+
+                // Restore original marker position
+                var hasOriginal = (originalLat !== null && !isNaN(originalLat) && originalLng !== null && !isNaN(originalLng));
+                if (hasOriginal) {
+                    if (leafletMarker) {
+                        leafletMarker.setLatLng([originalLat, originalLng]);
+                        leafletMarker.dragging.disable();
+                        var locationName = document.getElementById('renter-map').dataset.name || 'My Location';
+                        leafletMarker.bindPopup('<strong>' + locationName + '</strong>').openPopup();
+                    }
+                    leafletMap.setView([originalLat, originalLng], 15);
+                } else {
+                    if (leafletMarker) {
+                        leafletMap.removeLayer(leafletMarker);
+                        leafletMarker = null;
+                    }
+                    leafletMap.setView([4.2105, 101.9758], 6);
+                }
+
+                // Restore hidden inputs
+                if (latitudeInput) latitudeInput.value = hasOriginal ? originalLat : '';
+                if (longitudeInput) longitudeInput.value = hasOriginal ? originalLng : '';
+                updateCoordDisplay(hasOriginal ? originalLat : null, hasOriginal ? originalLng : null);
+
+                const mapEditHint = document.getElementById('map-edit-hint');
+                if (mapEditHint) mapEditHint.classList.add('hidden');
+
+                setTimeout(function () { leafletMap.invalidateSize(); }, 200);
+            }
         </script>
     </th:block>
 </body>
