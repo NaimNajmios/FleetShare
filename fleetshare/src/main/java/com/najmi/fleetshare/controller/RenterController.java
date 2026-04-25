@@ -29,8 +29,9 @@ import com.najmi.fleetshare.entity.FleetOwner;
 import com.najmi.fleetshare.dto.OwnerProfileDTO;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 import com.najmi.fleetshare.dto.PasswordChangeRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -459,6 +460,38 @@ public class RenterController {
             }
         }
         return "redirect:/renter/bookings";
+    }
+
+    @PostMapping("/bookings/{id}/auto-cancel")
+    @ResponseBody
+    public ResponseEntity<?> autoCancelBooking(@PathVariable Long id, HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            com.najmi.fleetshare.entity.Booking booking = bookingRepository.findById(id).orElse(null);
+            if (booking == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Verify ownership
+            if (!booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Access denied"));
+            }
+
+            // Only cancel if still PENDING with awaiting payment
+            if (booking.getStatus().equals("PENDING")) {
+                booking.setStatus("CANCELLED");
+                bookingRepository.save(booking);
+            }
+
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/bookings/{id}/payment/cash")

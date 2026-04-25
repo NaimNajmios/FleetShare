@@ -360,6 +360,35 @@
                 color: #721c24;
                 border: 1px solid #dc3545;
             }
+
+            .countdown-timer {
+                margin-left: auto;
+                text-align: right;
+            }
+
+            .countdown-label {
+                display: block;
+                font-size: 0.75rem;
+                opacity: 0.8;
+            }
+
+            .countdown-display {
+                font-size: 1.5rem;
+                font-weight: 700;
+                font-family: monospace;
+            }
+
+            .countdown-display.warning {
+                color: #b45309;
+            }
+
+            .countdown-display.danger {
+                color: #dc2626;
+            }
+
+            .countdown-display.expired {
+                color: #991b1b;
+            }
         </style>
     </th:block>
 </head>
@@ -377,7 +406,18 @@
             </div>
 
             <!-- Status Banner -->
-            <div th:if="${booking.status == 'PENDING'}" class="status-banner banner-pending">
+            <div th:if="${booking.status == 'PENDING' and (booking.paymentStatus == 'AWAITING' or booking.paymentStatus == null)}" class="status-banner banner-pending">
+                <i class="fas fa-hourglass-half"></i>
+                <div>
+                    <strong>Awaiting Payment</strong>
+                    <p>Complete your payment to secure this booking.</p>
+                </div>
+                <div class="countdown-timer" id="countdownTimer">
+                    <span class="countdown-label">Payment required in:</span>
+                    <span class="countdown-display" id="countdownDisplay" th:data-deadline="${booking.startDate}">--:--</span>
+                </div>
+            </div>
+            <div th:if="${booking.status == 'PENDING' and booking.paymentStatus != 'AWAITING'}" class="status-banner banner-pending">
                 <i class="fas fa-clock"></i>
                 <div>
                     <strong>Awaiting Owner Confirmation</strong>
@@ -460,6 +500,18 @@
                     <!-- Vehicle Information Card -->
                     <div class="details-card">
                         <h2 class="card-title">Vehicle Information</h2>
+
+                        <!-- Vehicle Image -->
+                        <div class="vehicle-image-preview mb-3">
+                            <img th:if="${booking != null and booking.vehicleImageUrl != null and !booking.vehicleImageUrl.isEmpty()}"
+                                 th:src="${booking.vehicleImageUrl}" alt="Vehicle Image"
+                                 class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                            <div th:if="${booking == null or booking.vehicleImageUrl == null or booking.vehicleImageUrl.isEmpty()}"
+                                 class="vehicle-placeholder bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-car text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+
                         <div class="info-grid">
                             <div class="info-item">
                                 <span class="info-label">Model</span>
@@ -474,6 +526,22 @@
                                     th:text="${booking != null ? booking.vehicleRegistrationNo : 'WXY 1234'}">
                                     WXY 1234
                                 </span>
+                            </div>
+                            <div class="info-item" th:if="${booking != null and booking.vehicleCategory != null}">
+                                <span class="info-label">Category</span>
+                                <span class="info-value" th:text="${booking.vehicleCategory}">SUV</span>
+                            </div>
+                            <div class="info-item" th:if="${booking != null and booking.vehicleFuelType != null}">
+                                <span class="info-label">Fuel Type</span>
+                                <span class="info-value" th:text="${booking.vehicleFuelType}">Petrol</span>
+                            </div>
+                            <div class="info-item" th:if="${booking != null and booking.vehicleTransmissionType != null}">
+                                <span class="info-label">Transmission</span>
+                                <span class="info-value" th:text="${booking.vehicleTransmissionType}">Automatic</span>
+                            </div>
+                            <div class="info-item" th:if="${booking != null and booking.vehicleRatePerDay != null}">
+                                <span class="info-label">Daily Rate</span>
+                                <span class="info-value" th:text="'RM ' + ${booking.vehicleRatePerDay}">RM 120</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Owner</span>
@@ -794,7 +862,7 @@
             });
             /*]]>*/
         </script>
-        <script>
+        <script th:inline="javascript">
             document.addEventListener('DOMContentLoaded', function () {
                 // Cancel Booking Modal Logic
                 const cancelBtn = document.getElementById('btn-cancel-booking');
@@ -839,6 +907,77 @@
                     });
                 }
             });
+
+// Countdown Timer
+            (function initCountdown() {
+                const countdownDisplay = document.getElementById('countdownDisplay');
+                if (!countdownDisplay) return;
+
+                const deadlineStr = countdownDisplay.dataset.deadline;
+                const bookingId = /*[[${booking.bookingId}]]*/ 0;
+
+                if (!deadlineStr) return;
+
+                let deadline;
+                try {
+                    deadline = new Date(deadlineStr);
+                    if (isNaN(deadline.getTime())) {
+                        deadline = new Date(deadlineStr.replace(/(\d{2})\s+(\w{3})\s+(\d{4}),?\s+(\d{2}):(\d{2})/, '$2 $1 $3 $4:$5'));
+                    }
+                } catch(e) {
+                    console.error('Could not parse deadline:', e);
+                    return;
+                }
+
+                // Subtract 30 minutes
+                deadline = new Date(deadline.getTime() - 30 * 60 * 1000);
+
+                // Get CSRF token
+                var csrfMeta = document.querySelector('meta[name="_csrf"]');
+                var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
+                var csrfHeader = document.querySelector('meta[name="_csrf_header"]') ? document.querySelector('meta[name="_csrf_header"]').getAttribute('content') : 'X-CSRF-TOKEN';
+
+                function updateCountdown() {
+                    const now = new Date();
+                    const diff = deadline - now;
+
+                    if (diff <= 0) {
+                        countdownDisplay.textContent = 'EXPIRED';
+                        countdownDisplay.classList.remove('warning', 'danger');
+                        countdownDisplay.classList.add('expired');
+
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (csrfToken) headers[csrfHeader] = csrfToken;
+
+                        fetch('/renter/bookings/' + bookingId + '/auto-cancel', {
+                            method: 'POST',
+                            headers: headers
+                        }).then(function(response) {
+                            if (response.ok) {
+                                setTimeout(function() { location.reload(); }, 1500);
+                            }
+                        }).catch(function() {});
+
+                        return;
+                    }
+
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+
+                    if (minutes < 5) {
+                        countdownDisplay.classList.remove('warning');
+                        countdownDisplay.classList.add('danger');
+                    } else if (minutes < 15) {
+                        countdownDisplay.classList.remove('danger');
+                        countdownDisplay.classList.add('warning');
+                    }
+
+                    countdownDisplay.textContent = minutes + 'm ' + (seconds < 10 ? '0' : '') + seconds + 's';
+                }
+
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            })();
         </script>
     </th:block>
 </body>
