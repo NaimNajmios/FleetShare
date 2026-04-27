@@ -25,6 +25,7 @@ public class PaymentDetailDTO {
     private String invoiceStatus;
     private String invoiceRemarks;
     private Long bookingId;
+    private LocalDateTime bookingStartDate;
 
     // Constructors
     public PaymentDetailDTO() {
@@ -173,5 +174,13 @@ public class PaymentDetailDTO {
 
     public void setBookingId(Long bookingId) {
         this.bookingId = bookingId;
+    }
+
+    public LocalDateTime getBookingStartDate() {
+        return bookingStartDate;
+    }
+
+    public void setBookingStartDate(LocalDateTime bookingStartDate) {
+        this.bookingStartDate = bookingStartDate;
     }
 }

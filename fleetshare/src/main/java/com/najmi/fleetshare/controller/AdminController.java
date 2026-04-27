@@ -534,6 +534,13 @@ public class AdminController {
                 .getPaymentStatusLogsDTO(paymentId);
         model.addAttribute("statusLogs", statusLogs);
 
+        // Get booking status logs if this payment is linked to a booking
+        if (payment.getBookingId() != null) {
+            java.util.List<com.najmi.fleetshare.dto.BookingLogDTO> bookingStatusLogs = bookingService
+                    .getBookingStatusLogsDTO(payment.getBookingId());
+            model.addAttribute("bookingStatusLogs", bookingStatusLogs);
+        }
+
         return "admin/view-payment";
     }
 

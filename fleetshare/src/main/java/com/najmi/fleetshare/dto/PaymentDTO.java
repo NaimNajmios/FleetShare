@@ -13,6 +13,8 @@ public class PaymentDTO {
     private String paymentStatus;
     private LocalDateTime paymentDate;
     private String transactionReference;
+    private LocalDateTime bookingStartDate;
+    private Long bookingId;
 
     // Constructors
     public PaymentDTO() {
@@ -20,7 +22,8 @@ public class PaymentDTO {
 
     public PaymentDTO(Long paymentId, String invoiceNumber, String renterName,
             String ownerBusinessName, BigDecimal amount, String paymentMethod,
-            String paymentStatus, LocalDateTime paymentDate, String transactionReference) {
+            String paymentStatus, LocalDateTime paymentDate, String transactionReference,
+            LocalDateTime bookingStartDate, Long bookingId) {
         this.paymentId = paymentId;
         this.invoiceNumber = invoiceNumber;
         this.renterName = renterName;
@@ -30,6 +33,8 @@ public class PaymentDTO {
         this.paymentStatus = paymentStatus;
         this.paymentDate = paymentDate;
         this.transactionReference = transactionReference;
+        this.bookingStartDate = bookingStartDate;
+        this.bookingId = bookingId;
     }
 
     // Getters and Setters
@@ -103,5 +108,21 @@ public class PaymentDTO {
 
     public void setTransactionReference(String transactionReference) {
         this.transactionReference = transactionReference;
+    }
+
+    public LocalDateTime getBookingStartDate() {
+        return bookingStartDate;
+    }
+
+    public void setBookingStartDate(LocalDateTime bookingStartDate) {
+        this.bookingStartDate = bookingStartDate;
+    }
+
+    public Long getBookingId() {
+        return bookingId;
+    }
+
+    public void setBookingId(Long bookingId) {
+        this.bookingId = bookingId;
     }
 }

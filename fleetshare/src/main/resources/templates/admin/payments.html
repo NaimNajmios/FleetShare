@@ -114,6 +114,38 @@
             .chart-container {
                 height: 250px;
             }
+
+            /* Countdown Timer Styles */
+            .countdown-badge {
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.3s ease;
+                background: rgba(255, 193, 7, 0.1);
+                color: #856404;
+                border: 1px solid rgba(255, 193, 7, 0.2);
+            }
+            .countdown-badge i { font-size: 14px; }
+            .countdown-warning {
+                background: rgba(253, 126, 20, 0.1) !important;
+                color: #fd7e14 !important;
+                border-color: rgba(253, 126, 20, 0.2) !important;
+            }
+            .countdown-danger {
+                background: rgba(220, 53, 69, 0.1) !important;
+                color: #dc3545 !important;
+                border-color: rgba(220, 53, 69, 0.2) !important;
+                animation: pulse-red 2s infinite;
+            }
+            @keyframes pulse-red {
+                0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+            }
         </style>
     </th:block>
 </head>
@@ -247,6 +279,13 @@
                             <span class="small fw-bold text-muted" th:text="${payment.invoiceNumber}">INV-001</span>
                             <span th:if="${payment.paymentStatus == 'PENDING'}"
                                 class="badge bg-warning text-dark">Pending</span>
+                            <span th:if="${payment.paymentStatus == 'PENDING' and payment.bookingStartDate != null}" 
+                                 class="countdown-badge" 
+                                 th:data-deadline="${payment.bookingStartDate}"
+                                 th:data-booking-id="${payment.bookingId}">
+                                <i class="mdi mdi-clock-fast"></i>
+                                <span class="countdown-timer">...</span>
+                            </span>
                             <span
                                 th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'COMPLETED' or payment.paymentStatus == 'PAID'}"
                                 class="badge bg-success">Verified</span>
@@ -312,6 +351,14 @@
                                             <td>
                                                 <span th:if="${payment.paymentStatus == 'PENDING'}"
                                                     class="badge bg-warning text-dark">Pending</span>
+                                                <div th:if="${payment.paymentStatus == 'PENDING' and payment.bookingStartDate != null}" 
+                                                     class="countdown-badge ms-1" 
+                                                     th:data-deadline="${payment.bookingStartDate}"
+                                                     th:data-booking-id="${payment.bookingId}"
+                                                     style="font-size: 0.65rem; padding: 2px 5px;">
+                                                    <i class="mdi mdi-clock-fast"></i>
+                                                    <span class="countdown-timer">...</span>
+                                                </div>
                                                 <span
                                                     th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'COMPLETED' or payment.paymentStatus == 'PAID'}"
                                                     class="badge bg-success">Verified</span>
@@ -402,7 +449,64 @@
             if (searchInput) searchInput.addEventListener('input', filterPayments);
             if (methodFilter) methodFilter.addEventListener('change', filterPayments);
             if (statusFilter) statusFilter.addEventListener('change', () => { currentStatusFilter = statusFilter.value || 'all'; kpiCards.forEach(card => { card.classList.toggle('active', card.dataset.filter === currentStatusFilter); }); filterPayments(); });
-            document.addEventListener('DOMContentLoaded', () => { const savedView = localStorage.getItem('adminPaymentViewPreference') || 'grid'; setView(savedView); });
+
+            // Countdown Timer Logic
+            function updateCountdown(el) {
+                const deadlineStr = el.getAttribute('data-deadline');
+                if (!deadlineStr) return;
+                
+                const deadline = new Date(deadlineStr.replace(' ', 'T'));
+                const now = new Date();
+                
+                // deadline is booking.startDate. Payment deadline is 30 mins before that.
+                const paymentDeadline = new Date(deadline.getTime() - (30 * 60 * 1000));
+                const diff = paymentDeadline - now;
+
+                if (diff <= 0) {
+                    el.classList.add('countdown-danger');
+                    el.querySelector('.countdown-timer').innerText = 'Expired';
+                    return;
+                }
+
+                const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+                const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let timeStr = '';
+                if (weeks > 0) timeStr += weeks + 'w ';
+                if (days > 0) timeStr += days + 'd ';
+                if (hours > 0) timeStr += hours + 'h ';
+                if (mins > 0 || (weeks === 0 && days === 0 && hours === 0)) timeStr += mins + 'm ';
+                timeStr += secs + 's';
+
+                el.querySelector('.countdown-timer').innerText = timeStr;
+
+                // Update styling based on remaining time
+                el.classList.remove('countdown-warning', 'countdown-danger');
+                if (diff < 5 * 60 * 1000) { // < 5 mins
+                    el.classList.add('countdown-danger');
+                } else if (diff < 15 * 60 * 1000) { // < 15 mins
+                    el.classList.add('countdown-warning');
+                }
+            }
+
+            function initCountdowns() {
+                const timerElements = document.querySelectorAll('.countdown-badge');
+                if (timerElements.length > 0) {
+                    timerElements.forEach(updateCountdown);
+                    setInterval(() => {
+                        timerElements.forEach(updateCountdown);
+                    }, 1000);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => { 
+                const savedView = localStorage.getItem('adminPaymentViewPreference') || 'grid'; 
+                setView(savedView); 
+                initCountdowns();
+            });
         </script>
     </th:block>
 </body>

@@ -199,6 +199,83 @@
                 color: #721c24;
             }
 
+            .badge-confirmed {
+                background-color: #d1e7dd;
+                color: #0f5132;
+            }
+
+            .badge-active {
+                background-color: #cfe2ff;
+                color: #084298;
+            }
+
+            .badge-completed {
+                background-color: #e2d9f3;
+                color: #4a1fb8;
+            }
+
+            .badge-cancelled {
+                background-color: #f8d7da;
+                color: #842029;
+            }
+
+            .badge-disputed {
+                background-color: #ffc107;
+                color: #664d03;
+            }
+
+            .timeline-remarks {
+                font-size: 0.7rem;
+                color: #6c757d;
+                margin-top: 0.25rem;
+                font-style: italic;
+            }
+
+            .timeline-item.status-CONFIRMED::before {
+                background: #28a745;
+                box-shadow: 0 0 0 2px #28a745;
+            }
+
+            .timeline-item.status-ACTIVE::before {
+                background: #0d6efd;
+                box-shadow: 0 0 0 2px #0d6efd;
+            }
+
+            .timeline-item.status-COMPLETED::before {
+                background: #6f42c1;
+                box-shadow: 0 0 0 2px #6f42c1;
+            }
+
+            .timeline-item.status-CANCELLED::before {
+                background: #dc3545;
+                box-shadow: 0 0 0 2px #dc3545;
+            }
+
+            .timeline-item.status-DISPUTED::before {
+                background: #ffc107;
+                box-shadow: 0 0 0 2px #ffc107;
+            }
+
+            .timeline-item.status-CONFIRMED .timeline-content {
+                border-left-color: #28a745;
+            }
+
+            .timeline-item.status-ACTIVE .timeline-content {
+                border-left-color: #0d6efd;
+            }
+
+            .timeline-item.status-COMPLETED .timeline-content {
+                border-left-color: #6f42c1;
+            }
+
+            .timeline-item.status-CANCELLED .timeline-content {
+                border-left-color: #dc3545;
+            }
+
+            .timeline-item.status-DISPUTED .timeline-content {
+                border-left-color: #ffc107;
+            }
+
             .action-panel {
                 background: white;
                 padding: 1.5rem;
@@ -212,6 +289,39 @@
                 color: #4B49AC;
                 text-align: center;
                 margin-bottom: 1rem;
+            }
+
+            /* Countdown Timer Styles */
+            .countdown-badge {
+                padding: 6px 12px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                transition: all 0.3s ease;
+                background: rgba(255, 193, 7, 0.1);
+                color: #856404;
+                border: 1px solid rgba(255, 193, 7, 0.2);
+                margin-top: 10px;
+            }
+            .countdown-badge i { font-size: 16px; }
+            .countdown-warning {
+                background: rgba(253, 126, 20, 0.1) !important;
+                color: #fd7e14 !important;
+                border-color: rgba(253, 126, 20, 0.2) !important;
+            }
+            .countdown-danger {
+                background: rgba(220, 53, 69, 0.1) !important;
+                color: #dc3545 !important;
+                border-color: rgba(220, 53, 69, 0.2) !important;
+                animation: pulse-red 2s infinite;
+            }
+            @keyframes pulse-red {
+                0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
             }
         </style>
     </th:block>
@@ -227,7 +337,13 @@
                         <h3>Payment Details</h3>
                         <p>Payment ID: <span th:text="${payment.paymentId}">1</span></p>
                     </div>
-                    <div>
+                    <div class="text-right">
+                        <div th:if="${payment.paymentStatus == 'PENDING' and payment.bookingStartDate != null}" 
+                             class="countdown-badge d-block" 
+                             th:data-deadline="${payment.bookingStartDate}">
+                            <i class="mdi mdi-clock-fast"></i>
+                            <span class="countdown-timer">...</span>
+                        </div>
                         <span th:text="${payment.paymentStatus}" th:class="'status-badge ' + 
                               (${payment.paymentStatus == 'VERIFIED'} ? 'status-verified' : 
                               (${payment.paymentStatus == 'PENDING'} ? 'status-pending' : 
@@ -410,6 +526,39 @@
                         <p class="mb-0">No status changes recorded yet</p>
                     </div>
                 </div>
+
+                <!-- Booking Status Timeline (shown if payment is linked to a booking) -->
+                <div th:if="${!#lists.isEmpty(bookingStatusLogs)}" class="info-card mt-3">
+                    <div class="card-header-custom">Booking Status Timeline</div>
+
+                    <div class="timeline">
+                        <div th:each="log : ${bookingStatusLogs}" th:class="'timeline-item status-' + ${log.status}">
+                            <div class="timeline-content">
+                                <div class="timeline-status">
+                                    <span th:if="${log.status == 'PENDING'}"
+                                        class="status-badge badge-pending">Pending</span>
+                                    <span th:if="${log.status == 'CONFIRMED'}"
+                                        class="status-badge badge-confirmed">Confirmed</span>
+                                    <span th:if="${log.status == 'ACTIVE'}"
+                                        class="status-badge badge-active">Active</span>
+                                    <span th:if="${log.status == 'COMPLETED'}"
+                                        class="status-badge badge-completed">Completed</span>
+                                    <span th:if="${log.status == 'CANCELLED'}"
+                                        class="status-badge badge-cancelled">Cancelled</span>
+                                    <span th:if="${log.status == 'DISPUTED'}"
+                                        class="status-badge badge-disputed">Disputed</span>
+                                </div>
+                                <div class="timeline-actor" th:text="'By: ' + ${log.actorName}">By: admin@example.com
+                                </div>
+                                <div class="timeline-time"
+                                    th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">01 Jan 2024 10:00
+                                </div>
+                                <div th:if="${log.remarks != null && !log.remarks.isEmpty()}" class="timeline-remarks"
+                                    th:text="${log.remarks}">Remarks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>\r\n\r\n        <!-- Verify Payment Modal -->
     <div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
@@ -443,6 +592,63 @@
         </div>
     </div>
     </div>
+    <th:block layout:fragment="extra-js">
+        <script th:inline="javascript">
+            // Countdown Timer Logic
+            function updateCountdown(el) {
+                const deadlineStr = el.getAttribute('data-deadline');
+                if (!deadlineStr) return;
+                
+                const deadline = new Date(deadlineStr.replace(' ', 'T'));
+                const now = new Date();
+                
+                // deadline is booking.startDate. Payment deadline is 30 mins before that.
+                const paymentDeadline = new Date(deadline.getTime() - (30 * 60 * 1000));
+                const diff = paymentDeadline - now;
+
+                if (diff <= 0) {
+                    el.classList.add('countdown-danger');
+                    el.querySelector('.countdown-timer').innerText = 'Expired';
+                    return;
+                }
+
+                const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+                const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 7)) / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let timeStr = '';
+                if (weeks > 0) timeStr += weeks + 'w ';
+                if (days > 0) timeStr += days + 'd ';
+                if (hours > 0) timeStr += hours + 'h ';
+                if (mins > 0 || (weeks === 0 && days === 0 && hours === 0)) timeStr += mins + 'm ';
+                timeStr += secs + 's';
+
+                el.querySelector('.countdown-timer').innerText = timeStr;
+
+                // Update styling based on remaining time
+                el.classList.remove('countdown-warning', 'countdown-danger');
+                if (diff < 5 * 60 * 1000) { // < 5 mins
+                    el.classList.add('countdown-danger');
+                } else if (diff < 15 * 60 * 1000) { // < 15 mins
+                    el.classList.add('countdown-warning');
+                }
+            }
+
+            function initCountdowns() {
+                const timerElements = document.querySelectorAll('.countdown-badge');
+                if (timerElements.length > 0) {
+                    timerElements.forEach(updateCountdown);
+                    setInterval(() => {
+                        timerElements.forEach(updateCountdown);
+                    }, 1000);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', initCountdowns);
+        </script>
+    </th:block>
 </body>
 
 </html>

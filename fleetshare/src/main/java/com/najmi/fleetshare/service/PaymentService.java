@@ -44,6 +44,9 @@ public class PaymentService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private BookingRepository bookingRepository;
+
     /**
      * Fetches all payments with related information
      * 
@@ -73,7 +76,9 @@ public class PaymentService {
                         payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : "N/A",
                         payment.getPaymentStatus() != null ? payment.getPaymentStatus().name() : "PENDING",
                         payment.getPaymentDate(),
-                        payment.getTransactionReference());
+                        payment.getTransactionReference(),
+                        invoice.getBookingId() != null ? bookingRepository.findById(invoice.getBookingId()).map(Booking::getStartDate).orElse(null) : null,
+                        invoice.getBookingId());
                 paymentDTOs.add(dto);
             }
         }
@@ -163,6 +168,14 @@ public class PaymentService {
         dto.setInvoiceStatus(invoice.getStatus() != null ? invoice.getStatus().name() : "UNKNOWN");
         dto.setInvoiceRemarks(invoice.getRemarks());
         dto.setBookingId(invoice.getBookingId());
+
+        // Fill booking start date
+        if (invoice.getBookingId() != null) {
+            Booking booking = bookingRepository.findById(invoice.getBookingId()).orElse(null);
+            if (booking != null) {
+                dto.setBookingStartDate(booking.getStartDate());
+            }
+        }
 
         return dto;
     }
@@ -550,7 +563,9 @@ public class PaymentService {
                         payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : "N/A",
                         payment.getPaymentStatus() != null ? payment.getPaymentStatus().name() : "PENDING",
                         payment.getPaymentDate(),
-                        payment.getTransactionReference());
+                        payment.getTransactionReference(),
+                        invoice.getBookingId() != null ? bookingRepository.findById(invoice.getBookingId()).map(Booking::getStartDate).orElse(null) : null,
+                        invoice.getBookingId());
                 paymentDTOs.add(dto);
             }
         }
