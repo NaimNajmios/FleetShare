@@ -1,6 +1,8 @@
 package com.najmi.fleetshare.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DTO for report generation parameters
@@ -19,6 +21,7 @@ public class ReportRequest {
     private boolean isAdmin; // context flag
     private String format; // pdf, csv, or excel
     private boolean comparisonMode; // enable period comparison
+    private List<String> remarks; // custom remarks for the report
 
     // Default constructor
     public ReportRequest() {
@@ -119,6 +122,14 @@ public class ReportRequest {
 
     public void setComparisonMode(boolean comparisonMode) {
         this.comparisonMode = comparisonMode;
+    }
+
+    public List<String> getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(List<String> remarks) {
+        this.remarks = remarks;
     }
 
     /**

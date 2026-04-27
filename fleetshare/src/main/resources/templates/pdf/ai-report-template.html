@@ -178,6 +178,34 @@
             border-top: 1px solid #eee;
             padding-top: 20px;
         }
+
+        /* Remarks Section */
+        .remarks-container {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .remarks-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .remarks-list {
+            list-style-type: disc;
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .remarks-list li {
+            margin-bottom: 4px;
+            color: #444;
+            font-size: 10px;
+        }
     </style>
 </head>
 
@@ -247,6 +275,16 @@
                     <div class="summary-value" th:text="${entry.value}">Value</div>
                 </div>
             </th:block>
+        </div>
+    </th:block>
+
+    <!-- Remarks Section -->
+    <th:block th:if="${report.remarks != null and !report.remarks.isEmpty()}">
+        <div class="remarks-container">
+            <div class="remarks-title">Remarks</div>
+            <ul class="remarks-list">
+                <li th:each="remark : ${report.remarks}" th:text="${remark}">Remark text</li>
+            </ul>
         </div>
     </th:block>
 

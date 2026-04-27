@@ -30,7 +30,6 @@ import com.najmi.fleetshare.dto.OwnerProfileDTO;
 import com.najmi.fleetshare.repository.FleetOwnerRepository;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.najmi.fleetshare.dto.PasswordChangeRequest;
@@ -481,10 +480,15 @@ public class RenterController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Access denied"));
             }
 
-            // Only cancel if still PENDING with awaiting payment
-            if (booking.getStatus().equals("PENDING")) {
-                booking.setStatus("CANCELLED");
-                bookingRepository.save(booking);
+            // Fetch current status from log since Booking entity doesn't have it
+            BookingDTO bookingDetails = bookingService.getBookingDetails(id);
+            if (bookingDetails == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Only cancel if still PENDING 
+            if ("PENDING".equals(bookingDetails.getStatus())) {
+                bookingService.updateBookingStatus(id, "CANCELLED", user.getUserId(), "Auto-cancelled by renter");
             }
 
             return ResponseEntity.ok(Map.of("success", true));

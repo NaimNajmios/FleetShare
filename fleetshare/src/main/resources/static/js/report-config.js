@@ -12,6 +12,7 @@
     let reportChartInstance = null;
     let isComparisonMode = false;
     let comparisonData = null;
+    let remarkCounter = 0;
 
     const CHART_CONFIGS = {
         'monthly-revenue': {
@@ -96,6 +97,13 @@
             this.apiEndpoint = apiEndpoint;
             this.bindEvents();
             previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+            this.initRemarks();
+        },
+
+        initRemarks: function() {
+            previewModal._element.addEventListener('shown.bs.modal', () => {
+                this.clearRemarks();
+            });
         },
 
         bindEvents: function() {
@@ -265,6 +273,8 @@
             const vehicleFilter = document.getElementById('vehicle-filter')?.value;
             const ownerFilter = document.getElementById('owner-filter')?.value;
 
+            const remarks = this.getRemarksList();
+
             const params = {
                 category: currentCategory,
                 reportType: currentReport,
@@ -274,10 +284,56 @@
                 status: document.getElementById('status-filter')?.value || null,
                 vehicleId: vehicleFilter ? parseInt(vehicleFilter) : null,
                 ownerId: ownerFilter ? parseInt(ownerFilter) : null,
-                comparisonMode: isComparisonMode
+                comparisonMode: isComparisonMode,
+                remarks: remarks
             };
 
             return params;
+        },
+
+        getRemarksList: function() {
+            const remarks = [];
+            document.querySelectorAll('.remark-input').forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    remarks.push(value);
+                }
+            });
+            return remarks;
+        },
+
+        addRemarkField: function() {
+            const container = document.getElementById('remarks-container');
+            if (!container) return;
+
+            const fieldId = 'remark-' + (++remarkCounter);
+            const field = document.createElement('div');
+            field.className = 'remark-field';
+            field.id = 'field-' + fieldId;
+            field.innerHTML = `
+                <input type="text" class="form-control form-control-sm remark-input" 
+                       id="${fieldId}" placeholder="Enter your remark..." maxlength="500">
+                <button type="button" class="btn btn-outline-danger btn-sm btn-remove-remark" 
+                        onclick="ReportBuilder.removeRemarkField('${fieldId}')">
+                    <i class="mdi mdi-close"></i>
+                </button>
+            `;
+            container.appendChild(field);
+        },
+
+        removeRemarkField: function(fieldId) {
+            const field = document.getElementById('field-' + fieldId);
+            if (field) {
+                field.remove();
+            }
+        },
+
+        clearRemarks: function() {
+            const container = document.getElementById('remarks-container');
+            if (container) {
+                container.innerHTML = '';
+            }
+            remarkCounter = 0;
         },
 
         validateDateRange: function() {
@@ -326,7 +382,14 @@
                 headers: headers,
                 body: JSON.stringify(this.getReportParams())
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || `Server error: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 document.getElementById('loading-indicator').style.display = 'none';
                 document.getElementById('preview-content').style.display = 'block';
@@ -370,12 +433,21 @@
 
             const noData = !data.data || data.data.length === 0;
 
+            const remarksHtml = data.remarks && data.remarks.length > 0 ?
+                `<div class="remarks-preview mt-4">
+                    <h6 class="text-primary font-weight-bold mb-2">Remarks</h6>
+                    <ul class="list-unstyled mb-0">
+                        ${data.remarks.map(r => `<li class="text-muted small mb-1"><i class="mdi mdi-circle-small me-1"></i>${r}</li>`).join('')}
+                    </ul>
+                </div>` : '';
+
             section.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="text-muted"><i class="mdi mdi-calendar me-1"></i>${data.period}</span>
                     <span class="badge bg-secondary">${data.data?.length || 0} records</span>
                 </div>
                 ${summaryHtml}
+                ${remarksHtml}
             `;
 
             if (data.comparisonData) {
@@ -530,7 +602,9 @@
             }
 
             const params = this.getReportParams();
-            const queryString = new URLSearchParams({
+            const remarks = this.getRemarksList();
+            
+            const queryParams = {
                 category: params.category,
                 reportType: params.reportType,
                 duration: params.duration,
@@ -541,7 +615,13 @@
                 ownerId: params.ownerId || '',
                 format: format,
                 comparisonMode: params.comparisonMode
-            }).toString();
+            };
+            
+            if (remarks && remarks.length > 0) {
+                queryParams.remarks = JSON.stringify(remarks);
+            }
+            
+            const queryString = new URLSearchParams(queryParams).toString();
 
             if (typeof showToast === 'function') {
                 showToast(`Preparing ${format.toUpperCase()} download...`, 'info', 'Generating Report');

@@ -41,6 +41,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -730,6 +733,7 @@ public class AdminController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long ownerId,
             @RequestParam(required = false) Boolean comparisonMode,
+            @RequestParam(required = false) String remarks,
             @RequestParam(defaultValue = "pdf") String format,
             HttpSession session) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -748,6 +752,10 @@ public class AdminController {
             request.setAdmin(true);
             request.setFormat(format);
             request.setComparisonMode(comparisonMode != null && comparisonMode);
+            
+            if (remarks != null && !remarks.isEmpty()) {
+                request.setRemarks(parseRemarks(remarks));
+            }
 
             if (startDate != null && !startDate.isEmpty()) {
                 request.setStartDate(java.time.LocalDate.parse(startDate));
@@ -786,6 +794,30 @@ public class AdminController {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
+    }
+    
+    private List<String> parseRemarks(String remarks) {
+        if (remarks == null || remarks.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String trimmed = remarks.trim();
+        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                return mapper.readValue(trimmed, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+            } catch (Exception e) {
+            }
+        }
+
+        if (trimmed.contains(",") && !trimmed.startsWith("{")) {
+            return Arrays.stream(trimmed.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.singletonList(trimmed);
     }
 
     @Autowired
@@ -839,12 +871,14 @@ public class AdminController {
             String contentType;
             String filename;
 
+            List<String> remarks = request.getRemarks();
+
             if ("csv".equalsIgnoreCase(format)) {
-                content = reportService.generateAiCsvReport(aiResponse);
+                content = reportService.generateAiCsvReport(aiResponse, remarks);
                 contentType = "text/csv";
                 filename = "ai-report.csv";
             } else {
-                content = reportService.generateAiPdfReport(aiResponse, request.getQuery());
+                content = reportService.generateAiPdfReport(aiResponse, request.getQuery(), remarks);
                 contentType = "application/pdf";
                 filename = "ai-report.pdf";
             }

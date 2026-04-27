@@ -104,6 +104,11 @@ public class ReportService {
         
         String filters = buildFilterString(request);
         response.setFilters(filters);
+
+        // Set remarks from request if present
+        if (request != null && request.getRemarks() != null && !request.getRemarks().isEmpty()) {
+            response.setRemarks(new ArrayList<>(request.getRemarks()));
+        }
     }
 
     /**
@@ -293,6 +298,7 @@ public class ReportService {
      */
     public byte[] generatePdfReport(ReportRequest request) {
         ReportResponse<Map<String, Object>> reportData = generateReportData(request);
+        
         String html = buildReportHtml(reportData, request);
         return generatePdfFromHtml(html);
     }
@@ -302,6 +308,7 @@ public class ReportService {
      */
     public byte[] generateCsvReport(ReportRequest request) {
         ReportResponse<Map<String, Object>> reportData = generateReportData(request);
+        
         return buildCsv(reportData);
     }
 
@@ -1052,6 +1059,19 @@ public class ReportService {
             csv.append(String.join(",", values)).append("\n");
         }
 
+        // Remarks
+        if (report.getRemarks() != null && !report.getRemarks().isEmpty()) {
+            csv.append("\n");
+            csv.append("Remarks\n");
+            for (String remark : report.getRemarks()) {
+                String escaped = remark.replace("\"", "\"\"");
+                if (escaped.contains(",")) {
+                    escaped = "\"" + escaped + "\"";
+                }
+                csv.append(escaped).append("\n");
+            }
+        }
+
         return csv.toString().getBytes();
     }
 
@@ -1060,7 +1080,7 @@ public class ReportService {
      */
     public byte[] generateExcelReport(ReportRequest request) {
         ReportResponse<Map<String, Object>> reportData = generateReportData(request);
-
+        
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
@@ -1161,6 +1181,25 @@ public class ReportService {
                     setCellValue(valueCell, entry.getValue());
                     valueCell.setCellStyle(dataStyle);
                 }
+                
+                dataRowNum = summaryDataRowNum;
+            }
+
+            // Remarks section
+            if (reportData.getRemarks() != null && !reportData.getRemarks().isEmpty()) {
+                int remarkRowNum = dataRowNum + 2;
+                Row remarkTitleRow = sheet.createRow(remarkRowNum);
+                Cell remarkTitleCell = remarkTitleRow.createCell(0);
+                remarkTitleCell.setCellValue("Remarks");
+                remarkTitleCell.setCellStyle(summaryStyle);
+
+                int remarkDataRowNum = remarkRowNum + 1;
+                for (String remark : reportData.getRemarks()) {
+                    Row row = sheet.createRow(remarkDataRowNum++);
+                    Cell remarkCell = row.createCell(0);
+                    remarkCell.setCellValue("• " + remark);
+                    remarkCell.setCellStyle(dataStyle);
+                }
             }
 
             // Auto-size columns
@@ -1204,8 +1243,13 @@ public class ReportService {
     /**
      * Generate PDF report from AI query results.
      */
-    public byte[] generateAiPdfReport(AiQueryResponse aiResponse, String query) {
+    public byte[] generateAiPdfReport(AiQueryResponse aiResponse, String query, List<String> remarks) {
         ReportResponse<Map<String, Object>> report = convertAiToReport(aiResponse);
+        
+        if (remarks != null && !remarks.isEmpty()) {
+            report.setRemarks(remarks);
+        }
+        
         String html = buildAiReportHtml(report, query);
         return generatePdfFromHtml(html);
     }
@@ -1213,8 +1257,13 @@ public class ReportService {
     /**
      * Generate CSV report from AI query results.
      */
-    public byte[] generateAiCsvReport(AiQueryResponse aiResponse) {
+    public byte[] generateAiCsvReport(AiQueryResponse aiResponse, List<String> remarks) {
         ReportResponse<Map<String, Object>> report = convertAiToReport(aiResponse);
+        
+        if (remarks != null && !remarks.isEmpty()) {
+            report.setRemarks(remarks);
+        }
+        
         return buildCsv(report);
     }
 

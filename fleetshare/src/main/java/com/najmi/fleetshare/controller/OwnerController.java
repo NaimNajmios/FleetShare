@@ -50,6 +50,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -1108,6 +1111,7 @@ public class OwnerController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long vehicleId,
             @RequestParam(required = false) Boolean comparisonMode,
+            @RequestParam(required = false) String remarks,
             @RequestParam(defaultValue = "pdf") String format,
             HttpSession session) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -1126,6 +1130,10 @@ public class OwnerController {
             request.setAdmin(false);
             request.setFormat(format);
             request.setComparisonMode(comparisonMode != null && comparisonMode);
+            
+            if (remarks != null && !remarks.isEmpty()) {
+                request.setRemarks(parseRemarks(remarks));
+            }
 
             if (startDate != null && !startDate.isEmpty()) {
                 request.setStartDate(LocalDate.parse(startDate));
@@ -1164,6 +1172,30 @@ public class OwnerController {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
+    }
+    
+    private List<String> parseRemarks(String remarks) {
+        if (remarks == null || remarks.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String trimmed = remarks.trim();
+        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                return mapper.readValue(trimmed, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+            } catch (Exception e) {
+            }
+        }
+
+        if (trimmed.contains(",") && !trimmed.startsWith("{")) {
+            return Arrays.stream(trimmed.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.singletonList(trimmed);
     }
 
     @Autowired
@@ -1219,12 +1251,14 @@ public class OwnerController {
             String contentType;
             String filename;
 
+            List<String> remarks = request.getRemarks();
+
             if ("csv".equalsIgnoreCase(format)) {
-                content = reportService.generateAiCsvReport(aiResponse);
+                content = reportService.generateAiCsvReport(aiResponse, remarks);
                 contentType = "text/csv";
                 filename = "ai-report.csv";
             } else {
-                content = reportService.generateAiPdfReport(aiResponse, request.getQuery());
+                content = reportService.generateAiPdfReport(aiResponse, request.getQuery(), remarks);
                 contentType = "application/pdf";
                 filename = "ai-report.pdf";
             }
