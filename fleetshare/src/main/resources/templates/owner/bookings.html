@@ -130,6 +130,52 @@
             .chart-container {
                 height: 280px;
             }
+
+            /* Countdown Timer Badge */
+            .countdown-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.25rem 0.75rem;
+                border-radius: 50px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                background: #f8f9fa;
+                color: #6c757d;
+                border: 1px solid #dee2e6;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+            }
+
+            .countdown-badge i {
+                font-size: 0.85rem;
+                color: #0d6efd;
+            }
+
+            .countdown-badge.warning {
+                background: #fff3cd;
+                color: #856404;
+                border-color: #ffeeba;
+                animation: pulse-warning 2s infinite;
+            }
+
+            .countdown-badge.danger {
+                background: #f8d7da;
+                color: #721c24;
+                border-color: #f5c6cb;
+                animation: pulse-danger 1s infinite alternate;
+            }
+
+            @keyframes pulse-warning {
+                0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+            }
+
+            @keyframes pulse-danger {
+                from { box-shadow: 0 0 5px #dc3545; }
+                to { box-shadow: 0 0 15px #dc3545; }
+            }
         </style>
     </th:block>
 </head>
@@ -285,6 +331,15 @@
                             <span th:if="${booking.status == 'COMPLETED'}" class="badge bg-success">Completed</span>
                             <span th:if="${booking.status == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
                             <span th:if="${booking.status == 'DISPUTED'}" class="badge bg-secondary">Disputed</span>
+
+                            <!-- Countdown for pending payments -->
+                            <div th:if="${booking.status == 'PENDING' and (booking.paymentStatus == 'AWAITING' or booking.paymentStatus == null)}"
+                                 class="countdown-badge"
+                                 th:data-booking-id="${booking.bookingId}"
+                                 th:data-deadline="${#temporals.format(booking.startDate, 'yyyy-MM-dd HH:mm')}">
+                                <i class="mdi mdi-timer-outline"></i>
+                                <span>--:--</span>
+                            </div>
                         </div>
                         <div class="card-body">
                             <h5 class="renter-name mb-1" th:text="${booking.renterName}">John Doe</h5>
@@ -359,6 +414,15 @@
                                                     class="badge bg-danger">Cancelled</span>
                                                 <span th:if="${booking.status == 'DISPUTED'}"
                                                     class="badge bg-secondary">Disputed</span>
+
+                                                <!-- Countdown for table view -->
+                                                <div th:if="${booking.status == 'PENDING' and (booking.paymentStatus == 'AWAITING' or booking.paymentStatus == null)}"
+                                                     class="countdown-badge mt-1 d-block text-center"
+                                                     th:data-booking-id="${booking.bookingId}"
+                                                     th:data-deadline="${#temporals.format(booking.startDate, 'yyyy-MM-dd HH:mm')}">
+                                                    <i class="mdi mdi-timer-outline"></i>
+                                                    <span>--:--</span>
+                                                </div>
                                             </td>
                                             <td class="text-end">
                                                 <a th:href="@{/owner/bookings/view/{id}(id=${booking.bookingId})}"
@@ -544,7 +608,64 @@
                 const savedView = localStorage.getItem('bookingViewPreference') || 'grid';
                 setView(savedView);
                 filterBookings();
+
+                // Initialize countdowns
+                initCountdowns();
             });
+
+            function initCountdowns() {
+                const countdownBadges = document.querySelectorAll('.countdown-badge');
+                if (countdownBadges.length === 0) return;
+
+                countdownBadges.forEach(badge => {
+                    const deadlineStr = badge.dataset.deadline;
+                    const timeSpan = badge.querySelector('span');
+
+                    if (!deadlineStr || !timeSpan) return;
+
+                    let deadline = new Date(deadlineStr);
+                    // Standard: 30 minutes before start date
+                    deadline = new Date(deadline.getTime() - 30 * 60 * 1000);
+
+                    function updateCountdown() {
+                        const now = new Date();
+                        const diff = deadline - now;
+
+                        if (diff <= 0) {
+                            badge.classList.remove('warning', 'danger');
+                            badge.style.opacity = '0.5';
+                            timeSpan.textContent = 'EXPIRED';
+                            return;
+                        }
+
+                        const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+                        const days = Math.floor((diff % (7 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+                        const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                        const minutes = Math.floor((diff % (60 * 60 * 1000)) / 60000);
+                        const seconds = Math.floor((diff % 60000) / 1000);
+
+                        if (minutes < 5 && hours === 0 && days === 0 && weeks === 0) {
+                            badge.classList.remove('warning');
+                            badge.classList.add('danger');
+                        } else if (minutes < 15 && hours === 0 && days === 0 && weeks === 0) {
+                            badge.classList.remove('danger');
+                            badge.classList.add('warning');
+                        }
+
+                        let displayParts = [];
+                        if (weeks > 0) displayParts.push(weeks + 'w');
+                        if (days > 0 || weeks > 0) displayParts.push(days + 'd');
+                        if (hours > 0 || days > 0 || weeks > 0) displayParts.push(hours + 'h');
+                        displayParts.push(minutes + 'm');
+                        displayParts.push((seconds < 10 ? '0' : '') + seconds + 's');
+
+                        timeSpan.textContent = displayParts.join(' ');
+                    }
+
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+                });
+            }
         </script>
     </th:block>
 </body>

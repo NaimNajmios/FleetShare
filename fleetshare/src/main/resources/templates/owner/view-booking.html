@@ -302,6 +302,52 @@
             .timeline-item.status-FAILED .timeline-content {
                 border-left-color: #dc3545;
             }
+
+            /* Countdown Timer Badge */
+            .countdown-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.4rem 1rem;
+                border-radius: 50px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                background: #f8f9fa;
+                color: #6c757d;
+                border: 1px solid #dee2e6;
+                transition: all 0.3s ease;
+                margin-right: 1rem;
+            }
+
+            .countdown-badge i {
+                font-size: 1rem;
+                color: #0d6efd;
+            }
+
+            .countdown-badge.warning {
+                background: #fff3cd;
+                color: #856404;
+                border-color: #ffeeba;
+                animation: pulse-warning 2s infinite;
+            }
+
+            .countdown-badge.danger {
+                background: #f8d7da;
+                color: #721c24;
+                border-color: #f5c6cb;
+                animation: pulse-danger 1s infinite alternate;
+            }
+
+            @keyframes pulse-warning {
+                0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+            }
+
+            @keyframes pulse-danger {
+                from { box-shadow: 0 0 5px #dc3545; }
+                to { box-shadow: 0 0 15px #dc3545; }
+            }
         </style>
     </th:block>
 </head>
@@ -316,7 +362,16 @@
                         <h3>Booking Details</h3>
                         <p>Panoramic view of Booking ID: <span th:text="${booking.bookingId}">24</span></p>
                     </div>
-                    <div>
+                    <div class="d-flex align-items-center">
+                        <!-- Countdown for pending payments -->
+                        <div th:if="${booking.status == 'PENDING' and (booking.paymentStatus == 'AWAITING' or booking.paymentStatus == null)}"
+                             id="booking-countdown"
+                             class="countdown-badge"
+                             th:data-deadline="${#temporals.format(booking.startDate, 'yyyy-MM-dd HH:mm')}">
+                            <i class="mdi mdi-timer-outline"></i>
+                            <span>--:--</span>
+                        </div>
+
                         <span th:text="${booking.status}" th:class="'status-badge ' + 
                               (${booking.status == 'CONFIRMED'} ? 'status-confirmed' : 
                               (${booking.status == 'PENDING'} ? 'status-pending' : 
@@ -791,6 +846,54 @@
         <script th:inline="javascript">
             /*<![CDATA[*/
             document.addEventListener("DOMContentLoaded", function () {
+                // Initialize Countdown
+                const countdownEl = document.getElementById('booking-countdown');
+                if (countdownEl) {
+                    const deadlineStr = countdownEl.dataset.deadline;
+                    let deadline = new Date(deadlineStr);
+                    // Standard: 30 minutes before start date
+                    deadline = new Date(deadline.getTime() - 30 * 60 * 1000);
+                    const timeSpan = countdownEl.querySelector('span');
+
+                    function updateCountdown() {
+                        const now = new Date();
+                        const diff = deadline - now;
+
+                        if (diff <= 0) {
+                            countdownEl.classList.remove('warning', 'danger');
+                            countdownEl.style.opacity = '0.5';
+                            timeSpan.textContent = 'EXPIRED';
+                            return;
+                        }
+
+                        const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+                        const days = Math.floor((diff % (7 * 24 * 60 * 60 * 1000)) / (24 * 60 * 60 * 1000));
+                        const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                        const minutes = Math.floor((diff % (60 * 60 * 1000)) / 60000);
+                        const seconds = Math.floor((diff % 60000) / 1000);
+
+                        if (minutes < 5 && hours === 0 && days === 0 && weeks === 0) {
+                            countdownEl.classList.remove('warning');
+                            countdownEl.classList.add('danger');
+                        } else if (minutes < 15 && hours === 0 && days === 0 && weeks === 0) {
+                            countdownEl.classList.remove('danger');
+                            countdownEl.classList.add('warning');
+                        }
+
+                        let displayParts = [];
+                        if (weeks > 0) displayParts.push(weeks + 'w');
+                        if (days > 0 || weeks > 0) displayParts.push(days + 'd');
+                        if (hours > 0 || days > 0 || weeks > 0) displayParts.push(hours + 'h');
+                        displayParts.push(minutes + 'm');
+                        displayParts.push((seconds < 10 ? '0' : '') + seconds + 's');
+
+                        timeSpan.textContent = displayParts.join(' ');
+                    }
+
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+                }
+
                 const bookingStatus = /*[[${booking.status}]]*/ 'UNKNOWN';
                 if (bookingStatus === 'ACTIVE') {
                     const mapContainer = document.getElementById('bookingMap');
