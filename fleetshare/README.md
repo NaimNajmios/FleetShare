@@ -138,11 +138,6 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Logic: Update `BookingStatusLog` automatically on status change.
 - [x] **[R15] Booking History**
     - [x] `Pageable` endpoints for history lists (Pagination).
-- [x] **Renter Booking Experience (UI)**
-    - [x] Integrated vehicle browsing and selection interface (`browse-vehicles.html`).
-    - [x] Detailed booking flow including vehicle specs, pricing, and availability.
-    - [x] Responsive "My Bookings" dashboard with status-based filtering and card-based historical views.
-    - [x] Interactive booking details view for renters including status timeline and payment status logs.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -210,12 +205,6 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Card/FPX available only if owner has ToyyibPay configured.
     - [x] Bank Transfer available only if owner has bank info or QR code set.
     - [x] Cash at counter always available.
-- [x] **Admin/Owner Payment Management (UI)**
-    - [x] Comprehensive payment management dashboards for Owners and Admins.
-    - [x] Detailed payment view featuring verification status, proof-of-payment display, and real-time transition buttons.
-    - [x] Integrated state-machine logic for payment verification (PENDING -> VERIFIED).
-    - [x] Automated booking confirmation upon successful payment verification.
-    - [x] Interactive countdown timer for payment processing window.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -244,11 +233,6 @@ These elements are planned for upcoming modules to enhance functionality and rob
 - [x] **Global Platform Search**
     - [x] Cross-entity search mechanism spanning vehicles, bookings, renters, and fleet owners.
     - [x] Search controller exposing backend REST endpoints.
-- [x] **Modular Report Generation**
-    - [x] Multi-role report generation controller supporting Admins, Owners, and Renters.
-    - [x] Dynamic report configuration UI via standard modals.
-    - [x] Professional PDF export capability using FlyingSaucer/IText with custom HTML/CSS templates.
-    - [x] Support for AI-generated insight reports and transactional receipts.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -372,9 +356,6 @@ src/main/java/
 │   │   ├── VehicleManagementService.java # Vehicle fleet operations
 │   │   ├── PaymentService.java         # Payment processing & history
 │   │   ├── EmailService.java           # Async email with HTML templates
-│   │   ├── ReportService.java          # Modular reporting & PDF export
-│   │   ├── QueryClassifier.java        # AI query categorization component
-│   │   ├── PromptTemplateService.java  # Dynamic LLM prompt management
 │   │   └── PredictiveMaintenanceService.java # Predictive analytics
 │   │
 │   └── util/                           # Utilities
@@ -390,7 +371,6 @@ src/main/resources/
     ├── layouts/                        # Base layouts
     ├── owner/                          # Owner views
     ├── pages/                          # Miscellaneous pages
-    ├── pdf/                            # HTML templates for PDF generation (receipts, reports)
     ├── renter/                         # Renter views
     └── index.html                      # Landing page
 
@@ -416,8 +396,7 @@ src/test/java/
 - [x] Generate utilization reports for fleet owners
 - [x] Platform-wide analytics for administrators
 - [x] FleetShare AI Data Assistant with multi-provider LLM support (Groq / Cerebras / OpenRouter) for administrators and owners
-- [x] Automated query classification and template-based prompt generation for AI queries
-- [x] Financial reporting and revenue tracking with modular PDF export system
+- [ ] Financial reporting and revenue tracking
 
 -----
 
@@ -494,10 +473,7 @@ src/test/java/
 ### Renter Endpoints:
 - `GET /api/renter/bookings` - Booking history
 - `POST /api/renter/bookings` - Create new booking
-- `GET /api/renter/bookings/{id}` - Detailed booking view with status logs
 - `GET /api/renter/payments` - Payment history
-- `POST /api/renter/payments/capture` - Process payment with proof upload
-- `GET /api/renter/reports/generate` - Generate personal usage report
 
 ### Owner Endpoints:
 - `GET /api/owner/vehicles` - Manage vehicle fleet
@@ -509,9 +485,6 @@ src/test/java/
 - `POST /owner/maintenance/{id}/status` - Update maintenance status
 - `GET /owner/ai-reports` - AI Data Assistant
 - `GET /api/owner/reports/utilization` - Utilization reports
-- `GET /api/owner/reports/generate` - Modular fleet performance reports
-- `GET /api/owner/payments` - Fleet-wide payment management
-- `POST /api/owner/payments/{id}/verify` - Verify renter payment
 - `POST /owner/profile` - Update profile (includes bank info & ToyyibPay config)
 - `POST /owner/profile/qr` - Upload payment QR code image
 - `POST /owner/profile/image` - Upload profile photo
@@ -521,8 +494,6 @@ src/test/java/
 - `GET /admin/maintenance` - Platform-wide maintenance oversight
 - `GET /admin/maintenance/{id}` - Detailed maintenance tracking view
 - `GET /api/admin/reports/platform` - Platform analytics
-- `GET /api/admin/reports/generate` - Global system reporting
-- `GET /api/admin/payments` - Global payment oversight & verification
 - `PATCH /api/admin/users/{id}/status` - User status management
 - `GET /api/search` - Global platform search endpoint
 
