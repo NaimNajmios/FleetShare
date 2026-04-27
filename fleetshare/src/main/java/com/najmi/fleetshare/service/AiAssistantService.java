@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Service for AI Data Assistant.
@@ -43,6 +45,12 @@ public class AiAssistantService {
     private MaintenanceService maintenanceService;
     @Autowired
     private UserManagementService userManagementService;
+
+    @Autowired
+    private QueryClassifier queryClassifier;
+
+    @Autowired
+    private PromptTemplateService promptTemplateService;
 
     @Value("${ai.assistant.provider:groq}")
     private String defaultProvider;
@@ -99,7 +107,13 @@ public class AiAssistantService {
             return AiQueryResponse.error("Please enter a question.");
         }
 
-        // Resolve provider
+        QueryClassifier.ClassificationResult classification = queryClassifier.classify(query);
+        QueryClassifier.QueryIntent intent = classification.getIntent();
+        
+        if (intent == null) {
+            intent = QueryClassifier.QueryIntent.LISTING;
+        }
+
         String activeProvider = (provider != null && !provider.isEmpty()) ? provider : defaultProvider;
         String apiKey = getApiKey(activeProvider);
         if (apiKey == null || apiKey.isEmpty()) {
@@ -109,16 +123,15 @@ public class AiAssistantService {
         }
 
         try {
-            // 1. Build data context
-            String dataContext = buildDataContext(ownerId, isAdmin);
+            String dataContext = buildDataContext(ownerId, isAdmin, classification.getFromDate(), classification.getToDate(), classification.getFilters());
 
-            // 2. Build system prompt
-            String systemPrompt = buildSystemPrompt(dataContext, isAdmin);
+            String systemPrompt = promptTemplateService.getSystemPrompt(
+                    dataContext, isAdmin, intent, classification.getFromDate(), classification.getToDate());
 
-            // 3. Call LLM API
-            String rawResponse = callLlmApi(systemPrompt, query, activeProvider);
+            String userPrompt = promptTemplateService.getUserPrompt(query, intent, classification.getFilters());
 
-            // 4. Parse and return
+            String rawResponse = callLlmApiWithRetry(systemPrompt, userPrompt, activeProvider);
+
             return parseAiResponse(rawResponse);
 
         } catch (Exception e) {
@@ -142,9 +155,14 @@ public class AiAssistantService {
      * For owners: only their fleet data.
      * For admins: platform-wide data.
      */
-    private String buildDataContext(Long ownerId, boolean isAdmin) {
+    private String buildDataContext(Long ownerId, boolean isAdmin, java.time.LocalDate fromDate, java.time.LocalDate toDate, Map<String, Object> filters) {
         StringBuilder ctx = new StringBuilder();
-        ctx.append("=== FLEET DATA SNAPSHOT (as of ").append(LocalDate.now().format(DATE_FMT)).append(") ===\n\n");
+        ctx.append("=== FLEET DATA SNAPSHOT (as of ").append(LocalDate.now().format(DATE_FMT)).append(") ===\n");
+
+        if (fromDate != null && toDate != null) {
+            ctx.append("Period: ").append(fromDate.format(DATE_FMT)).append(" to ").append(toDate.format(DATE_FMT)).append("\n");
+        }
+        ctx.append("\n");
 
         // --- Vehicles ---
         List<VehicleDTO> vehicles;
@@ -362,6 +380,46 @@ public class AiAssistantService {
     }
 
     // ==================== LLM API CLIENT ====================
+
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 1000;
+
+    private String callLlmApiWithRetry(String systemPrompt, String userQuery, String provider) throws Exception {
+        Exception lastException = null;
+        
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                return callLlmApi(systemPrompt, userQuery, provider);
+            } catch (Exception e) {
+                lastException = e;
+                String message = e.getMessage();
+                
+                if (message != null && (message.contains("429") || message.contains("rate_limit"))) {
+                    long delay = RETRY_DELAY_MS * attempt;
+                    log.warn("Rate limited. Retrying in {}ms...", delay);
+                    Thread.sleep(delay);
+                    continue;
+                }
+                
+                if (attempt < MAX_RETRIES && isRetryableError(message)) {
+                    long delay = RETRY_DELAY_MS * attempt;
+                    log.warn("Attempt {} failed: {}. Retrying in {}ms...", attempt, message, delay);
+                    Thread.sleep(delay);
+                    continue;
+                }
+                
+                throw e;
+            }
+        }
+        
+        throw lastException != null ? lastException : new RuntimeException("Max retries exceeded");
+    }
+
+    private boolean isRetryableError(String message) {
+        if (message == null) return false;
+        return message.contains("500") || message.contains("502") || message.contains("503") 
+                || message.contains("504") || message.contains("timeout") || message.contains("network");
+    }
 
     private String callLlmApi(String systemPrompt, String userQuery, String provider) throws Exception {
         String apiKey = getApiKey(provider);
