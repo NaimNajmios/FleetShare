@@ -37,6 +37,16 @@ public class ToyyibPayService {
     @Value("${app.base-url:http://localhost:8080}")
     private String appBaseUrl;
 
+    // Platform credentials for Central Payout
+    @Value("${toyyibpay.platform.secret-key:}")
+    private String platformSecretKey;
+
+    @Value("${toyyibpay.platform.category-code:}")
+    private String platformCategoryCode;
+
+    @Value("${toyyibpay.platform.username:}")
+    private String platformUsername;
+
     private final RestTemplate restTemplate;
 
     public ToyyibPayService() {
@@ -44,24 +54,72 @@ public class ToyyibPayService {
     }
 
     /**
-     * Creates a bill on ToyyibPay using the owner's BYOK credentials.
+     * Checks if the platform has valid credentials configured for central payout.
      *
-     * @param owner       The fleet owner with ToyyibPay credentials
-     * @param payment     The payment entity
-     * @param booking     The booking details
-     * @param renterEmail Renter's email address
-     * @param renterPhone Renter's phone number
-     * @param renterName  Renter's full name
+     * @return true if platform credentials are configured
+     */
+    public boolean isPlatformConfigured() {
+        return platformSecretKey != null && !platformSecretKey.isEmpty()
+                && platformCategoryCode != null && !platformCategoryCode.isEmpty();
+    }
+
+    /**
+     * Returns the platform's secret key for callback hash validation.
+     *
+     * @return The platform secret key
+     */
+    public String getPlatformSecretKey() {
+        return platformSecretKey;
+    }
+
+    /**
+     * Creates a bill on ToyyibPay using the Central Payout model (platform credentials + split payment).
+     * Falls back to BYOK (owner credentials) if platform is not configured or owner lacks a username.
+     *
+     * @param owner              The fleet owner
+     * @param payment            The payment entity
+     * @param booking            The booking details
+     * @param renterEmail        Renter's email address
+     * @param renterPhone        Renter's phone number
+     * @param renterName         Renter's full name
+     * @param platformCommission Platform commission amount (null for BYOK fallback)
+     * @param ownerPayout        Owner payout amount (null for BYOK fallback)
      * @return The bill code returned by ToyyibPay
      */
     public String createBill(FleetOwner owner, Payment payment, BookingDTO booking,
-                             String renterEmail, String renterPhone, String renterName) {
-        
-        if (owner.getToyyibpaySecretKey() == null || owner.getToyyibpaySecretKey().isEmpty()) {
-            throw new IllegalStateException("Owner has not configured ToyyibPay secret key");
+                             String renterEmail, String renterPhone, String renterName,
+                             BigDecimal platformCommission, BigDecimal ownerPayout) {
+
+        // Determine which mode to use: Central Payout or BYOK fallback
+        boolean useCentralPayout = isPlatformConfigured()
+                && owner.getToyyibpayUsername() != null
+                && !owner.getToyyibpayUsername().isEmpty()
+                && ownerPayout != null
+                && ownerPayout.compareTo(BigDecimal.ZERO) > 0;
+
+        boolean useByokFallback = !useCentralPayout
+                && owner.getToyyibpaySecretKey() != null
+                && !owner.getToyyibpaySecretKey().isEmpty()
+                && owner.getToyyibpayCategoryCode() != null
+                && !owner.getToyyibpayCategoryCode().isEmpty();
+
+        if (!useCentralPayout && !useByokFallback) {
+            throw new IllegalStateException(
+                    "Payment cannot be processed: neither platform credentials nor owner BYOK credentials are configured.");
         }
-        if (owner.getToyyibpayCategoryCode() == null || owner.getToyyibpayCategoryCode().isEmpty()) {
-            throw new IllegalStateException("Owner has not configured ToyyibPay category code");
+
+        String secretKey;
+        String categoryCode;
+
+        if (useCentralPayout) {
+            secretKey = platformSecretKey;
+            categoryCode = platformCategoryCode;
+            logger.info("Using CENTRAL PAYOUT mode for owner: {} (username: {})",
+                    owner.getBusinessName(), owner.getToyyibpayUsername());
+        } else {
+            secretKey = owner.getToyyibpaySecretKey();
+            categoryCode = owner.getToyyibpayCategoryCode();
+            logger.info("Using BYOK FALLBACK mode for owner: {}", owner.getBusinessName());
         }
 
         // Convert amount to cents (ToyyibPay expects amount in cents)
@@ -77,8 +135,8 @@ public class ToyyibPayService {
 
         // Build form data
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("userSecretKey", owner.getToyyibpaySecretKey());
-        formData.add("categoryCode", owner.getToyyibpayCategoryCode());
+        formData.add("userSecretKey", secretKey);
+        formData.add("categoryCode", categoryCode);
         formData.add("billName", billName);
         formData.add("billDescription", billDescription);
         formData.add("billPriceSetting", "1"); // Fixed price
@@ -90,14 +148,31 @@ public class ToyyibPayService {
         formData.add("billTo", renterName != null ? truncate(renterName, 100) : "");
         formData.add("billEmail", renterEmail != null ? renterEmail : "");
         formData.add("billPhone", renterPhone != null ? renterPhone : "");
-        formData.add("billSplitPayment", "0");
-        formData.add("billSplitPaymentArgs", "");
-        formData.add("billPaymentChannel", billPaymentChannel);
+
+        // Split Payment configuration
+        if (useCentralPayout) {
+            formData.add("billSplitPayment", "1");
+            int ownerPayoutCents = ownerPayout.multiply(BigDecimal.valueOf(100)).intValue();
+            String splitArgs = String.format(
+                "[{\"id\":\"%s\",\"amount\":\"%d\"}]",
+                owner.getToyyibpayUsername(), ownerPayoutCents);
+            formData.add("billSplitPaymentArgs", splitArgs);
+            // Restrict to FPX only when split payment is enabled (split only works with FPX)
+            formData.add("billPaymentChannel", "0");
+            logger.info("Split payment enabled: owner {} gets {} cents, platform gets {} cents",
+                    owner.getToyyibpayUsername(), ownerPayoutCents,
+                    platformCommission != null ? platformCommission.multiply(BigDecimal.valueOf(100)).intValue() : 0);
+        } else {
+            formData.add("billSplitPayment", "0");
+            formData.add("billSplitPaymentArgs", "");
+            formData.add("billPaymentChannel", billPaymentChannel);
+        }
+
         formData.add("billChargeToCustomer", "1");
         formData.add("billExpiryDays", String.valueOf(billExpiryDays));
 
-        logger.info("Creating ToyyibPay bill for booking #{} with amount {} cents", 
-                     booking.getBookingId(), amountCents);
+        logger.info("Creating ToyyibPay bill for booking #{} with amount {} cents (mode: {})",
+                     booking.getBookingId(), amountCents, useCentralPayout ? "CENTRAL_PAYOUT" : "BYOK");
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -153,7 +228,7 @@ public class ToyyibPayService {
     /**
      * Validates the callback hash from ToyyibPay to prevent tampering.
      *
-     * @param userSecretKey Owner's ToyyibPay secret key
+     * @param userSecretKey Secret key used to create the bill (platform or owner)
      * @param status        Payment status from callback
      * @param orderId       External reference number
      * @param refno         Payment reference number

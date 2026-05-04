@@ -6,15 +6,17 @@ public class PaymentStatusLogDTO {
     private String status;
     private String actorName;
     private LocalDateTime timestamp;
+    private String remarks;
 
     // Constructors
     public PaymentStatusLogDTO() {
     }
 
-    public PaymentStatusLogDTO(String status, String actorName, LocalDateTime timestamp) {
+    public PaymentStatusLogDTO(String status, String actorName, LocalDateTime timestamp, String remarks) {
         this.status = status;
         this.actorName = actorName;
         this.timestamp = timestamp;
+        this.remarks = remarks;
     }
 
     // Getters and Setters
@@ -40,5 +42,13 @@ public class PaymentStatusLogDTO {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 }

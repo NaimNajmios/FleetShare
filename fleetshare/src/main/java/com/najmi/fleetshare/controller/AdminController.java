@@ -539,6 +539,10 @@ public class AdminController {
             java.util.List<com.najmi.fleetshare.dto.BookingLogDTO> bookingStatusLogs = bookingService
                     .getBookingStatusLogsDTO(payment.getBookingId());
             model.addAttribute("bookingStatusLogs", bookingStatusLogs);
+
+            // Fetch all payment attempts for this invoice/booking for history timeline
+            List<com.najmi.fleetshare.entity.Payment> allPayments = paymentService.getPaymentsByInvoiceId(payment.getInvoiceId());
+            model.addAttribute("allPayments", allPayments);
         }
 
         return "admin/view-payment";
@@ -1185,5 +1189,157 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload: " + e.getMessage()));
         }
+    }
+
+    @Autowired
+    private com.najmi.fleetshare.service.CommissionService commissionService;
+
+    @Autowired
+    private com.najmi.fleetshare.repository.FleetOwnerRepository fleetOwnerRepository;
+
+    /**
+     * Payout Dashboard - shows platform commission revenue and per-owner split details.
+     */
+    @GetMapping("/payout-dashboard")
+    public String payoutDashboard(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            var allPayments = paymentService.getAllPayments();
+
+            // Total platform commission from verified split payments
+            BigDecimal totalPlatformCommission = allPayments.stream()
+                    .filter(p -> "VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()) && p.getPlatformCommission() != null)
+                    .map(com.najmi.fleetshare.dto.PaymentDTO::getPlatformCommission)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // Total owner payouts
+            BigDecimal totalOwnerPayouts = allPayments.stream()
+                    .filter(p -> "VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()) && p.getOwnerPayout() != null)
+                    .map(com.najmi.fleetshare.dto.PaymentDTO::getOwnerPayout)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // Total transaction volume for split payments
+            BigDecimal totalSplitVolume = allPayments.stream()
+                    .filter(p -> "VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()) && p.getAmount() != null)
+                    .map(com.najmi.fleetshare.dto.PaymentDTO::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            long splitPaymentCount = allPayments.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
+                    .count();
+
+            long verifiedSplitCount = allPayments.stream()
+                    .filter(p -> "VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
+                    .count();
+
+            model.addAttribute("totalPlatformCommission", totalPlatformCommission);
+            model.addAttribute("totalOwnerPayouts", totalOwnerPayouts);
+            model.addAttribute("totalSplitVolume", totalSplitVolume);
+            model.addAttribute("splitPaymentCount", splitPaymentCount);
+            model.addAttribute("verifiedSplitCount", verifiedSplitCount);
+            model.addAttribute("commissionRate", commissionService.getCommissionRate());
+            model.addAttribute("commissionEnabled", commissionService.isCommissionEnabled());
+
+            // Per-owner payout summary
+            java.util.Map<String, BigDecimal> ownerPayoutMap = new java.util.LinkedHashMap<>();
+            java.util.Map<String, BigDecimal> ownerCommissionMap = new java.util.LinkedHashMap<>();
+            java.util.Map<String, Long> ownerTxCountMap = new java.util.LinkedHashMap<>();
+
+            for (var payment : allPayments) {
+                if (Boolean.TRUE.equals(payment.getSplitPaymentEnabled())
+                        && ("VERIFIED".equals(payment.getPaymentStatus()) || "COMPLETED".equals(payment.getPaymentStatus()) || "PAID".equals(payment.getPaymentStatus()))) {
+                    String ownerName = payment.getOwnerBusinessName() != null ? payment.getOwnerBusinessName() : "Unknown";
+                    ownerPayoutMap.merge(ownerName,
+                            payment.getOwnerPayout() != null ? payment.getOwnerPayout() : BigDecimal.ZERO,
+                            BigDecimal::add);
+                    ownerCommissionMap.merge(ownerName,
+                            payment.getPlatformCommission() != null ? payment.getPlatformCommission() : BigDecimal.ZERO,
+                            BigDecimal::add);
+                    ownerTxCountMap.merge(ownerName, 1L, Long::sum);
+                }
+            }
+
+            model.addAttribute("ownerPayoutMap", ownerPayoutMap);
+            model.addAttribute("ownerCommissionMap", ownerCommissionMap);
+            model.addAttribute("ownerTxCountMap", ownerTxCountMap);
+
+            // Monthly commission trend (last 6 months)
+            java.util.Map<String, BigDecimal> monthlyCommission = new java.util.LinkedHashMap<>();
+            java.util.Map<String, BigDecimal> monthlyPayout = new java.util.LinkedHashMap<>();
+
+            for (int i = 5; i >= 0; i--) {
+                LocalDate monthDate = LocalDate.now().minusMonths(i);
+                String monthKey = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("MMM yyyy"));
+                int year = monthDate.getYear();
+                int month = monthDate.getMonthValue();
+
+                BigDecimal commission = allPayments.stream()
+                        .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled())
+                                && ("VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                                && p.getPaymentDate() != null
+                                && p.getPaymentDate().getYear() == year
+                                && p.getPaymentDate().getMonthValue() == month
+                                && p.getPlatformCommission() != null)
+                        .map(com.najmi.fleetshare.dto.PaymentDTO::getPlatformCommission)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                BigDecimal payout = allPayments.stream()
+                        .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled())
+                                && ("VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                                && p.getPaymentDate() != null
+                                && p.getPaymentDate().getYear() == year
+                                && p.getPaymentDate().getMonthValue() == month
+                                && p.getOwnerPayout() != null)
+                        .map(com.najmi.fleetshare.dto.PaymentDTO::getOwnerPayout)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                monthlyCommission.put(monthKey, commission);
+                monthlyPayout.put(monthKey, payout);
+            }
+
+            model.addAttribute("monthlyCommissionLabels", monthlyCommission.keySet());
+            model.addAttribute("monthlyCommissionAmounts", monthlyCommission.values());
+            model.addAttribute("monthlyPayoutAmounts", monthlyPayout.values());
+
+            // Split payment list (recent split transactions)
+            var splitPayments = allPayments.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
+                    .sorted((a, b) -> {
+                        if (a.getPaymentDate() == null) return 1;
+                        if (b.getPaymentDate() == null) return -1;
+                        return b.getPaymentDate().compareTo(a.getPaymentDate());
+                    })
+                    .limit(50)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("splitPayments", splitPayments);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("totalPlatformCommission", BigDecimal.ZERO);
+            model.addAttribute("totalOwnerPayouts", BigDecimal.ZERO);
+            model.addAttribute("totalSplitVolume", BigDecimal.ZERO);
+            model.addAttribute("splitPaymentCount", 0L);
+            model.addAttribute("verifiedSplitCount", 0L);
+            model.addAttribute("commissionRate", BigDecimal.ZERO);
+            model.addAttribute("commissionEnabled", false);
+            model.addAttribute("ownerPayoutMap", new java.util.LinkedHashMap<>());
+            model.addAttribute("ownerCommissionMap", new java.util.LinkedHashMap<>());
+            model.addAttribute("ownerTxCountMap", new java.util.LinkedHashMap<>());
+            model.addAttribute("monthlyCommissionLabels", new java.util.ArrayList<>());
+            model.addAttribute("monthlyCommissionAmounts", new java.util.ArrayList<>());
+            model.addAttribute("monthlyPayoutAmounts", new java.util.ArrayList<>());
+            model.addAttribute("splitPayments", new java.util.ArrayList<>());
+        }
+
+        return "admin/payout-dashboard";
     }
 }

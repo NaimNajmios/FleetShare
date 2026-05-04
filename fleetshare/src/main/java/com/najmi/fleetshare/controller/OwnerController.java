@@ -1056,6 +1056,10 @@ public class OwnerController {
             java.util.List<com.najmi.fleetshare.dto.BookingLogDTO> bookingStatusLogs = bookingService
                     .getBookingStatusLogsDTO(payment.getBookingId());
             model.addAttribute("bookingStatusLogs", bookingStatusLogs);
+
+            // Fetch all payment attempts for this invoice/booking for history timeline
+            List<com.najmi.fleetshare.entity.Payment> allPayments = paymentService.getPaymentsByInvoiceId(payment.getInvoiceId());
+            model.addAttribute("allPayments", allPayments);
         }
 
         return "owner/view-payment";
@@ -1328,6 +1332,8 @@ public class OwnerController {
                 request.getToyyibpaySecretKey() != null ? request.getToyyibpaySecretKey().trim() : null);
         owner.setToyyibpayCategoryCode(
                 request.getToyyibpayCategoryCode() != null ? request.getToyyibpayCategoryCode().trim() : null);
+        owner.setToyyibpayUsername(
+                request.getToyyibpayUsername() != null ? request.getToyyibpayUsername().trim() : null);
 
         owner.setUpdatedAt(LocalDateTime.now());
         fleetOwnerRepository.save(owner);

@@ -78,6 +78,9 @@ public class RenterController {
     @Autowired
     private com.najmi.fleetshare.service.ToyyibPayService toyyibPayService;
 
+    @Autowired
+    private com.najmi.fleetshare.service.CommissionService commissionService;
+
     @GetMapping("/vehicles")
     public String browseVehicles(
             @RequestParam(value = "pickupDate", required = false) String pickupDateStr,
@@ -448,6 +451,14 @@ public class RenterController {
                 com.najmi.fleetshare.entity.Payment currentPayment = paymentService.getPaymentByBookingId(id);
                 model.addAttribute("currentPayment", currentPayment);
 
+                // If payment failed, fetch the latest failure reason from logs
+                if (currentPayment != null && currentPayment.getPaymentStatus() == com.najmi.fleetshare.entity.Payment.PaymentStatus.FAILED) {
+                    List<com.najmi.fleetshare.entity.PaymentStatusLog> logs = paymentService.getPaymentStatusLogs(currentPayment.getPaymentId());
+                    if (!logs.isEmpty()) {
+                        model.addAttribute("failureReason", logs.get(0).getRemarks());
+                    }
+                }
+
                 // Fetch fleet owner for dynamic payment methods
                 com.najmi.fleetshare.entity.Booking bookingEntity = bookingRepository.findById(id).orElse(null);
                 if (bookingEntity != null) {
@@ -580,9 +591,9 @@ public class RenterController {
     }
 
     /**
-     * Initiates a gateway payment via ToyyibPay (BYOK).
-     * Creates a bill on ToyyibPay using the owner's credentials and redirects the renter
-     * to the ToyyibPay payment page.
+     * Initiates a gateway payment via ToyyibPay.
+     * Uses Central Payout (platform credentials + split payment) when possible,
+     * falls back to BYOK (owner credentials) otherwise.
      */
     @PostMapping("/bookings/{id}/payment/gateway")
     public String processGatewayPayment(@PathVariable Long id, HttpSession session,
@@ -600,7 +611,7 @@ public class RenterController {
                 return "redirect:/renter/bookings";
             }
 
-            // 2. Get fleet owner and validate ToyyibPay credentials
+            // 2. Get fleet owner and validate payment credentials
             com.najmi.fleetshare.entity.Booking bookingEntity = bookingRepository.findById(id).orElse(null);
             if (bookingEntity == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Booking not found.");
@@ -608,7 +619,14 @@ public class RenterController {
             }
 
             FleetOwner owner = fleetOwnerRepository.findById(bookingEntity.getFleetOwnerId()).orElse(null);
-            if (owner == null || owner.getToyyibpaySecretKey() == null || owner.getToyyibpaySecretKey().isEmpty()) {
+            // Accept either toyyibpayUsername (central payout) or toyyibpaySecretKey (BYOK)
+            boolean hasCentralPayout = owner != null
+                    && owner.getToyyibpayUsername() != null && !owner.getToyyibpayUsername().isEmpty()
+                    && toyyibPayService.isPlatformConfigured();
+            boolean hasByok = owner != null
+                    && owner.getToyyibpaySecretKey() != null && !owner.getToyyibpaySecretKey().isEmpty();
+
+            if (!hasCentralPayout && !hasByok) {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "Online payment is not available for this owner. Please choose another payment method.");
                 return "redirect:/renter/bookings/" + id + "/payment";
@@ -617,7 +635,25 @@ public class RenterController {
             // 3. Create or reuse payment record
             com.najmi.fleetshare.entity.Payment payment = paymentService.processGatewayPayment(id);
 
-            // 4. Create ToyyibPay bill (only if no bill code exists yet)
+            // 4. Calculate commission split
+            java.math.BigDecimal platformCommission = null;
+            java.math.BigDecimal ownerPayout = null;
+
+            if (hasCentralPayout && commissionService.isCommissionEnabled()) {
+                java.util.Map<String, java.math.BigDecimal> split = commissionService.calculateSplit(payment.getAmount());
+                platformCommission = split.get("commission");
+                ownerPayout = split.get("ownerPayout");
+                java.math.BigDecimal rate = split.get("rate");
+
+                // Store commission data on payment entity
+                payment.setPlatformCommission(platformCommission);
+                payment.setOwnerPayout(ownerPayout);
+                payment.setCommissionRate(rate);
+                payment.setSplitPaymentEnabled(true);
+                payment = paymentService.savePayment(payment);
+            }
+
+            // 5. Create ToyyibPay bill (only if no bill code exists yet)
             if (payment.getToyyibpayBillCode() == null || payment.getToyyibpayBillCode().isEmpty()) {
                 // Get renter details for bill
                 String renterEmail = user.getEmail();
@@ -625,14 +661,15 @@ public class RenterController {
                 String renterPhone = user.getRenterDetails().getPhoneNumber();
 
                 String billCode = toyyibPayService.createBill(
-                        owner, payment, booking, renterEmail, renterPhone, renterName);
+                        owner, payment, booking, renterEmail, renterPhone, renterName,
+                        platformCommission, ownerPayout);
 
                 // Store bill code and persist
                 payment.setToyyibpayBillCode(billCode);
                 payment = paymentService.savePayment(payment);
             }
 
-            // 5. Redirect to ToyyibPay payment page
+            // 6. Redirect to ToyyibPay payment page
             String paymentUrl = toyyibPayService.getPaymentUrl(payment.getToyyibpayBillCode());
             return "redirect:" + paymentUrl;
 

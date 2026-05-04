@@ -15,6 +15,9 @@ public class PaymentDTO {
     private String transactionReference;
     private LocalDateTime bookingStartDate;
     private Long bookingId;
+    private BigDecimal platformCommission;
+    private BigDecimal ownerPayout;
+    private Boolean splitPaymentEnabled;
 
     // Constructors
     public PaymentDTO() {
@@ -23,7 +26,8 @@ public class PaymentDTO {
     public PaymentDTO(Long paymentId, String invoiceNumber, String renterName,
             String ownerBusinessName, BigDecimal amount, String paymentMethod,
             String paymentStatus, LocalDateTime paymentDate, String transactionReference,
-            LocalDateTime bookingStartDate, Long bookingId) {
+            LocalDateTime bookingStartDate, Long bookingId,
+            BigDecimal platformCommission, BigDecimal ownerPayout, Boolean splitPaymentEnabled) {
         this.paymentId = paymentId;
         this.invoiceNumber = invoiceNumber;
         this.renterName = renterName;
@@ -35,6 +39,9 @@ public class PaymentDTO {
         this.transactionReference = transactionReference;
         this.bookingStartDate = bookingStartDate;
         this.bookingId = bookingId;
+        this.platformCommission = platformCommission;
+        this.ownerPayout = ownerPayout;
+        this.splitPaymentEnabled = splitPaymentEnabled;
     }
 
     // Getters and Setters
@@ -124,5 +131,29 @@ public class PaymentDTO {
 
     public void setBookingId(Long bookingId) {
         this.bookingId = bookingId;
+    }
+
+    public BigDecimal getPlatformCommission() {
+        return platformCommission;
+    }
+
+    public void setPlatformCommission(BigDecimal platformCommission) {
+        this.platformCommission = platformCommission;
+    }
+
+    public BigDecimal getOwnerPayout() {
+        return ownerPayout;
+    }
+
+    public void setOwnerPayout(BigDecimal ownerPayout) {
+        this.ownerPayout = ownerPayout;
+    }
+
+    public Boolean getSplitPaymentEnabled() {
+        return splitPaymentEnabled;
+    }
+
+    public void setSplitPaymentEnabled(Boolean splitPaymentEnabled) {
+        this.splitPaymentEnabled = splitPaymentEnabled;
     }
 }

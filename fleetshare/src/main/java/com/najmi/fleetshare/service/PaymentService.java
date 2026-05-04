@@ -78,7 +78,10 @@ public class PaymentService {
                         payment.getPaymentDate(),
                         payment.getTransactionReference(),
                         invoice.getBookingId() != null ? bookingRepository.findById(invoice.getBookingId()).map(Booking::getStartDate).orElse(null) : null,
-                        invoice.getBookingId());
+                        invoice.getBookingId(),
+                        payment.getPlatformCommission(),
+                        payment.getOwnerPayout(),
+                        payment.getSplitPaymentEnabled());
                 paymentDTOs.add(dto);
             }
         }
@@ -111,7 +114,8 @@ public class PaymentService {
             PaymentStatusLogDTO dto = new PaymentStatusLogDTO(
                     log.getStatusValue() != null ? log.getStatusValue().name() : "UNKNOWN",
                     actorName,
-                    log.getStatusTimestamp());
+                    log.getStatusTimestamp(),
+                    log.getRemarks());
             dtos.add(dto);
         }
 
@@ -176,6 +180,12 @@ public class PaymentService {
                 dto.setBookingStartDate(booking.getStartDate());
             }
         }
+
+        // Fill commission/split payment data
+        dto.setPlatformCommission(payment.getPlatformCommission());
+        dto.setOwnerPayout(payment.getOwnerPayout());
+        dto.setCommissionRate(payment.getCommissionRate());
+        dto.setSplitPaymentEnabled(payment.getSplitPaymentEnabled());
 
         return dto;
     }
@@ -408,23 +418,31 @@ public class PaymentService {
         return payment;
     }
 
-    /**
-     * Gets the current payment for a booking.
-     *
-     * @param bookingId The booking ID
-     * @return The Payment entity or null if no payment exists
-     */
     public Payment getPaymentByBookingId(Long bookingId) {
         List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
         if (invoices.isEmpty()) {
             return null;
         }
         Invoice invoice = invoices.get(0);
+        // Find latest payment by sorting by paymentId desc
         List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
         if (payments.isEmpty()) {
             return null;
         }
+        
+        // Sort to get the latest one
+        payments.sort((p1, p2) -> p2.getPaymentId().compareTo(p1.getPaymentId()));
         return payments.get(0);
+    }
+
+    /**
+     * Gets all payments for a specific invoice ID.
+     * 
+     * @param invoiceId The invoice ID
+     * @return List of Payment entities
+     */
+    public List<Payment> getPaymentsByInvoiceId(Long invoiceId) {
+        return paymentRepository.findByInvoiceId(invoiceId);
     }
 
     /**
@@ -565,7 +583,10 @@ public class PaymentService {
                         payment.getPaymentDate(),
                         payment.getTransactionReference(),
                         invoice.getBookingId() != null ? bookingRepository.findById(invoice.getBookingId()).map(Booking::getStartDate).orElse(null) : null,
-                        invoice.getBookingId());
+                        invoice.getBookingId(),
+                        payment.getPlatformCommission(),
+                        payment.getOwnerPayout(),
+                        payment.getSplitPaymentEnabled());
                 paymentDTOs.add(dto);
             }
         }

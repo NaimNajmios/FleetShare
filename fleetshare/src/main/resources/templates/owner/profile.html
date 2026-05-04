@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/owner-layout}" th:with="activePage='profile', pageTitle='My Profile'">
 
@@ -287,12 +287,24 @@
                             <small class="text-muted">Category code from your ToyyibPay dashboard</small>
                         </div>
 
+                        <div class="form-group">
+                            <label class="form-label">ToyyibPay Username</label>
+                            <input type="text" class="form-control" id="toyyibpayUsername"
+                                placeholder="Enter your ToyyibPay username" disabled
+                                th:value="${owner != null ? owner.toyyibpayUsername : ''}">
+                            <small class="text-muted">
+                                Your ToyyibPay username for receiving split payments.
+                                This is the username you use to log in at toyyibpay.com
+                            </small>
+                        </div>
+
                         <div class="alert alert-info d-flex align-items-center" role="alert">
                             <i class="mdi mdi-information-outline mr-2" style="font-size: 1.5rem;"></i>
                             <div>
-                                <strong>Bring Your Own Key (BYOK)</strong><br>
-                                <small>Use your own ToyyibPay account to receive payments directly. Create an account at
-                                    <a href="https://toyyibpay.com" target="_blank">toyyibpay.com</a></small>
+                                <strong>Central Payout &amp; BYOK</strong><br>
+                                <small>If your <b>ToyyibPay Username</b> is set, payments are routed via the platform with automatic commission splitting.
+                                    Otherwise, your <b>Secret Key</b> is used for direct payments (BYOK).
+                                    Create an account at <a href="https://toyyibpay.com" target="_blank">toyyibpay.com</a></small>
                             </div>
                         </div>
                     </div>
@@ -513,8 +525,9 @@
                 // Payment fields
                 const toyyibpaySecretKeyInput = document.getElementById('toyyibpaySecretKey');
                 const toyyibpayCategoryCodeInput = document.getElementById('toyyibpayCategoryCode');
+                const toyyibpayUsernameInput = document.getElementById('toyyibpayUsername');
                 const qrCodeUploadInput = document.getElementById('qrCodeUpload');
-                const paymentFields = [toyyibpaySecretKeyInput, toyyibpayCategoryCodeInput, qrCodeUploadInput].filter(f => f);
+                const paymentFields = [toyyibpaySecretKeyInput, toyyibpayCategoryCodeInput, toyyibpayUsernameInput, qrCodeUploadInput].filter(f => f);
 
                 // Initialize original values
                 editableFields.forEach(field => {
@@ -648,7 +661,8 @@
                                 bankAccountNumber: bankAccountNumberInput ? bankAccountNumberInput.value : '',
                                 bankAccountHolder: bankAccountHolderInput ? bankAccountHolderInput.value : '',
                                 toyyibpaySecretKey: toyyibpaySecretKeyInput ? toyyibpaySecretKeyInput.value : '',
-                                toyyibpayCategoryCode: toyyibpayCategoryCodeInput ? toyyibpayCategoryCodeInput.value : ''
+                                toyyibpayCategoryCode: toyyibpayCategoryCodeInput ? toyyibpayCategoryCodeInput.value : '',
+                                toyyibpayUsername: toyyibpayUsernameInput ? toyyibpayUsernameInput.value : ''
                             };
 
                             console.log('Saving profile data...', profileData);

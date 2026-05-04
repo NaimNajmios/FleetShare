@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='payout-dashboard', pageTitle='Payout Dashboard'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .kpi-card {
+                border-radius: 12px;
+                padding: 1.25rem;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .kpi-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .kpi-card .kpi-value {
+                font-size: 1.75rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
+            .kpi-card .kpi-label {
+                font-size: 0.875rem;
+                font-weight: 500;
+                opacity: 0.9;
+                margin-top: 0.25rem;
+            }
+
+            .kpi-card .kpi-icon {
+                font-size: 2.5rem;
+                opacity: 0.3;
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .kpi-commission {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .kpi-payout {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .kpi-volume {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+            }
+
+            .kpi-count {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: white;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
+            .config-badge {
+                font-size: 0.85rem;
+                padding: 6px 12px;
+                border-radius: 20px;
+            }
+
+            .owner-payout-table th {
+                border-top: none;
+                font-weight: 600;
+                color: #6c757d;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.5px;
+            }
+
+            .split-badge {
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 0.7rem;
+                font-weight: 600;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Payout Dashboard</h3>
+                        <p class="text-muted mb-0">Monitor platform commission revenue and owner payouts</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="config-badge"
+                            th:classappend="${commissionEnabled} ? 'badge bg-success' : 'badge bg-secondary'">
+                            <i class="mdi mdi-cog me-1"></i>
+                            Commission: <span
+                                th:text="${#numbers.formatDecimal(commissionRate * 100, 1, 'COMMA', 0, 'POINT')}">10</span>%
+                            <span th:text="${commissionEnabled} ? 'Active' : 'Inactive'">Active</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-commission">
+                    <div class="kpi-value"
+                        th:text="'RM ' + ${#numbers.formatDecimal(totalPlatformCommission ?: 0, 1, 'COMMA', 2, 'POINT')}">
+                        RM 0.00</div>
+                    <div class="kpi-label">Platform Commission</div>
+                    <i class="mdi mdi-trending-up kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-payout">
+                    <div class="kpi-value"
+                        th:text="'RM ' + ${#numbers.formatDecimal(totalOwnerPayouts ?: 0, 1, 'COMMA', 2, 'POINT')}">
+                        RM 0.00</div>
+                    <div class="kpi-label">Owner Payouts</div>
+                    <i class="mdi mdi-account-cash kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-volume">
+                    <div class="kpi-value"
+                        th:text="'RM ' + ${#numbers.formatDecimal(totalSplitVolume ?: 0, 1, 'COMMA', 2, 'POINT')}">
+                        RM 0.00</div>
+                    <div class="kpi-label">Split Transaction Volume</div>
+                    <i class="mdi mdi-swap-horizontal kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-count">
+                    <div class="kpi-value" th:text="${verifiedSplitCount ?: 0}">0</div>
+                    <div class="kpi-label">Verified Split Payments</div>
+                    <i class="mdi mdi-check-decagram kpi-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-8 mb-4 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Commission & Payout Trend</h5>
+                        <div class="chart-container"><canvas id="commissionTrendChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Revenue Split</h5>
+                        <div class="chart-container"><canvas id="revenueSplitChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Per-Owner Payout Summary -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="mdi mdi-account-group me-2"></i>Per-Owner Payout Summary
+                        </h5>
+                        <div th:if="${#maps.isEmpty(ownerPayoutMap)}" class="text-center py-4">
+                            <i class="mdi mdi-cash-register mdi-48px text-muted"></i>
+                            <p class="text-muted mt-2">No split payment data yet. Split payouts will appear here once
+                                verified transactions are processed.</p>
+                        </div>
+                        <div th:unless="${#maps.isEmpty(ownerPayoutMap)}" class="table-responsive">
+                            <table class="table owner-payout-table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fleet Owner</th>
+                                        <th class="text-end">Transactions</th>
+                                        <th class="text-end">Total Payout</th>
+                                        <th class="text-end">Commission Paid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="entry : ${ownerPayoutMap}">
+                                        <td>
+                                            <strong th:text="${entry.key}">Owner Name</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="badge bg-primary"
+                                                th:text="${ownerTxCountMap.get(entry.key) ?: 0}">0</span>
+                                        </td>
+                                        <td class="text-end fw-bold text-success">
+                                            RM <span
+                                                th:text="${#numbers.formatDecimal(entry.value ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                        <td class="text-end text-muted">
+                                            RM <span
+                                                th:text="${#numbers.formatDecimal(ownerCommissionMap.get(entry.key) ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Split Transactions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="mdi mdi-history me-2"></i>Recent Split Transactions
+                        </h5>
+                        <div th:if="${#lists.isEmpty(splitPayments)}" class="text-center py-4">
+                            <i class="mdi mdi-swap-horizontal mdi-48px text-muted"></i>
+                            <p class="text-muted mt-2">No split transactions yet.</p>
+                        </div>
+                        <div th:unless="${#lists.isEmpty(splitPayments)}" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Invoice</th>
+                                        <th>Renter</th>
+                                        <th>Owner</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-end">Commission</th>
+                                        <th class="text-end">Owner Payout</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="payment : ${splitPayments}">
+                                        <td class="fw-bold" th:text="${payment.invoiceNumber}">INV-001</td>
+                                        <td th:text="${payment.renterName}">Renter</td>
+                                        <td th:text="${payment.ownerBusinessName}">Owner</td>
+                                        <td class="text-end fw-bold">
+                                            RM <span
+                                                th:text="${#numbers.formatDecimal(payment.amount ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                        <td class="text-end text-primary fw-bold">
+                                            RM <span
+                                                th:text="${#numbers.formatDecimal(payment.platformCommission ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                        <td class="text-end text-success fw-bold">
+                                            RM <span
+                                                th:text="${#numbers.formatDecimal(payment.ownerPayout ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                        <td
+                                            th:text="${payment.paymentDate != null ? #temporals.format(payment.paymentDate, 'MMM dd, yyyy') : 'N/A'}">
+                                            N/A</td>
+                                        <td>
+                                            <span th:if="${payment.paymentStatus == 'PENDING'}"
+                                                class="badge bg-warning text-dark">Pending</span>
+                                            <span
+                                                th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'COMPLETED' or payment.paymentStatus == 'PAID'}"
+                                                class="badge bg-success">Verified</span>
+                                            <span
+                                                th:if="${payment.paymentStatus == 'FAILED' or payment.paymentStatus == 'REJECTED'}"
+                                                class="badge bg-danger">Failed</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script th:inline="javascript">
+            const chartData = {
+                monthlyLabels: /*[[${monthlyCommissionLabels}]]*/[],
+                monthlyCommission: /*[[${monthlyCommissionAmounts}]]*/[],
+                monthlyPayout: /*[[${monthlyPayoutAmounts}]]*/[],
+                totalCommission: /*[[${totalPlatformCommission ?: 0}]]*/ 0,
+                totalPayout: /*[[${totalOwnerPayouts ?: 0}]]*/ 0
+            };
+
+            // Commission & Payout Trend Chart
+            const trendCtx = document.getElementById('commissionTrendChart');
+            if (trendCtx) {
+                new Chart(trendCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.monthlyLabels,
+                        datasets: [{
+                            label: 'Commission (RM)',
+                            data: chartData.monthlyCommission,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: '#667eea',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }, {
+                            label: 'Owner Payout (RM)',
+                            data: chartData.monthlyPayout,
+                            backgroundColor: 'rgba(17, 153, 142, 0.8)',
+                            borderColor: '#11998e',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: v => 'RM ' + v } }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ctx.dataset.label + ': RM ' + ctx.parsed.y.toFixed(2)
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Revenue Split Donut Chart
+            const splitCtx = document.getElementById('revenueSplitChart');
+            if (splitCtx) {
+                new Chart(splitCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Platform Commission', 'Owner Payouts'],
+                        datasets: [{
+                            data: [chartData.totalCommission, chartData.totalPayout],
+                            backgroundColor: ['#667eea', '#38ef7d'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ctx.label + ': RM ' + ctx.parsed.toFixed(2)
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+    </th:block>
+</body>
+
+</html>

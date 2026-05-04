@@ -45,6 +45,18 @@ public class Payment {
     @Column(name = "gateway_ref_no", length = 100)
     private String gatewayRefNo;
 
+    @Column(name = "platform_commission", precision = 10, scale = 2)
+    private java.math.BigDecimal platformCommission;
+
+    @Column(name = "owner_payout", precision = 10, scale = 2)
+    private java.math.BigDecimal ownerPayout;
+
+    @Column(name = "commission_rate", precision = 5, scale = 4)
+    private java.math.BigDecimal commissionRate;
+
+    @Column(name = "split_payment_enabled")
+    private Boolean splitPaymentEnabled = false;
+
     // Enums
     public enum PaymentMethod {
         CREDIT_CARD, BANK_TRANSFER, QR_PAYMENT, CASH
@@ -145,5 +157,37 @@ public class Payment {
 
     public void setGatewayRefNo(String gatewayRefNo) {
         this.gatewayRefNo = gatewayRefNo;
+    }
+
+    public java.math.BigDecimal getPlatformCommission() {
+        return platformCommission;
+    }
+
+    public void setPlatformCommission(java.math.BigDecimal platformCommission) {
+        this.platformCommission = platformCommission;
+    }
+
+    public java.math.BigDecimal getOwnerPayout() {
+        return ownerPayout;
+    }
+
+    public void setOwnerPayout(java.math.BigDecimal ownerPayout) {
+        this.ownerPayout = ownerPayout;
+    }
+
+    public java.math.BigDecimal getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(java.math.BigDecimal commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public Boolean getSplitPaymentEnabled() {
+        return splitPaymentEnabled;
+    }
+
+    public void setSplitPaymentEnabled(Boolean splitPaymentEnabled) {
+        this.splitPaymentEnabled = splitPaymentEnabled;
     }
 }

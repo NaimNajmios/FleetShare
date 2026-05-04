@@ -52,6 +52,9 @@ public class OwnerProfileUpdateRequest implements Serializable {
     @Size(max = 100, message = "Category code must not exceed 100 characters")
     private String toyyibpayCategoryCode;
 
+    @Size(max = 100, message = "ToyyibPay username must not exceed 100 characters")
+    private String toyyibpayUsername;
+
     // Getters and Setters
 
     public String getBusinessName() {
@@ -164,5 +167,13 @@ public class OwnerProfileUpdateRequest implements Serializable {
 
     public void setToyyibpayCategoryCode(String toyyibpayCategoryCode) {
         this.toyyibpayCategoryCode = toyyibpayCategoryCode;
+    }
+
+    public String getToyyibpayUsername() {
+        return toyyibpayUsername;
+    }
+
+    public void setToyyibpayUsername(String toyyibpayUsername) {
+        this.toyyibpayUsername = toyyibpayUsername;
     }
 }

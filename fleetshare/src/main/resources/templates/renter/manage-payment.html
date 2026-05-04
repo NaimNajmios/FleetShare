@@ -99,6 +99,11 @@
                 color: #155724;
             }
 
+            .status-failed {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
             .method-selection-card {
                 background: white;
                 border-radius: 1rem;
@@ -413,6 +418,21 @@
             .countdown-display.expired {
                 color: #991b1b;
             }
+
+            /* Failure Banner */
+            .banner-failed {
+                background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                color: #721c24;
+                border: 1px solid #f5c2c7;
+            }
+
+            .retry-prompt {
+                background: #fff5f5;
+                border-left: 4px solid #dc3545;
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: 0.5rem;
+            }
         </style>
     </th:block>
 </head>
@@ -424,11 +444,13 @@
                 <!-- Left Column: Action Zone -->
                 <div class="action-zone">
                     <!-- Countdown Banner -->
-                    <div th:if="${booking.status == 'PENDING' and (currentPayment == null or currentPayment.paymentStatus.name() == 'PENDING')}" class="status-banner banner-pending">
-                        <i class="fas fa-hourglass-half"></i>
+                    <div th:if="${booking.status == 'PENDING' and (currentPayment == null or currentPayment.paymentStatus.name() == 'PENDING' or currentPayment.paymentStatus.name() == 'FAILED')}" class="status-banner"
+                         th:classappend="${currentPayment != null and currentPayment.paymentStatus.name() == 'FAILED' ? 'banner-failed' : 'banner-pending'}">
+                        <i th:class="${currentPayment != null and currentPayment.paymentStatus.name() == 'FAILED' ? 'fas fa-exclamation-circle' : 'fas fa-hourglass-half'}"></i>
                         <div>
-                            <strong>Payment Required</strong>
-                            <p>Complete your payment before the timer expires.</p>
+                            <strong th:text="${currentPayment != null and currentPayment.paymentStatus.name() == 'FAILED' ? 'Payment Failed' : 'Payment Required'}">Payment Required</strong>
+                            <p th:if="${currentPayment == null or currentPayment.paymentStatus.name() == 'PENDING'}">Complete your payment before the timer expires.</p>
+                            <p th:if="${currentPayment != null and currentPayment.paymentStatus.name() == 'FAILED'}" th:text="${failureReason ?: 'Your previous payment attempt was unsuccessful.'}">Your previous payment attempt was unsuccessful.</p>
                         </div>
                         <div class="countdown-timer" id="countdownTimer">
                             <span class="countdown-label">Expires in:</span>
@@ -465,7 +487,7 @@
                             <div class="context-item">
                                 <span class="context-label">Payment Status</span>
                                 <span class="status-badge" th:if="${currentPayment != null}"
-                                    th:classappend="${currentPayment.paymentStatus.name() == 'VERIFIED' ? 'status-verified' : 'status-pending'}"
+                                    th:classappend="${currentPayment.paymentStatus.name() == 'VERIFIED' ? 'status-verified' : (currentPayment.paymentStatus.name() == 'FAILED' ? 'status-failed' : 'status-pending')}"
                                     th:text="${currentPayment.paymentStatus.name()}">PENDING</span>
                                 <span class="status-badge status-pending"
                                     th:if="${currentPayment == null}">AWAITING</span>
@@ -549,6 +571,48 @@
                                 </select>
                                 <button type="submit" class="btn-primary-action btn-gateway" style="width: 100%;">
                                     Confirm Change <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- SCENARIO 2.5: Payment is FAILED - Show Failure with Retry Option -->
+                    <div th:if="${currentPayment != null and currentPayment.paymentStatus.name() == 'FAILED'}">
+                        <div class="current-method-card" style="border-color: #dc3545; background: #fff5f5;">
+                            <div class="current-method-icon" style="color: #dc3545;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="current-method-title">Latest Payment Failed</div>
+                            <div class="current-method-name" th:text="${currentPayment.paymentMethod.name()}">CASH</div>
+                            
+                            <div class="retry-prompt text-start mx-auto" style="max-width: 500px;">
+                                <p class="mb-0"><strong>Why did it fail?</strong></p>
+                                <p class="mb-0" th:text="${failureReason ?: 'Your previous payment attempt was unsuccessful.'}">Failure reason goes here.</p>
+                            </div>
+
+                            <p class="text-muted" style="margin-bottom: 1.5rem;">
+                                Please select a payment method below to try again.
+                            </p>
+
+                            <button class="btn-primary-action btn-gateway" id="btn-retry-payment">
+                                <i class="fas fa-redo"></i> Retry Payment
+                            </button>
+                        </div>
+
+                        <!-- Retry Method Selection (Revealed by button) -->
+                        <div id="retry-method-section" class="method-selection-card hidden" style="margin-top: 1.5rem;">
+                            <h2 class="section-title">Select Payment Method to Retry</h2>
+                            <p class="text-muted small mb-3">Your previous attempt failed. You can try the same method again or pick a new one.</p>
+                            <form id="retryMethodForm" th:action="@{/renter/bookings/{id}/payment/change(id=${booking.bookingId})}" method="POST">
+                                <select name="method" class="payment-method-select" style="margin-bottom: 1rem;">
+                                    <option th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}" 
+                                            value="CREDIT_CARD" th:selected="${currentPayment.paymentMethod.name() == 'CREDIT_CARD'}">Credit/Debit Card &amp; FPX</option>
+                                    <option th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}" 
+                                            value="BANK_TRANSFER" th:selected="${currentPayment.paymentMethod.name() == 'BANK_TRANSFER'}">Bank Transfer / DuitNow QR</option>
+                                    <option value="CASH" th:selected="${currentPayment.paymentMethod.name() == 'CASH'}">Cash at Counter</option>
+                                </select>
+                                <button type="submit" class="btn-primary-action btn-gateway" style="width: 100%;">
+                                    Confirm &amp; Retry <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </form>
                         </div>
@@ -713,9 +777,9 @@
             </div>
         </div>
 
-        <!-- Footer for PENDING state -->
+        <!-- Footer for PENDING or FAILED state -->
         <div class="sticky-footer"
-            th:if="${currentPayment != null and currentPayment.paymentStatus.name() == 'PENDING'}">
+            th:if="${currentPayment != null and (currentPayment.paymentStatus.name() == 'PENDING' or currentPayment.paymentStatus.name() == 'FAILED')}">
             <div class="payment-footer-container">
                 <a th:href="@{/renter/bookings/{id}(id=${booking.bookingId})}" class="btn-cancel">Back to Booking</a>
                 <span></span>
@@ -821,6 +885,17 @@
                 if (btnChangeMethod && changeMethodSection) {
                     btnChangeMethod.addEventListener('click', function () {
                         changeMethodSection.classList.toggle('hidden');
+                        this.classList.add('hidden');
+                    });
+                }
+
+                // Retry Button
+                const btnRetryPayment = document.getElementById('btn-retry-payment');
+                const retryMethodSection = document.getElementById('retry-method-section');
+
+                if (btnRetryPayment && retryMethodSection) {
+                    btnRetryPayment.addEventListener('click', function () {
+                        retryMethodSection.classList.toggle('hidden');
                         this.classList.add('hidden');
                     });
                 }

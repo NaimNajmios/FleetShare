@@ -19,6 +19,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Controller
 @RequestMapping("/api/payment/toyyibpay")
 public class ToyyibPayController {
@@ -39,6 +41,9 @@ public class ToyyibPayController {
 
     @Autowired
     private ToyyibPayService toyyibPayService;
+
+    @Value("${toyyibpay.platform.secret-key:}")
+    private String platformSecretKey;
 
     /**
      * Callback endpoint - receives payment status from ToyyibPay servers (server-to-server POST).
@@ -94,11 +99,33 @@ public class ToyyibPayController {
 
             // 3. Validate hash if provided
             if (hash != null && !hash.isEmpty()) {
-                boolean isValid = toyyibPayService.validateCallbackHash(
-                        owner.getToyyibpaySecretKey(), status, orderId, refno, hash);
-                if (!isValid) {
-                    logger.error("Hash validation failed for billcode: {}", billcode);
-                    return "FAIL";
+                // Determine which key to use for validation:
+                // If platform key is configured, bill was likely created under platform account
+                String validationKey;
+                if (platformSecretKey != null && !platformSecretKey.isEmpty()) {
+                    validationKey = platformSecretKey;
+                } else {
+                    // BYOK fallback: use owner's key
+                    validationKey = owner.getToyyibpaySecretKey();
+                }
+
+                if (validationKey != null && !validationKey.isEmpty()) {
+                    boolean isValid = toyyibPayService.validateCallbackHash(
+                            validationKey, status, orderId, refno, hash);
+                    if (!isValid) {
+                        // Try the other key as fallback (in case of mixed mode)
+                        String fallbackKey = (validationKey.equals(platformSecretKey))
+                                ? owner.getToyyibpaySecretKey()
+                                : platformSecretKey;
+                        if (fallbackKey != null && !fallbackKey.isEmpty()) {
+                            isValid = toyyibPayService.validateCallbackHash(
+                                    fallbackKey, status, orderId, refno, hash);
+                        }
+                        if (!isValid) {
+                            logger.error("Hash validation failed for billcode: {}", billcode);
+                            return "FAIL";
+                        }
+                    }
                 }
             }
 
@@ -121,11 +148,21 @@ public class ToyyibPayController {
                 invoice.setStatus(Invoice.InvoiceStatus.PAID);
                 invoiceRepository.save(invoice);
 
-                // Log status
-                logStatusChange(payment.getPaymentId(), Payment.PaymentStatus.VERIFIED,
-                        null, "Payment verified via ToyyibPay. Ref: " + refno + ". Reason: " + reason);
+                // Log status with split details if applicable
+                String splitInfo = "";
+                if (Boolean.TRUE.equals(payment.getSplitPaymentEnabled())) {
+                    splitInfo = String.format(" | Split: commission=RM%.2f, ownerPayout=RM%.2f, rate=%.1f%%",
+                            payment.getPlatformCommission(),
+                            payment.getOwnerPayout(),
+                            payment.getCommissionRate() != null
+                                    ? payment.getCommissionRate().multiply(java.math.BigDecimal.valueOf(100))
+                                    : java.math.BigDecimal.ZERO);
+                }
 
-                logger.info("Payment VERIFIED for billcode: {}, refno: {}", billcode, refno);
+                logStatusChange(payment.getPaymentId(), Payment.PaymentStatus.VERIFIED,
+                        null, "Payment verified via ToyyibPay. Ref: " + refno + ". Reason: " + reason + splitInfo);
+
+                logger.info("Payment VERIFIED for billcode: {}, refno: {}{}", billcode, refno, splitInfo);
 
             } else if ("3".equals(status)) {
                 // Failed

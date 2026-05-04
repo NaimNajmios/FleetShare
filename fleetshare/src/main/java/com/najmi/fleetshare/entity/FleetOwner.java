@@ -45,6 +45,9 @@ public class FleetOwner {
     @Column(name = "toyyibpay_category_code", length = 100)
     private String toyyibpayCategoryCode;
 
+    @Column(name = "toyyibpay_username", length = 100)
+    private String toyyibpayUsername;
+
     // Constructors
     public FleetOwner() {
     }
@@ -144,5 +147,13 @@ public class FleetOwner {
 
     public void setToyyibpayCategoryCode(String toyyibpayCategoryCode) {
         this.toyyibpayCategoryCode = toyyibpayCategoryCode;
+    }
+
+    public String getToyyibpayUsername() {
+        return toyyibpayUsername;
+    }
+
+    public void setToyyibpayUsername(String toyyibpayUsername) {
+        this.toyyibpayUsername = toyyibpayUsername;
     }
 }

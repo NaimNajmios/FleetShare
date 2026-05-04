@@ -27,6 +27,12 @@ public class PaymentDetailDTO {
     private Long bookingId;
     private LocalDateTime bookingStartDate;
 
+    // Commission/split payment details
+    private java.math.BigDecimal platformCommission;
+    private java.math.BigDecimal ownerPayout;
+    private java.math.BigDecimal commissionRate;
+    private Boolean splitPaymentEnabled;
+
     // Constructors
     public PaymentDetailDTO() {
     }
@@ -182,5 +188,37 @@ public class PaymentDetailDTO {
 
     public void setBookingStartDate(LocalDateTime bookingStartDate) {
         this.bookingStartDate = bookingStartDate;
+    }
+
+    public java.math.BigDecimal getPlatformCommission() {
+        return platformCommission;
+    }
+
+    public void setPlatformCommission(java.math.BigDecimal platformCommission) {
+        this.platformCommission = platformCommission;
+    }
+
+    public java.math.BigDecimal getOwnerPayout() {
+        return ownerPayout;
+    }
+
+    public void setOwnerPayout(java.math.BigDecimal ownerPayout) {
+        this.ownerPayout = ownerPayout;
+    }
+
+    public java.math.BigDecimal getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(java.math.BigDecimal commissionRate) {
+        this.commissionRate = commissionRate;
+    }
+
+    public Boolean getSplitPaymentEnabled() {
+        return splitPaymentEnabled;
+    }
+
+    public void setSplitPaymentEnabled(Boolean splitPaymentEnabled) {
+        this.splitPaymentEnabled = splitPaymentEnabled;
     }
 }
