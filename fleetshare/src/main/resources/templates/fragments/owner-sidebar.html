@@ -36,6 +36,12 @@
                 <span class="menu-title">Payment</span>
             </a>
         </li>
+        <li class="nav-item" th:classappend="${activePage == 'payout-dashboard'} ? 'active'">
+            <a class="nav-link" th:href="@{/owner/payout-dashboard}">
+                <i class="mdi mdi-bank-transfer menu-icon"></i>
+                <span class="menu-title">Payout Dashboard</span>
+            </a>
+        </li>
         <li class="nav-item" th:classappend="${activePage == 'reports'} ? 'active'">
             <a class="nav-link" th:href="@{/owner/reports}">
                 <i class="icon-paper menu-icon"></i>

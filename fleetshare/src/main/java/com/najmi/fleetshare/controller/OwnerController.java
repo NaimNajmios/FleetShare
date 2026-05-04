@@ -1083,6 +1083,123 @@ public class OwnerController {
         return "redirect:/owner/payments/view/" + paymentId;
     }
 
+    /**
+     * Owner Payout Dashboard - shows owner's specific earnings and commission paid.
+     */
+    @GetMapping("/payout-dashboard")
+    public String payoutDashboard(HttpSession session, Model model) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            List<PaymentDTO> allPayments = paymentService.getPaymentsByOwnerId(ownerId);
+
+            // Filter for verified split payments
+            List<PaymentDTO> verifiedSplitPayments = allPayments.stream()
+                    .filter(p -> "VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
+                    .collect(Collectors.toList());
+
+            // Total Owner Payouts
+            BigDecimal totalOwnerPayouts = verifiedSplitPayments.stream()
+                    .filter(p -> p.getOwnerPayout() != null)
+                    .map(PaymentDTO::getOwnerPayout)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // Total Commission Paid
+            BigDecimal totalCommissionPaid = verifiedSplitPayments.stream()
+                    .filter(p -> p.getPlatformCommission() != null)
+                    .map(PaymentDTO::getPlatformCommission)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // Total transaction volume for split payments
+            BigDecimal totalSplitVolume = verifiedSplitPayments.stream()
+                    .filter(p -> p.getAmount() != null)
+                    .map(PaymentDTO::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            long verifiedSplitCount = verifiedSplitPayments.size();
+
+            model.addAttribute("totalOwnerPayouts", totalOwnerPayouts);
+            model.addAttribute("totalCommissionPaid", totalCommissionPaid);
+            model.addAttribute("totalSplitVolume", totalSplitVolume);
+            model.addAttribute("verifiedSplitCount", verifiedSplitCount);
+
+            // Monthly trend (last 6 months)
+            java.util.Map<String, BigDecimal> monthlyPayout = new java.util.LinkedHashMap<>();
+            java.util.Map<String, BigDecimal> monthlyCommission = new java.util.LinkedHashMap<>();
+
+            for (int i = 5; i >= 0; i--) {
+                LocalDate monthDate = LocalDate.now().minusMonths(i);
+                String monthKey = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("MMM yyyy"));
+                int year = monthDate.getYear();
+                int month = monthDate.getMonthValue();
+
+                BigDecimal payout = verifiedSplitPayments.stream()
+                        .filter(p -> p.getPaymentDate() != null
+                                && p.getPaymentDate().getYear() == year
+                                && p.getPaymentDate().getMonthValue() == month
+                                && p.getOwnerPayout() != null)
+                        .map(PaymentDTO::getOwnerPayout)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                BigDecimal commission = verifiedSplitPayments.stream()
+                        .filter(p -> p.getPaymentDate() != null
+                                && p.getPaymentDate().getYear() == year
+                                && p.getPaymentDate().getMonthValue() == month
+                                && p.getPlatformCommission() != null)
+                        .map(PaymentDTO::getPlatformCommission)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                monthlyPayout.put(monthKey, payout);
+                monthlyCommission.put(monthKey, commission);
+            }
+
+            model.addAttribute("monthlyTrendLabels", monthlyPayout.keySet());
+            model.addAttribute("monthlyPayoutAmounts", monthlyPayout.values());
+            model.addAttribute("monthlyCommissionAmounts", monthlyCommission.values());
+
+            // Recent split transactions
+            List<PaymentDTO> splitPayments = allPayments.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
+                    .sorted((a, b) -> {
+                        if (a.getPaymentDate() == null) return 1;
+                        if (b.getPaymentDate() == null) return -1;
+                        return b.getPaymentDate().compareTo(a.getPaymentDate());
+                    })
+                    .limit(50)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("splitPayments", splitPayments);
+            
+            // Check if owner has configured their ToyyibPay Username
+            boolean hasToyyibpayUsername = false;
+            java.util.Optional<com.najmi.fleetshare.entity.FleetOwner> ownerOpt = fleetOwnerRepository.findById(ownerId);
+            if (ownerOpt.isPresent()) {
+                String username = ownerOpt.get().getToyyibpayUsername();
+                hasToyyibpayUsername = username != null && !username.trim().isEmpty();
+            }
+            model.addAttribute("hasToyyibpayUsername", hasToyyibpayUsername);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("totalOwnerPayouts", BigDecimal.ZERO);
+            model.addAttribute("totalCommissionPaid", BigDecimal.ZERO);
+            model.addAttribute("totalSplitVolume", BigDecimal.ZERO);
+            model.addAttribute("verifiedSplitCount", 0L);
+            model.addAttribute("monthlyTrendLabels", new java.util.ArrayList<>());
+            model.addAttribute("monthlyPayoutAmounts", new java.util.ArrayList<>());
+            model.addAttribute("monthlyCommissionAmounts", new java.util.ArrayList<>());
+            model.addAttribute("splitPayments", new java.util.ArrayList<>());
+            model.addAttribute("hasToyyibpayUsername", false);
+        }
+
+        return "owner/payout-dashboard";
+    }
+
     @GetMapping("/reports")
     public String reports(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='payout-dashboard', pageTitle='Payout Dashboard'">
+
+<head>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .kpi-card {
+                border-radius: 12px;
+                padding: 1.25rem;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                border: none;
+            }
+
+            .kpi-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .kpi-card .kpi-value {
+                font-size: 1.75rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
+            .kpi-card .kpi-label {
+                font-size: 0.875rem;
+                font-weight: 500;
+                opacity: 0.9;
+                margin-top: 0.25rem;
+            }
+
+            .kpi-card .kpi-icon {
+                font-size: 2.5rem;
+                opacity: 0.3;
+                position: absolute;
+                right: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .kpi-payout {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .kpi-commission {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: white;
+            }
+
+            .kpi-volume {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+            }
+
+            .kpi-count {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
+            .split-badge {
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 0.7rem;
+                font-weight: 600;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h3 class="font-weight-bold mb-1">Payout Dashboard</h3>
+                        <p class="text-muted mb-0">Track your earnings and commission paid via Central Payout</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Warning Alert if no Toyyibpay username -->
+        <div class="row mb-4" th:if="${!hasToyyibpayUsername}">
+            <div class="col-12">
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="mdi mdi-alert-circle-outline mr-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Central Payout Not Enabled!</strong><br>
+                        <small>You have not configured your ToyyibPay Username. This dashboard only tracks payments routed via the Central Payout module. To enable automatic commission splitting, please update your <a th:href="@{/owner/profile}">Profile</a>.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-payout">
+                    <div class="kpi-value"
+                        th:text="'RM ' + ${#numbers.formatDecimal(totalOwnerPayouts ?: 0, 1, 'COMMA', 2, 'POINT')}">
+                        RM 0.00</div>
+                    <div class="kpi-label">Total Earnings</div>
+                    <i class="mdi mdi-account-cash kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-commission">
+                    <div class="kpi-value"
+                        th:text="'RM ' + ${#numbers.formatDecimal(totalCommissionPaid ?: 0, 1, 'COMMA', 2, 'POINT')}">
+                        RM 0.00</div>
+                    <div class="kpi-label">Commission Paid</div>
+                    <i class="mdi mdi-trending-down kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-volume">
+                    <div class="kpi-value"
+                        th:text="'RM ' + ${#numbers.formatDecimal(totalSplitVolume ?: 0, 1, 'COMMA', 2, 'POINT')}">
+                        RM 0.00</div>
+                    <div class="kpi-label">Gross Transaction Volume</div>
+                    <i class="mdi mdi-swap-horizontal kpi-icon"></i>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+                <div class="kpi-card kpi-count">
+                    <div class="kpi-value" th:text="${verifiedSplitCount ?: 0}">0</div>
+                    <div class="kpi-label">Verified Payouts</div>
+                    <i class="mdi mdi-check-decagram kpi-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-8 mb-4 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Earnings & Commission Trend</h5>
+                        <div class="chart-container"><canvas id="earningsTrendChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Gross vs Net Split</h5>
+                        <div class="chart-container"><canvas id="revenueSplitChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Split Transactions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="mdi mdi-history me-2"></i>Recent Payouts
+                        </h5>
+                        <div th:if="${#lists.isEmpty(splitPayments)}" class="text-center py-4">
+                            <i class="mdi mdi-cash-register mdi-48px text-muted"></i>
+                            <p class="text-muted mt-2">No split payment data yet.</p>
+                        </div>
+                        <div th:unless="${#lists.isEmpty(splitPayments)}" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Invoice</th>
+                                        <th>Renter</th>
+                                        <th class="text-end">Gross Total</th>
+                                        <th class="text-end">Commission (Platform)</th>
+                                        <th class="text-end">Net Payout (You)</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="payment : ${splitPayments}">
+                                        <td class="fw-bold" th:text="${payment.invoiceNumber}">INV-001</td>
+                                        <td th:text="${payment.renterName}">Renter</td>
+                                        <td class="text-end fw-bold">
+                                            RM <span
+                                                th:text="${#numbers.formatDecimal(payment.amount ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                        <td class="text-end text-danger fw-bold">
+                                            - RM <span
+                                                th:text="${#numbers.formatDecimal(payment.platformCommission ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                        <td class="text-end text-success fw-bold">
+                                            RM <span
+                                                th:text="${#numbers.formatDecimal(payment.ownerPayout ?: 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                                        </td>
+                                        <td
+                                            th:text="${payment.paymentDate != null ? #temporals.format(payment.paymentDate, 'MMM dd, yyyy') : 'N/A'}">
+                                            N/A</td>
+                                        <td>
+                                            <span th:if="${payment.paymentStatus == 'PENDING'}"
+                                                class="badge bg-warning text-dark">Pending</span>
+                                            <span
+                                                th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'COMPLETED' or payment.paymentStatus == 'PAID'}"
+                                                class="badge bg-success">Verified</span>
+                                            <span
+                                                th:if="${payment.paymentStatus == 'FAILED' or payment.paymentStatus == 'REJECTED'}"
+                                                class="badge bg-danger">Failed</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/owner/payments/view/{id}(id=${payment.paymentId})}"
+                                                class="btn btn-sm btn-outline-primary"><i class="mdi mdi-eye"></i> View</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script th:inline="javascript">
+            const chartData = {
+                monthlyLabels: /*[[${monthlyTrendLabels}]]*/[],
+                monthlyPayout: /*[[${monthlyPayoutAmounts}]]*/[],
+                monthlyCommission: /*[[${monthlyCommissionAmounts}]]*/[],
+                totalPayout: /*[[${totalOwnerPayouts ?: 0}]]*/ 0,
+                totalCommission: /*[[${totalCommissionPaid ?: 0}]]*/ 0
+            };
+
+            // Earnings & Commission Trend Chart
+            const trendCtx = document.getElementById('earningsTrendChart');
+            if (trendCtx) {
+                new Chart(trendCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.monthlyLabels,
+                        datasets: [{
+                            label: 'Net Earnings (RM)',
+                            data: chartData.monthlyPayout,
+                            backgroundColor: 'rgba(17, 153, 142, 0.8)',
+                            borderColor: '#11998e',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }, {
+                            label: 'Commission Paid (RM)',
+                            data: chartData.monthlyCommission,
+                            backgroundColor: 'rgba(250, 112, 154, 0.8)',
+                            borderColor: '#fa709a',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: v => 'RM ' + v } }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ctx.dataset.label + ': RM ' + ctx.parsed.y.toFixed(2)
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Revenue Split Donut Chart
+            const splitCtx = document.getElementById('revenueSplitChart');
+            if (splitCtx) {
+                new Chart(splitCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Net Earnings', 'Commission Paid'],
+                        datasets: [{
+                            data: [chartData.totalPayout, chartData.totalCommission],
+                            backgroundColor: ['#38ef7d', '#fa709a'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ctx.label + ': RM ' + ctx.parsed.toFixed(2)
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+    </th:block>
+</body>
+
+</html>
