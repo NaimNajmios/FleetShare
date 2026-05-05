@@ -877,6 +877,11 @@ public class OwnerController {
         }
 
         model.addAttribute("booking", booking);
+        
+        // Phase 1: Add valid status transitions for the dropdown
+        List<String> nextStatuses = bookingService.getValidNextStatuses(booking.getStatus());
+        model.addAttribute("nextStatuses", nextStatuses);
+        
         return "owner/edit-booking";
     }
 
@@ -906,6 +911,7 @@ public class OwnerController {
 
     @PostMapping("/bookings/update")
     public String updateBooking(@ModelAttribute BookingDTO bookingDTO,
+            @RequestParam(value = "newStatus", required = false) String newStatus,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
         SessionUser user = SessionHelper.getCurrentUser(session);
@@ -928,6 +934,16 @@ public class OwnerController {
             }
 
             bookingService.updateBooking(bookingDTO);
+
+            // Phase 1: Handle status update if provided
+            if (newStatus != null && !newStatus.trim().isEmpty() && !newStatus.equals(existing.getStatus())) {
+                try {
+                    bookingService.updateBookingStatus(bookingDTO.getBookingId(), newStatus, user.getUserId(), "Updated via booking edit screen");
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("warningMessage", "Booking details updated, but status update failed: " + e.getMessage());
+                }
+            }
+
             redirectAttributes.addFlashAttribute("successMessage", "Booking updated successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to update booking: " + e.getMessage());

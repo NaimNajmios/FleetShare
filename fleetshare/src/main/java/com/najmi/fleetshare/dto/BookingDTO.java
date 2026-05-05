@@ -34,6 +34,23 @@ public class BookingDTO {
     private BigDecimal ratePerDay;
     private Integer daysRented;
     private String snapshotRemarks;
+    private java.util.List<PriceAdjustment> adjustments = new java.util.ArrayList<>();
+
+    public static class PriceAdjustment {
+        private String description;
+        private BigDecimal amount;
+
+        public PriceAdjustment() {}
+        public PriceAdjustment(String description, BigDecimal amount) {
+            this.description = description;
+            this.amount = amount;
+        }
+
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        public BigDecimal getAmount() { return amount; }
+        public void setAmount(BigDecimal amount) { this.amount = amount; }
+    }
 
     // Constructors
     public BookingDTO() {
@@ -280,5 +297,13 @@ public class BookingDTO {
 
     public void setSnapshotRemarks(String snapshotRemarks) {
         this.snapshotRemarks = snapshotRemarks;
+    }
+
+    public java.util.List<PriceAdjustment> getAdjustments() {
+        return adjustments;
+    }
+
+    public void setAdjustments(java.util.List<PriceAdjustment> adjustments) {
+        this.adjustments = adjustments;
     }
 }

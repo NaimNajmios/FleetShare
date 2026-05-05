@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class BookingService {
@@ -52,6 +54,8 @@ public class BookingService {
 
     @Autowired
     private EmailService emailService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Fetches all bookings with related information
@@ -196,6 +200,19 @@ public class BookingService {
             dto.setRatePerDay(snapshot.getRatePerDay());
             dto.setDaysRented(snapshot.getDaysRented());
             dto.setSnapshotRemarks(snapshot.getRemarks());
+
+            // Phase 2: Parse adjustments from JSON remarks if they look like JSON
+            if (snapshot.getRemarks() != null && snapshot.getRemarks().trim().startsWith("[")) {
+                try {
+                    List<BookingDTO.PriceAdjustment> adjustments = objectMapper.readValue(
+                        snapshot.getRemarks(), 
+                        new TypeReference<List<BookingDTO.PriceAdjustment>>() {}
+                    );
+                    dto.setAdjustments(adjustments);
+                } catch (Exception e) {
+                    // Fallback: keep as raw remarks
+                }
+            }
         });
 
         return dto;
@@ -284,15 +301,32 @@ public class BookingService {
             java.math.BigDecimal autoCalculated = snapshot.getRatePerDay()
                     .multiply(java.math.BigDecimal.valueOf(days));
 
-            // Check if owner provided a manual override
-            if (bookingDTO.getTotalCost() != null
+            // Phase 2: Calculate adjustments total
+            java.math.BigDecimal adjustmentsTotal = java.math.BigDecimal.ZERO;
+            if (bookingDTO.getAdjustments() != null && !bookingDTO.getAdjustments().isEmpty()) {
+                for (BookingDTO.PriceAdjustment adj : bookingDTO.getAdjustments()) {
+                    if (adj.getAmount() != null) {
+                        adjustmentsTotal = adjustmentsTotal.add(adj.getAmount());
+                    }
+                }
+                
+                // Serialize adjustments to JSON remarks
+                try {
+                    String jsonRemarks = objectMapper.writeValueAsString(bookingDTO.getAdjustments());
+                    snapshot.setRemarks(jsonRemarks);
+                } catch (Exception e) {
+                    snapshot.setRemarks(bookingDTO.getSnapshotRemarks());
+                }
+                
+                totalCost = autoCalculated.add(adjustmentsTotal);
+            } else if (bookingDTO.getTotalCost() != null
                     && bookingDTO.getTotalCost().compareTo(java.math.BigDecimal.ZERO) > 0
                     && bookingDTO.getTotalCost().compareTo(autoCalculated) != 0) {
-                // Manual override: use owner's custom price
+                // Legacy manual override support
                 totalCost = bookingDTO.getTotalCost();
                 snapshot.setRemarks(bookingDTO.getSnapshotRemarks());
             } else {
-                // Auto-calculated: rate × days
+                // Pure auto-calculated
                 totalCost = autoCalculated;
                 snapshot.setRemarks(null);
             }
@@ -404,6 +438,24 @@ public class BookingService {
         }
 
         return booking;
+    }
+
+    /**
+     * Returns a list of valid next statuses for a given current status.
+     */
+    public List<String> getValidNextStatuses(String currentStatusStr) {
+        try {
+            BookingStatusLog.BookingStatus current = BookingStatusLog.BookingStatus.valueOf(currentStatusStr.toUpperCase());
+            List<String> nextStatuses = new ArrayList<>();
+            for (BookingStatusLog.BookingStatus status : BookingStatusLog.BookingStatus.values()) {
+                if (isValidTransition(current, status)) {
+                    nextStatuses.add(status.name());
+                }
+            }
+            return nextStatuses;
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     /**

@@ -109,6 +109,66 @@
                 text-decoration: line-through;
                 border-color: transparent !important;
             }
+
+            /* Phase 1 & 2 Styles */
+            .price-breakdown {
+                background: #f8f9fa;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-top: 1rem;
+            }
+
+            .adjustment-row td {
+                vertical-align: middle;
+                padding: 0.5rem;
+            }
+
+            .adjustment-table {
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .adjustment-table th {
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                color: #6c757d;
+                font-weight: 600;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            .delta-badge {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.5rem;
+                border-radius: 20px;
+                margin-left: 0.5rem;
+                vertical-align: middle;
+            }
+
+            .delta-increase {
+                background-color: #ffebee;
+                color: #c62828;
+            }
+
+            .delta-decrease {
+                background-color: #e8f5e9;
+                color: #2e7d32;
+            }
+            
+            .btn-remove-adjustment {
+                color: #dc3545;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+            
+            .btn-remove-adjustment:hover {
+                color: #a71d2a;
+            }
+
+            .status-select-container {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #f3f3f3;
+            }
         </style>
     </th:block>
 </head>
@@ -199,50 +259,73 @@
                         </div>
                     </div>
 
-                    <!-- Pricing -->
+                    <!-- Phase 2: Pricing & Adjustments -->
                     <div class="info-card">
-                        <div class="card-header-custom">Pricing</div>
+                        <div class="card-header-custom">Pricing & Adjustments</div>
+                        
                         <div class="detail-row">
-                            <span class="detail-label">Auto-Calculated Total (RM)</span>
-                            <span class="detail-value fw-bold text-success" id="autoTotal"
-                                th:text="${booking.totalCost != null ? booking.totalCost : 'N/A'}">360.00</span>
+                            <span class="detail-label">Base Rental Total (RM)</span>
+                            <span class="detail-value fw-bold" id="autoTotal"
+                                th:text="${(booking.ratePerDay != null ? booking.ratePerDay : 0) * (booking.daysRented != null ? booking.daysRented : 0)}">0.00</span>
                         </div>
 
-                        <!-- Manual Override Toggle -->
-                        <div class="detail-row" style="border-bottom: none;">
-                            <span class="detail-label">Adjust Price Manually?</span>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="overrideToggle"
-                                    th:checked="${booking.snapshotRemarks != null and !booking.snapshotRemarks.isEmpty()}">
+                        <!-- Adjustments Table -->
+                        <div class="adjustment-table-container">
+                            <table class="adjustment-table" id="adjustmentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th style="width: 120px;">Amount (RM)</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adjustmentsBody">
+                                    <tr th:each="adj, stat : *{adjustments}" class="adjustment-row">
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   th:name="'adjustments[' + ${stat.index} + '].description'" 
+                                                   th:value="${adj.description}" placeholder="e.g. Cleaning Fee">
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control form-control-sm adjustment-amount" 
+                                                   th:name="'adjustments[' + ${stat.index} + '].amount'" 
+                                                   th:value="${adj.amount}" placeholder="0.00">
+                                        </td>
+                                        <td class="text-center">
+                                            <i class="mdi mdi-delete btn-remove-adjustment"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="btnAddAdjustment">
+                                <i class="mdi mdi-plus"></i> Add Adjustment
+                            </button>
+                        </div>
+
+                        <!-- Phase 1: Price Breakdown -->
+                        <div class="price-breakdown">
+                            <div class="detail-row mb-1" style="border:none;">
+                                <span class="detail-label">Base Cost</span>
+                                <span class="detail-value" id="breakdownBase"
+                                    th:text="${'RM ' + ((booking.ratePerDay != null ? booking.ratePerDay : 0) * (booking.daysRented != null ? booking.daysRented : 0))}">RM 0.00</span>
+                            </div>
+                            <div class="detail-row mb-1" style="border:none;">
+                                <span class="detail-label">Adjustments</span>
+                                <span class="detail-value" id="breakdownAdjustments"
+                                    th:text="${'RM ' + (booking.adjustments != null ? #aggregates.sum(booking.adjustments.![amount]) : '0.00')}">RM 0.00</span>
+                            </div>
+                            <div class="detail-row pt-2" style="border-top: 1px solid #dee2e6;">
+                                <span class="detail-label fw-bold">Final Total</span>
+                                <div>
+                                    <span class="detail-value text-primary fs-5" id="finalTotal"
+                                        th:text="${'RM ' + (booking.totalCost != null ? booking.totalCost : '0.00')}">RM 0.00</span>
+                                    <span id="deltaBadge" class="delta-badge" style="display:none;"></span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Manual Override Fields (hidden by default) -->
-                        <div id="overrideSection" style="display: none;">
-                            <div class="detail-row">
-                                <span class="detail-label">Custom Total (RM)</span>
-                                <input type="number" step="0.01" class="form-control form-control-sm w-50"
-                                    id="customTotalCost" name="totalCost"
-                                    th:value="${booking.snapshotRemarks != null and !booking.snapshotRemarks.isEmpty() ? booking.totalCost : ''}"
-                                    placeholder="Enter custom amount" disabled>
-                            </div>
-                            <div class="detail-row" style="flex-direction: column; align-items: flex-start;">
-                                <span class="detail-label mb-2">Reason for Adjustment</span>
-                                <textarea class="form-control form-control-sm" rows="2" id="snapshotRemarks"
-                                    name="snapshotRemarks" th:text="${booking.snapshotRemarks}"
-                                    placeholder="e.g. Discount for repeat customer, late return surcharge"
-                                    disabled></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Previous Remarks (if exists) -->
-                        <div th:if="${booking.snapshotRemarks != null and !booking.snapshotRemarks.isEmpty()}"
-                            class="override-note">
-                            <small class="text-muted"><i class="mdi mdi-information-outline"></i> Last adjustment
-                                reason:</small>
-                            <br>
-                            <small th:text="${booking.snapshotRemarks}">Discount applied</small>
-                        </div>
+                        <!-- Hidden field for original total to calculate delta -->
+                        <input type="hidden" id="originalTotal" th:value="${booking.totalCost}">
                     </div>
 
                     <!-- Payment Information (Read Only) -->
@@ -302,6 +385,19 @@
                     <div class="action-panel">
                         <div class="card-header-custom">Actions</div>
 
+                        <!-- Phase 1: Status Selection -->
+                        <div class="status-select-container">
+                            <label class="detail-label mb-2">Update Booking Status</label>
+                            <select class="form-control" name="newStatus">
+                                <option th:value="${booking.status}" th:text="${booking.status + ' (Current)'}" selected></option>
+                                <option th:each="status : ${nextStatuses}" th:value="${status}" th:text="${status}"></option>
+                            </select>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="mdi mdi-information-outline"></i> 
+                                Only valid transitions are shown.
+                            </small>
+                        </div>
+
                         <button type="submit" class="btn btn-primary btn-block mb-3">Save Changes</button>
                         <a th:href="@{/owner/bookings/view/{id}(id=*{bookingId})}"
                             class="btn btn-secondary btn-block">Cancel</a>
@@ -320,92 +416,160 @@
                 const daysRentedEl = document.getElementById('daysRented');
                 const autoTotalEl = document.getElementById('autoTotal');
                 const ratePerDayEl = document.getElementById('ratePerDay');
-                const overrideToggle = document.getElementById('overrideToggle');
-                const overrideSection = document.getElementById('overrideSection');
-                const customTotalInput = document.getElementById('customTotalCost');
-                const remarksInput = document.getElementById('snapshotRemarks');
+                
+                const breakdownBaseEl = document.getElementById('breakdownBase');
+                const breakdownAdjustmentsEl = document.getElementById('breakdownAdjustments');
+                const finalTotalEl = document.getElementById('finalTotal');
+                const deltaBadge = document.getElementById('deltaBadge');
+                const originalTotal = parseFloat(document.getElementById('originalTotal').value || '0');
+
+                const btnAddAdjustment = document.getElementById('btnAddAdjustment');
+                const adjustmentsBody = document.getElementById('adjustmentsBody');
 
                 const vehicleId = document.getElementById('vehicleIdData').textContent.trim();
                 const bookingId = document.getElementById('bookingIdData').textContent.trim();
-
                 const ratePerDay = parseFloat(ratePerDayEl ? ratePerDayEl.textContent : '0');
+
+                function reindexAdjustments() {
+                    const rows = adjustmentsBody.querySelectorAll('.adjustment-row');
+                    rows.forEach((row, index) => {
+                        const descInput = row.querySelector('input[type="text"]');
+                        const amountInput = row.querySelector('input[type="number"]');
+                        descInput.name = `adjustments[${index}].description`;
+                        amountInput.name = `adjustments[${index}].amount`;
+                    });
+                }
+
+                function calculateAdjustmentsTotal() {
+                    let total = 0;
+                    const inputs = adjustmentsBody.querySelectorAll('.adjustment-amount');
+                    inputs.forEach(input => {
+                        const val = parseFloat(input.value);
+                        if (!isNaN(val)) total += val;
+                    });
+                    return total;
+                }
 
                 function recalculate() {
                     const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
                     const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+                    let baseTotal = 0;
 
-                    if (startDate && endDate && endDate > startDate) {
-                        const diffMs = endDate - startDate;
-                        let days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                    if (startDate && endDate && endDate >= startDate) {
+                        // Use date-only for calculation to match the booking form (calendar days)
+                        const startD = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        const endD = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+                        const diffMs = endD - startD;
+                        let days = Math.round(diffMs / (1000 * 60 * 60 * 24));
+                        
+                        // Minimum 1 day charge
                         if (days <= 0) days = 1;
 
                         daysRentedEl.textContent = days;
-
                         if (ratePerDay > 0) {
-                            const total = (ratePerDay * days).toFixed(2);
-                            autoTotalEl.textContent = total;
+                            baseTotal = ratePerDay * days;
+                            autoTotalEl.textContent = baseTotal.toFixed(2);
+                            breakdownBaseEl.textContent = `RM ${baseTotal.toFixed(2)}`;
                         }
                     } else {
                         daysRentedEl.textContent = 'N/A';
-                        autoTotalEl.textContent = 'N/A';
+                        autoTotalEl.textContent = '0.00';
+                        breakdownBaseEl.textContent = 'RM 0.00';
+                    }
+
+                    const adjustmentsTotal = calculateAdjustmentsTotal();
+                    const finalTotal = baseTotal + adjustmentsTotal;
+
+                    breakdownAdjustmentsEl.textContent = `RM ${adjustmentsTotal.toFixed(2)}`;
+                    finalTotalEl.textContent = `RM ${finalTotal.toFixed(2)}`;
+
+                    // Update Delta Badge
+                    const delta = finalTotal - originalTotal;
+                    if (Math.abs(delta) < 0.01) {
+                        deltaBadge.style.display = 'none';
+                    } else {
+                        deltaBadge.style.display = 'inline-block';
+                        deltaBadge.className = 'delta-badge ' + (delta > 0 ? 'delta-increase' : 'delta-decrease');
+                        deltaBadge.textContent = (delta > 0 ? '+' : '-') + ' RM ' + Math.abs(delta).toFixed(2);
                     }
                 }
 
-                function toggleOverride() {
-                    const isOverride = overrideToggle.checked;
-                    overrideSection.style.display = isOverride ? 'block' : 'none';
-                    customTotalInput.disabled = !isOverride;
-                    remarksInput.disabled = !isOverride;
+                btnAddAdjustment.addEventListener('click', function() {
+                    const index = adjustmentsBody.querySelectorAll('.adjustment-row').length;
+                    const row = document.createElement('tr');
+                    row.className = 'adjustment-row';
+                    row.innerHTML = `
+                        <td>
+                            <input type="text" class="form-control form-control-sm" name="adjustments[${index}].description" placeholder="e.g. Surcharge">
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" class="form-control form-control-sm adjustment-amount" name="adjustments[${index}].amount" placeholder="0.00">
+                        </td>
+                        <td class="text-center">
+                            <i class="mdi mdi-delete btn-remove-adjustment"></i>
+                        </td>
+                    `;
+                    adjustmentsBody.appendChild(row);
+                    
+                    // Add listeners for recalculation
+                    row.querySelector('.adjustment-amount').addEventListener('input', recalculate);
+                    row.querySelector('.btn-remove-adjustment').addEventListener('click', function() {
+                        row.remove();
+                        reindexAdjustments();
+                        recalculate();
+                    });
+                });
 
-                    if (!isOverride) {
-                        customTotalInput.value = '';
-                        remarksInput.value = '';
+                // Delegate remove button for existing rows
+                adjustmentsBody.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('btn-remove-adjustment')) {
+                        e.target.closest('.adjustment-row').remove();
+                        reindexAdjustments();
+                        recalculate();
                     }
-                }
+                });
 
-                overrideToggle.addEventListener('change', toggleOverride);
+                // Listen for changes in existing amounts
+                adjustmentsBody.addEventListener('input', function(e) {
+                    if (e.target.classList.contains('adjustment-amount')) {
+                        recalculate();
+                    }
+                });
 
-                // Initialize override on page load
-                toggleOverride();
+                // Initialize override logic (deprecated but keeping for safety if needed)
+                // toggleOverride(); // Removed as we use the new table flow
 
                 // Fetch unavailable dates and initialize Flatpickr
                 fetch('/owner/bookings/vehicle/' + vehicleId + '/unavailable-dates?excludeBookingId=' + bookingId)
                     .then(response => response.json())
                     .then(ranges => {
-                        // Convert ranges to Flatpickr disable format
-                        const disableRanges = ranges.map(r => ({
-                            from: r.from,
-                            to: r.to
-                        }));
-
+                        const disableRanges = ranges.map(r => ({ from: r.from, to: r.to }));
                         const fpConfig = {
                             enableTime: true,
                             dateFormat: 'Y-m-d\\TH:i',
                             time_24hr: true,
                             disable: disableRanges,
                             allowInput: true,
-                            onChange: function () {
-                                recalculate();
-                            }
+                            onChange: recalculate
                         };
-
                         flatpickr(startDateInput, Object.assign({}, fpConfig));
                         flatpickr(endDateInput, Object.assign({}, fpConfig));
+                        
+                        // Trigger initial calculation
+                        recalculate();
                     })
                     .catch(err => {
                         console.error('Failed to load unavailable dates:', err);
-                        // Fallback: initialize Flatpickr without disabled dates
                         const fpConfig = {
                             enableTime: true,
                             dateFormat: 'Y-m-d\\TH:i',
                             time_24hr: true,
                             allowInput: true,
-                            onChange: function () {
-                                recalculate();
-                            }
+                            onChange: recalculate
                         };
                         flatpickr(startDateInput, fpConfig);
                         flatpickr(endDateInput, fpConfig);
+                        recalculate();
                     });
             })();
         </script>
