@@ -603,15 +603,29 @@
                         <div id="retry-method-section" class="method-selection-card hidden" style="margin-top: 1.5rem;">
                             <h2 class="section-title">Select Payment Method to Retry</h2>
                             <p class="text-muted small mb-3">Your previous attempt failed. You can try the same method again or pick a new one.</p>
-                            <form id="retryMethodForm" th:action="@{/renter/bookings/{id}/payment/change(id=${booking.bookingId})}" method="POST">
-                                <select name="method" class="payment-method-select" style="margin-bottom: 1rem;">
+                            <form id="retryMethodForm" th:action="@{/renter/bookings/{id}/payment/retry(id=${booking.bookingId})}" method="POST" enctype="multipart/form-data">
+                                <select name="method" id="retryPaymentMethodSelect" class="payment-method-select" style="margin-bottom: 1rem;">
                                     <option th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}" 
                                             value="CREDIT_CARD" th:selected="${currentPayment.paymentMethod.name() == 'CREDIT_CARD'}">Credit/Debit Card &amp; FPX</option>
                                     <option th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}" 
                                             value="BANK_TRANSFER" th:selected="${currentPayment.paymentMethod.name() == 'BANK_TRANSFER'}">Bank Transfer / DuitNow QR</option>
                                     <option value="CASH" th:selected="${currentPayment.paymentMethod.name() == 'CASH'}">Cash at Counter</option>
                                 </select>
-                                <button type="submit" class="btn-primary-action btn-gateway" style="width: 100%;">
+                                
+                                <!-- Dynamic upload zone for retry when BANK_TRANSFER is selected -->
+                                <div id="retryUploadSection" class="hidden mb-3 p-3 bg-light rounded border">
+                                    <p class="text-muted small mb-2"><i class="fas fa-info-circle"></i> Please upload your new transfer receipt.</p>
+                                    <div id="retryUploadZone" style="border: 2px dashed #dee2e6; border-radius: 0.5rem; padding: 1.5rem; cursor: pointer; transition: all 0.2s; text-align: center; background: white;">
+                                        <i class="fas fa-cloud-upload-alt text-muted mb-2"></i>
+                                        <p style="margin-bottom: 0; color: #6c757d; font-size: 0.9rem;">Click to upload receipt</p>
+                                        <input type="file" id="retryReceiptUpload" name="receipt" hidden accept="image/*,.pdf">
+                                    </div>
+                                    <p id="retryFileName" class="hidden mt-2 mb-0 text-success" style="font-size: 0.85rem; font-weight: 500;">
+                                        <i class="fas fa-check-circle"></i> <span id="retryFileNameText"></span>
+                                    </p>
+                                </div>
+
+                                <button type="submit" id="btn-submit-retry" class="btn-primary-action btn-gateway" style="width: 100%;">
                                     Confirm &amp; Retry <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </form>
@@ -897,7 +911,75 @@
                     btnRetryPayment.addEventListener('click', function () {
                         retryMethodSection.classList.toggle('hidden');
                         this.classList.add('hidden');
+                        
+                        // Check initial state of the dropdown to show/hide upload if needed
+                        const retrySelect = document.getElementById('retryPaymentMethodSelect');
+                        if(retrySelect) {
+                            retrySelect.dispatchEvent(new Event('change'));
+                        }
                     });
+                }
+                
+                // Retry Form Dynamic Receipt Upload
+                const retryPaymentMethodSelect = document.getElementById('retryPaymentMethodSelect');
+                const retryUploadSection = document.getElementById('retryUploadSection');
+                const retryUploadZone = document.getElementById('retryUploadZone');
+                const retryReceiptUpload = document.getElementById('retryReceiptUpload');
+                const retryFileName = document.getElementById('retryFileName');
+                const retryFileNameText = document.getElementById('retryFileNameText');
+                const retryMethodForm = document.getElementById('retryMethodForm');
+                const btnSubmitRetry = document.getElementById('btn-submit-retry');
+
+                if (retryPaymentMethodSelect && retryUploadSection) {
+                    retryPaymentMethodSelect.addEventListener('change', function() {
+                        if (this.value === 'BANK_TRANSFER') {
+                            retryUploadSection.classList.remove('hidden');
+                        } else {
+                            retryUploadSection.classList.add('hidden');
+                        }
+                    });
+
+                    if (retryUploadZone && retryReceiptUpload) {
+                        retryUploadZone.addEventListener('click', () => retryReceiptUpload.click());
+
+                        retryReceiptUpload.addEventListener('change', function() {
+                            if (this.files && this.files[0]) {
+                                retryFileNameText.textContent = this.files[0].name;
+                                retryFileName.classList.remove('hidden');
+                                retryUploadZone.style.borderColor = '#198754';
+                                retryUploadZone.style.background = '#f0fff4';
+                            }
+                        });
+                    }
+
+                    // Validate upload before submit
+                    if(retryMethodForm && retryReceiptUpload) {
+                        retryMethodForm.addEventListener('submit', function(e) {
+                            if (retryPaymentMethodSelect.value === 'BANK_TRANSFER') {
+                                if (!retryReceiptUpload.files || !retryReceiptUpload.files[0]) {
+                                    e.preventDefault();
+                                    const noReceiptModalEl = document.getElementById('noReceiptModal');
+                                    if (noReceiptModalEl) {
+                                        const noReceiptModal = new bootstrap.Modal(noReceiptModalEl);
+                                        noReceiptModal.show();
+                                    } else {
+                                        alert("Please upload a receipt for Bank Transfer.");
+                                    }
+                                } else {
+                                    // Valid, show spinner
+                                    if (btnSubmitRetry) {
+                                        btnSubmitRetry.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+                                        btnSubmitRetry.disabled = true;
+                                    }
+                                }
+                            } else {
+                                if (btnSubmitRetry) {
+                                    btnSubmitRetry.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+                                    btnSubmitRetry.disabled = true;
+                                }
+                            }
+                        });
+                    }
                 }
 
                 // Method selection for new payments

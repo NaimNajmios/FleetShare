@@ -568,6 +568,52 @@ public class RenterController {
         }
     }
 
+    @PostMapping("/bookings/{id}/payment/retry")
+    public String retryPayment(@PathVariable Long id,
+            @RequestParam("method") String method,
+            @RequestParam(value = "receipt", required = false) org.springframework.web.multipart.MultipartFile receipt,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            com.najmi.fleetshare.entity.Payment.PaymentMethod newMethod;
+            switch (method.toUpperCase()) {
+                case "CASH":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CASH;
+                    break;
+                case "CREDIT_CARD":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CREDIT_CARD;
+                    break;
+                case "BANK_TRANSFER":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.BANK_TRANSFER;
+                    break;
+                case "QR_PAYMENT":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.QR_PAYMENT;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid payment method: " + method);
+            }
+
+            paymentService.retryPayment(id, newMethod, receipt);
+            redirectAttributes.addFlashAttribute("successMessage", "Payment method changed and retried successfully.");
+
+            if (newMethod == com.najmi.fleetshare.entity.Payment.PaymentMethod.CREDIT_CARD) {
+                // Redirect directly to the gateway processing for credit card
+                return processGatewayPayment(id, session, redirectAttributes);
+            }
+
+            return "redirect:/renter/bookings/" + id;
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to retry payment: " + e.getMessage());
+            return "redirect:/renter/bookings/" + id + "/payment";
+        }
+    }
+
     @PostMapping("/bookings/{id}/payment/transfer")
     public String processTransferPayment(@PathVariable Long id,
             @RequestParam("receipt") org.springframework.web.multipart.MultipartFile receipt,

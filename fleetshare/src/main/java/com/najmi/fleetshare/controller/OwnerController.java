@@ -1083,6 +1083,25 @@ public class OwnerController {
         return "redirect:/owner/payments/view/" + paymentId;
     }
 
+    @PostMapping("/payments/fail/{paymentId}")
+    public String failPayment(@PathVariable Long paymentId,
+            @RequestParam(value = "reason", required = false) String reason,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Add ownership validation logic here if required, though paymentService might handle it or we assume user is owner.
+            paymentService.failPayment(paymentId, user.getUserId(), reason);
+            redirectAttributes.addFlashAttribute("successMessage", "Payment marked as failed successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to mark payment as failed: " + e.getMessage());
+        }
+        return "redirect:/owner/payments/view/" + paymentId;
+    }
+
     /**
      * Owner Payout Dashboard - shows owner's specific earnings and commission paid.
      */

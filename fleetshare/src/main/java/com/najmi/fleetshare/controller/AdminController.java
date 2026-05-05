@@ -548,6 +548,24 @@ public class AdminController {
         return "admin/view-payment";
     }
 
+    @PostMapping("/payment/fail/{paymentId}")
+    public String failPayment(@PathVariable Long paymentId,
+            @RequestParam(value = "reason", required = false) String reason,
+            HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            paymentService.failPayment(paymentId, user.getUserId(), reason);
+            redirectAttributes.addFlashAttribute("successMessage", "Payment marked as failed successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to mark payment as failed: " + e.getMessage());
+        }
+        return "redirect:/admin/payment/view/" + paymentId;
+    }
+
     /**
      * Download invoice PDF for a booking
      */

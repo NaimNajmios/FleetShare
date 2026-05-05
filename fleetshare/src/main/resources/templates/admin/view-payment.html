@@ -361,6 +361,13 @@
                             <div>
                                 <h5 class="alert-heading mb-1" style="font-weight: bold; color: #721c24;">Payment Attempt Failed</h5>
                                 <p class="mb-0" style="color: #721c24;">The renter's payment attempt was unsuccessful. A notification has been sent to them to retry their payment via the Manage Payment page.</p>
+                                
+                                <div class="mt-3 p-3 rounded" style="background-color: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.2);" th:if="${not #lists.isEmpty(statusLogs)}">
+                                    <div th:each="log, iterStat : ${statusLogs}" th:if="${log.status == 'FAILED' and iterStat.index == 0}">
+                                        <strong>Reason:</strong> <span th:text="${log.remarks}">Failure reason</span><br>
+                                        <small class="text-muted">Failed by: <span th:text="${log.actorName}">Admin</span> at <span th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">Time</span></small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -478,6 +485,10 @@
                     </a>
                     <button class="btn btn-secondary btn-block mb-3" onclick="window.print()">
                         <i class="mdi mdi-printer"></i> Print Details
+                    </button>
+                    
+                    <button th:if="${payment.paymentStatus == 'PENDING'}" type="button" class="btn btn-danger btn-block mb-3" data-toggle="modal" data-target="#rejectPaymentModal">
+                        <i class="mdi mdi-close-circle"></i> Reject Payment
                     </button>
 
                     <!-- Documents -->
@@ -600,6 +611,35 @@
                 </div>
             </div>
         </div>
+        </div>
+
+        <!-- Reject Payment Modal -->
+        <div class="modal fade" id="rejectPaymentModal" tabindex="-1" role="dialog" aria-labelledby="rejectPaymentModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectPaymentModalLabel">Reject Payment</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form th:action="@{/admin/payment/fail/{paymentId}(paymentId=${payment.paymentId})}" method="POST">
+                        <div class="modal-body">
+                            <p>Are you sure you want to reject this payment? This will mark the payment as FAILED and notify the renter to retry.</p>
+                            <div class="form-group">
+                                <label for="reason">Reason for Rejection <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="reason" name="reason" rows="3" required placeholder="e.g. Uploaded receipt is blurred, fraudulent transaction, etc."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">

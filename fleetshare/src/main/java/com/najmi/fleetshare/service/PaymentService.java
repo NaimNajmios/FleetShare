@@ -436,6 +436,58 @@ public class PaymentService {
     }
 
     /**
+     * Fails a payment manually, typically by an Admin or Owner.
+     *
+     * @param paymentId The payment ID to fail
+     * @param actorUserId The user ID of the person failing the payment
+     * @param reason The reason for failure
+     * @return The updated Payment entity
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment failPayment(Long paymentId, Long actorUserId, String reason) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found: " + paymentId));
+
+        if (payment.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
+            throw new IllegalStateException("Cannot fail a payment that is already verified.");
+        }
+
+        // Update payment status
+        payment.setPaymentStatus(Payment.PaymentStatus.FAILED);
+        payment = paymentRepository.save(payment);
+
+        // Log status change
+        PaymentStatusLog log = new PaymentStatusLog();
+        log.setPaymentId(payment.getPaymentId());
+        log.setStatusValue(Payment.PaymentStatus.FAILED);
+        log.setStatusTimestamp(java.time.LocalDateTime.now());
+        log.setActorUserId(actorUserId);
+        log.setRemarks(reason != null && !reason.trim().isEmpty() ? reason : "Payment failed by admin/owner");
+        paymentStatusLogRepository.save(log);
+
+        // Update invoice status to OVERDUE or retain UNPAID
+        Invoice invoice = invoiceRepository.findById(payment.getInvoiceId()).orElse(null);
+        if (invoice != null) {
+            // Let the booking/invoice stay as UNPAID but notify the renter to retry
+            Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+            if (renter != null) {
+                User renterUser = userRepository.findById(renter.getUserId()).orElse(null);
+                if (renterUser != null && renterUser.getEmail() != null) {
+                    Map<String, Object> emailModel = new HashMap<>();
+                    emailModel.put("renterName", renter.getFullName());
+                    emailModel.put("bookingId", invoice.getBookingId());
+                    emailModel.put("reason", reason);
+                    // Reusing a generic email template or a new one
+                    emailService.sendHtmlEmail(renterUser.getEmail(), "Payment Failed - Action Required", "email/payment-failed", emailModel);
+                }
+            }
+        }
+
+        return payment;
+    }
+
+
+    /**
      * Gets all payments for a specific invoice ID.
      * 
      * @param invoiceId The invoice ID
@@ -447,7 +499,7 @@ public class PaymentService {
 
     /**
      * Changes the payment method for a booking.
-     * Only allowed when payment is PENDING.
+     * Allowed when payment is PENDING or FAILED.
      *
      * @param bookingId The booking ID
      * @param newMethod The new payment method
@@ -507,6 +559,27 @@ public class PaymentService {
         newLog.setRemarks(getMethodRemarks(newMethod));
         paymentStatusLogRepository.save(newLog);
 
+        return newPayment;
+    }
+
+    /**
+     * Retries a payment that has FAILED.
+     * 
+     * @param bookingId The booking ID
+     * @param newMethod The new payment method
+     * @param receipt The receipt file (if BANK_TRANSFER)
+     * @return The new Payment entity
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment retryPayment(Long bookingId, Payment.PaymentMethod newMethod, org.springframework.web.multipart.MultipartFile receipt) throws java.io.IOException {
+        // Creates a new payment record using the changePaymentMethod logic
+        Payment newPayment = changePaymentMethod(bookingId, newMethod);
+        
+        // If the new method is BANK_TRANSFER and a receipt is provided, process it
+        if (newMethod == Payment.PaymentMethod.BANK_TRANSFER && receipt != null && !receipt.isEmpty()) {
+            return processBankTransferPayment(bookingId, receipt);
+        }
+        
         return newPayment;
     }
 
