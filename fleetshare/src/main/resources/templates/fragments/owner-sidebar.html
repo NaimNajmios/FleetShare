@@ -1,4 +1,4 @@
-<nav class="sidebar sidebar-offcanvas" id="sidebar" th:fragment="sidebar">
+<nav class="sidebar sidebar-offcanvas" id="sidebar" th:fragment="sidebar(activePage)">
     <ul class="nav">
         <li class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active'">
             <a class="nav-link" th:href="@{/owner/dashboard}">

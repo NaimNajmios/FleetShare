@@ -42,7 +42,7 @@
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <!-- partial:fragments/header.html -->
-      <div th:replace="~{fragments/header :: sidebar}"></div>
+      <div th:replace="~{fragments/header :: sidebar(activePage=${activePage})}"></div>
       <!-- partial -->
       <div class="main-panel">
         <div class="content-wrapper">
