@@ -59,19 +59,17 @@
     --fs-transition-slow: 300ms ease;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --fs-bg-main: #0b0f1a;
-        --fs-bg-card: #161c2d;
-        --fs-text-primary: #ffffff;
-        --fs-text-secondary: #e2e8f0;
-        --fs-text-muted: #b4beca;
-        --fs-primary-glow: rgba(59, 130, 246, 0.25);
-        --fs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-        --fs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-        --fs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-        --fs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-    }
+[data-theme="dark"] {
+    --fs-bg-main: #0b0f1a;
+    --fs-bg-card: #161c2d;
+    --fs-text-primary: #ffffff;
+    --fs-text-secondary: #e2e8f0;
+    --fs-text-muted: #b4beca;
+    --fs-primary-glow: rgba(59, 130, 246, 0.25);
+    --fs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --fs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+    --fs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    --fs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================
@@ -187,14 +185,12 @@ body.auth-page {
     border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-@media (prefers-color-scheme: dark) {
-    .auth-card {
-        background: rgba(22, 28, 45, 0.85);
-        backdrop-filter: blur(16px) saturate(180%);
-        -webkit-backdrop-filter: blur(16px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 15px rgba(37, 99, 235, 0.1);
-    }
+[data-theme="dark"] .auth-card {
+    background: rgba(22, 28, 45, 0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 15px rgba(37, 99, 235, 0.1);
 }
 
 .auth-card::before {
@@ -347,10 +343,8 @@ body.auth-page {
     box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-    .form-input {
-        border-color: #334155;
-    }
+[data-theme="dark"] .form-input {
+    border-color: #334155;
 }
 
 .form-input:focus {
@@ -983,11 +977,9 @@ border: 1px solid var(--fs-success-border);
     border-bottom: 1px solid #e2e8f0;
 }
 
-@media (prefers-color-scheme: dark) {
-    .auth-divider::before,
-    .auth-divider::after {
-        border-bottom-color: #334155;
-    }
+[data-theme="dark"] .auth-divider::before,
+[data-theme="dark"] .auth-divider::after {
+    border-bottom-color: #334155;
 }
 
 .auth-divider span {
@@ -1023,10 +1015,8 @@ border: 1px solid var(--fs-success-border);
     transition: all var(--fs-transition-base);
 }
 
-@media (prefers-color-scheme: dark) {
-    .btn-social {
-        border-color: #334155;
-    }
+[data-theme="dark"] .btn-social {
+    border-color: #334155;
 }
 
 .btn-social:hover:not(:disabled) {
@@ -1058,17 +1048,15 @@ border: 1px solid var(--fs-success-border);
     border-color: #94a3b8;
 }
 
-@media (prefers-color-scheme: dark) {
-    .btn-secondary {
-        background: #334155;
-        border-color: #475569;
-        color: #ffffff;
-    }
-    
-    .btn-secondary:hover {
-        background: #475569;
-        border-color: #64748b;
-    }
+[data-theme="dark"] .btn-secondary {
+    background: #334155;
+    border-color: #475569;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: #475569;
+    border-color: #64748b;
 }
 
 /* ============================================
@@ -1339,6 +1327,39 @@ border: 1px solid var(--fs-success-border);
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
+    outline: none;
+    box-shadow: var(--fs-shadow-glow);
+}
+
+/* ============================================
+   Theme Toggle Button
+   ============================================ */
+
+.theme-toggle-btn {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: transparent;
+    border: none;
+    color: var(--fs-text-secondary);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all var(--fs-transition-fast);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.theme-toggle-btn:hover {
+    color: var(--fs-primary);
+    background: var(--fs-primary-glow);
+    transform: scale(1.05);
+}
+
+.theme-toggle-btn:focus-visible {
     outline: none;
     box-shadow: var(--fs-shadow-glow);
 }
