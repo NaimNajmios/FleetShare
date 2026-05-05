@@ -111,7 +111,9 @@ public class BookingService {
         Map<Long, Payment> paymentMap = paymentRepository.findByInvoiceIdIn(invoiceIds).stream()
                 .collect(Collectors.groupingBy(Payment::getInvoiceId,
                         Collectors.collectingAndThen(Collectors.toList(),
-                                list -> list.isEmpty() ? null : list.get(0))));
+                                list -> list.isEmpty() ? null : list.stream()
+                                        .max(java.util.Comparator.comparing(Payment::getPaymentId))
+                                        .orElse(null))));
 
         List<BookingDTO> bookingDTOs = new ArrayList<>();
 
@@ -176,10 +178,16 @@ public class BookingService {
             // Fetch Payment
             List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
             if (!payments.isEmpty()) {
-                Payment payment = payments.get(0);
-                dto.setPaymentMethod(payment.getPaymentMethod().name());
-                dto.setPaymentStatus(payment.getPaymentStatus().name());
-                dto.setProofOfPaymentUrl(payment.getVerificationProofUrl());
+                // Pick the latest payment (highest ID)
+                Payment payment = payments.stream()
+                        .max(java.util.Comparator.comparing(Payment::getPaymentId))
+                        .orElse(null);
+                
+                if (payment != null) {
+                    dto.setPaymentMethod(payment.getPaymentMethod().name());
+                    dto.setPaymentStatus(payment.getPaymentStatus().name());
+                    dto.setProofOfPaymentUrl(payment.getVerificationProofUrl());
+                }
             }
         }
 
