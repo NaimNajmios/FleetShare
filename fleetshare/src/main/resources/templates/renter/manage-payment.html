@@ -557,19 +557,83 @@
                         <div id="change-method-section" class="method-selection-card hidden"
                             style="margin-top: 1.5rem;">
                             <h2 class="section-title">Select New Payment Method</h2>
+                            <div class="payment-options-grid mb-4" role="radiogroup" aria-label="Change Payment Method">
+                                <button
+                                    th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}"
+                                    type="button" class="payment-option-card change-option" data-value="card" role="radio"
+                                    aria-checked="false">
+                                    <i class="fab fa-cc-visa text-primary mb-2"></i>
+                                    <span>Card / FPX</span>
+                                </button>
+                                <button
+                                    th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}"
+                                    type="button" class="payment-option-card change-option" data-value="transfer" role="radio"
+                                    aria-checked="false">
+                                    <i class="fas fa-university text-info mb-2"></i>
+                                    <span>Transfer</span>
+                                </button>
+                                <button type="button" class="payment-option-card change-option" data-value="cash" role="radio"
+                                    aria-checked="false">
+                                    <i class="fas fa-money-bill-wave text-success mb-2"></i>
+                                    <span>Cash</span>
+                                </button>
+                            </div>
+
+                            <div class="change-dynamic-area">
+                                <!-- Card Info -->
+                                <div id="change-content-card" class="payment-content hidden text-center mb-4">
+                                    <div class="gateway-logos mb-3">
+                                        <i class="fab fa-cc-visa fa-2x text-primary mx-1"></i>
+                                        <i class="fab fa-cc-mastercard fa-2x text-warning mx-1"></i>
+                                        <i class="fas fa-university fa-2x text-info mx-1"></i>
+                                    </div>
+                                    <p class="text-muted small">You will be redirected to the secure ToyyibPay gateway.</p>
+                                </div>
+
+                                <!-- Transfer Info -->
+                                <div id="change-content-transfer" class="payment-content hidden mb-4">
+                                    <div class="alert alert-info py-2 px-3 mb-3 small d-flex align-items-center">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <span>Please use the bank details below.</span>
+                                    </div>
+                                    
+                                    <div th:if="${owner != null and owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()}"
+                                        class="text-center mb-3">
+                                        <img th:src="${owner.paymentQrUrl}" alt="Payment QR Code"
+                                            style="max-width: 150px; border-radius: 0.5rem; border: 1px solid #dee2e6;">
+                                    </div>
+
+                                    <div th:if="${owner != null and owner.bankName != null and !owner.bankName.isEmpty()}"
+                                        class="bg-light p-3 rounded-3 small">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Bank:</span>
+                                            <span class="fw-bold" th:text="${owner.bankName}">Bank Name</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Acc No:</span>
+                                            <span class="fw-bold" th:text="${owner.bankAccountNumber}">Number</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Holder:</span>
+                                            <span class="fw-bold" th:text="${owner.bankAccountHolder}">Holder</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cash Info -->
+                                <div id="change-content-cash" class="payment-content hidden text-center mb-4">
+                                    <div class="alert alert-success py-2 px-3 small d-flex align-items-center">
+                                        <i class="fas fa-wallet me-2"></i>
+                                        <span>Pay at the counter upon vehicle collection.</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <form id="changeMethodForm"
                                 th:action="@{/renter/bookings/{id}/payment/change(id=${booking.bookingId})}"
                                 method="POST">
-                                <select name="method" class="payment-method-select" style="margin-bottom: 1rem;">
-                                    <option
-                                        th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}"
-                                        value="CREDIT_CARD">Credit/Debit Card &amp; FPX</option>
-                                    <option
-                                        th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}"
-                                        value="BANK_TRANSFER">Bank Transfer / DuitNow QR</option>
-                                    <option value="CASH">Cash at Counter</option>
-                                </select>
-                                <button type="submit" class="btn-primary-action btn-gateway" style="width: 100%;">
+                                <input type="hidden" name="method" id="changeMethodValue" value="">
+                                <button type="submit" id="btn-confirm-change" class="btn-primary-action btn-gateway hidden" style="width: 100%;">
                                     Confirm Change <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </form>
@@ -603,29 +667,86 @@
                         <div id="retry-method-section" class="method-selection-card hidden" style="margin-top: 1.5rem;">
                             <h2 class="section-title">Select Payment Method to Retry</h2>
                             <p class="text-muted small mb-3">Your previous attempt failed. You can try the same method again or pick a new one.</p>
-                            <form id="retryMethodForm" th:action="@{/renter/bookings/{id}/payment/retry(id=${booking.bookingId})}" method="POST" enctype="multipart/form-data">
-                                <select name="method" id="retryPaymentMethodSelect" class="payment-method-select" style="margin-bottom: 1rem;">
-                                    <option th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}" 
-                                            value="CREDIT_CARD" th:selected="${currentPayment.paymentMethod.name() == 'CREDIT_CARD'}">Credit/Debit Card &amp; FPX</option>
-                                    <option th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}" 
-                                            value="BANK_TRANSFER" th:selected="${currentPayment.paymentMethod.name() == 'BANK_TRANSFER'}">Bank Transfer / DuitNow QR</option>
-                                    <option value="CASH" th:selected="${currentPayment.paymentMethod.name() == 'CASH'}">Cash at Counter</option>
-                                </select>
-                                
-                                <!-- Dynamic upload zone for retry when BANK_TRANSFER is selected -->
-                                <div id="retryUploadSection" class="hidden mb-3 p-3 bg-light rounded border">
-                                    <p class="text-muted small mb-2"><i class="fas fa-info-circle"></i> Please upload your new transfer receipt.</p>
+                            
+                            <div class="payment-options-grid mb-4" role="radiogroup" aria-label="Retry Payment Method">
+                                <button
+                                    th:if="${owner != null and owner.toyyibpaySecretKey != null and !owner.toyyibpaySecretKey.isEmpty()}"
+                                    type="button" class="payment-option-card retry-option" data-value="card" role="radio"
+                                    aria-checked="false">
+                                    <i class="fab fa-cc-visa text-primary mb-2"></i>
+                                    <span>Card / FPX</span>
+                                </button>
+                                <button
+                                    th:if="${owner != null and ((owner.bankName != null and !owner.bankName.isEmpty()) or (owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()))}"
+                                    type="button" class="payment-option-card retry-option" data-value="transfer" role="radio"
+                                    aria-checked="false">
+                                    <i class="fas fa-university text-info mb-2"></i>
+                                    <span>Transfer</span>
+                                </button>
+                                <button type="button" class="payment-option-card retry-option" data-value="cash" role="radio"
+                                    aria-checked="false">
+                                    <i class="fas fa-money-bill-wave text-success mb-2"></i>
+                                    <span>Cash</span>
+                                </button>
+                            </div>
+
+                            <div class="retry-dynamic-area">
+                                <!-- Card Info -->
+                                <div id="retry-content-card" class="payment-content hidden text-center mb-4">
+                                    <div class="gateway-logos mb-3">
+                                        <i class="fab fa-cc-visa fa-2x text-primary mx-1"></i>
+                                        <i class="fab fa-cc-mastercard fa-2x text-warning mx-1"></i>
+                                        <i class="fas fa-university fa-2x text-info mx-1"></i>
+                                    </div>
+                                    <p class="text-muted small">Retrying via secure ToyyibPay gateway.</p>
+                                </div>
+
+                                <!-- Transfer Info -->
+                                <div id="retry-content-transfer" class="payment-content hidden mb-4">
+                                    <div th:if="${owner != null and owner.paymentQrUrl != null and !owner.paymentQrUrl.isEmpty()}"
+                                        class="text-center mb-3">
+                                        <img th:src="${owner.paymentQrUrl}" alt="Payment QR Code"
+                                            style="max-width: 150px; border-radius: 0.5rem; border: 1px solid #dee2e6;">
+                                    </div>
+
+                                    <div th:if="${owner != null and owner.bankName != null and !owner.bankName.isEmpty()}"
+                                        class="bg-light p-3 rounded-3 small mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Bank:</span>
+                                            <span class="fw-bold" th:text="${owner.bankName}">Bank Name</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Acc No:</span>
+                                            <span class="fw-bold" th:text="${owner.bankAccountNumber}">Number</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Holder:</span>
+                                            <span class="fw-bold" th:text="${owner.bankAccountHolder}">Holder</span>
+                                        </div>
+                                    </div>
+
                                     <div id="retryUploadZone" style="border: 2px dashed #dee2e6; border-radius: 0.5rem; padding: 1.5rem; cursor: pointer; transition: all 0.2s; text-align: center; background: white;">
                                         <i class="fas fa-cloud-upload-alt text-muted mb-2"></i>
-                                        <p style="margin-bottom: 0; color: #6c757d; font-size: 0.9rem;">Click to upload receipt</p>
-                                        <input type="file" id="retryReceiptUpload" name="receipt" hidden accept="image/*,.pdf">
+                                        <p style="margin-bottom: 0; color: #6c757d; font-size: 0.9rem;">Click to upload new receipt</p>
+                                        <input type="file" id="retryReceiptUpload" name="receipt" hidden accept="image/*,.pdf" form="retryMethodForm">
                                     </div>
-                                    <p id="retryFileName" class="hidden mt-2 mb-0 text-success" style="font-size: 0.85rem; font-weight: 500;">
+                                    <p id="retryFileName" class="hidden mt-2 mb-0 text-success" style="font-size: 0.85rem; font-weight: 500; text-align: center;">
                                         <i class="fas fa-check-circle"></i> <span id="retryFileNameText"></span>
                                     </p>
                                 </div>
 
-                                <button type="submit" id="btn-submit-retry" class="btn-primary-action btn-gateway" style="width: 100%;">
+                                <!-- Cash Info -->
+                                <div id="retry-content-cash" class="payment-content hidden text-center mb-4">
+                                    <div class="alert alert-success py-2 px-3 small d-flex align-items-center">
+                                        <i class="fas fa-wallet me-2"></i>
+                                        <span>Retry by choosing to pay cash at counter.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form id="retryMethodForm" th:action="@{/renter/bookings/{id}/payment/retry(id=${booking.bookingId})}" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="method" id="retryMethodValue" value="">
+                                <button type="submit" id="btn-submit-retry" class="btn-primary-action btn-gateway hidden" style="width: 100%;">
                                     Confirm &amp; Retry <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </form>
@@ -892,10 +1013,9 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // Change Method Button
+                // 1. Change Method Toggle
                 const btnChangeMethod = document.getElementById('btn-change-method');
                 const changeMethodSection = document.getElementById('change-method-section');
-
                 if (btnChangeMethod && changeMethodSection) {
                     btnChangeMethod.addEventListener('click', function () {
                         changeMethodSection.classList.toggle('hidden');
@@ -903,60 +1023,101 @@
                     });
                 }
 
-                // Retry Button
+                // 2. Retry Method Toggle
                 const btnRetryPayment = document.getElementById('btn-retry-payment');
                 const retryMethodSection = document.getElementById('retry-method-section');
-
                 if (btnRetryPayment && retryMethodSection) {
                     btnRetryPayment.addEventListener('click', function () {
                         retryMethodSection.classList.toggle('hidden');
                         this.classList.add('hidden');
-                        
-                        // Check initial state of the dropdown to show/hide upload if needed
-                        const retrySelect = document.getElementById('retryPaymentMethodSelect');
-                        if(retrySelect) {
-                            retrySelect.dispatchEvent(new Event('change'));
-                        }
                     });
                 }
-                
-                // Retry Form Dynamic Receipt Upload
-                const retryPaymentMethodSelect = document.getElementById('retryPaymentMethodSelect');
-                const retryUploadSection = document.getElementById('retryUploadSection');
-                const retryUploadZone = document.getElementById('retryUploadZone');
-                const retryReceiptUpload = document.getElementById('retryReceiptUpload');
-                const retryFileName = document.getElementById('retryFileName');
-                const retryFileNameText = document.getElementById('retryFileNameText');
-                const retryMethodForm = document.getElementById('retryMethodForm');
-                const btnSubmitRetry = document.getElementById('btn-submit-retry');
 
-                if (retryPaymentMethodSelect && retryUploadSection) {
-                    retryPaymentMethodSelect.addEventListener('change', function() {
-                        if (this.value === 'BANK_TRANSFER') {
-                            retryUploadSection.classList.remove('hidden');
-                        } else {
-                            retryUploadSection.classList.add('hidden');
-                        }
+                // 3. Selection Logic for "Change Method"
+                const changeOptions = document.querySelectorAll('.change-option');
+                const changeHiddenInput = document.getElementById('changeMethodValue');
+                const btnConfirmChange = document.getElementById('btn-confirm-change');
+                if (changeOptions.length > 0) {
+                    const changeContents = {
+                        card: document.getElementById('change-content-card'),
+                        transfer: document.getElementById('change-content-transfer'),
+                        cash: document.getElementById('change-content-cash')
+                    };
+
+                    changeOptions.forEach(option => {
+                        option.addEventListener('click', function () {
+                            const val = this.dataset.value;
+                            const backendVal = val === 'card' ? 'CREDIT_CARD' : val === 'transfer' ? 'BANK_TRANSFER' : 'CASH';
+                            if (changeHiddenInput) changeHiddenInput.value = backendVal;
+
+                            changeOptions.forEach(opt => opt.classList.remove('active'));
+                            this.classList.add('active');
+
+                            Object.values(changeContents).forEach(el => el && el.classList.add('hidden'));
+                            if (changeContents[val]) changeContents[val].classList.remove('hidden');
+                            if (btnConfirmChange) btnConfirmChange.classList.remove('hidden');
+                        });
                     });
 
+                    const changeForm = document.getElementById('changeMethodForm');
+                    if (changeForm) {
+                        changeForm.addEventListener('submit', function() {
+                            if (btnConfirmChange) {
+                                btnConfirmChange.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+                                btnConfirmChange.disabled = true;
+                            }
+                        });
+                    }
+                }
+
+                // 4. Selection Logic for "Retry Method"
+                const retryOptions = document.querySelectorAll('.retry-option');
+                const retryHiddenInput = document.getElementById('retryMethodValue');
+                const btnSubmitRetry = document.getElementById('btn-submit-retry');
+                const retryReceiptUpload = document.getElementById('retryReceiptUpload');
+                if (retryOptions.length > 0) {
+                    const retryContents = {
+                        card: document.getElementById('retry-content-card'),
+                        transfer: document.getElementById('retry-content-transfer'),
+                        cash: document.getElementById('retry-content-cash')
+                    };
+
+                    retryOptions.forEach(option => {
+                        option.addEventListener('click', function () {
+                            const val = this.dataset.value;
+                            const backendVal = val === 'card' ? 'CREDIT_CARD' : val === 'transfer' ? 'BANK_TRANSFER' : 'CASH';
+                            if (retryHiddenInput) retryHiddenInput.value = backendVal;
+
+                            retryOptions.forEach(opt => opt.classList.remove('active'));
+                            this.classList.add('active');
+
+                            Object.values(retryContents).forEach(el => el && el.classList.add('hidden'));
+                            if (retryContents[val]) retryContents[val].classList.remove('hidden');
+                            if (btnSubmitRetry) btnSubmitRetry.classList.remove('hidden');
+                        });
+                    });
+
+                    // Retry Upload Handling
+                    const retryUploadZone = document.getElementById('retryUploadZone');
+                    const retryFileName = document.getElementById('retryFileName');
+                    const retryFileNameText = document.getElementById('retryFileNameText');
                     if (retryUploadZone && retryReceiptUpload) {
                         retryUploadZone.addEventListener('click', () => retryReceiptUpload.click());
-
                         retryReceiptUpload.addEventListener('change', function() {
                             if (this.files && this.files[0]) {
-                                retryFileNameText.textContent = this.files[0].name;
-                                retryFileName.classList.remove('hidden');
+                                if (retryFileNameText) retryFileNameText.textContent = this.files[0].name;
+                                if (retryFileName) retryFileName.classList.remove('hidden');
                                 retryUploadZone.style.borderColor = '#198754';
                                 retryUploadZone.style.background = '#f0fff4';
                             }
                         });
                     }
 
-                    // Validate upload before submit
-                    if(retryMethodForm && retryReceiptUpload) {
-                        retryMethodForm.addEventListener('submit', function(e) {
-                            if (retryPaymentMethodSelect.value === 'BANK_TRANSFER') {
-                                if (!retryReceiptUpload.files || !retryReceiptUpload.files[0]) {
+                    const retryForm = document.getElementById('retryMethodForm');
+                    if (retryForm) {
+                        retryForm.addEventListener('submit', function(e) {
+                            if (retryHiddenInput.value === 'BANK_TRANSFER') {
+                                if (!retryReceiptUpload || !retryReceiptUpload.files || !retryReceiptUpload.files[0]) {
                                     e.preventDefault();
                                     const noReceiptModalEl = document.getElementById('noReceiptModal');
                                     if (noReceiptModalEl) {
@@ -965,26 +1126,19 @@
                                     } else {
                                         alert("Please upload a receipt for Bank Transfer.");
                                     }
-                                } else {
-                                    // Valid, show spinner
-                                    if (btnSubmitRetry) {
-                                        btnSubmitRetry.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
-                                        btnSubmitRetry.disabled = true;
-                                    }
+                                    return;
                                 }
-                            } else {
-                                if (btnSubmitRetry) {
-                                    btnSubmitRetry.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
-                                    btnSubmitRetry.disabled = true;
-                                }
+                            }
+                            if (btnSubmitRetry) {
+                                btnSubmitRetry.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+                                btnSubmitRetry.disabled = true;
                             }
                         });
                     }
                 }
 
-                // Method selection for new payments
-                const paymentOptions = document.querySelectorAll('.payment-option-card');
-
+                // 5. Selection Logic for "Initial Payment" (Scenario 3)
+                const paymentOptions = document.querySelectorAll('.payment-option-card:not(.change-option):not(.retry-option)');
                 if (paymentOptions.length > 0) {
                     const contentCard = document.getElementById('content-card');
                     const contentTransfer = document.getElementById('content-transfer');
@@ -995,27 +1149,14 @@
                     const hiddenInput = document.getElementById('paymentMethodValue');
 
                     function updatePaymentUI(selected) {
-                        // Update hidden input
                         if (hiddenInput) hiddenInput.value = selected;
+                        paymentOptions.forEach(opt => opt.classList.remove('active'));
+                        const activeOption = document.querySelector(`.payment-option-card:not(.change-option):not(.retry-option)[data-value="${selected}"]`);
+                        if (activeOption) activeOption.classList.add('active');
 
-                        // Reset all options
-                        paymentOptions.forEach(opt => {
-                            opt.classList.remove('active');
-                            opt.setAttribute('aria-checked', 'false');
-                        });
+                        [contentCard, contentTransfer, contentCash].forEach(el => el && el.classList.add('hidden'));
+                        [btnCard, btnTransfer, btnCash].forEach(el => el && el.classList.add('hidden'));
 
-                        // Set active option
-                        const activeOption = document.querySelector(`.payment-option-card[data-value="${selected}"]`);
-                        if (activeOption) {
-                            activeOption.classList.add('active');
-                            activeOption.setAttribute('aria-checked', 'true');
-                        }
-
-                        // Hide all contents
-                        [contentCard, contentTransfer, contentCash].forEach(el => { if (el) el.classList.add('hidden'); });
-                        [btnCard, btnTransfer, btnCash].forEach(el => { if (el) el.classList.add('hidden'); });
-
-                        // Show selected content
                         if (selected === 'card') {
                             if (contentCard) contentCard.classList.remove('hidden');
                             if (btnCard) btnCard.classList.remove('hidden');
@@ -1028,36 +1169,25 @@
                         }
                     }
 
-                    // Auto-select the first available payment method on load
                     const firstOption = paymentOptions[0];
-                    if (firstOption) {
-                        updatePaymentUI(firstOption.dataset.value);
-                    }
+                    if (firstOption) updatePaymentUI(firstOption.dataset.value);
 
                     paymentOptions.forEach(option => {
                         option.addEventListener('click', function () {
                             updatePaymentUI(this.dataset.value);
                         });
-
-                        // Keyboard support
-                        option.addEventListener('keydown', function (e) {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                updatePaymentUI(this.dataset.value);
-                            }
-                        });
                     });
 
-                    // Button Actions
+                    // Gateway Redirect
                     if (btnCard) {
                         btnCard.addEventListener('click', function() {
-                            btnCard.disabled = true;
-                            btnCard.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Redirecting to gateway...';
+                            this.disabled = true;
+                            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Redirecting...';
                             document.getElementById('gatewayPaymentForm').submit();
                         });
                     }
 
-                    // Upload Zone for Bank Transfer
+                    // Upload Handling
                     const uploadZone = document.getElementById('uploadZone');
                     const receiptUpload = document.getElementById('receiptUpload');
                     const fileName = document.getElementById('fileName');
@@ -1066,43 +1196,18 @@
 
                     if (uploadZone && receiptUpload) {
                         uploadZone.addEventListener('click', () => receiptUpload.click());
-
-                        uploadZone.addEventListener('dragover', (e) => {
-                            e.preventDefault();
-                            uploadZone.style.borderColor = '#0d6efd';
-                            uploadZone.style.background = '#f0f7ff';
-                        });
-
-                        uploadZone.addEventListener('dragleave', () => {
-                            uploadZone.style.borderColor = '#dee2e6';
-                            uploadZone.style.background = 'transparent';
-                        });
-
-                        uploadZone.addEventListener('drop', (e) => {
-                            e.preventDefault();
-                            uploadZone.style.borderColor = '#dee2e6';
-                            uploadZone.style.background = 'transparent';
-                            if (e.dataTransfer.files.length) {
-                                receiptUpload.files = e.dataTransfer.files;
-                                handleFileSelected();
-                            }
-                        });
-
-                        receiptUpload.addEventListener('change', handleFileSelected);
-
-                        function handleFileSelected() {
-                            if (receiptUpload.files && receiptUpload.files[0]) {
-                                const file = receiptUpload.files[0];
-                                if (fileNameText) fileNameText.textContent = file.name;
+                        receiptUpload.addEventListener('change', function() {
+                            if (this.files && this.files[0]) {
+                                if (fileNameText) fileNameText.textContent = this.files[0].name;
                                 if (fileName) fileName.classList.remove('hidden');
                                 uploadZone.style.borderColor = '#198754';
                                 uploadZone.style.background = '#f0fff4';
                                 if (btnTransfer) btnTransfer.disabled = false;
                             }
-                        }
+                        });
                     }
 
-                    // Submit Receipt Button
+                    // Modals
                     if (btnTransfer) {
                         const receiptModalEl = document.getElementById('receiptModal');
                         const noReceiptModalEl = document.getElementById('noReceiptModal');
@@ -1129,7 +1234,6 @@
                         }
                     }
 
-                    // Cash Payment Confirmation
                     const cashForm = document.getElementById('cashPaymentForm');
                     const btnCashSubmit = document.getElementById('btn-cash');
                     if (btnCashSubmit && cashForm) {
