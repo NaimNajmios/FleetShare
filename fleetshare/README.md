@@ -138,6 +138,10 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Logic: Update `BookingStatusLog` automatically on status change.
 - [x] **[R15] Booking History**
     - [x] `Pageable` endpoints for history lists (Pagination).
+- [x] **Advanced Booking Management**
+    - [x] Owner-side booking edit interface (`edit-booking.html`).
+    - [x] `BookingPriceSnapshot` for preserving price and terms at the time of booking.
+    - [x] Automated status tracking and history logging.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -174,6 +178,9 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Administrative oversight dashboard covering platform-wide maintenance (`/admin/maintenance`).
     - [x] Detailed historical timeline tracking view for specific records (`view-maintenance.html`) for both Owners and Admins.
     - [x] `MaintenanceStatsDTO` providing monthly aggregation, cost summaries, and average cost per record.
+- [x] **Maintenance Parts & Logistics**
+    - [x] Parts tracking for maintenance records (`MaintenancePart` entity).
+    - [x] Service provider management (`ServiceProvider` entity).
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -205,6 +212,11 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Card/FPX available only if owner has ToyyibPay configured.
     - [x] Bank Transfer available only if owner has bank info or QR code set.
     - [x] Cash at counter always available.
+- [x] **ToyyibPay & Automated Payouts**
+    - [x] Integrated ToyyibPay for real-time payment processing and callbacks.
+    - [x] **Commission Management:** Automatic platform fee calculation.
+    - [x] **Owner Payouts:** Dashboard for owners to track earnings and request payouts.
+    - [x] **Failed Payment Workflow:** Automated handling and recovery logic for failed transactions.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -233,6 +245,11 @@ These elements are planned for upcoming modules to enhance functionality and rob
 - [x] **Global Platform Search**
     - [x] Cross-entity search mechanism spanning vehicles, bookings, renters, and fleet owners.
     - [x] Search controller exposing backend REST endpoints.
+- [x] **Modular Report Generation**
+    - [x] Multi-role report generation controller supporting Admins, Owners, and Renters.
+    - [x] Dynamic report configuration UI via standard modals.
+    - [x] Professional PDF export capability using FlyingSaucer/IText with custom HTML/CSS templates.
+    - [x] Support for AI-generated insight reports and transactional receipts (Invoices/Receipts).
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -259,9 +276,10 @@ These elements are planned for upcoming modules to enhance functionality and rob
 - [x] **Layout & Templating**
     - [x] Base layouts established: `admin-layout.html` and `owner-layout.html`.
     - [x] Integration of reusable Thymeleaf fragments (sidebar, header, reusable navigation bars, and generic modals).
-- [x] **Booking & Maintenance Templates**
-    - [x] Improved booking management views for renter (`my-bookings.html`), owner (`bookings.html`), and admin (`bookings.html`).
-    - [x] Updated maintenance views for owner and admin dashboards.
+    - [x] Shared UI components and layout fragments for dashboard consistency.
+- [x] **Status Tracking & Timelines**
+    - [x] Interactive status timelines for Bookings and Maintenance records.
+    - [x] Visual cues for payment verification and processing windows.
 
 -----
 
@@ -352,10 +370,17 @@ src/main/java/
 │   │   ├── UserSessionService.java     # Session management service
 │   │   ├── AiAssistantService.java     # Multi-provider LLM AI Data Assistant
 │   │   ├── MaintenanceService.java     # Maintenance CRUD, validation, stats
-│   │   ├── BookingService.java         # Booking lifecycle management
+│   │   ├── BookingService.java         # Booking lifecycle & bulk fetch
 │   │   ├── VehicleManagementService.java # Vehicle fleet operations
 │   │   ├── PaymentService.java         # Payment processing & history
+│   │   ├── ToyyibPayService.java       # Payment gateway integration
+│   │   ├── CommissionService.java      # Platform fee & payout logic
+│   │   ├── InvoiceService.java         # Billing & Invoice management
+│   │   ├── ReceiptService.java         # Payment receipt generation
 │   │   ├── EmailService.java           # Async email with HTML templates
+│   │   ├── ReportService.java          # Modular reporting & PDF export
+│   │   ├── QueryClassifier.java        # AI query categorization component
+│   │   ├── PromptTemplateService.java  # Dynamic LLM prompt management
 │   │   └── PredictiveMaintenanceService.java # Predictive analytics
 │   │
 │   └── util/                           # Utilities
@@ -367,10 +392,13 @@ src/main/resources/
 └── templates/                          # Thymeleaf templates
     ├── admin/                          # Admin views
     ├── auth/                           # Login/Register views
+    ├── email/                          # HTML email templates
     ├── fragments/                      # Reusable UI fragments
     ├── layouts/                        # Base layouts
     ├── owner/                          # Owner views
     ├── pages/                          # Miscellaneous pages
+    ├── pdf/                            # HTML templates for PDF generation (receipts, reports)
+    ├── public/                         # Public access views
     ├── renter/                         # Renter views
     └── index.html                      # Landing page
 
@@ -396,7 +424,8 @@ src/test/java/
 - [x] Generate utilization reports for fleet owners
 - [x] Platform-wide analytics for administrators
 - [x] FleetShare AI Data Assistant with multi-provider LLM support (Groq / Cerebras / OpenRouter) for administrators and owners
-- [ ] Financial reporting and revenue tracking
+- [x] **AI Query Classification:** Automated categorization of user queries for targeted fleet insights.
+- [x] Financial reporting and revenue tracking (PDF export for Invoices/Receipts).
 
 -----
 
@@ -483,6 +512,7 @@ src/test/java/
 - `GET /owner/maintenance/{id}` - Detailed maintenance tracking timeline
 - `POST /owner/maintenance` - Create maintenance record
 - `POST /owner/maintenance/{id}/status` - Update maintenance status
+- `GET /owner/payouts` - Owner earnings and payout dashboard
 - `GET /owner/ai-reports` - AI Data Assistant
 - `GET /api/owner/reports/utilization` - Utilization reports
 - `POST /owner/profile` - Update profile (includes bank info & ToyyibPay config)
