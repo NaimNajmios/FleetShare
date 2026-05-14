@@ -187,6 +187,17 @@ public class PaymentService {
         dto.setCommissionRate(payment.getCommissionRate());
         dto.setSplitPaymentEnabled(payment.getSplitPaymentEnabled());
 
+        // Additional payment fields
+        dto.setToyyibpayBillCode(payment.getToyyibpayBillCode());
+        dto.setGatewayRefNo(payment.getGatewayRefNo());
+        if (payment.getVerifiedByUserId() != null) {
+            User verifier = userRepository.findById(payment.getVerifiedByUserId()).orElse(null);
+            dto.setVerifiedByEmail(verifier != null ? verifier.getEmail() : null);
+        }
+
+        // Invoice total amount for comparison
+        dto.setInvoiceTotalAmount(invoice.getTotalAmount());
+
         return dto;
     }
 

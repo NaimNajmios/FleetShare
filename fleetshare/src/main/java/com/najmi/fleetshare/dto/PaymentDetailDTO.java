@@ -33,6 +33,14 @@ public class PaymentDetailDTO {
     private java.math.BigDecimal commissionRate;
     private Boolean splitPaymentEnabled;
 
+    // Additional payment fields
+    private String toyyibpayBillCode;
+    private String gatewayRefNo;
+    private String verifiedByEmail;
+
+    // Invoice total for comparison
+    private java.math.BigDecimal invoiceTotalAmount;
+
     // Constructors
     public PaymentDetailDTO() {
     }
@@ -220,5 +228,37 @@ public class PaymentDetailDTO {
 
     public void setSplitPaymentEnabled(Boolean splitPaymentEnabled) {
         this.splitPaymentEnabled = splitPaymentEnabled;
+    }
+
+    public String getToyyibpayBillCode() {
+        return toyyibpayBillCode;
+    }
+
+    public void setToyyibpayBillCode(String toyyibpayBillCode) {
+        this.toyyibpayBillCode = toyyibpayBillCode;
+    }
+
+    public String getGatewayRefNo() {
+        return gatewayRefNo;
+    }
+
+    public void setGatewayRefNo(String gatewayRefNo) {
+        this.gatewayRefNo = gatewayRefNo;
+    }
+
+    public String getVerifiedByEmail() {
+        return verifiedByEmail;
+    }
+
+    public void setVerifiedByEmail(String verifiedByEmail) {
+        this.verifiedByEmail = verifiedByEmail;
+    }
+
+    public java.math.BigDecimal getInvoiceTotalAmount() {
+        return invoiceTotalAmount;
+    }
+
+    public void setInvoiceTotalAmount(java.math.BigDecimal invoiceTotalAmount) {
+        this.invoiceTotalAmount = invoiceTotalAmount;
     }
 }
