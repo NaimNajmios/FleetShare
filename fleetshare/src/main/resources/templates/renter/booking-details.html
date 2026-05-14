@@ -389,6 +389,37 @@
             .countdown-display.expired {
                 color: #991b1b;
             }
+
+            .map-card {
+                height: 250px;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                border: 1px solid #e9ecef;
+                z-index: 1;
+            }
+
+            .location-placeholder {
+                height: 200px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                border-radius: 0.5rem;
+                color: #6c757d;
+                flex-direction: column;
+                gap: 0.5rem;
+                border: 1px dashed #dee2e6;
+            }
+
+            .location-placeholder i {
+                font-size: 2.5rem;
+                opacity: 0.5;
+            }
+
+            .location-placeholder p {
+                margin: 0;
+                font-weight: 500;
+            }
         </style>
     </th:block>
 </head>
@@ -771,12 +802,34 @@
                                 <div class="timeline-remarks">Waiting for payment.</div>
                             </div>
                         </div>
+                        </div>
+                    </div>
+
+                    <!-- Pickup / Dropoff Location Map -->
+                    <div class="timeline-card" style="margin-top: 1.5rem;">
+                        <h2 class="card-title">
+                            <i class="fas fa-map-marked-alt text-primary me-2"></i>Pickup / Dropoff Location
+                        </h2>
+                        <div th:if="${ownerLatitude != null and ownerLongitude != null}">
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-building me-1"></i>
+                                <span th:text="${ownerBusinessLocation}">City, State</span>
+                            </p>
+                            <div id="ownerLocationMap" class="map-card"
+                                 th:data-lat="${ownerLatitude}"
+                                 th:data-lng="${ownerLongitude}">
+                            </div>
+                        </div>
+                        <div th:unless="${ownerLatitude != null and ownerLongitude != null}" class="location-placeholder">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <p>Location not available</p>
+                            <small>The fleet owner has not set a business location.</small>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Cancel Booking Modal -->
+            <!-- Cancel Booking Modal -->
         <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-labelledby="cancelBookingModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -820,6 +873,33 @@
 
     <th:block layout:fragment="extra-js">
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            (function initLocationMap() {
+                var lat = /*[[${ownerLatitude}]]*/ null;
+                var lng = /*[[${ownerLongitude}]]*/ null;
+                if (lat && lng) {
+                    delete L.Icon.Default.prototype._getIconUrl;
+                    L.Icon.Default.mergeOptions({
+                        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+                    });
+
+                    var map = L.map('ownerLocationMap', { scrollWheelZoom: false }).setView([lat, lng], 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                    L.marker([lat, lng])
+                        .addTo(map)
+                        .bindPopup('<strong>Pickup / Dropoff Location</strong>')
+                        .openPopup();
+
+                    setTimeout(function () { map.invalidateSize(); }, 200);
+                }
+            })();
+            /*]]>*/
+        </script>
         <script th:inline="javascript">
             /*<![CDATA[*/
             document.addEventListener("DOMContentLoaded", function () {

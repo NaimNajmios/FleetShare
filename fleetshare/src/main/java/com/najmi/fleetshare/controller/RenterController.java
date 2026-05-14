@@ -429,6 +429,22 @@ public class RenterController {
                     model.addAttribute("paymentLogs", paymentLogs);
                 }
 
+                // Fetch owner's location for pickup/dropoff map
+                try {
+                    com.najmi.fleetshare.entity.Booking bookingEntity = bookingRepository.findById(id).orElse(null);
+                    if (bookingEntity != null) {
+                        FleetOwner fleetOwner = fleetOwnerRepository.findById(bookingEntity.getFleetOwnerId()).orElse(null);
+                        if (fleetOwner != null) {
+                            Address ownerAddress = addressRepository.findLatestAddressByUserId(fleetOwner.getUserId()).orElse(null);
+                            if (ownerAddress != null && ownerAddress.getLatitude() != null && ownerAddress.getLongitude() != null) {
+                                model.addAttribute("ownerLatitude", ownerAddress.getLatitude());
+                                model.addAttribute("ownerLongitude", ownerAddress.getLongitude());
+                                model.addAttribute("ownerBusinessLocation", ownerAddress.getCity() + ", " + ownerAddress.getState());
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+
                 return "renter/booking-details";
             }
         }
