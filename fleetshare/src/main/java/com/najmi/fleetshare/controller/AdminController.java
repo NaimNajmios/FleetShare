@@ -1099,6 +1099,15 @@ public class AdminController {
     public String editBooking(@PathVariable Long bookingId, Model model) {
         BookingDTO booking = bookingService.getBookingDetails(bookingId);
         model.addAttribute("booking", booking);
+
+        if (booking != null && booking.getVehicleId() != null) {
+            com.najmi.fleetshare.dto.VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(booking.getVehicleId());
+            model.addAttribute("vehicle", vehicle);
+        }
+
+        java.util.List<String> nextStatuses = bookingService.getValidNextStatuses(booking.getStatus());
+        model.addAttribute("nextStatuses", nextStatuses);
+
         return "admin/edit-booking";
     }
 

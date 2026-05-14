@@ -878,6 +878,7 @@ public class OwnerController {
         }
 
         model.addAttribute("booking", booking);
+        model.addAttribute("vehicle", vehicle);
         
         // Phase 1: Add valid status transitions for the dropdown
         List<String> nextStatuses = bookingService.getValidNextStatuses(booking.getStatus());
