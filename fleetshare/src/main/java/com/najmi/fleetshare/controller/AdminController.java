@@ -393,6 +393,12 @@ public class AdminController {
         BookingDTO booking = bookingService.getBookingDetails(bookingId);
         model.addAttribute("booking", booking);
 
+        // Get vehicle details
+        if (booking != null && booking.getVehicleId() != null) {
+            com.najmi.fleetshare.dto.VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(booking.getVehicleId());
+            model.addAttribute("vehicle", vehicle);
+        }
+
         // Get status logs for timeline
         List<BookingLogDTO> statusLogs = bookingService.getBookingStatusLogsDTO(bookingId);
         model.addAttribute("statusLogs", statusLogs);

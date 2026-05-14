@@ -178,6 +178,23 @@ public class BookingService {
             Invoice invoice = invoices.get(0);
             dto.setTotalCost(invoice.getTotalAmount());
             dto.setInvoiceNumber(invoice.getInvoiceNumber());
+            dto.setInvoiceIssueDate(invoice.getIssueDate());
+            dto.setInvoiceDueDate(invoice.getDueDate());
+            dto.setInvoiceStatus(invoice.getStatus() != null ? invoice.getStatus().name() : null);
+            dto.setInvoiceRemarks(invoice.getRemarks());
+
+            // Fetch Renter contact info
+            Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+            if (renter != null) {
+                dto.setRenterPhoneNumber(renter.getPhoneNumber());
+            }
+
+            // Fetch FleetOwner contact info
+            FleetOwner fleetOwner = fleetOwnerRepository.findById(invoice.getFleetOwnerId()).orElse(null);
+            if (fleetOwner != null) {
+                dto.setOwnerContactPhone(fleetOwner.getContactPhone());
+                dto.setOwnerIsVerified(fleetOwner.getIsVerified() != null ? fleetOwner.getIsVerified() : false);
+            }
 
             // Fetch Payment
             List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
@@ -191,6 +208,8 @@ public class BookingService {
                     dto.setPaymentMethod(payment.getPaymentMethod().name());
                     dto.setPaymentStatus(payment.getPaymentStatus().name());
                     dto.setProofOfPaymentUrl(payment.getVerificationProofUrl());
+                    dto.setPaymentDate(payment.getPaymentDate());
+                    dto.setPaymentTransactionReference(payment.getTransactionReference());
                 }
             }
         }

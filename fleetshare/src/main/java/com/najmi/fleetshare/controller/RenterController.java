@@ -416,6 +416,12 @@ public class RenterController {
             if (booking != null && booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
                 model.addAttribute("booking", booking);
 
+                // Fetch vehicle details
+                if (booking.getVehicleId() != null) {
+                    com.najmi.fleetshare.dto.VehicleDTO vehicle = vehicleManagementService.getVehicleDetails(booking.getVehicleId());
+                    model.addAttribute("vehicle", vehicle);
+                }
+
                 // Fetch booking status logs
                 List<BookingStatusLog> statusLogs = bookingService.getBookingStatusLogs(id);
                 model.addAttribute("statusLogs", statusLogs);

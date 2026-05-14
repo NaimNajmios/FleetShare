@@ -515,7 +515,7 @@
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Duration</span>
-                                <span class="info-value">2 Days</span>
+                                <span class="info-value" th:text="${booking.daysRented != null ? booking.daysRented + ' Days' : 'N/A'}">2 Days</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Status</span>
@@ -570,6 +570,14 @@
                                 <span class="info-label">Transmission</span>
                                 <span class="info-value" th:text="${booking.vehicleTransmissionType}">Automatic</span>
                             </div>
+                            <div class="info-item" th:if="${vehicle != null and vehicle.manufacturingYear != null}">
+                                <span class="info-label">Year</span>
+                                <span class="info-value" th:text="${vehicle.manufacturingYear}">2022</span>
+                            </div>
+                            <div class="info-item" th:if="${vehicle != null and vehicle.mileage != null}">
+                                <span class="info-label">Mileage</span>
+                                <span class="info-value" th:text="${vehicle.mileage + ' km'}">30,000 km</span>
+                            </div>
                             <div class="info-item" th:if="${booking != null and booking.vehicleRatePerDay != null}">
                                 <span class="info-label">Daily Rate</span>
                                 <span class="info-value" th:text="'RM ' + ${booking.vehicleRatePerDay}">RM 120</span>
@@ -579,6 +587,23 @@
                                 <span class="info-value"
                                     th:text="${booking != null ? booking.ownerBusinessName : 'FleetCo Rentals'}">
                                     FleetCo Rentals
+                                </span>
+                            </div>
+                            <div class="info-item" th:if="${vehicle != null and vehicle.ownerContactPhone != null}">
+                                <span class="info-label">Owner Contact</span>
+                                <span class="info-value">
+                                    <a th:href="'tel:' + ${vehicle.ownerContactPhone}" th:text="${vehicle.ownerContactPhone}" style="color: #4B49AC; text-decoration: none;">012-3456789</a>
+                                </span>
+                            </div>
+                            <div class="info-item" th:if="${vehicle != null}">
+                                <span class="info-label">Owner Status</span>
+                                <span class="info-value">
+                                    <span th:if="${vehicle.ownerIsVerified == true}" class="status-badge status-confirmed" style="font-size: 0.7rem;">
+                                        <i class="fas fa-check-circle"></i> Verified
+                                    </span>
+                                    <span th:if="${vehicle.ownerIsVerified == false}" class="status-badge status-pending" style="font-size: 0.7rem;">
+                                        Unverified
+                                    </span>
                                 </span>
                             </div>
                             <div class="info-item">
@@ -614,17 +639,19 @@
                             <div class="payment-breakdown">
                                 <div class="breakdown-row">
                                     <span>Rate per Day</span>
-                                    <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 220.00'}">RM
-                                        220.00</span>
+                                    <span th:text="${booking.ratePerDay != null ? 'RM ' + #numbers.formatDecimal(booking.ratePerDay, 1, 'COMMA', 2, 'POINT') : 'N/A'}">RM 220.00</span>
                                 </div>
                                 <div class="breakdown-row">
                                     <span>Number of Days</span>
-                                    <span>× 2</span>
+                                    <span th:text="${booking.daysRented != null ? '× ' + booking.daysRented : 'N/A'}">× 2</span>
+                                </div>
+                                <div class="breakdown-row" th:each="adj : ${booking.adjustments}">
+                                    <span th:text="${adj.description}">Discount</span>
+                                    <span th:text="${adj.amount != null and adj.amount < 0 ? '-' : '+'} + ' RM ' + ${#numbers.formatDecimal(adj.amount, 1, 'COMMA', 2, 'POINT')}">-RM 20.00</span>
                                 </div>
                                 <div class="breakdown-row total">
                                     <span>Total Amount</span>
-                                    <span th:text="${booking != null ? 'RM ' + booking.totalCost : 'RM 440.00'}">RM
-                                        440.00</span>
+                                    <span th:text="${booking.totalCost != null ? 'RM ' + #numbers.formatDecimal(booking.totalCost, 1, 'COMMA', 2, 'POINT') : 'N/A'}">RM 440.00</span>
                                 </div>
                             </div>
                         </div>
@@ -642,6 +669,47 @@
                             <div class="spec-chip" th:if="${booking != null and booking.vehicleCategory != null}">
                                 <i class="fas fa-car text-primary"></i>
                                 <span th:text="${booking.vehicleCategory}">SUV</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Invoice & Payment Details Card -->
+                    <div class="details-card" th:if="${booking.invoiceNumber != null}">
+                        <h2 class="card-title">Invoice & Payment Details</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Invoice Number</span>
+                                <span class="info-value" th:text="${booking.invoiceNumber}">INV-001</span>
+                            </div>
+                            <div class="info-item" th:if="${booking.invoiceIssueDate != null}">
+                                <span class="info-label">Invoice Date</span>
+                                <span class="info-value" th:text="${#temporals.format(booking.invoiceIssueDate, 'dd MMM yyyy')}">15 Jun 2025</span>
+                            </div>
+                            <div class="info-item" th:if="${booking.invoiceDueDate != null}">
+                                <span class="info-label">Due Date</span>
+                                <span class="info-value" th:text="${#temporals.format(booking.invoiceDueDate, 'dd MMM yyyy')}">30 Jun 2025</span>
+                            </div>
+                            <div class="info-item" th:if="${booking.invoiceStatus != null}">
+                                <span class="info-label">Invoice Status</span>
+                                <span class="info-value">
+                                    <span class="status-badge"
+                                          th:classappend="${booking.invoiceStatus == 'PAID' ? 'status-confirmed' : 
+                                                          (booking.invoiceStatus == 'OVERDUE' ? 'status-cancelled' : 
+                                                          (booking.invoiceStatus == 'VOID' ? 'status-cancelled' : 'status-pending'))}"
+                                          th:text="${booking.invoiceStatus}">PAID</span>
+                                </span>
+                            </div>
+                            <div class="info-item" th:if="${booking.invoiceRemarks != null}">
+                                <span class="info-label">Remarks</span>
+                                <span class="info-value" th:text="${booking.invoiceRemarks}">-</span>
+                            </div>
+                            <div class="info-item" th:if="${booking.paymentDate != null}">
+                                <span class="info-label">Payment Date</span>
+                                <span class="info-value" th:text="${#temporals.format(booking.paymentDate, 'dd MMM yyyy, HH:mm')}">20 Jun 2025, 14:30</span>
+                            </div>
+                            <div class="info-item" th:if="${booking.paymentTransactionReference != null}">
+                                <span class="info-label">Transaction Ref</span>
+                                <span class="info-value" th:text="${booking.paymentTransactionReference}" style="font-size: 0.85rem; word-break: break-all;">TXN-12345</span>
                             </div>
                         </div>
                     </div>

@@ -808,6 +808,7 @@ public class OwnerController {
         }
 
         model.addAttribute("booking", booking);
+        model.addAttribute("vehicle", vehicle);
 
         // Get status logs for timeline
         List<BookingLogDTO> statusLogs = bookingService.getBookingStatusLogsDTO(bookingId);

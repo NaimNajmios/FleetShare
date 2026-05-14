@@ -1,6 +1,7 @@
 package com.najmi.fleetshare.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class BookingDTO {
@@ -35,6 +36,21 @@ public class BookingDTO {
     private Integer daysRented;
     private String snapshotRemarks;
     private java.util.List<PriceAdjustment> adjustments = new java.util.ArrayList<>();
+
+    // Additional contact details
+    private String renterPhoneNumber;
+    private String ownerContactPhone;
+    private Boolean ownerIsVerified;
+
+    // Invoice details
+    private LocalDate invoiceIssueDate;
+    private LocalDate invoiceDueDate;
+    private String invoiceStatus;
+    private String invoiceRemarks;
+
+    // Payment details
+    private LocalDateTime paymentDate;
+    private String paymentTransactionReference;
 
     public static class PriceAdjustment {
         private String description;
@@ -305,5 +321,77 @@ public class BookingDTO {
 
     public void setAdjustments(java.util.List<PriceAdjustment> adjustments) {
         this.adjustments = adjustments;
+    }
+
+    public String getRenterPhoneNumber() {
+        return renterPhoneNumber;
+    }
+
+    public void setRenterPhoneNumber(String renterPhoneNumber) {
+        this.renterPhoneNumber = renterPhoneNumber;
+    }
+
+    public String getOwnerContactPhone() {
+        return ownerContactPhone;
+    }
+
+    public void setOwnerContactPhone(String ownerContactPhone) {
+        this.ownerContactPhone = ownerContactPhone;
+    }
+
+    public Boolean getOwnerIsVerified() {
+        return ownerIsVerified;
+    }
+
+    public void setOwnerIsVerified(Boolean ownerIsVerified) {
+        this.ownerIsVerified = ownerIsVerified;
+    }
+
+    public LocalDate getInvoiceIssueDate() {
+        return invoiceIssueDate;
+    }
+
+    public void setInvoiceIssueDate(LocalDate invoiceIssueDate) {
+        this.invoiceIssueDate = invoiceIssueDate;
+    }
+
+    public LocalDate getInvoiceDueDate() {
+        return invoiceDueDate;
+    }
+
+    public void setInvoiceDueDate(LocalDate invoiceDueDate) {
+        this.invoiceDueDate = invoiceDueDate;
+    }
+
+    public String getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(String invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
+    }
+
+    public String getInvoiceRemarks() {
+        return invoiceRemarks;
+    }
+
+    public void setInvoiceRemarks(String invoiceRemarks) {
+        this.invoiceRemarks = invoiceRemarks;
+    }
+
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
+    }
+
+    public String getPaymentTransactionReference() {
+        return paymentTransactionReference;
+    }
+
+    public void setPaymentTransactionReference(String paymentTransactionReference) {
+        this.paymentTransactionReference = paymentTransactionReference;
     }
 }
