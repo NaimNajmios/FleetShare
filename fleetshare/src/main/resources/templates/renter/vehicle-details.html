@@ -460,6 +460,14 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
         <script>
             (function initOwnerMap() {
+                // Fix default marker icon paths (CDN loading issue)
+                delete L.Icon.Default.prototype._getIconUrl;
+                L.Icon.Default.mergeOptions({
+                    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+                });
+
                 var mapEl = document.getElementById('owner-map');
                 if (mapEl && mapEl.dataset.lat && mapEl.dataset.lng) {
                     var lat = parseFloat(mapEl.dataset.lat);
@@ -468,7 +476,7 @@
 
                     var map = L.map('owner-map', { scrollWheelZoom: false }).setView([lat, lng], 14);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
+                        attribution: '&copy; OpenStreetMap contributors'
                     }).addTo(map);
                     L.marker([lat, lng])
                         .addTo(map)

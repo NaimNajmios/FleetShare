@@ -13,6 +13,7 @@ public class OwnerProfileDTO {
     private Double latitude;
     private Double longitude;
     private int vehicleCount;
+    private String profileImageUrl;
 
     // Constructors
     public OwnerProfileDTO() {
@@ -102,5 +103,13 @@ public class OwnerProfileDTO {
 
     public void setVehicleCount(int vehicleCount) {
         this.vehicleCount = vehicleCount;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

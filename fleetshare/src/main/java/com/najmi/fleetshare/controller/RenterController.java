@@ -774,6 +774,12 @@ public class RenterController {
                 longitude,
                 ownerVehicles.size());
 
+        // Fetch profile image from the user entity
+        com.najmi.fleetshare.entity.User userEntity = userRepository.findById(owner.getUserId()).orElse(null);
+        if (userEntity != null) {
+            ownerProfile.setProfileImageUrl(userEntity.getProfileImageUrl());
+        }
+
         model.addAttribute("owner", ownerProfile);
         model.addAttribute("vehicles", availableVehicles);
         return "renter/owner-profile";
