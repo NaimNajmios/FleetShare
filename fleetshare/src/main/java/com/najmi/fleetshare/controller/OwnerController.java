@@ -973,7 +973,7 @@ public class OwnerController {
             model.addAttribute("failedCount", failedCount);
 
             // Calculate statistics by payment method
-            long creditCardCount = payments.stream().filter(p -> "CREDIT_CARD".equals(p.getPaymentMethod())).count();
+            long creditCardCount = payments.stream().filter(p -> "FPX".equals(p.getPaymentMethod())).count();
             long bankTransferCount = payments.stream().filter(p -> "BANK_TRANSFER".equals(p.getPaymentMethod()))
                     .count();
             long qrPaymentCount = payments.stream().filter(p -> "QR_PAYMENT".equals(p.getPaymentMethod())).count();

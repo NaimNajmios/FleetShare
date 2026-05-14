@@ -59,7 +59,7 @@ public class Payment {
 
     // Enums
     public enum PaymentMethod {
-        CREDIT_CARD, BANK_TRANSFER, QR_PAYMENT, CASH
+        FPX, BANK_TRANSFER, QR_PAYMENT, CASH
     }
 
     public enum PaymentStatus {

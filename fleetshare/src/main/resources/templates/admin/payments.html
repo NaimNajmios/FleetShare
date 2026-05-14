@@ -238,7 +238,7 @@
                             </select>
                             <select class="form-select" id="method-filter" style="width: 150px;">
                                 <option value="">All Methods</option>
-                                <option value="CREDIT_CARD">Credit Card</option>
+                                <option value="FPX">Online Banking / FPX</option>
                                 <option value="BANK_TRANSFER">Bank Transfer</option>
                                 <option value="QR_PAYMENT">QR Payment</option>
                                 <option value="CASH">Cash</option>
@@ -411,7 +411,7 @@
             if (statusCtx) new Chart(statusCtx.getContext('2d'), { type: 'doughnut', data: { labels: ['Pending', 'Verified', 'Failed'], datasets: [{ data: [paymentStats.pending, paymentStats.verified, paymentStats.failed], backgroundColor: ['#f5576c', '#38ef7d', '#adb5bd'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
 
             const methodCtx = document.getElementById('methodChart');
-            if (methodCtx) new Chart(methodCtx.getContext('2d'), { type: 'pie', data: { labels: ['Credit Card', 'Bank Transfer', 'QR Payment', 'Cash'], datasets: [{ data: [paymentStats.creditCard, paymentStats.bankTransfer, paymentStats.qrPayment, paymentStats.cash], backgroundColor: ['#4facfe', '#667eea', '#fa709a', '#fee140'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            if (methodCtx) new Chart(methodCtx.getContext('2d'), { type: 'pie', data: { labels: ['Online Banking / FPX', 'Bank Transfer', 'QR Payment', 'Cash'], datasets: [{ data: [paymentStats.creditCard, paymentStats.bankTransfer, paymentStats.qrPayment, paymentStats.cash], backgroundColor: ['#4facfe', '#667eea', '#fa709a', '#fee140'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
 
             const monthlyCtx = document.getElementById('monthlyChart');
             if (monthlyCtx) new Chart(monthlyCtx.getContext('2d'), { type: 'line', data: { labels: paymentStats.monthlyLabels, datasets: [{ label: 'Amount (RM)', data: paymentStats.monthlyPaymentAmounts, borderColor: '#4B49AC', backgroundColor: 'rgba(75, 73, 172, 0.2)', borderWidth: 2, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });

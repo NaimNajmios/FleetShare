@@ -261,7 +261,7 @@
                             </select>
                             <select class="form-select" id="method-filter" style="width: 150px;">
                                 <option value="">All Methods</option>
-                                <option value="CREDIT_CARD">Credit Card</option>
+                                <option value="FPX">Online Banking / FPX</option>
                                 <option value="BANK_TRANSFER">Bank Transfer</option>
                                 <option value="QR_PAYMENT">QR Payment</option>
                                 <option value="CASH">Cash</option>
@@ -473,7 +473,7 @@
                 new Chart(methodCtx.getContext('2d'), {
                     type: 'pie',
                     data: {
-                        labels: ['Credit Card', 'Bank Transfer', 'QR Payment', 'Cash'],
+                        labels: ['Online Banking / FPX', 'Bank Transfer', 'QR Payment', 'Cash'],
                         datasets: [{
                             data: [paymentStats.creditCard, paymentStats.bankTransfer, paymentStats.qrPayment, paymentStats.cash],
                             backgroundColor: ['#4facfe', '#667eea', '#fa709a', '#fee140'],

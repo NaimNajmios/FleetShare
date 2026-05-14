@@ -452,7 +452,7 @@ public class AdminController {
         model.addAttribute("failedCount", failedCount);
 
         // Calculate statistics by payment method
-        long creditCardCount = allPayments.stream().filter(p -> "CREDIT_CARD".equals(p.getPaymentMethod())).count();
+        long creditCardCount = allPayments.stream().filter(p -> "FPX".equals(p.getPaymentMethod())).count();
         long bankTransferCount = allPayments.stream().filter(p -> "BANK_TRANSFER".equals(p.getPaymentMethod())).count();
         long qrPaymentCount = allPayments.stream().filter(p -> "QR_PAYMENT".equals(p.getPaymentMethod())).count();
         long cashCount = allPayments.stream().filter(p -> "CASH".equals(p.getPaymentMethod())).count();

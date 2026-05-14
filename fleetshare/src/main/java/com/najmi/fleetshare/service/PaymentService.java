@@ -590,8 +590,8 @@ public class PaymentService {
         switch (method) {
             case CASH:
                 return "Cash payment option selected by renter";
-            case CREDIT_CARD:
-                return "Credit card payment initiated";
+            case FPX:
+                return "Online banking / FPX payment initiated";
             case BANK_TRANSFER:
                 return "Bank transfer payment selected";
             case QR_PAYMENT:
@@ -738,8 +738,8 @@ public class PaymentService {
             if (p.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
                 throw new IllegalStateException("Payment already completed for this booking.");
             }
-            // Reuse existing CREDIT_CARD + PENDING payment
-            if (p.getPaymentMethod() == Payment.PaymentMethod.CREDIT_CARD
+            // Reuse existing FPX + PENDING payment
+            if (p.getPaymentMethod() == Payment.PaymentMethod.FPX
                     && p.getPaymentStatus() == Payment.PaymentStatus.PENDING) {
                 return p;
             }
@@ -749,7 +749,7 @@ public class PaymentService {
         Payment payment = new Payment();
         payment.setInvoiceId(invoice.getInvoiceId());
         payment.setAmount(invoice.getTotalAmount());
-        payment.setPaymentMethod(Payment.PaymentMethod.CREDIT_CARD);
+        payment.setPaymentMethod(Payment.PaymentMethod.FPX);
         payment.setPaymentStatus(Payment.PaymentStatus.PENDING);
         payment.setPaymentDate(java.time.LocalDateTime.now());
         payment.setTransactionReference("GATEWAY-" + System.currentTimeMillis());

@@ -659,8 +659,9 @@
                         <div id="bookingMap" style="height: 350px; width: 100%; border-radius: 0.5rem; z-index: 1;"></div>
                     </div>
 
-                    <!-- Action Buttons (Only for PENDING) -->
-                    <div class="action-buttons" th:if="${booking.status == 'PENDING'}">
+                    <!-- Action Buttons (Only for PENDING with payment not yet verified/active) -->
+                    <div class="action-buttons"
+                         th:if="${booking.status == 'PENDING' and (booking.paymentStatus == null or booking.paymentStatus == 'AWAITING' or booking.paymentStatus == 'PENDING')}">
                         <a th:href="@{/renter/bookings/{id}/payment(id=${booking.bookingId})}" class="btn-manage">
                             <i class="fas fa-credit-card"></i> Manage Payment
                         </a>
@@ -677,7 +678,7 @@
                         <h2 class="card-title">Actions</h2>
 
                         <!-- CONFIRMED Actions -->
-                        <div th:if="${booking.status == 'CONFIRMED'}">
+                        <div th:if="${booking.status == 'CONFIRMED' and (booking.paymentStatus == null or booking.paymentStatus == 'AWAITING' or booking.paymentStatus == 'PENDING')}">
                             <a href="#" class="btn btn-primary">
                                 <i class="fas fa-phone me-2"></i>Contact Owner
                             </a>

@@ -561,8 +561,8 @@ public class RenterController {
                 case "CASH":
                     newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CASH;
                     break;
-                case "CREDIT_CARD":
-                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CREDIT_CARD;
+                case "FPX":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.FPX;
                     break;
                 case "BANK_TRANSFER":
                     newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.BANK_TRANSFER;
@@ -601,8 +601,8 @@ public class RenterController {
                 case "CASH":
                     newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CASH;
                     break;
-                case "CREDIT_CARD":
-                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.CREDIT_CARD;
+                case "FPX":
+                    newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.FPX;
                     break;
                 case "BANK_TRANSFER":
                     newMethod = com.najmi.fleetshare.entity.Payment.PaymentMethod.BANK_TRANSFER;
@@ -617,7 +617,7 @@ public class RenterController {
             paymentService.retryPayment(id, newMethod, receipt);
             redirectAttributes.addFlashAttribute("successMessage", "Payment method changed and retried successfully.");
 
-            if (newMethod == com.najmi.fleetshare.entity.Payment.PaymentMethod.CREDIT_CARD) {
+            if (newMethod == com.najmi.fleetshare.entity.Payment.PaymentMethod.FPX) {
                 // Redirect directly to the gateway processing for credit card
                 return processGatewayPayment(id, session, redirectAttributes);
             }
