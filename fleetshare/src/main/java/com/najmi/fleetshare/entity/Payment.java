@@ -63,7 +63,7 @@ public class Payment {
     }
 
     public enum PaymentStatus {
-        PENDING, VERIFIED, FAILED
+        PENDING, VERIFIED, FAILED, REFUNDED
     }
 
     // Constructors

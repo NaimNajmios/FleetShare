@@ -497,6 +497,36 @@ public class PaymentService {
         return payment;
     }
 
+    /**
+     * Refunds a verified payment (used when a booking is cancelled after payment).
+     *
+     * @param paymentId    The payment ID to refund
+     * @param actorUserId  The user ID performing the refund
+     * @param reason       The reason for refund
+     * @return The updated Payment entity
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public Payment refundPayment(Long paymentId, Long actorUserId, String reason) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found: " + paymentId));
+
+        if (payment.getPaymentStatus() != Payment.PaymentStatus.VERIFIED) {
+            throw new IllegalStateException("Only verified payments can be refunded.");
+        }
+
+        payment.setPaymentStatus(Payment.PaymentStatus.REFUNDED);
+        payment = paymentRepository.save(payment);
+
+        PaymentStatusLog log = new PaymentStatusLog();
+        log.setPaymentId(payment.getPaymentId());
+        log.setStatusValue(Payment.PaymentStatus.REFUNDED);
+        log.setStatusTimestamp(java.time.LocalDateTime.now());
+        log.setActorUserId(actorUserId);
+        log.setRemarks(reason != null && !reason.trim().isEmpty() ? "Refunded: " + reason : "Refunded due to cancellation");
+        paymentStatusLogRepository.save(log);
+
+        return payment;
+    }
 
     /**
      * Gets all payments for a specific invoice ID.

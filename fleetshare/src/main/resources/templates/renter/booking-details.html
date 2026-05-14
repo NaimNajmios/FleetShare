@@ -1056,24 +1056,48 @@
 
                 if (confirmCancelBtn) {
                     confirmCancelBtn.addEventListener('click', function () {
-                        // UI: Loading State
                         const originalText = this.innerHTML;
                         this.disabled = true;
                         this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Cancelling...';
 
-                        // Simulation of API call
-                        setTimeout(() => {
+                        const reason = document.getElementById('cancellationReason') ? document.getElementById('cancellationReason').value : '';
+                        const bookingId = /*[[${booking.bookingId}]]*/ 0;
+                        var csrfMeta = document.querySelector('meta[name="_csrf"]');
+                        var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
+                        var csrfHeaderEl = document.querySelector('meta[name="_csrf_header"]');
+                        var csrfHeader = csrfHeaderEl ? csrfHeaderEl.getAttribute('content') : 'X-CSRF-TOKEN';
+                        var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+                        if (csrfToken) headers[csrfHeader] = csrfToken;
+
+                        fetch('/renter/bookings/' + bookingId + '/cancel', {
+                            method: 'POST',
+                            headers: headers,
+                            body: 'reason=' + encodeURIComponent(reason)
+                        })
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
                             if (cancelModal) cancelModal.hide();
-
-                            // Show success toast
-                            if (window.showToast) {
-                                window.showToast('Booking cancellation functionality coming soon!', 'info', 'Coming Soon');
+                            if (data.success) {
+                                if (window.showToast) {
+                                    window.showToast('Booking cancelled successfully.', 'success', 'Cancelled');
+                                }
+                                setTimeout(function () { window.location.reload(); }, 1500);
+                            } else {
+                                if (window.showToast) {
+                                    window.showToast(data.error || 'Failed to cancel booking.', 'error', 'Error');
+                                }
+                                this.disabled = false;
+                                this.innerHTML = originalText;
                             }
-
-                            // Reset button
+                        }.bind(this))
+                        .catch(function () {
+                            if (cancelModal) cancelModal.hide();
+                            if (window.showToast) {
+                                window.showToast('Network error. Please try again.', 'error', 'Error');
+                            }
                             this.disabled = false;
                             this.innerHTML = originalText;
-                        }, 1000);
+                        }.bind(this));
                     });
                 }
             });

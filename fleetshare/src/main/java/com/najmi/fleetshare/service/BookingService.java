@@ -55,6 +55,9 @@ public class BookingService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private PaymentService paymentService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -464,6 +467,41 @@ public class BookingService {
                 emailModel.put("remarks", finalRemarks);
                 
                 emailService.sendHtmlEmail(ownerUser.getEmail(), "Booking Status Updated to " + statusName, "email/booking-status-update", emailModel);
+            }
+        }
+
+        // If cancelled, clean up related resources
+        if (targetStatus == BookingStatusLog.BookingStatus.CANCELLED) {
+            // Mark vehicle as available
+            Vehicle vehicle = vehicleRepository.findById(booking.getVehicleId()).orElse(null);
+            if (vehicle != null) {
+                vehicle.setStatus(Vehicle.VehicleStatus.AVAILABLE);
+                vehicleRepository.save(vehicle);
+            }
+
+            // Find invoice and payment records
+            List<Invoice> invoices = invoiceRepository.findByBookingId(booking.getBookingId());
+            if (!invoices.isEmpty()) {
+                Invoice invoice = invoices.get(0);
+                // Void the invoice if it was paid
+                if (invoice.getStatus() == Invoice.InvoiceStatus.PAID) {
+                    invoice.setStatus(Invoice.InvoiceStatus.VOID);
+                    invoiceRepository.save(invoice);
+                }
+                // Refund payment if verified
+                List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+                if (!payments.isEmpty()) {
+                    Payment payment = payments.stream()
+                            .max(java.util.Comparator.comparing(Payment::getPaymentId))
+                            .orElse(null);
+                    if (payment != null && payment.getPaymentStatus() == Payment.PaymentStatus.VERIFIED) {
+                        try {
+                            paymentService.refundPayment(payment.getPaymentId(), actorUserId, finalRemarks);
+                        } catch (Exception ignored) {
+                            // Refund is best-effort; don't fail the cancellation
+                        }
+                    }
+                }
             }
         }
 

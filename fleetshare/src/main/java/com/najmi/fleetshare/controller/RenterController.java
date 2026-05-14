@@ -531,6 +531,46 @@ public class RenterController {
         }
     }
 
+    /**
+     * Manual cancel booking by the renter
+     */
+    @PostMapping("/bookings/{id}/cancel")
+    @ResponseBody
+    public ResponseEntity<?> cancelBooking(@PathVariable Long id,
+            @RequestParam(value = "reason", required = false) String reason,
+            HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getRenterDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        }
+
+        try {
+            com.najmi.fleetshare.dto.BookingDTO booking = bookingService.getBookingDetails(id);
+            if (booking == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Verify booking belongs to logged-in renter
+            if (!booking.getRenterId().equals(user.getRenterDetails().getRenterId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Access denied"));
+            }
+
+            // Only allow cancel from PENDING or CONFIRMED
+            if (!"PENDING".equals(booking.getStatus()) && !"CONFIRMED".equals(booking.getStatus())) {
+                return ResponseEntity.badRequest().body(Map.of("error",
+                        "Cannot cancel booking in " + booking.getStatus() + " status."));
+            }
+
+            bookingService.updateBookingStatus(id, "CANCELLED", user.getUserId(), reason);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Booking cancelled successfully."));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/bookings/{id}/payment/cash")
     public String confirmCashPayment(@PathVariable Long id, HttpSession session,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
