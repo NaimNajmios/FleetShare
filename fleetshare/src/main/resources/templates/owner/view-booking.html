@@ -807,6 +807,12 @@
                     <input type="hidden" name="status" value="CONFIRMED">
                     <div class="modal-body">
                         <p>Confirm this booking?</p>
+                        <div th:if="${booking.paymentStatus == 'PENDING' or booking.paymentStatus == null}" 
+                             class="alert alert-warning mb-3" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-information-outline me-1"></i>
+                            <strong>Payment Not Yet Verified:</strong> The payment is still 
+                            <strong>PENDING</strong>. Confirming before payment is verified means you accept this booking without confirmed funds.
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Remarks (optional)</label>
                             <textarea name="remarks" class="form-control" rows="2"
@@ -822,7 +828,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Mark as Active Modal -->
     <div class="modal fade" id="activeModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -835,6 +841,12 @@
                     <input type="hidden" name="status" value="ACTIVE">
                     <div class="modal-body">
                         <p>Mark this booking as active? (Vehicle picked up)</p>
+                        <div th:if="${booking.paymentStatus == 'PENDING' or booking.paymentStatus == null}" 
+                             class="alert alert-warning mb-3" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-information-outline me-1"></i>
+                            <strong>Payment Not Yet Verified:</strong> The payment is still 
+                            <strong>PENDING</strong>. Marking as active with unverified payment risks non-payment.
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Remarks (optional)</label>
                             <textarea name="remarks" class="form-control" rows="2"
@@ -850,7 +862,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Mark as Completed Modal -->
     <div class="modal fade" id="completeModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -863,6 +875,19 @@
                     <input type="hidden" name="status" value="COMPLETED">
                     <div class="modal-body">
                         <p>Mark this booking as completed? (Vehicle returned)</p>
+                        <div th:if="${booking.paymentStatus == 'VERIFIED' or booking.paymentStatus == 'PAID' or booking.paymentStatus == 'COMPLETED'}" 
+                             class="alert alert-info mb-3" style="border-left: 4px solid #0dcaf0;">
+                            <i class="mdi mdi-information-outline me-1"></i>
+                            <strong>Payment Processed:</strong> Payment of 
+                            <strong th:text="'RM ' + ${#numbers.formatDecimal(booking.totalCost, 1, 'COMMA', 2, 'POINT')}">RM 0.00</strong> 
+                            was <strong th:text="${booking.paymentStatus}">VERIFIED</strong>. Completing confirms the rental is finished.
+                        </div>
+                        <div th:if="${booking.paymentStatus == 'PENDING' or booking.paymentStatus == null}" 
+                             class="alert alert-warning mb-3" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-information-outline me-1"></i>
+                            <strong>Payment Not Yet Verified:</strong> The payment is still 
+                            <strong>PENDING</strong>. Completing with an unpaid invoice may require follow-up.
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Remarks (optional)</label>
                             <textarea name="remarks" class="form-control" rows="2"
@@ -878,7 +903,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Report Issue (Dispute) Modal -->
     <div class="modal fade" id="disputeModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -891,6 +916,14 @@
                     <input type="hidden" name="status" value="DISPUTED">
                     <div class="modal-body">
                         <p>Report an issue with this booking?</p>
+                        <div th:if="${booking.paymentStatus == 'VERIFIED' or booking.paymentStatus == 'PAID' or booking.paymentStatus == 'COMPLETED'}" 
+                             class="alert alert-warning mb-3" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-information-outline me-1"></i>
+                            <strong>Payment Already Processed:</strong> Payment of 
+                            <strong th:text="'RM ' + ${#numbers.formatDecimal(booking.totalCost, 1, 'COMMA', 2, 'POINT')}">RM 0.00</strong> 
+                            was <strong th:text="${booking.paymentStatus}">VERIFIED</strong>. 
+                            Reporting an issue may result in a refund if resolved in the renter's favor.
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Issue Details <span class="text-danger">*</span></label>
                             <textarea name="remarks" class="form-control" rows="3" placeholder="Describe the issue..."
@@ -906,7 +939,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Cancel Booking Modal -->
     <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
