@@ -1640,26 +1640,39 @@ public class OwnerController {
     @GetMapping("/bookings/{id}/invoice")
     public org.springframework.http.ResponseEntity<byte[]> downloadInvoice(
             @PathVariable Long id, HttpSession session) {
+        return getInvoicePdf(id, session, true);
+    }
+
+    /**
+     * View invoice inline in browser
+     */
+    @GetMapping("/bookings/{id}/invoice/view")
+    public org.springframework.http.ResponseEntity<byte[]> viewInvoice(
+            @PathVariable Long id, HttpSession session) {
+        return getInvoicePdf(id, session, false);
+    }
+
+    private org.springframework.http.ResponseEntity<byte[]> getInvoicePdf(
+            Long id, HttpSession session, boolean attachment) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return org.springframework.http.ResponseEntity.status(401).build();
         }
 
         try {
-            // Get invoice for this booking
             com.najmi.fleetshare.entity.Invoice invoice = invoiceService.getInvoiceByBookingId(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
 
-            // Verify ownership
             if (!invoice.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
                 return org.springframework.http.ResponseEntity.status(403).build();
             }
 
             byte[] pdf = invoiceService.generateInvoicePdf(invoice.getInvoiceId());
+            String disposition = attachment ? "attachment" : "inline";
 
             return org.springframework.http.ResponseEntity.ok()
                     .header("Content-Disposition",
-                            "attachment; filename=invoice-" + invoice.getInvoiceNumber() + ".pdf")
+                            disposition + "; filename=invoice-" + invoice.getInvoiceNumber() + ".pdf")
                     .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -1667,41 +1680,49 @@ public class OwnerController {
         }
     }
 
-    /**
-     * Download receipt PDF for a booking (only if payment is verified)
-     */
     @GetMapping("/bookings/{id}/receipt")
     public org.springframework.http.ResponseEntity<byte[]> downloadReceipt(
             @PathVariable Long id, HttpSession session) {
+        return getReceiptPdf(id, session, true);
+    }
+
+    /**
+     * View receipt inline in browser
+     */
+    @GetMapping("/bookings/{id}/receipt/view")
+    public org.springframework.http.ResponseEntity<byte[]> viewReceipt(
+            @PathVariable Long id, HttpSession session) {
+        return getReceiptPdf(id, session, false);
+    }
+
+    private org.springframework.http.ResponseEntity<byte[]> getReceiptPdf(
+            Long id, HttpSession session, boolean attachment) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return org.springframework.http.ResponseEntity.status(401).build();
         }
 
         try {
-            // Get invoice for this booking
             com.najmi.fleetshare.entity.Invoice invoice = invoiceService.getInvoiceByBookingId(id)
                     .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
 
-            // Verify ownership
             if (!invoice.getFleetOwnerId().equals(user.getOwnerDetails().getFleetOwnerId())) {
                 return org.springframework.http.ResponseEntity.status(403).build();
             }
 
-            // Get payment for this invoice
             com.najmi.fleetshare.entity.Payment payment = receiptService.getPaymentByInvoiceId(invoice.getInvoiceId())
                     .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
 
-            // Check if payment is verified
             if (!receiptService.canGenerateReceipt(payment.getPaymentId())) {
                 return org.springframework.http.ResponseEntity.status(400).build();
             }
 
             byte[] pdf = receiptService.generateReceiptPdf(payment.getPaymentId());
+            String disposition = attachment ? "attachment" : "inline";
 
             return org.springframework.http.ResponseEntity.ok()
                     .header("Content-Disposition",
-                            "attachment; filename=receipt-" + invoice.getInvoiceNumber() + ".pdf")
+                            disposition + "; filename=receipt-" + invoice.getInvoiceNumber() + ".pdf")
                     .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {

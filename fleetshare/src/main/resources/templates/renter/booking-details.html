@@ -722,17 +722,28 @@
                         <h2 class="card-title">Documents</h2>
 
                         <!-- Invoice - always visible if invoice exists -->
-                        <a th:href="@{/renter/bookings/{id}/invoice(id=${booking.bookingId})}"
-                            class="btn btn-outline-primary" style="width: 100%; margin-bottom: 0.5rem;">
-                            <i class="fas fa-file-invoice me-2"></i>Download Invoice
-                        </a>
+                        <div class="d-flex mb-2" style="width: 100%;">
+                            <a th:href="@{/renter/bookings/{id}/invoice/view(id=${booking.bookingId})}"
+                               target="_blank" class="btn btn-outline-info" style="border-top-right-radius:0; border-bottom-right-radius:0; border-right:none;" title="View Invoice">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a th:href="@{/renter/bookings/{id}/invoice(id=${booking.bookingId})}"
+                                class="btn btn-outline-primary flex-grow-1" style="border-radius:0;">
+                                <i class="fas fa-file-invoice me-2"></i>Download Invoice
+                            </a>
+                        </div>
 
                         <!-- Receipt - only visible when payment is VERIFIED -->
-                        <a th:if="${booking.paymentStatus == 'VERIFIED'}"
-                            th:href="@{/renter/bookings/{id}/receipt(id=${booking.bookingId})}" class="btn btn-success"
-                            style="width: 100%;">
-                            <i class="fas fa-receipt me-2"></i>Download Receipt
-                        </a>
+                        <div th:if="${booking.paymentStatus == 'VERIFIED'}" class="d-flex mb-2" style="width: 100%;">
+                            <a th:href="@{/renter/bookings/{id}/receipt/view(id=${booking.bookingId})}"
+                               target="_blank" class="btn btn-outline-info" style="border-top-right-radius:0; border-bottom-right-radius:0; border-right:none;" title="View Receipt">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a th:href="@{/renter/bookings/{id}/receipt(id=${booking.bookingId})}" class="btn btn-success flex-grow-1"
+                                style="border-radius:0;">
+                                <i class="fas fa-receipt me-2"></i>Download Receipt
+                            </a>
+                        </div>
 
                         <!-- Receipt not available message -->
                         <div th:if="${booking.paymentStatus != 'VERIFIED'}" class="text-muted small"

@@ -543,10 +543,14 @@
                     <div th:if="${payment.bookingId != null}" class="mt-3 pt-3" style="border-top: 1px solid #dee2e6;">
                         <div class="text-muted small mb-2">Documents</div>
                         
-                        <!-- Invoice Download & Email -->
+                        <!-- Invoice View, Download & Email -->
                         <div class="d-flex mb-2">
+                            <a th:href="@{/admin/bookings/{id}/invoice/view(id=${payment.bookingId})}" 
+                               target="_blank" class="btn btn-outline-info" style="border-top-right-radius:0; border-bottom-right-radius:0; border-right:none;" title="View Invoice">
+                                <i class="mdi mdi-eye"></i>
+                            </a>
                             <a th:href="@{/admin/bookings/{id}/invoice(id=${payment.bookingId})}" 
-                               class="btn btn-outline-primary flex-grow-1" style="border-top-right-radius:0; border-bottom-right-radius:0;">
+                               class="btn btn-outline-primary flex-grow-1" style="border-radius:0;">
                                 <i class="mdi mdi-file-document"></i> Download Invoice
                             </a>
                             <form th:action="@{/admin/bookings/{id}/invoice/email(id=${payment.bookingId})}" method="POST" 
@@ -557,10 +561,14 @@
                             </form>
                         </div>
                         
-                        <!-- Receipt Download & Email (only if payment verified) -->
+                        <!-- Receipt View, Download & Email (only if payment verified) -->
                         <div th:if="${payment.paymentStatus == 'VERIFIED' or payment.paymentStatus == 'PAID' or payment.paymentStatus == 'COMPLETED'}" class="d-flex mb-2">
+                            <a th:href="@{/admin/bookings/{id}/receipt/view(id=${payment.bookingId})}" 
+                               target="_blank" class="btn btn-outline-info" style="border-top-right-radius:0; border-bottom-right-radius:0; border-right:none;" title="View Receipt">
+                                <i class="mdi mdi-eye"></i>
+                            </a>
                             <a th:href="@{/admin/bookings/{id}/receipt(id=${payment.bookingId})}" 
-                               class="btn btn-success flex-grow-1" style="border-top-right-radius:0; border-bottom-right-radius:0;">
+                               class="btn btn-success flex-grow-1" style="border-radius:0;">
                                 <i class="mdi mdi-receipt"></i> Download Receipt
                             </a>
                             <form th:action="@{/admin/bookings/{id}/receipt/email(id=${payment.bookingId})}" method="POST"

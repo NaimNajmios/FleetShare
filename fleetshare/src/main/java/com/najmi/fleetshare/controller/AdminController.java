@@ -571,6 +571,15 @@ public class AdminController {
      */
     @GetMapping("/bookings/{id}/invoice")
     public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long id, HttpSession session) {
+        return getInvoicePdf(id, session, true);
+    }
+
+    @GetMapping("/bookings/{id}/invoice/view")
+    public ResponseEntity<byte[]> viewInvoice(@PathVariable Long id, HttpSession session) {
+        return getInvoicePdf(id, session, false);
+    }
+
+    private ResponseEntity<byte[]> getInvoicePdf(Long id, HttpSession session, boolean attachment) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getAdminDetails() == null) {
             return ResponseEntity.status(401).build();
@@ -581,9 +590,10 @@ public class AdminController {
                     .orElseThrow(() -> new IllegalArgumentException("Invoice not found"));
 
             byte[] pdf = invoiceService.generateInvoicePdf(invoice.getInvoiceId());
+            String disposition = attachment ? "attachment" : "inline";
 
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=invoice-" + invoice.getInvoiceNumber() + ".pdf")
+                    .header("Content-Disposition", disposition + "; filename=invoice-" + invoice.getInvoiceNumber() + ".pdf")
                     .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -591,11 +601,17 @@ public class AdminController {
         }
     }
 
-    /**
-     * Download receipt PDF for a booking
-     */
     @GetMapping("/bookings/{id}/receipt")
     public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long id, HttpSession session) {
+        return getReceiptPdf(id, session, true);
+    }
+
+    @GetMapping("/bookings/{id}/receipt/view")
+    public ResponseEntity<byte[]> viewReceipt(@PathVariable Long id, HttpSession session) {
+        return getReceiptPdf(id, session, false);
+    }
+
+    private ResponseEntity<byte[]> getReceiptPdf(Long id, HttpSession session, boolean attachment) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getAdminDetails() == null) {
             return ResponseEntity.status(401).build();
@@ -613,9 +629,10 @@ public class AdminController {
             }
 
             byte[] pdf = receiptService.generateReceiptPdf(payment.getPaymentId());
+            String disposition = attachment ? "attachment" : "inline";
 
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=receipt-" + invoice.getInvoiceNumber() + ".pdf")
+                    .header("Content-Disposition", disposition + "; filename=receipt-" + invoice.getInvoiceNumber() + ".pdf")
                     .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
