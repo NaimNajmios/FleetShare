@@ -52,6 +52,9 @@ public class BookingDTO {
     private LocalDateTime paymentDate;
     private String paymentTransactionReference;
 
+    // Computed flags
+    private Boolean startDatePassed;
+
     public static class PriceAdjustment {
         private String description;
         private BigDecimal amount;
@@ -393,5 +396,13 @@ public class BookingDTO {
 
     public void setPaymentTransactionReference(String paymentTransactionReference) {
         this.paymentTransactionReference = paymentTransactionReference;
+    }
+
+    public Boolean getStartDatePassed() {
+        return startDatePassed;
+    }
+
+    public void setStartDatePassed(Boolean startDatePassed) {
+        this.startDatePassed = startDatePassed;
     }
 }

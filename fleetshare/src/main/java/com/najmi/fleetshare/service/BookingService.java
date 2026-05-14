@@ -234,6 +234,9 @@ public class BookingService {
             }
         });
 
+        // Compute if the booking's start date has passed
+        dto.setStartDatePassed(dto.getStartDate() != null && dto.getStartDate().isBefore(java.time.LocalDateTime.now()));
+
         return dto;
     }
 
@@ -411,6 +414,14 @@ public class BookingService {
         // Validate status transition
         if (!isValidTransition(currentStatus, targetStatus)) {
             throw new IllegalStateException("Cannot transition from " + currentStatus + " to " + targetStatus);
+        }
+
+        // Block CONFIRMED or ACTIVE if the booking start date has passed
+        if ((targetStatus == BookingStatusLog.BookingStatus.CONFIRMED || targetStatus == BookingStatusLog.BookingStatus.ACTIVE)
+                && booking.getStartDate() != null && booking.getStartDate().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalStateException(
+                    "Cannot transition to " + targetStatus + " because the booking start date (" +
+                    booking.getStartDate() + ") has already passed.");
         }
 
         // Create status log entry

@@ -925,6 +925,16 @@
                         <p class="mb-3 text-muted">Are you sure you want to cancel this booking? This action cannot be
                             undone.</p>
 
+                        <div th:if="${booking.paymentStatus != null and booking.paymentStatus != 'PENDING'}" 
+                             class="alert alert-warning d-flex align-items-center mb-3" role="alert" style="border-left: 4px solid #ffc107;">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <div class="small">
+                                <strong>Payment Already Processed:</strong> Your payment is 
+                                <strong th:text="${booking.paymentStatus}">VERIFIED</strong>. 
+                                Cancelling may require a refund process.
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="cancellationReason" class="form-label text-dark fw-bold small">Reason for
                                 Cancellation (Optional)</label>

@@ -598,10 +598,13 @@
                     <!-- PENDING Status Actions -->
                     <div th:if="${booking.status == 'PENDING'}" class="mb-3">
                         <p class="text-muted small mb-2">This booking is awaiting confirmation.</p>
-                        <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal"
+                        <button th:if="${!booking.startDatePassed}" class="btn btn-success btn-block mb-2" data-bs-toggle="modal"
                             data-bs-target="#bookingConfirmModal">
                             <i class="mdi mdi-check-circle"></i> Confirm Booking
                         </button>
+                        <div th:if="${booking.startDatePassed}" class="alert alert-warning small py-2 mb-2" style="font-size: 0.8rem;">
+                            <i class="mdi mdi-clock-alert"></i> Start date has passed — confirmation is no longer available.
+                        </div>
                         <button class="btn btn-outline-danger btn-block" data-bs-toggle="modal"
                             data-bs-target="#cancelModal">
                             <i class="mdi mdi-close-circle"></i> Cancel Booking
@@ -611,10 +614,13 @@
                     <!-- CONFIRMED Status Actions -->
                     <div th:if="${booking.status == 'CONFIRMED'}" class="mb-3">
                         <p class="text-muted small mb-2">Booking confirmed. Ready for pickup.</p>
-                        <button class="btn btn-primary btn-block mb-2" data-bs-toggle="modal"
+                        <button th:if="${!booking.startDatePassed}" class="btn btn-primary btn-block mb-2" data-bs-toggle="modal"
                             data-bs-target="#activeModal">
                             <i class="mdi mdi-car-key"></i> Mark as Active (Picked Up)
                         </button>
+                        <div th:if="${booking.startDatePassed}" class="alert alert-warning small py-2 mb-2" style="font-size: 0.8rem;">
+                            <i class="mdi mdi-clock-alert"></i> Start date has passed — can no longer mark as active.
+                        </div>
                         <button class="btn btn-outline-danger btn-block" data-bs-toggle="modal"
                             data-bs-target="#cancelModal">
                             <i class="mdi mdi-close-circle"></i> Cancel Booking
@@ -914,6 +920,13 @@
                     <div class="modal-body">
                         <div class="alert alert-danger">
                             <i class="mdi mdi-alert"></i> This action cannot be undone.
+                        </div>
+                        <div th:if="${booking.paymentStatus != null and booking.paymentStatus != 'PENDING'}" 
+                             class="alert alert-warning" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-information-outline me-1"></i>
+                            <strong>Payment Already Processed:</strong> The payment for this booking is 
+                            <strong th:text="${booking.paymentStatus}">VERIFIED</strong>. 
+                            Cancelling will require a refund to the renter.
                         </div>
                         <p>Are you sure you want to cancel this booking?</p>
                         <div class="form-group">
