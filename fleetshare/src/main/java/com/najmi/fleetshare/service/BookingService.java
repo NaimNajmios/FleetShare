@@ -433,15 +433,6 @@ public class BookingService {
                     booking.getStartDate() + ") has already passed.");
         }
 
-        // Gap#2: Block ACTIVE if the booking start date is still in the future
-        if (targetStatus == BookingStatusLog.BookingStatus.ACTIVE
-                && booking.getStartDate() != null && booking.getStartDate().isAfter(java.time.LocalDateTime.now())) {
-            throw new IllegalStateException(
-                    "Cannot mark as ACTIVE because the rental period has not started yet. " +
-                    "The rental period starts on " + booking.getStartDate().toLocalDate() + ". " +
-                    "Please edit the booking to adjust the dates if you have an agreement with the renter.");
-        }
-
         // Gap#6: Block ACTIVE if vehicle has IN_PROGRESS maintenance
         if (targetStatus == BookingStatusLog.BookingStatus.ACTIVE) {
             List<VehicleMaintenance> activeMaints = vehicleMaintenanceRepository
