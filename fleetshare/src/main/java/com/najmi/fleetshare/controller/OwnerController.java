@@ -5,6 +5,7 @@ import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.BookingLogDTO;
 import com.najmi.fleetshare.dto.MaintenanceDTO;
 import com.najmi.fleetshare.dto.MaintenanceLogDTO;
+import com.najmi.fleetshare.dto.AgendaItemDTO;
 import com.najmi.fleetshare.dto.PaymentDTO;
 import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.dto.SessionUser;
@@ -186,6 +187,13 @@ public class OwnerController {
 
                 // Pass vehicles list for status overview
                 model.addAttribute("vehicles", vehicles);
+
+                // Build sticky-note agenda
+                List<PaymentDTO> allPayments = paymentService.getPaymentsByOwnerId(ownerId);
+                model.addAttribute("pendingPayments", allPayments);
+                Map<String, List<AgendaItemDTO>> agenda = buildDashboardAgenda(
+                    ownerId, today, allOwnerBookings, maintenanceRecords, allPayments);
+                model.addAttribute("agenda", agenda);
             } catch (Exception e) {
                 // Log error and set defaults
                 e.printStackTrace();
@@ -1935,5 +1943,149 @@ public class OwnerController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // ── Sticky Note Dashboard Agenda ──
+
+    private Map<String, List<AgendaItemDTO>> buildDashboardAgenda(
+            Long ownerId, LocalDate today,
+            List<BookingDTO> bookings, List<MaintenanceDTO> maintenance,
+            List<PaymentDTO> payments) {
+
+        LocalDate tomorrow = today.plusDays(1);
+        LocalDate dayAfter = tomorrow.plusDays(1);
+
+        Map<String, List<AgendaItemDTO>> agenda = new java.util.LinkedHashMap<>();
+        agenda.put("today", new java.util.ArrayList<>());
+        agenda.put("tomorrow", new java.util.ArrayList<>());
+        agenda.put("dayAfter", new java.util.ArrayList<>());
+
+        // ── Bookings ──
+        for (BookingDTO b : bookings != null ? bookings : Collections.<BookingDTO>emptyList()) {
+            if (b.getStartDate() == null || b.getEndDate() == null) continue;
+            if ("COMPLETED".equals(b.getStatus()) || "CANCELLED".equals(b.getStatus())) continue;
+
+            LocalDate start = b.getStartDate().toLocalDate();
+            LocalDate end = b.getEndDate().toLocalDate();
+
+            for (Map.Entry<String, List<AgendaItemDTO>> entry : agenda.entrySet()) {
+                LocalDate day = "today".equals(entry.getKey()) ? today
+                        : "tomorrow".equals(entry.getKey()) ? tomorrow : dayAfter;
+
+                if ((start.isEqual(day) || start.isBefore(day)) && (end.isEqual(day) || end.isAfter(day))) {
+                    String vehicle = (b.getVehicleBrand() != null ? b.getVehicleBrand() + " " : "")
+                                   + (b.getVehicleModel() != null ? b.getVehicleModel() : "");
+                    String title, desc, urgency = "info";
+
+                    if (start.isEqual(day) && "CONFIRMED".equals(b.getStatus())) {
+                        title = vehicle + " — pickup today";
+                        urgency = "warning";
+                    } else if (end.isEqual(day) && "ACTIVE".equals(b.getStatus())) {
+                        title = vehicle + " — return due";
+                        urgency = "warning";
+                    } else if ("ACTIVE".equals(b.getStatus())) {
+                        title = vehicle + " — active";
+                    } else {
+                        title = vehicle;
+                    }
+
+                    if ("PENDING".equals(b.getStatus())) {
+                        title = vehicle + " — pending confirmation";
+                        urgency = "warning";
+                    }
+
+                    desc = b.getRenterName() != null ? b.getRenterName() : "";
+                    if (b.getStartDate() != null && b.getEndDate() != null) {
+                        desc += " (" + b.getStartDate().toLocalDate() + " — " + b.getEndDate().toLocalDate() + ")";
+                    }
+
+                    entry.getValue().add(new AgendaItemDTO(
+                            entry.getKey(), day, "BOOKING", title, desc.trim(),
+                            b.getStatus(), urgency,
+                            "/owner/bookings/view/" + b.getBookingId()));
+                }
+            }
+        }
+
+        // ── Maintenance ──
+        for (MaintenanceDTO m : maintenance != null ? maintenance : Collections.<MaintenanceDTO>emptyList()) {
+            if (m.getScheduledDate() == null) continue;
+            if ("COMPLETED".equals(m.getStatus()) || "CANCELLED".equals(m.getStatus())) continue;
+
+            String vehicle = (m.getVehicleBrand() != null ? m.getVehicleBrand() + " " : "")
+                           + (m.getVehicleModel() != null ? m.getVehicleModel() : "");
+
+            // Overdue PENDING → always in Today
+            if ("PENDING".equals(m.getStatus()) && m.getScheduledDate().isBefore(today)) {
+                String title = vehicle + " — overdue";
+                String desc = m.getDescription() != null ? m.getDescription() : "";
+                desc += " (scheduled " + m.getScheduledDate() + ")";
+                agenda.get("today").add(new AgendaItemDTO(
+                        "today", today, "MAINTENANCE", title, desc.trim(),
+                        m.getStatus(), "danger",
+                        "/owner/maintenance/view/" + m.getMaintenanceId()));
+                continue;
+            }
+
+            // Scheduled for specific day
+            for (Map.Entry<String, List<AgendaItemDTO>> entry : agenda.entrySet()) {
+                LocalDate day = "today".equals(entry.getKey()) ? today
+                        : "tomorrow".equals(entry.getKey()) ? tomorrow : dayAfter;
+
+                if (m.getScheduledDate().isEqual(day)) {
+                    String title = vehicle + " — " + ("IN_PROGRESS".equals(m.getStatus()) ? "in progress" : "scheduled");
+                    String desc = m.getDescription() != null ? m.getDescription() : "";
+                    entry.getValue().add(new AgendaItemDTO(
+                            entry.getKey(), day, "MAINTENANCE", title, desc.trim(),
+                            m.getStatus(), "IN_PROGRESS".equals(m.getStatus()) ? "warning" : "info",
+                            "/owner/maintenance/view/" + m.getMaintenanceId()));
+                }
+            }
+        }
+
+        // ── Payments ──
+        for (PaymentDTO p : payments != null ? payments : Collections.<PaymentDTO>emptyList()) {
+            if (p.getPaymentDate() != null) {
+                LocalDate pd = p.getPaymentDate().toLocalDate();
+                for (Map.Entry<String, List<AgendaItemDTO>> entry : agenda.entrySet()) {
+                    LocalDate day = "today".equals(entry.getKey()) ? today
+                            : "tomorrow".equals(entry.getKey()) ? tomorrow : dayAfter;
+                    if (pd.isEqual(day) && "PENDING".equals(p.getPaymentStatus())) {
+                        String title = "Payment from " + (p.getRenterName() != null ? p.getRenterName() : "Unknown");
+                        String desc = "RM " + (p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
+                                    + " — needs verification";
+                        entry.getValue().add(new AgendaItemDTO(
+                                entry.getKey(), day, "PAYMENT", title, desc,
+                                p.getPaymentStatus(), "warning",
+                                "/owner/payments/view/" + p.getPaymentId()));
+                    }
+                }
+            }
+
+            // Also show PENDING payments without a payment date in Today
+            if ("PENDING".equals(p.getPaymentStatus()) && p.getPaymentDate() == null) {
+                String title = "Payment pending from " + (p.getRenterName() != null ? p.getRenterName() : "Unknown");
+                String desc = "RM " + (p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
+                            + " — awaiting receipt upload";
+                // Avoid duplicates
+                boolean exists = agenda.get("today").stream().anyMatch(
+                    a -> "PAYMENT".equals(a.getType()) && a.getTitle().equals(title));
+                if (!exists) {
+                    agenda.get("today").add(new AgendaItemDTO(
+                            "today", today, "PAYMENT", title, desc,
+                            "PENDING", "info",
+                            "/owner/payments/view/" + p.getPaymentId()));
+                }
+            }
+        }
+
+        // Cap each day at 7 items
+        for (List<AgendaItemDTO> items : agenda.values()) {
+            if (items.size() > 7) {
+                items.subList(7, items.size()).clear();
+            }
+        }
+
+        return agenda;
     }
 }

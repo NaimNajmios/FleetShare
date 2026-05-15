@@ -195,6 +195,156 @@
                 margin-right: 6px;
                 display: inline-block;
             }
+
+            /* ── Sticky Note Agenda ── */
+            .agenda-day-card {
+                background: #fafbfc;
+                border-radius: 10px;
+                border: 1px solid #e8ecf1;
+                overflow: hidden;
+                height: 100%;
+                transition: box-shadow 0.2s;
+            }
+            .agenda-day-card:hover {
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            }
+            .agenda-today {
+                border-color: #4B49AC;
+                border-width: 1px;
+                background: #f8f7ff;
+            }
+            .agenda-day-header {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #e8ecf1;
+                background: white;
+            }
+            .agenda-today .agenda-day-header {
+                background: #4B49AC;
+                color: white;
+                border-bottom: none;
+            }
+            .agenda-today .agenda-day-header .agenda-day-date,
+            .agenda-today .agenda-day-header .agenda-count {
+                color: rgba(255,255,255,0.85);
+            }
+            .agenda-today .agenda-day-header .agenda-count {
+                background: rgba(255,255,255,0.25) !important;
+            }
+            .agenda-day-label {
+                font-weight: 600;
+                font-size: 0.9rem;
+                flex: 1;
+            }
+            .agenda-day-date {
+                font-size: 0.75rem;
+                color: #6c757d;
+            }
+            .agenda-count {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.5rem;
+            }
+
+            .agenda-items {
+                padding: 0.25rem 0;
+            }
+            .agenda-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.6rem 1rem;
+                text-decoration: none;
+                color: inherit;
+                transition: background 0.15s;
+                border-left: 3px solid transparent;
+                cursor: pointer;
+            }
+            .agenda-item:hover {
+                background: rgba(75,73,172,0.04);
+                color: inherit;
+            }
+            .agenda-item.urgency-warning {
+                border-left-color: #ffc107;
+            }
+            .agenda-item.urgency-danger {
+                border-left-color: #dc3545;
+            }
+            .agenda-item.urgency-info {
+                border-left-color: #17a2b8;
+            }
+
+            .agenda-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                font-size: 1rem;
+            }
+            .agenda-BOOKING .agenda-icon {
+                background: #e8f4fd;
+                color: #0d6efd;
+            }
+            .agenda-MAINTENANCE .agenda-icon {
+                background: #fff3cd;
+                color: #856404;
+            }
+            .agenda-PAYMENT .agenda-icon {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .agenda-content {
+                flex: 1;
+                min-width: 0;
+            }
+            .agenda-title {
+                font-weight: 600;
+                font-size: 0.85rem;
+                color: #212529;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .agenda-desc {
+                font-size: 0.75rem;
+                color: #6c757d;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .agenda-badge {
+                font-size: 0.6rem;
+                padding: 0.15rem 0.4rem;
+                margin-top: 0.15rem;
+            }
+            .agenda-arrow {
+                color: #adb5bd;
+                font-size: 1rem;
+                flex-shrink: 0;
+                opacity: 0.4;
+            }
+            .agenda-item:hover .agenda-arrow {
+                opacity: 0.8;
+            }
+
+            .agenda-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.35rem;
+                padding: 1.5rem 1rem;
+                color: #6c757d;
+                font-size: 0.8rem;
+            }
+            .agenda-empty i {
+                font-size: 1.5rem;
+            }
         </style>
     </th:block>
 </head>
@@ -302,6 +452,67 @@
                         </div>
                         <div class="mt-3 small text-muted">
                             Awaiting confirmation
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Note Agenda -->
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="card-title mb-0">
+                                <i class="mdi mdi-sticky-note text-primary me-1"></i> Agenda
+                            </h4>
+                            <span class="text-muted small" th:text="${#temporals.format(#temporals.createToday(), 'EEEE, dd MMM yyyy')}">Date</span>
+                        </div>
+
+                        <div th:if="${agenda != null and !agenda.isEmpty()}" class="row g-3">
+                            <th:block th:each="dayEntry : ${agenda}">
+                                <div class="col-md-4">
+                                    <div th:class="'agenda-day-card ' + (${dayEntry.key == 'today'} ? 'agenda-today' : '')">
+                                        <div class="agenda-day-header">
+                                            <span th:text="${dayEntry.key == 'today' ? 'Today' : (dayEntry.key == 'tomorrow' ? 'Tomorrow' : 'Day After')}"
+                                                  class="agenda-day-label"></span>
+                                            <span class="agenda-day-date"
+                                                  th:text="${dayEntry.key == 'today' ? #temporals.format(#temporals.createToday(), 'dd MMM') : (dayEntry.key == 'tomorrow' ? #temporals.format(#temporals.createToday().plusDays(1), 'dd MMM') : #temporals.format(#temporals.createToday().plusDays(2), 'dd MMM'))}"></span>
+                                            <span th:if="${!dayEntry.value.isEmpty()}"
+                                                  class="agenda-count badge rounded-pill bg-secondary"
+                                                  th:text="${dayEntry.value.size() + ' item' + (dayEntry.value.size() == 1 ? '' : 's')}">0</span>
+                                        </div>
+
+                                        <div th:if="${!dayEntry.value.isEmpty()}" class="agenda-items">
+                                            <a th:each="item : ${dayEntry.value}"
+                                               th:href="${item.actionUrl}"
+                                               th:class="'agenda-item agenda-' + ${item.type.toLowerCase()} + ' urgency-' + ${item.urgency}">
+                                                <div class="agenda-icon">
+                                                    <i th:class="${item.type == 'BOOKING' ? 'mdi mdi-car' : (item.type == 'MAINTENANCE' ? 'mdi mdi-wrench' : 'mdi mdi-cash')}"></i>
+                                                </div>
+                                                <div class="agenda-content">
+                                                    <div class="agenda-title" th:text="${item.title}">Title</div>
+                                                    <div class="agenda-desc" th:text="${item.description}">Desc</div>
+                                                    <span th:class="'badge badge-sm agenda-badge badge-' + (${item.status == 'PENDING'} ? 'warning' : (${item.status == 'CONFIRMED'} ? 'success' : (${item.status == 'ACTIVE'} ? 'info' : (${item.status == 'IN_PROGRESS'} ? 'info' : 'secondary'))))"
+                                                          th:text="${item.status}">Status</span>
+                                                </div>
+                                                <i class="mdi mdi-chevron-right agenda-arrow"></i>
+                                            </a>
+                                        </div>
+
+                                        <div th:if="${dayEntry.value.isEmpty()}" class="agenda-empty">
+                                            <i class="mdi mdi-check-circle-outline text-success"></i>
+                                            <span>Nothing scheduled</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th:block>
+                        </div>
+
+                        <div th:if="${agenda == null or agenda.isEmpty()}" class="text-center text-muted py-4">
+                            <i class="mdi mdi-sticky-note" style="font-size: 2rem;"></i>
+                            <p class="mt-2 mb-0">No upcoming agenda items</p>
                         </div>
                     </div>
                 </div>
