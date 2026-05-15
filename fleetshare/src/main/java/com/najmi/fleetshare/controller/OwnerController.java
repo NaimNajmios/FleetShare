@@ -231,6 +231,25 @@ public class OwnerController {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
             List<RenterDTO> customers = userManagementService.getCustomersByOwnerId(ownerId);
             model.addAttribute("customers", customers);
+
+            // KPI counts
+            if (customers != null) {
+                long totalCustomers = customers.size();
+                long activeCustomers = customers.stream().filter(c -> Boolean.TRUE.equals(c.getIsActive())).count();
+                long inactiveCustomers = totalCustomers - activeCustomers;
+                long customersWithBookings = customers.stream()
+                        .filter(c -> c.getTotalBookings() != null && c.getTotalBookings() > 0)
+                        .count();
+                model.addAttribute("totalCustomers", totalCustomers);
+                model.addAttribute("activeCustomers", activeCustomers);
+                model.addAttribute("inactiveCustomers", inactiveCustomers);
+                model.addAttribute("customersWithBookings", customersWithBookings);
+            } else {
+                model.addAttribute("totalCustomers", 0);
+                model.addAttribute("activeCustomers", 0);
+                model.addAttribute("inactiveCustomers", 0);
+                model.addAttribute("customersWithBookings", 0);
+            }
         }
         return "owner/customers";
     }
@@ -254,6 +273,24 @@ public class OwnerController {
 
         UserDetailDTO customerDetail = userManagementService.getUserDetails(customerId, "renter");
         model.addAttribute("customerDetail", customerDetail);
+
+        // Fetch booking history for this customer
+        RenterDTO customerStats = customers.stream()
+                .filter(c -> c.getUserId().equals(customerId))
+                .findFirst().orElse(null);
+        if (customerStats != null) {
+            model.addAttribute("customerStats", customerStats);
+        }
+
+        // Fetch recent bookings by this customer with this owner
+        Long renterId = customerStats != null ? customerStats.getRenterId() : null;
+        if (renterId != null) {
+            List<BookingDTO> recentCustomerBookings = bookingService.getRecentBookingsByRenterIdAndOwnerId(renterId, ownerId, 5);
+            model.addAttribute("recentCustomerBookings", recentCustomerBookings);
+        } else {
+            model.addAttribute("recentCustomerBookings", new java.util.ArrayList<>());
+        }
+
         return "owner/view-customer";
     }
 

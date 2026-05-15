@@ -24,6 +24,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT DISTINCT b.renterId FROM Booking b WHERE b.fleetOwnerId = :fleetOwnerId")
     List<Long> findDistinctRenterIdsByFleetOwnerId(@Param("fleetOwnerId") Long fleetOwnerId);
 
+    @Query("SELECT b FROM Booking b WHERE b.renterId = :renterId AND b.fleetOwnerId = :fleetOwnerId ORDER BY b.createdAt DESC")
+    List<Booking> findByRenterIdAndFleetOwnerId(@Param("renterId") Long renterId, @Param("fleetOwnerId") Long fleetOwnerId);
+
+    @Query("SELECT b FROM Booking b WHERE b.renterId = :renterId AND b.fleetOwnerId = :fleetOwnerId ORDER BY b.createdAt DESC")
+    org.springframework.data.domain.Page<Booking> findByRenterIdAndFleetOwnerId(@Param("renterId") Long renterId, @Param("fleetOwnerId") Long fleetOwnerId, org.springframework.data.domain.Pageable pageable);
+
     @Query("SELECT new com.najmi.fleetshare.dto.BookingDTO(" +
             "b.bookingId, r.renterId, r.fullName, COALESCE(u.email, 'N/A'), v.vehicleId, v.model, v.brand, " +
             "v.registrationNo, v.vehicleImageUrl, COALESCE(f.businessName, 'Unknown Owner'), b.startDate, b.endDate, " +

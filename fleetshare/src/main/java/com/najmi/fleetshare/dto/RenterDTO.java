@@ -1,5 +1,6 @@
 package com.najmi.fleetshare.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class RenterDTO {
@@ -10,6 +11,9 @@ public class RenterDTO {
     private String phoneNumber;
     private Boolean isActive;
     private LocalDateTime createdAt;
+    private Long totalBookings;
+    private BigDecimal totalSpent;
+    private LocalDateTime lastBookingDate;
 
     // Constructors
     public RenterDTO() {
@@ -81,5 +85,29 @@ public class RenterDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Long getTotalBookings() {
+        return totalBookings;
+    }
+
+    public void setTotalBookings(Long totalBookings) {
+        this.totalBookings = totalBookings;
+    }
+
+    public BigDecimal getTotalSpent() {
+        return totalSpent;
+    }
+
+    public void setTotalSpent(BigDecimal totalSpent) {
+        this.totalSpent = totalSpent;
+    }
+
+    public LocalDateTime getLastBookingDate() {
+        return lastBookingDate;
+    }
+
+    public void setLastBookingDate(LocalDateTime lastBookingDate) {
+        this.lastBookingDate = lastBookingDate;
     }
 }

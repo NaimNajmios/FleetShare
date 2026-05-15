@@ -8,10 +8,15 @@ import com.najmi.fleetshare.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +37,12 @@ public class UserManagementService {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private com.najmi.fleetshare.repository.PaymentRepository paymentRepository;
 
     /**
      * Fetches all fleet owners with their associated user details
@@ -169,21 +180,49 @@ public class UserManagementService {
         // 1. Get distinct renter IDs directly from DB (Optimized)
         List<Long> renterIdsList = bookingRepository.findDistinctRenterIdsByFleetOwnerId(ownerId);
         Set<Long> renterIds = new java.util.HashSet<>(renterIdsList);
-        renterIds.remove(null); // Ensure no nulls are passed to findAllById
+        renterIds.remove(null);
+
+        if (renterIds.isEmpty()) {
+            return new ArrayList<>();
+        }
 
         // 2. Batch fetch renters
         List<Renter> renters = renterRepository.findAllById(renterIds);
 
-        // 4. Collect user IDs for batch fetching
+        // 3. Collect user IDs for batch fetching
         Set<Long> userIds = renters.stream()
                 .map(Renter::getUserId)
                 .collect(Collectors.toSet());
 
-        // 5. Batch fetch users
+        // 4. Batch fetch users
         java.util.Map<Long, User> userMap = userRepository.findAllById(userIds).stream()
                 .collect(Collectors.toMap(User::getUserId, java.util.function.Function.identity()));
 
-        // 6. Map to DTOs
+        // 5. Batch fetch aggregate booking data per renter
+        List<Booking> allOwnerBookings = bookingRepository.findByFleetOwnerId(ownerId);
+        Map<Long, List<Booking>> bookingsByRenter = allOwnerBookings.stream()
+                .collect(Collectors.groupingBy(Booking::getRenterId));
+
+        // 6. Batch fetch invoices for all relevant renters to compute total spent
+        Map<Long, Invoice> invoiceByBooking = new java.util.HashMap<>();
+        for (Booking b : allOwnerBookings) {
+            List<Invoice> invs = invoiceRepository.findByBookingId(b.getBookingId());
+            if (!invs.isEmpty()) {
+                invoiceByBooking.put(b.getBookingId(), invs.get(0));
+            }
+        }
+        Set<Long> invoiceIds = invoiceByBooking.values().stream()
+                .map(Invoice::getInvoiceId)
+                .collect(Collectors.toSet());
+        Map<Long, Payment> paymentByInvoice = new java.util.HashMap<>();
+        if (!invoiceIds.isEmpty()) {
+            List<Payment> payments = paymentRepository.findByInvoiceIdIn(invoiceIds);
+            for (Payment p : payments) {
+                paymentByInvoice.putIfAbsent(p.getInvoiceId(), p);
+            }
+        }
+
+        // 7. Map to DTOs with aggregates
         List<RenterDTO> customers = new ArrayList<>();
         for (Renter renter : renters) {
             User user = userMap.get(renter.getUserId());
@@ -196,6 +235,31 @@ public class UserManagementService {
                         renter.getPhoneNumber(),
                         user.getIsActive(),
                         user.getCreatedAt());
+
+                // Compute per-customer aggregates
+                List<Booking> renterBookings = bookingsByRenter.getOrDefault(renter.getRenterId(), Collections.emptyList());
+                dto.setTotalBookings((long) renterBookings.size());
+
+                // Last booking date
+                renterBookings.stream()
+                        .map(Booking::getCreatedAt)
+                        .filter(Objects::nonNull)
+                        .max(Comparator.naturalOrder())
+                        .ifPresent(dto::setLastBookingDate);
+
+                // Total spent (sum of verified/paid invoice amounts)
+                BigDecimal totalSpent = renterBookings.stream()
+                        .map(b -> invoiceByBooking.get(b.getBookingId()))
+                        .filter(Objects::nonNull)
+                        .filter(inv -> {
+                            Payment pmt = paymentByInvoice.get(inv.getInvoiceId());
+                            return pmt != null && pmt.getPaymentStatus() == Payment.PaymentStatus.VERIFIED;
+                        })
+                        .map(Invoice::getTotalAmount)
+                        .filter(Objects::nonNull)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                dto.setTotalSpent(totalSpent);
+
                 customers.add(dto);
             }
         }

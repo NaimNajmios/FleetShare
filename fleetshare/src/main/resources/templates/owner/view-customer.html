@@ -236,6 +236,19 @@
                             <span class="stat-label">Customer ID</span>
                             <span class="stat-value" th:text="${customerDetail.userId}">#123</span>
                         </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Bookings</span>
+                            <span class="stat-value" th:text="${customerStats != null and customerStats.totalBookings != null ? customerStats.totalBookings : 0}">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Spent</span>
+                            <span class="stat-value">RM <span
+                                th:text="${customerStats != null and customerStats.totalSpent != null ? #numbers.formatDecimal(customerStats.totalSpent, 0, 2) : '0.00'}">0.00</span></span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Member Since</span>
+                            <span class="stat-value" th:text="${customerStats != null and customerStats.createdAt != null ? #temporals.format(customerStats.createdAt, 'MMM yyyy') : 'N/A'}">N/A</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -310,6 +323,70 @@
                     <div th:if="${customerDetail.addressLine1 == null}" class="empty-address">
                         <i class="mdi mdi-map-marker-off"></i>
                         <p>No address on file</p>
+                    </div>
+                </div>
+
+                <!-- Recent Bookings Card -->
+                <div class="info-card" th:if="${not #lists.isEmpty(recentCustomerBookings)}">
+                    <div class="card-header-title">
+                        <i class="mdi mdi-calendar-clock"></i>
+                        <h5>Recent Bookings</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Vehicle</th>
+                                    <th>Dates</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="booking : ${recentCustomerBookings}">
+                                    <td class="fw-bold" th:text="'#' + ${booking.bookingId}">#123</td>
+                                    <td th:text="${booking.vehicleBrand + ' ' + booking.vehicleModel}">Toyota Vios</td>
+                                    <td>
+                                        <span th:text="${booking.startDate != null ? #temporals.format(booking.startDate, 'dd MMM') : ''}">01 Jan</span>
+                                        - <span th:text="${booking.endDate != null ? #temporals.format(booking.endDate, 'dd MMM') : ''}">05 Jan</span>
+                                    </td>
+                                    <td class="fw-bold">RM <span
+                                            th:text="${booking.totalCost != null ? #numbers.formatDecimal(booking.totalCost, 0, 2) : '0.00'}">0.00</span></td>
+                                    <td>
+                                        <span th:if="${booking.status == 'PENDING'}"
+                                            class="badge bg-warning text-dark">Pending</span>
+                                        <span th:if="${booking.status == 'CONFIRMED'}"
+                                            class="badge bg-info">Confirmed</span>
+                                        <span th:if="${booking.status == 'ACTIVE'}"
+                                            class="badge bg-primary">Active</span>
+                                        <span th:if="${booking.status == 'COMPLETED'}"
+                                            class="badge bg-success">Completed</span>
+                                        <span th:if="${booking.status == 'CANCELLED'}"
+                                            class="badge bg-secondary">Cancelled</span>
+                                        <span th:if="${booking.status == 'DISPUTED'}"
+                                            class="badge bg-danger">Disputed</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a th:href="@{/owner/bookings/view/{id}(id=${booking.bookingId})}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            <i class="mdi mdi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="info-card" th:if="${#lists.isEmpty(recentCustomerBookings)}">
+                    <div class="card-header-title">
+                        <i class="mdi mdi-calendar-clock"></i>
+                        <h5>Recent Bookings</h5>
+                    </div>
+                    <div class="text-center py-3 text-muted">
+                        <i class="mdi mdi-calendar-remove mdi-24px mb-2"></i>
+                        <p class="mb-0">No booking history yet</p>
                     </div>
                 </div>
             </div>

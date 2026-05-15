@@ -819,6 +819,21 @@ public class BookingService {
     }
 
     /**
+     * Fetches recent bookings for a specific renter with a specific owner
+     *
+     * @param renterId Renter ID
+     * @param ownerId  Owner ID
+     * @param limit    Number of bookings to fetch
+     * @return List of BookingDTO objects
+     */
+    public List<BookingDTO> getRecentBookingsByRenterIdAndOwnerId(Long renterId, Long ownerId, int limit) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit,
+                org.springframework.data.domain.Sort.by("createdAt").descending());
+        List<Booking> bookings = bookingRepository.findByRenterIdAndFleetOwnerId(renterId, ownerId, pageable).getContent();
+        return mapBookingsToDTOs(bookings);
+    }
+
+    /**
      * Fetches recent bookings for a specific owner
      *
      * @param ownerId Owner ID
