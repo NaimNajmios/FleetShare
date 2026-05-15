@@ -1,5 +1,6 @@
 package com.najmi.fleetshare.controller;
 
+import com.najmi.fleetshare.dto.AgendaItemDTO;
 import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.VehicleDTO;
@@ -885,6 +886,12 @@ public class RenterController {
         List<BookingDTO> recentBookings = bookingService.getRecentBookingsByRenterId(renterId, 3);
         model.addAttribute("recentBookings", recentBookings);
 
+        // Build sticky-note agenda
+        List<BookingDTO> allMyBookings = bookingService.getBookingsByRenterId(renterId);
+        Map<String, List<AgendaItemDTO>> agenda = buildRenterAgenda(
+            java.time.LocalDate.now(), allMyBookings);
+        model.addAttribute("agenda", agenda);
+
         return "renter/home";
     }
 
@@ -987,6 +994,128 @@ public class RenterController {
             return ResponseEntity.ok(ranges);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
+    // ── Sticky Note Agenda (renter-specific) ──
+
+    private Map<String, List<AgendaItemDTO>> buildRenterAgenda(
+            java.time.LocalDate today, List<BookingDTO> bookings) {
+
+        java.time.LocalDate tomorrow = today.plusDays(1);
+        java.time.LocalDate dayAfter = tomorrow.plusDays(1);
+
+        Map<String, List<AgendaItemDTO>> agenda = new java.util.LinkedHashMap<>();
+        agenda.put("today", new java.util.ArrayList<>());
+        agenda.put("tomorrow", new java.util.ArrayList<>());
+        agenda.put("dayAfter", new java.util.ArrayList<>());
+
+        for (BookingDTO b : bookings != null ? bookings : java.util.Collections.<BookingDTO>emptyList()) {
+            if (b.getStartDate() == null || b.getEndDate() == null) continue;
+            if ("COMPLETED".equals(b.getStatus()) || "CANCELLED".equals(b.getStatus())) continue;
+
+            java.time.LocalDate start = b.getStartDate().toLocalDate();
+            java.time.LocalDate end = b.getEndDate().toLocalDate();
+
+            for (Map.Entry<String, List<AgendaItemDTO>> entry : agenda.entrySet()) {
+                java.time.LocalDate day = "today".equals(entry.getKey()) ? today
+                        : "tomorrow".equals(entry.getKey()) ? tomorrow : dayAfter;
+
+                if (!((start.isEqual(day) || start.isBefore(day)) && (end.isEqual(day) || end.isAfter(day)))) {
+                    continue;
+                }
+
+                String vehicle = (b.getVehicleBrand() != null ? b.getVehicleBrand() + " " : "")
+                               + (b.getVehicleModel() != null ? b.getVehicleModel() : "");
+                String title, urgency = "info";
+
+                if (start.isEqual(day) && "CONFIRMED".equals(b.getStatus())) {
+                    title = vehicle + " — pickup today";
+                    urgency = "warning";
+                } else if (end.isEqual(day) && "ACTIVE".equals(b.getStatus())) {
+                    title = vehicle + " — return due";
+                    urgency = "warning";
+                } else if ("ACTIVE".equals(b.getStatus())) {
+                    title = vehicle + " — active";
+                } else if ("PENDING".equals(b.getStatus())) {
+                    title = vehicle + " — payment required";
+                    urgency = "warning";
+                } else if (start.isEqual(day) || start.isBefore(day)) {
+                    title = vehicle;
+                } else {
+                    title = vehicle + " — upcoming";
+                }
+
+                String desc = "";
+                if (b.getStartDate() != null && b.getEndDate() != null) {
+                    desc = b.getStartDate().toLocalDate() + " — " + b.getEndDate().toLocalDate();
+                }
+
+                String actionUrl = "/renter/bookings/" + b.getBookingId();
+                // Override to payment page if PENDING and unpaid
+                if ("PENDING".equals(b.getStatus()) &&
+                    (b.getPaymentStatus() == null || "PENDING".equals(b.getPaymentStatus()) || "FAILED".equals(b.getPaymentStatus()))) {
+                    actionUrl = "/renter/bookings/" + b.getBookingId() + "/payment";
+                }
+
+                entry.getValue().add(new AgendaItemDTO(
+                        entry.getKey(), day, "BOOKING", title, desc,
+                        b.getStatus(), urgency, actionUrl));
+            }
+        }
+
+        for (List<AgendaItemDTO> items : agenda.values()) {
+            if (items.size() > 7) {
+                items.subList(7, items.size()).clear();
+            }
+        }
+
+        return agenda;
+    }
+
+    // ── Calendar API (renter's own bookings) ──
+
+    @GetMapping("/api/calendar/bookings")
+    @ResponseBody
+    public ResponseEntity<?> getCalendarBookings(HttpSession session) {
+        try {
+            SessionUser user = SessionHelper.getCurrentUser(session);
+            if (user == null || user.getRenterDetails() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+            }
+
+            Long renterId = user.getRenterDetails().getRenterId();
+            List<BookingDTO> myBookings = bookingService.getBookingsByRenterId(renterId);
+            List<Map<String, Object>> events = new java.util.ArrayList<>();
+
+            for (BookingDTO b : myBookings != null ? myBookings : java.util.Collections.<BookingDTO>emptyList()) {
+                if (b.getStartDate() == null || b.getEndDate() == null) continue;
+
+                Map<String, Object> event = new java.util.HashMap<>();
+                String label = (b.getVehicleBrand() != null ? b.getVehicleBrand() + " " : "")
+                             + (b.getVehicleModel() != null ? b.getVehicleModel() : "");
+                event.put("title", label);
+                event.put("start", b.getStartDate().toString());
+                event.put("end", b.getEndDate().toString());
+
+                String color;
+                switch (b.getStatus() != null ? b.getStatus() : "") {
+                    case "PENDING":    color = "#ffc107"; break;
+                    case "CONFIRMED":  color = "#28a745"; break;
+                    case "ACTIVE":     color = "#17a2b8"; break;
+                    case "COMPLETED":  color = "#6c757d"; break;
+                    case "CANCELLED":  color = "#dc3545"; break;
+                    default:           color = "#6c757d"; break;
+                }
+                event.put("color", color);
+                event.put("url", "/renter/bookings/" + b.getBookingId());
+
+                events.add(event);
+            }
+
+            return ResponseEntity.ok(events);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }
