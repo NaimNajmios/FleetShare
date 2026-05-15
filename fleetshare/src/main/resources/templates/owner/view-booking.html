@@ -614,7 +614,19 @@
                     <!-- CONFIRMED Status Actions -->
                     <div th:if="${booking.status == 'CONFIRMED'}" class="mb-3">
                         <p class="text-muted small mb-2">Booking confirmed. Ready for pickup.</p>
-                        <button th:if="${!booking.startDatePassed}" class="btn btn-primary btn-block mb-2" data-bs-toggle="modal"
+                        <!-- Gap#2: Start date is in the future — restrict, suggest editing -->
+                        <div th:if="${booking.startDateUpcoming}" class="mb-2">
+                            <div class="alert alert-info small py-2 mb-2" style="font-size: 0.8rem;">
+                                <i class="mdi mdi-information-outline"></i>
+                                The rental period starts on <strong th:text="${#temporals.format(booking.startDate, 'dd MMM yyyy')}">N/A</strong>.
+                                The vehicle cannot be picked up before this date.
+                            </div>
+                            <a th:href="@{/owner/bookings/edit/{id}(id=${booking.bookingId})}"
+                               class="btn btn-outline-primary btn-block mb-2">
+                                <i class="mdi mdi-pencil"></i> Edit Booking Dates
+                            </a>
+                        </div>
+                        <button th:if="${!booking.startDatePassed and !booking.startDateUpcoming}" class="btn btn-primary btn-block mb-2" data-bs-toggle="modal"
                             data-bs-target="#activeModal">
                             <i class="mdi mdi-car-key"></i> Mark as Active (Picked Up)
                         </button>
@@ -875,6 +887,22 @@
                     <input type="hidden" name="status" value="COMPLETED">
                     <div class="modal-body">
                         <p>Mark this booking as completed? (Vehicle returned)</p>
+                        <!-- Gap#7: Early return warning -->
+                        <div th:if="${isEarlyReturn}"
+                             class="alert alert-warning mb-3" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-clock-outline me-1"></i>
+                            <strong>Early Return:</strong> The scheduled end date is
+                            <strong th:text="${#temporals.format(booking.endDate, 'dd MMM yyyy')}">N/A</strong>.
+                            The vehicle is being returned before the rental period ends.
+                        </div>
+                        <!-- Gap#8: Overdue return warning -->
+                        <div th:if="${isOverdueReturn}"
+                             class="alert alert-danger mb-3" style="border-left: 4px solid #dc3545;">
+                            <i class="mdi mdi-clock-alert me-1"></i>
+                            <strong>Overdue Return:</strong> The scheduled end date was
+                            <strong th:text="${#temporals.format(booking.endDate, 'dd MMM yyyy')}">N/A</strong>.
+                            The vehicle is <strong>overdue</strong>. Consider applying a late fee if applicable.
+                        </div>
                         <div th:if="${booking.paymentStatus == 'VERIFIED' or booking.paymentStatus == 'PAID' or booking.paymentStatus == 'COMPLETED'}" 
                              class="alert alert-info mb-3" style="border-left: 4px solid #0dcaf0;">
                             <i class="mdi mdi-information-outline me-1"></i>

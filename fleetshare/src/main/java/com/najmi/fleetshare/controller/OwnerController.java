@@ -583,6 +583,20 @@ public class OwnerController {
         List<MaintenanceLogDTO> statusLogs = maintenanceService.getMaintenanceLogsDTO(maintenanceId);
         model.addAttribute("statusLogs", statusLogs);
 
+        // Compute warnings for starting work
+        Map<String, Object> startWarnings = maintenanceService.getStartWorkWarnings(maintenanceId);
+        model.addAttribute("maintenanceStartWarnings", startWarnings);
+
+        // Gap#3,4: Maintenance overdue/long-running flags
+        if (maintenance.getScheduledDate() != null) {
+            long daysSinceScheduled = java.time.temporal.ChronoUnit.DAYS.between(maintenance.getScheduledDate(), LocalDate.now());
+            model.addAttribute("daysSinceScheduled", daysSinceScheduled);
+        }
+        if (maintenance.getActualStartTime() != null && "IN_PROGRESS".equals(maintenance.getStatus())) {
+            long hoursInProgress = java.time.temporal.ChronoUnit.HOURS.between(maintenance.getActualStartTime(), LocalDateTime.now());
+            model.addAttribute("hoursInProgress", hoursInProgress);
+        }
+
         return "owner/view-maintenance";
     }
 
@@ -819,6 +833,16 @@ public class OwnerController {
         if (payment != null) {
             java.util.List<com.najmi.fleetshare.dto.PaymentStatusLogDTO> paymentStatusLogs = paymentService.getPaymentStatusLogsDTO(payment.getPaymentId());
             model.addAttribute("paymentStatusLogs", paymentStatusLogs);
+        }
+
+        // Gap#7,8: Early/overdue return flags for ACTIVE bookings
+        LocalDateTime now = LocalDateTime.now();
+        if ("ACTIVE".equals(booking.getStatus()) && booking.getEndDate() != null) {
+            model.addAttribute("isEarlyReturn", now.isBefore(booking.getEndDate()));
+            model.addAttribute("isOverdueReturn", now.isAfter(booking.getEndDate()));
+        } else {
+            model.addAttribute("isEarlyReturn", false);
+            model.addAttribute("isOverdueReturn", false);
         }
 
         return "owner/view-booking";

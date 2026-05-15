@@ -4,6 +4,7 @@ import com.najmi.fleetshare.dto.BookingDTO;
 import com.najmi.fleetshare.dto.BookingLogDTO;
 import com.najmi.fleetshare.entity.*;
 import com.najmi.fleetshare.repository.*;
+import com.najmi.fleetshare.entity.VehicleMaintenance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +58,9 @@ public class BookingService {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private VehicleMaintenanceRepository vehicleMaintenanceRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -237,8 +241,10 @@ public class BookingService {
             }
         });
 
-        // Compute if the booking's start date has passed
-        dto.setStartDatePassed(dto.getStartDate() != null && dto.getStartDate().isBefore(java.time.LocalDateTime.now()));
+        // Compute date-based flags
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        dto.setStartDatePassed(dto.getStartDate() != null && dto.getStartDate().isBefore(now));
+        dto.setStartDateUpcoming(dto.getStartDate() != null && dto.getStartDate().isAfter(now));
 
         return dto;
     }
@@ -425,6 +431,63 @@ public class BookingService {
             throw new IllegalStateException(
                     "Cannot transition to " + targetStatus + " because the booking start date (" +
                     booking.getStartDate() + ") has already passed.");
+        }
+
+        // Gap#2: Block ACTIVE if the booking start date is still in the future
+        if (targetStatus == BookingStatusLog.BookingStatus.ACTIVE
+                && booking.getStartDate() != null && booking.getStartDate().isAfter(java.time.LocalDateTime.now())) {
+            throw new IllegalStateException(
+                    "Cannot mark as ACTIVE because the rental period has not started yet. " +
+                    "The rental period starts on " + booking.getStartDate().toLocalDate() + ". " +
+                    "Please edit the booking to adjust the dates if you have an agreement with the renter.");
+        }
+
+        // Gap#6: Block ACTIVE if vehicle has IN_PROGRESS maintenance
+        if (targetStatus == BookingStatusLog.BookingStatus.ACTIVE) {
+            List<VehicleMaintenance> activeMaints = vehicleMaintenanceRepository
+                    .findByVehicleIdAndCurrentStatus(booking.getVehicleId(), VehicleMaintenance.MaintenanceStatus.IN_PROGRESS);
+            if (!activeMaints.isEmpty()) {
+                VehicleMaintenance m = activeMaints.get(0);
+                throw new IllegalStateException(
+                        "Cannot mark as ACTIVE because the vehicle is currently under maintenance (Maintenance #" +
+                        m.getMaintenanceId() + " - \"" + m.getDescription() + "\"). " +
+                        "Please complete the maintenance first.");
+            }
+        }
+
+        // Gap#9: Block CONFIRMED if payment status is FAILED
+        if (targetStatus == BookingStatusLog.BookingStatus.CONFIRMED) {
+            List<Invoice> invoices = invoiceRepository.findByBookingId(bookingId);
+            if (!invoices.isEmpty()) {
+                Invoice invoice = invoices.get(0);
+                List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getInvoiceId());
+                Payment payment = payments.stream()
+                        .max(java.util.Comparator.comparing(Payment::getPaymentId))
+                        .orElse(null);
+                if (payment != null && payment.getPaymentStatus() == Payment.PaymentStatus.FAILED) {
+                    throw new IllegalStateException(
+                            "Cannot confirm booking because the payment has FAILED. " +
+                            "Please ask the renter to retry payment before confirming.");
+                }
+            }
+        }
+
+        // Gap#7,8: Add context remarks for early/overdue return
+        if (targetStatus == BookingStatusLog.BookingStatus.COMPLETED
+                && currentStatus == BookingStatusLog.BookingStatus.ACTIVE
+                && booking.getEndDate() != null) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            if (now.isBefore(booking.getEndDate())) {
+                // Early return – append context to remarks
+                String earlyNote = "[Early Return] Vehicle returned " +
+                        java.time.temporal.ChronoUnit.DAYS.between(now, booking.getEndDate()) + " day(s) before scheduled end date.";
+                remarks = (remarks != null ? remarks + " | " : "") + earlyNote;
+            } else if (now.isAfter(booking.getEndDate())) {
+                long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(booking.getEndDate(), now);
+                String overdueNote = "[Overdue Return] Vehicle returned " + daysOverdue + " day(s) late — scheduled end was " +
+                        booking.getEndDate().toLocalDate() + ".";
+                remarks = (remarks != null ? remarks + " | " : "") + overdueNote;
+            }
         }
 
         // Create status log entry

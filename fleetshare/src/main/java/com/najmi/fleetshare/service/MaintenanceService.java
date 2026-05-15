@@ -193,6 +193,42 @@ public class MaintenanceService {
     }
 
     /**
+     * Get warnings for starting maintenance work (Gap#1,5)
+     * Used by controllers to pass to view templates for conditional modal warnings.
+     */
+    public Map<String, Object> getStartWorkWarnings(Long maintenanceId) {
+        Map<String, Object> warnings = new HashMap<>();
+        warnings.put("scheduledDateFuture", false);
+        warnings.put("hasBookingConflict", false);
+        warnings.put("bookingConflictDetails", "");
+
+        maintenanceRepository.findById(maintenanceId).ifPresent(maintenance -> {
+            // Gap#1: Check if scheduledDate is in the future
+            if (maintenance.getScheduledDate() != null && maintenance.getScheduledDate().isAfter(LocalDate.now())) {
+                warnings.put("scheduledDateFuture", true);
+            }
+
+            // Gap#5: Check for overlapping active bookings
+            if (maintenance.getScheduledDate() != null) {
+                List<BookingStatusLog.BookingStatus> activeStatuses = List.of(
+                    BookingStatusLog.BookingStatus.CONFIRMED,
+                    BookingStatusLog.BookingStatus.ACTIVE
+                );
+                LocalDateTime dayStart = maintenance.getScheduledDate().atStartOfDay();
+                LocalDateTime dayEnd = maintenance.getScheduledDate().plusDays(1).atStartOfDay();
+                List<Booking> conflicting = bookingRepository.findOverlappingBookingsWithActiveStatus(
+                    maintenance.getVehicleId(), dayStart, dayEnd, activeStatuses);
+                if (!conflicting.isEmpty()) {
+                    warnings.put("hasBookingConflict", true);
+                    warnings.put("bookingConflictDetails", conflicting.size() + " booking(s) overlap with this maintenance period.");
+                }
+            }
+        });
+
+        return warnings;
+    }
+
+    /**
      * Get a single maintenance record by ID
      */
     public MaintenanceDTO getMaintenanceById(Long maintenanceId) {

@@ -220,6 +220,16 @@
                 <span th:if="${maintenance.status == 'CANCELLED'}" class="badge bg-danger status-badge-lg">Cancelled</span>
                 <span th:if="${maintenance.status == 'PENDING'}" class="badge bg-warning text-dark status-badge-lg">Pending</span>
                 <span th:if="${maintenance.status == 'IN_PROGRESS'}" class="badge bg-info status-badge-lg">In Progress</span>
+                <!-- Gap#3: Overdue maintenance badge -->
+                <span th:if="${maintenance.status == 'PENDING' and daysSinceScheduled != null and daysSinceScheduled > 30}"
+                      class="badge bg-danger status-badge-lg" title="Scheduled ${#temporals.format(maintenance.scheduledDate, 'dd MMM yyyy')}">
+                    <i class="mdi mdi-clock-alert"></i> Overdue
+                </span>
+                <!-- Gap#4: Long-running maintenance badge -->
+                <span th:if="${maintenance.status == 'IN_PROGRESS' and hoursInProgress != null and hoursInProgress > 336}"
+                      class="badge bg-warning text-dark status-badge-lg" title="Started ${#temporals.format(maintenance.actualStartTime, 'dd MMM yyyy HH:mm')}">
+                    <i class="mdi mdi-timer-sand"></i> Extended
+                </span>
                 <div th:if="${maintenance.status != 'COMPLETED' && maintenance.status != 'CANCELLED'}" class="d-flex gap-2">
                     <button th:if="${maintenance.status == 'PENDING'}" type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#startWorkModal">
                         <i class="mdi mdi-play me-1"></i> Start Work
@@ -392,6 +402,22 @@
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div class="modal-body">
                         <p>Start working on this maintenance?</p>
+                        <!-- Gap#1: Early start warning -->
+                        <div th:if="${maintenanceStartWarnings.scheduledDateFuture}"
+                             class="alert alert-warning mb-3" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-calendar-clock me-1"></i>
+                            <strong>Before Scheduled Date:</strong> The scheduled date for this maintenance is
+                            <strong th:text="${#temporals.format(maintenance.scheduledDate, 'dd MMM yyyy')}">N/A</strong>,
+                            which is in the future. Starting early may affect vehicle availability. Proceed only if necessary.
+                        </div>
+                        <!-- Gap#5: Booking conflict warning -->
+                        <div th:if="${maintenanceStartWarnings.hasBookingConflict}"
+                             class="alert alert-warning mb-3" style="border-left: 4px solid #ffc107;">
+                            <i class="mdi mdi-calendar-clock me-1"></i>
+                            <strong>Booking Conflict:</strong>
+                            <span th:text="${maintenanceStartWarnings.bookingConflictDetails}">Booking conflict detected.</span>
+                            Please contact affected renter(s) if needed.
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Remarks (optional)</label>
                             <textarea name="remarks" class="form-control" rows="2" placeholder="Add any notes..."></textarea>

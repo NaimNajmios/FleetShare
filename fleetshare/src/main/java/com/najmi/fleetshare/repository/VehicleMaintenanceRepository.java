@@ -17,4 +17,6 @@ public interface VehicleMaintenanceRepository extends JpaRepository<VehicleMaint
     List<VehicleMaintenance> findByVehicleIdAndIsDeletedFalse(Long vehicleId);
 
     List<VehicleMaintenance> findByFleetOwnerIdAndIsDeletedFalse(Long fleetOwnerId);
+
+    List<VehicleMaintenance> findByVehicleIdAndCurrentStatus(Long vehicleId, VehicleMaintenance.MaintenanceStatus status);
 }

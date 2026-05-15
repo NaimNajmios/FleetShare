@@ -54,6 +54,7 @@ public class BookingDTO {
 
     // Computed flags
     private Boolean startDatePassed;
+    private Boolean startDateUpcoming;
 
     public static class PriceAdjustment {
         private String description;
@@ -404,5 +405,13 @@ public class BookingDTO {
 
     public void setStartDatePassed(Boolean startDatePassed) {
         this.startDatePassed = startDatePassed;
+    }
+
+    public Boolean getStartDateUpcoming() {
+        return startDateUpcoming;
+    }
+
+    public void setStartDateUpcoming(Boolean startDateUpcoming) {
+        this.startDateUpcoming = startDateUpcoming;
     }
 }
