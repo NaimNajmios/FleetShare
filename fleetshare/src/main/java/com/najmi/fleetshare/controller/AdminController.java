@@ -432,11 +432,11 @@ public class AdminController {
             model.addAttribute("paymentStatusLogs", paymentStatusLogs);
         }
 
-        // Gap#7,8: Early/overdue return flags for ACTIVE bookings
-        LocalDateTime now = LocalDateTime.now();
+        // Gap#7,8: Early/overdue return flags for ACTIVE bookings (date-only comparison)
+        LocalDate today = LocalDate.now();
         if (booking != null && "ACTIVE".equals(booking.getStatus()) && booking.getEndDate() != null) {
-            model.addAttribute("isEarlyReturn", now.isBefore(booking.getEndDate()));
-            model.addAttribute("isOverdueReturn", now.isAfter(booking.getEndDate()));
+            model.addAttribute("isEarlyReturn", today.isBefore(booking.getEndDate().toLocalDate()));
+            model.addAttribute("isOverdueReturn", today.isAfter(booking.getEndDate().toLocalDate()));
         } else {
             model.addAttribute("isEarlyReturn", false);
             model.addAttribute("isOverdueReturn", false);

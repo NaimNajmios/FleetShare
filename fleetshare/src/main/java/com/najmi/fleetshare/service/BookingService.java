@@ -241,10 +241,10 @@ public class BookingService {
             }
         });
 
-        // Compute date-based flags
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        dto.setStartDatePassed(dto.getStartDate() != null && dto.getStartDate().isBefore(now));
-        dto.setStartDateUpcoming(dto.getStartDate() != null && dto.getStartDate().isAfter(now));
+        // Compute date-based flags (date-only comparison to avoid time-of-day false positives)
+        java.time.LocalDate today = java.time.LocalDate.now();
+        dto.setStartDatePassed(dto.getStartDate() != null && dto.getStartDate().toLocalDate().isBefore(today));
+        dto.setStartDateUpcoming(dto.getStartDate() != null && dto.getStartDate().toLocalDate().isAfter(today));
 
         return dto;
     }
@@ -425,9 +425,9 @@ public class BookingService {
             throw new IllegalStateException("Cannot transition from " + currentStatus + " to " + targetStatus);
         }
 
-        // Block CONFIRMED or ACTIVE if the booking start date has passed
-        if ((targetStatus == BookingStatusLog.BookingStatus.CONFIRMED || targetStatus == BookingStatusLog.BookingStatus.ACTIVE)
-                && booking.getStartDate() != null && booking.getStartDate().isBefore(java.time.LocalDateTime.now())) {
+        // Block ACTIVE if the booking start date has passed (date-only comparison)
+        if (targetStatus == BookingStatusLog.BookingStatus.ACTIVE
+                && booking.getStartDate() != null && booking.getStartDate().toLocalDate().isBefore(java.time.LocalDate.now())) {
             throw new IllegalStateException(
                     "Cannot transition to " + targetStatus + " because the booking start date (" +
                     booking.getStartDate() + ") has already passed.");
@@ -463,20 +463,19 @@ public class BookingService {
             }
         }
 
-        // Gap#7,8: Add context remarks for early/overdue return
+        // Gap#7,8: Add context remarks for early/overdue return (date-only comparison)
         if (targetStatus == BookingStatusLog.BookingStatus.COMPLETED
                 && currentStatus == BookingStatusLog.BookingStatus.ACTIVE
                 && booking.getEndDate() != null) {
-            java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            if (now.isBefore(booking.getEndDate())) {
-                // Early return – append context to remarks
-                String earlyNote = "[Early Return] Vehicle returned " +
-                        java.time.temporal.ChronoUnit.DAYS.between(now, booking.getEndDate()) + " day(s) before scheduled end date.";
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalDate endDate = booking.getEndDate().toLocalDate();
+            if (today.isBefore(endDate)) {
+                long daysEarly = java.time.temporal.ChronoUnit.DAYS.between(today, endDate);
+                String earlyNote = "[Early Return] Vehicle returned " + daysEarly + " day(s) before scheduled end date.";
                 remarks = (remarks != null ? remarks + " | " : "") + earlyNote;
-            } else if (now.isAfter(booking.getEndDate())) {
-                long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(booking.getEndDate(), now);
-                String overdueNote = "[Overdue Return] Vehicle returned " + daysOverdue + " day(s) late — scheduled end was " +
-                        booking.getEndDate().toLocalDate() + ".";
+            } else if (today.isAfter(endDate)) {
+                long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(endDate, today);
+                String overdueNote = "[Overdue Return] Vehicle returned " + daysOverdue + " day(s) late — scheduled end was " + endDate + ".";
                 remarks = (remarks != null ? remarks + " | " : "") + overdueNote;
             }
         }
