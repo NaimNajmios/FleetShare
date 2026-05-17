@@ -332,21 +332,24 @@
                             <!-- Query Input -->
                             <div class="query-input-wrapper">
                                 <textarea class="query-textarea" id="ai-query"
-                                    placeholder="Ask me anything about your fleet data...&#10;&#10;Examples:&#10;• How many bookings were cancelled this week?&#10;• Which vehicle generated the most revenue?&#10;• Show me all red cars rented last month"></textarea>
+                                    placeholder="Ask me anything about your fleet data...&#10;&#10;Examples:&#10;• Calculate the month-over-month revenue growth for my top 3 earning vehicles.&#10;• Identify my top repeat customers and their average spend per booking."></textarea>
 
-                                <div class="suggestions-row">
-                                    <span class="text-muted small me-2">Try:</span>
-                                    <button class="suggestion-chip" onclick="setQuery('Bookings this week')">
-                                        📊 Bookings this week
+                                <div class="suggestions-row align-items-center">
+                                    <span class="text-muted small me-2">Try Advanced Queries:</span>
+                                    <button class="suggestion-chip" onclick="setQuery('Calculate the month-over-month revenue growth for my top 3 earning vehicles')">
+                                        📈 MoM Revenue Growth
                                     </button>
-                                    <button class="suggestion-chip" onclick="setQuery('Pending payments')">
-                                        💳 Pending payments
+                                    <button class="suggestion-chip" onclick="setQuery('List all my vehicles with utilization rates above 75% that have maintenance due in the next 14 days')">
+                                        🔧 High Utilization & Maintenance
                                     </button>
-                                    <button class="suggestion-chip" onclick="setQuery('Available vehicles')">
-                                        🚗 Available vehicles
+                                    <button class="suggestion-chip" onclick="setQuery('Analyze the average rental duration and total earnings broken down by vehicle category (e.g. SUV, Sedan) over the last quarter')">
+                                        📊 Earnings by Category
                                     </button>
-                                    <button class="suggestion-chip" onclick="setQuery('Monthly revenue trend')">
-                                        📈 Monthly trend
+                                    <button class="suggestion-chip" onclick="setQuery('Identify which of my customers has booked the most times this year and their average spend per booking')">
+                                        🏆 Top Repeat Customers
+                                    </button>
+                                    <button class="suggestion-chip" onclick="setQuery('Show a breakdown of cancellation reasons for my bookings over the past 6 months to identify common issues')">
+                                        ⚠️ Cancellation Analysis
                                     </button>
                                 </div>
 

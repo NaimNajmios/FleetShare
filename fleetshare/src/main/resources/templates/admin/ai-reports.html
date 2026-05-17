@@ -214,17 +214,14 @@
                     <div class="card-body">
                         <div class="query-input-wrapper">
                             <textarea class="query-textarea" id="ai-query"
-                                placeholder="Ask me anything about your platform data...&#10;&#10;Examples:&#10;• How many bookings were cancelled this week?&#10;• Which fleet owner has the most vehicles?"></textarea>
-                            <div class="suggestions-row">
-                                <span class="text-muted small me-2">Try:</span>
-                                <button class="suggestion-chip" onclick="setQuery('Bookings this week')">📊 Bookings
-                                    this week</button>
-                                <button class="suggestion-chip" onclick="setQuery('Pending payments')">💳 Pending
-                                    payments</button>
-                                <button class="suggestion-chip" onclick="setQuery('Available vehicles')">🚗 Available
-                                    vehicles</button>
-                                <button class="suggestion-chip" onclick="setQuery('Fleet owner summary')">📈 Fleet
-                                    summary</button>
+                                placeholder="Ask me anything about your platform data...&#10;&#10;Examples:&#10;• Perform a cohort analysis on users who joined in Q1, showing their monthly retention rate and average LTV.&#10;• Detect potential fraudulent activity by listing users with multiple failed payments in 24 hours."></textarea>
+                            <div class="suggestions-row align-items-center">
+                                <span class="text-muted small me-2">Try Advanced Queries:</span>
+                                <button class="suggestion-chip" onclick="setQuery('Perform a cohort analysis on users who joined in Q1, showing their monthly retention rate and average lifetime value (LTV)')">📈 User Cohort & LTV</button>
+                                <button class="suggestion-chip" onclick="setQuery('Identify spatial and temporal patterns in vehicle utilization by comparing weekday vs weekend rental volumes across different vehicle classes')">📊 Utilization Patterns</button>
+                                <button class="suggestion-chip" onclick="setQuery('Calculate the platform-wide commission revenue forecast for next month based on current active bookings and historical cancellation rates')">💰 Revenue Forecasting</button>
+                                <button class="suggestion-chip" onclick="setQuery('Detect potential fraudulent activity by listing users with more than 3 distinct failed payment attempts using different payment methods within a 24-hour window')">🚨 Fraud Detection</button>
+                                <button class="suggestion-chip" onclick="setQuery('Analyze the operational impact of maintenance delays: show the average revenue lost per vehicle due to maintenance schedules extending past their expected completion dates')">🔧 Maintenance Impact</button>
                             </div>
                             <div class="d-flex justify-content-end"><button class="btn-ai-generate"
                                     id="generate-ai-report" onclick="generateAIReport()"><i
