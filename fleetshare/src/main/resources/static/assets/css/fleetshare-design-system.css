@@ -562,6 +562,17 @@
     min-width: 140px;
 }
 
+/* Ensure consistent height for filter controls in list views */
+.card-body .d-flex.gap-2.align-items-center .form-control,
+.card-body .d-flex.gap-2.align-items-center .form-select {
+    min-height: 44px;
+    height: 44px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
 /* Action Buttons */
 .fs-actions {
     display: flex;

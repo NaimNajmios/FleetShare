@@ -181,8 +181,14 @@
                                 th:data-status="${owner.isActive ? 'active' : 'inactive'}"
                                 th:data-search="${owner.businessName + ' ' + owner.email + ' ' + (owner.contactPhone ?: '')}">
                                 <div class="card-body text-center">
-                                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                        style="width: 60px; height: 60px;"><i class="mdi mdi-domain mdi-24px"></i></div>
+                                    <div class="mb-3 d-inline-block">
+                                        <img th:if="${!#strings.isEmpty(owner.profileImageUrl)}" th:src="@{${owner.profileImageUrl}}"
+                                            class="rounded-circle border" alt="Profile" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <div th:if="${#strings.isEmpty(owner.profileImageUrl)}" class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                                            style="width: 60px; height: 60px;">
+                                            <i class="mdi mdi-domain mdi-24px"></i>
+                                        </div>
+                                    </div>
                                     <h6 class="fw-bold mb-1" th:text="${owner.businessName}">Business</h6>
                                     <p class="text-muted small mb-1" th:text="${owner.email}">Email</p>
                                     <p class="text-muted small mb-2" th:text="${owner.contactPhone ?: 'No phone'}">Phone
@@ -246,8 +252,13 @@
                                 th:data-status="${renter.isActive ? 'active' : 'inactive'}"
                                 th:data-search="${renter.fullName + ' ' + renter.email + ' ' + (renter.phoneNumber ?: '')}">
                                 <div class="card-body text-center">
-                                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                        style="width: 60px; height: 60px;"><i class="mdi mdi-account mdi-24px"></i>
+                                    <div class="mb-3 d-inline-block">
+                                        <img th:if="${!#strings.isEmpty(renter.profileImageUrl)}" th:src="@{${renter.profileImageUrl}}"
+                                            class="rounded-circle border" alt="Profile" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <div th:if="${#strings.isEmpty(renter.profileImageUrl)}" class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                                            style="width: 60px; height: 60px;">
+                                            <i class="mdi mdi-account mdi-24px"></i>
+                                        </div>
                                     </div>
                                     <h6 class="fw-bold mb-1" th:text="${renter.fullName}">Name</h6>
                                     <p class="text-muted small mb-1" th:text="${renter.email}">Email</p>

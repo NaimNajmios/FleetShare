@@ -170,6 +170,26 @@
             </div>
         </div>
 
+        <!-- Filter Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="text" class="form-control" id="payout-search"
+                                placeholder="Search invoice, renter, owner..." style="width: 250px;">
+                            <select class="form-select" id="status-filter" style="width: 150px;">
+                                <option value="">All Status</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="VERIFIED">Verified</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Per-Owner Payout Summary -->
         <div class="row mb-4">
             <div class="col-12">
@@ -194,7 +214,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="entry : ${ownerPayoutMap}">
+                                    <tr th:each="entry : ${ownerPayoutMap}" class="owner-summary-item" th:data-search="${entry.key}">
                                         <td>
                                             <strong th:text="${entry.key}">Owner Name</strong>
                                         </td>
@@ -246,7 +266,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="payment : ${splitPayments}">
+                                    <tr th:each="payment : ${splitPayments}" class="split-item"
+                                        th:data-status="${payment.paymentStatus}"
+                                        th:data-search="${payment.invoiceNumber + ' ' + payment.renterName + ' ' + payment.ownerBusinessName}">
                                         <td class="fw-bold" th:text="${payment.invoiceNumber}">INV-001</td>
                                         <td th:text="${payment.renterName}">Renter</td>
                                         <td th:text="${payment.ownerBusinessName}">Owner</td>
@@ -364,6 +386,38 @@
                     }
                 });
             }
+
+            // Filtering logic
+            const searchInput = document.getElementById('payout-search');
+            const statusFilter = document.getElementById('status-filter');
+            
+            function filterPayouts() {
+                const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+                const statusValue = statusFilter ? statusFilter.value : '';
+                
+                // Filter Recent Transactions
+                document.querySelectorAll('.split-item').forEach(item => {
+                    const searchText = (item.dataset.search || '').toLowerCase();
+                    const itemStatus = item.dataset.status || '';
+                    
+                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+                    const matchesStatus = !statusValue || itemStatus === statusValue || 
+                        (statusValue === 'VERIFIED' && ['VERIFIED', 'COMPLETED', 'PAID'].includes(itemStatus)) || 
+                        (statusValue === 'FAILED' && ['FAILED', 'REJECTED'].includes(itemStatus));
+                    
+                    item.style.display = matchesSearch && matchesStatus ? '' : 'none';
+                });
+
+                // Filter Owner Summary (only by search text, status doesn't apply)
+                document.querySelectorAll('.owner-summary-item').forEach(item => {
+                    const searchText = (item.dataset.search || '').toLowerCase();
+                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+                    item.style.display = matchesSearch ? '' : 'none';
+                });
+            }
+            
+            if (searchInput) searchInput.addEventListener('input', filterPayouts);
+            if (statusFilter) statusFilter.addEventListener('change', filterPayouts);
         </script>
     </th:block>
 </body>

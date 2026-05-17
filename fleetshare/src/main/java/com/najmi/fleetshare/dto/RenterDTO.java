@@ -14,13 +14,14 @@ public class RenterDTO {
     private Long totalBookings;
     private BigDecimal totalSpent;
     private LocalDateTime lastBookingDate;
+    private String profileImageUrl;
 
     // Constructors
     public RenterDTO() {
     }
 
     public RenterDTO(Long renterId, Long userId, String email, String fullName, String phoneNumber,
-            Boolean isActive, LocalDateTime createdAt) {
+            Boolean isActive, LocalDateTime createdAt, String profileImageUrl) {
         this.renterId = renterId;
         this.userId = userId;
         this.email = email;
@@ -28,6 +29,7 @@ public class RenterDTO {
         this.phoneNumber = phoneNumber;
         this.isActive = isActive;
         this.createdAt = createdAt;
+        this.profileImageUrl = profileImageUrl;
     }
 
     // Getters and Setters
@@ -109,5 +111,13 @@ public class RenterDTO {
 
     public void setLastBookingDate(LocalDateTime lastBookingDate) {
         this.lastBookingDate = lastBookingDate;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

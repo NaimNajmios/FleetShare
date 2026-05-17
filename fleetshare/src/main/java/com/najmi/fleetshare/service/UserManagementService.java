@@ -73,7 +73,8 @@ public class UserManagementService {
                         owner.getContactPhone(),
                         owner.getIsVerified(),
                         user.getIsActive(),
-                        user.getCreatedAt());
+                        user.getCreatedAt(),
+                        user.getProfileImageUrl());
                 fleetOwnerDTOs.add(dto);
             }
         }
@@ -110,7 +111,8 @@ public class UserManagementService {
                         renter.getFullName(),
                         renter.getPhoneNumber(),
                         user.getIsActive(),
-                        user.getCreatedAt());
+                        user.getCreatedAt(),
+                        user.getProfileImageUrl());
                 renterDTOs.add(dto);
             }
         }
@@ -234,7 +236,8 @@ public class UserManagementService {
                         renter.getFullName(),
                         renter.getPhoneNumber(),
                         user.getIsActive(),
-                        user.getCreatedAt());
+                        user.getCreatedAt(),
+                        user.getProfileImageUrl());
 
                 // Compute per-customer aggregates
                 List<Booking> renterBookings = bookingsByRenter.getOrDefault(renter.getRenterId(), Collections.emptyList());

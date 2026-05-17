@@ -277,9 +277,9 @@
                 <div class="profile-card">
                     <!-- Avatar -->
                     <div class="avatar-wrapper">
-                        <img th:if="${userDetail.profileImageUrl != null}" th:src="@{${userDetail.profileImageUrl}}"
+                        <img th:if="${!#strings.isEmpty(userDetail.profileImageUrl)}" th:src="@{${userDetail.profileImageUrl}}"
                             class="avatar-image" alt="Profile">
-                        <div class="avatar-circle" th:if="${userDetail.profileImageUrl == null}"
+                        <div class="avatar-circle" th:if="${#strings.isEmpty(userDetail.profileImageUrl)}"
                             th:text="${#strings.substring(userDetail.fullName ?: 'U', 0, 1)}">U</div>
                         <div class="avatar-controls">
                             <input type="file" id="profileImageInput" accept="image/*" style="display: none;">

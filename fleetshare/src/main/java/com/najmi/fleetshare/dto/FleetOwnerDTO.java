@@ -10,13 +10,14 @@ public class FleetOwnerDTO {
     private Boolean isVerified;
     private Boolean isActive;
     private LocalDateTime createdAt;
+    private String profileImageUrl;
 
     // Constructors
     public FleetOwnerDTO() {
     }
 
     public FleetOwnerDTO(Long userId, String email, String businessName, String contactPhone,
-            Boolean isVerified, Boolean isActive, LocalDateTime createdAt) {
+            Boolean isVerified, Boolean isActive, LocalDateTime createdAt, String profileImageUrl) {
         this.userId = userId;
         this.email = email;
         this.businessName = businessName;
@@ -24,6 +25,7 @@ public class FleetOwnerDTO {
         this.isVerified = isVerified;
         this.isActive = isActive;
         this.createdAt = createdAt;
+        this.profileImageUrl = profileImageUrl;
     }
 
     // Getters and Setters
@@ -81,5 +83,13 @@ public class FleetOwnerDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }
