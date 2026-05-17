@@ -72,6 +72,8 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] **Security:** Use `@PostAuthorize` to ensure Owners only view their own data.
 - [x] **Profile Management**
     - [x] Service method `updateProfile(UserId, UpdateDTO)`.
+- [x] **Authentication UI Enhancements**
+    - [x] Functional light and dark mode toggle for login and registration pages.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -100,6 +102,10 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Logic to check if vehicle status can be toggled (check dependencies).
 - [x] **[R7] Utilization Reports**
     - [x] create a Custom Interface (Projection) for utilization stats to map JPQL results.
+- [x] **Customer Management**
+    - [x] Customer management module with view and listing capabilities for fleet owners.
+- [x] **Owner Dashboard**
+    - [x] Dashboard with agenda tracking and metrics summary.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -142,6 +148,8 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Owner-side booking edit interface (`edit-booking.html`).
     - [x] `BookingPriceSnapshot` for preserving price and terms at the time of booking.
     - [x] Automated status tracking and history logging.
+- [x] **Renter Dashboard**
+    - [x] Renter home dashboard view displaying user interface and activity overview.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -217,6 +225,10 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] **Commission Management:** Automatic platform fee calculation.
     - [x] **Owner Payouts:** Dashboard for owners to track earnings and request payouts.
     - [x] **Failed Payment Workflow:** Automated handling and recovery logic for failed transactions.
+- [x] **Invoicing and Receipts**
+    - [x] `InvoiceService` and `ReceiptService` implementation for generating professional PDF invoices and payments.
+- [x] **Payment Methods Extension**
+    - [x] Integration of 'FPX' payment method support in the database schema.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -249,7 +261,10 @@ These elements are planned for upcoming modules to enhance functionality and rob
     - [x] Multi-role report generation controller supporting Admins, Owners, and Renters.
     - [x] Dynamic report configuration UI via standard modals.
     - [x] Professional PDF export capability using FlyingSaucer/IText with custom HTML/CSS templates.
-    - [x] Support for AI-generated insight reports and transactional receipts (Invoices/Receipts).
+    - [x] Support for AI-generated insight reports and enhanced complex AI report prompts.
+- [x] **Enhanced User Management & Analytics**
+    - [x] Improved user management dashboard with DTOs, service layer, and corrected profile image rendering.
+    - [x] Implementation of platform-wide analytics and management dashboard.
 
 ### ⚙️ Implementation Details (Spring Boot)
 
@@ -280,6 +295,12 @@ These elements are planned for upcoming modules to enhance functionality and rob
 - [x] **Status Tracking & Timelines**
     - [x] Interactive status timelines for Bookings and Maintenance records.
     - [x] Visual cues for payment verification and processing windows.
+- [x] **Visual Enhancements & UI Standardization**
+    - [x] Integration of Lottie animations across the Renter Portal for a dynamic user experience.
+    - [x] Alignment of filter input heights and form components across Admin and Owner management pages.
+    - [x] Standardized professional design for PDF invoice and receipt templates.
+- [x] **Navigation Fixes**
+    - [x] Segment-based validation for precise sidebar active state highlighting.
 
 -----
 
