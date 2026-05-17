@@ -2,160 +2,310 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            color: #333;
-            font-size: 12px;
+        /* Professional Invoice Styles based on Receipt Layout */
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-center {
+                content: "Thank you for using FleetShare Platform";
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                font-size: 9px;
+                color: #999;
+            }
         }
 
-        .header {
-            text-align: center;
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            font-size: 11px;
+        }
+
+        .header-container {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-left {
+            display: table-cell;
+            vertical-align: top;
+        }
+
+        .header-right {
+            display: table-cell;
+            text-align: right;
+            vertical-align: top;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4B49AC;
+            margin-bottom: 5px;
+        }
+
+        .document-type {
+            font-size: 18px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+
+        .receipt-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 10px;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .status-issued { background-color: #f39c12; color: white; }
+        .status-paid { background-color: #28a745; color: white; }
+        .status-overdue { background-color: #dc3545; color: white; }
+        .status-void { background-color: #6c757d; color: white; }
+        .status-draft { background-color: #17a2b8; color: white; }
+
+        /* Detailed Grid */
+        .info-grid {
+            display: table;
+            width: 100%;
             margin-bottom: 30px;
         }
 
-        .header h1 {
-            color: #4B49AC;
-            margin: 0;
-            font-size: 24px;
+        .info-row {
+            display: table-row;
         }
 
-        .header p {
-            color: #666;
-            margin: 5px 0;
+        .info-cell {
+            display: table-cell;
+            width: 50%;
+            padding: 0 10px 0 0;
         }
 
-        .info-table {
-            width: 100%;
-            margin-bottom: 20px;
+        .info-cell:last-child {
+            padding: 0 0 0 10px;
         }
 
-        .info-table td {
-            vertical-align: top;
-            padding: 10px;
+        .section-label {
+            font-size: 9px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
         }
 
-        .info-block h3 {
-            color: #4B49AC;
-            border-bottom: 2px solid #4B49AC;
-            padding-bottom: 5px;
-            margin-top: 0;
+        .info-content {
+            font-size: 11px;
+            color: #2c3e50;
         }
 
+        /* Item Table */
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        .items-table th,
-        .items-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
         }
 
         .items-table th {
-            background-color: #4B49AC;
-            color: white;
+            text-align: left;
+            border-bottom: 2px solid #4B49AC;
+            padding: 10px 5px;
+            font-size: 10px;
+            color: #4B49AC;
+            text-transform: uppercase;
+        }
+
+        .items-table td {
+            padding: 12px 5px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .amount-col {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .total-section {
+            display: table;
+            width: 100%;
+            margin-top: 10px;
         }
 
         .total-row {
+            display: table-row;
+        }
+
+        .total-label {
+            display: table-cell;
+            text-align: right;
+            padding: 5px 15px;
             font-weight: bold;
-            font-size: 14px;
+            color: #7f8c8d;
         }
 
-        .total-row td {
-            border-top: 2px solid #333;
-        }
-
-        .status {
-            padding: 3px 10px;
-            border-radius: 10px;
+        .total-value {
+            display: table-cell;
+            text-align: right;
+            padding: 5px 5px;
+            font-size: 16px;
             font-weight: bold;
+            color: #4B49AC;
+            width: 120px;
         }
 
-        .status-issued {
-            background: #fff3cd;
-            color: #856404;
+        /* Payment Info Box */
+        .payment-info-box {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #4B49AC;
         }
 
-        .status-paid {
-            background: #d4edda;
-            color: #155724;
+        .payment-info-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #4B49AC;
+            text-transform: uppercase;
+            margin-bottom: 8px;
         }
 
-        .status-overdue {
-            background: #f8d7da;
-            color: #721c24;
+        .payment-info-item {
+            margin-bottom: 4px;
         }
 
         .footer {
+            margin-top: 60px;
             text-align: center;
-            margin-top: 40px;
-            color: #666;
-            font-size: 11px;
+            color: #999;
+            font-size: 9px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 40%;
+            left: 20%;
+            transform: rotate(-45deg);
+            font-size: 100px;
+            color: #f6f5fa;
+            font-weight: bold;
+            z-index: -1;
+            pointer-events: none;
+            text-transform: uppercase;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1>INVOICE</h1>
-        <p>FleetShare Vehicle Rental Platform</p>
+    <div class="watermark" th:text="${status}">ISSUED</div>
+
+    <div class="header-container">
+        <div class="header-left">
+            <div class="brand-name">FleetShare</div>
+            <div style="font-size: 10px; color: #7f8c8d;">Rental Management Marketplace</div>
+        </div>
+        <div class="header-right">
+            <div class="document-type">Invoice</div>
+            <div th:class="'receipt-status status-' + ${statusClass}" th:text="${status}">ISSUED</div>
+        </div>
     </div>
 
-    <table class="info-table">
-        <tr>
-            <td style="width: 50%;">
-                <div class="info-block">
-                    <h3>Invoice Details</h3>
-                    <p><strong>Invoice No:</strong> <span th:text="${invoiceNumber}">INV-001</span></p>
-                    <p><strong>Issue Date:</strong> <span th:text="${issueDate}">01 Jan 2026</span></p>
-                    <p><strong>Due Date:</strong> <span th:text="${dueDate}">08 Jan 2026</span></p>
-                    <p><strong>Status:</strong>
-                        <span th:class="'status status-' + ${statusClass}" th:text="${status}">ISSUED</span>
-                    </p>
+    <div class="info-grid">
+        <div class="info-row">
+            <div class="info-cell">
+                <div class="section-label">Transaction Information</div>
+                <div class="info-content">
+                    <div><strong>Invoice No:</strong> <span th:text="${invoiceNumber}">INV-001</span></div>
+                    <div><strong>Date Issued:</strong> <span th:text="${issueDate}">01 Jan 2026</span></div>
+                    <div><strong>Due Date:</strong> <span th:text="${dueDate}">08 Jan 2026</span></div>
                 </div>
-            </td>
-            <td style="width: 50%;">
-                <div class="info-block">
-                    <h3>Bill To</h3>
-                    <p><strong th:text="${renterName}">John Doe</strong></p>
-                    <p>Booking #<span th:text="${bookingId}">123</span></p>
+            </div>
+            <div class="info-cell">
+                <div class="section-label">Bill To</div>
+                <div class="info-content">
+                    <div><strong th:text="${renterName}">John Doe</strong></div>
+                    <div th:if="${booking != null and booking.renterEmail != null}" th:text="${booking.renterEmail}">john@example.com</div>
+                    <div th:if="${booking != null and booking.renterPhoneNumber != null}" th:text="${booking.renterPhoneNumber}">+60123456789</div>
+                    <div style="margin-top: 5px;">Booking ID: #<span th:text="${bookingId}">123</span></div>
                 </div>
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+    </div>
 
     <table class="items-table">
         <thead>
             <tr>
-                <th>Description</th>
-                <th>Vehicle</th>
-                <th>Rental Period</th>
-                <th style="text-align: right;">Amount</th>
+                <th style="width: 40%;">Description</th>
+                <th style="width: 25%;">Vehicle Detail</th>
+                <th style="width: 20%;">Rental Period</th>
+                <th style="width: 15%; text-align: right;">Amount</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>Vehicle Rental</td>
-                <td th:text="${vehicleInfo}">Toyota Vios (ABC 1234)</td>
-                <td th:text="${rentalPeriod}">01 Jan 2026 - 03 Jan 2026</td>
-                <td style="text-align: right;" th:text="'RM ' + ${#numbers.formatDecimal(amount, 1, 2)}">RM 300.00</td>
-            </tr>
-            <tr class="total-row">
-                <td colspan="3">Total</td>
-                <td style="text-align: right;" th:text="'RM ' + ${#numbers.formatDecimal(amount, 1, 2)}">RM 300.00</td>
-            </tr>
-        </tbody>
+            <tbody>
+                <tr>
+                    <td>
+                        <div style="font-weight: bold;">Vehicle Rental Services</div>
+                        <div th:if="${booking != null and booking.daysRented != null and booking.ratePerDay != null}" style="font-size: 9px; color: #777; margin-top: 4px;">
+                            <span th:text="${booking.daysRented}">3</span> Days @ <span th:text="'RM ' + ${#numbers.formatDecimal(booking.ratePerDay, 1, 2)}">RM 100.00</span>/day
+                        </div>
+                    </td>
+                    <td>
+                        <div th:text="${vehicleInfo}">Toyota Vios (ABC 1234)</div>
+                        <div th:if="${booking != null and booking.vehicleCategory != null}" style="font-size: 9px; color: #777; margin-top: 4px;">
+                            <span th:text="${booking.vehicleCategory}">Sedan</span> | <span th:text="${booking.vehicleTransmissionType}">Auto</span>
+                        </div>
+                    </td>
+                    <td th:text="${rentalPeriod}">01 Jan 2026 - 03 Jan 2026</td>
+                    <td class="amount-col" th:text="'RM ' + ${#numbers.formatDecimal((booking != null and booking.ratePerDay != null and booking.daysRented != null) ? (booking.ratePerDay * booking.daysRented) : amount, 1, 2)}">RM 300.00</td>
+                </tr>
+                <tr th:if="${booking != null and booking.adjustments != null and !booking.adjustments.isEmpty()}" th:each="adj : ${booking.adjustments}">
+                    <td colspan="3" style="text-align: right; color: #555; padding-right: 15px;" th:text="${adj.description}">Discount</td>
+                    <td class="amount-col" th:text="'RM ' + ${#numbers.formatDecimal(adj.amount, 1, 2)}">-RM 10.00</td>
+                </tr>
+            </tbody>
     </table>
 
+    <div class="total-section">
+        <div class="total-row">
+            <div class="total-label">Subtotal</div>
+            <div class="total-value" style="font-size: 12px; color: #555;" th:text="'RM ' + ${#numbers.formatDecimal(amount, 1, 2)}">RM 300.00</div>
+        </div>
+        <div class="total-row">
+            <div class="total-label">Total Amount Due</div>
+            <div class="total-value" th:text="'RM ' + ${#numbers.formatDecimal(amount, 1, 2)}">RM 300.00</div>
+        </div>
+    </div>
+
+    <div class="payment-info-box" th:if="${status != 'PAID'}">
+        <div class="payment-info-title">Payment Terms</div>
+        <div class="payment-info-item">Please make payment by the due date to secure your booking.</div>
+        <div class="payment-info-item">Late payments may result in booking cancellation.</div>
+    </div>
+    
+    <div class="payment-info-box" th:if="${status == 'PAID'}" style="border-left-color: #28a745;">
+        <div class="payment-info-title" style="color: #28a745;">Payment Settled</div>
+        <div class="payment-info-item">This invoice has been fully paid. Thank you for your payment.</div>
+    </div>
+
     <div class="footer">
-        <p>Fleet Owner: <span th:text="${ownerName}">ABC Rentals</span></p>
-        <p>Thank you for using FleetShare!</p>
+        <p>Merchant: <strong th:text="${ownerName}">ABC Rentals</strong></p>
+        <p th:if="${booking != null and booking.ownerContactPhone != null}" th:text="'Contact: ' + ${booking.ownerContactPhone}"></p>
+        <p>This is a computer-generated invoice and requires no physical signature.</p>
+        <p>Thank you for choosing FleetShare for your mobility needs.</p>
     </div>
 </body>
-
 </html>

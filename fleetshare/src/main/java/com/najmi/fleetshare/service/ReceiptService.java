@@ -104,6 +104,7 @@ public class ReceiptService {
             context.setVariable("rentalPeriod", booking.getStartDate().format(dateFormatter)
                     + " - " + booking.getEndDate().format(dateFormatter));
             context.setVariable("ownerName", booking.getOwnerBusinessName());
+            context.setVariable("booking", booking);
         } else {
             context.setVariable("renterName", "N/A");
             context.setVariable("vehicleInfo", "N/A");

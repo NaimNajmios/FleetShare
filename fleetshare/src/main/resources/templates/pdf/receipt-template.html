@@ -196,7 +196,7 @@
             left: 20%;
             transform: rotate(-45deg);
             font-size: 100px;
-            color: rgba(40, 167, 69, 0.05);
+            color: #f4faf5;
             font-weight: bold;
             z-index: -1;
             pointer-events: none;
@@ -232,7 +232,9 @@
                 <div class="section-label">Customer Details</div>
                 <div class="info-content">
                     <div><strong th:text="${renterName}">John Doe</strong></div>
-                    <div>Booking ID: #<span th:text="${bookingId}">123</span></div>
+                    <div th:if="${booking != null and booking.renterEmail != null}" th:text="${booking.renterEmail}">john@example.com</div>
+                    <div th:if="${booking != null and booking.renterPhoneNumber != null}" th:text="${booking.renterPhoneNumber}">+60123456789</div>
+                    <div style="margin-top: 5px;">Booking ID: #<span th:text="${bookingId}">123</span></div>
                 </div>
             </div>
         </div>
@@ -249,10 +251,24 @@
         </thead>
             <tbody>
                 <tr>
-                    <td>Vehicle Rental Services</td>
-                    <td th:text="${vehicleInfo}">Toyota Vios (ABC 1234)</td>
+                    <td>
+                        <div style="font-weight: bold;">Vehicle Rental Services</div>
+                        <div th:if="${booking != null and booking.daysRented != null and booking.ratePerDay != null}" style="font-size: 9px; color: #777; margin-top: 4px;">
+                            <span th:text="${booking.daysRented}">3</span> Days @ <span th:text="'RM ' + ${#numbers.formatDecimal(booking.ratePerDay, 1, 2)}">RM 100.00</span>/day
+                        </div>
+                    </td>
+                    <td>
+                        <div th:text="${vehicleInfo}">Toyota Vios (ABC 1234)</div>
+                        <div th:if="${booking != null and booking.vehicleCategory != null}" style="font-size: 9px; color: #777; margin-top: 4px;">
+                            <span th:text="${booking.vehicleCategory}">Sedan</span> | <span th:text="${booking.vehicleTransmissionType}">Auto</span>
+                        </div>
+                    </td>
                     <td th:text="${rentalPeriod}">01 Jan 2026 - 03 Jan 2026</td>
-                    <td class="amount-col" th:text="'RM ' + ${#numbers.formatDecimal(amount, 1, 2)}">RM 300.00</td>
+                    <td class="amount-col" th:text="'RM ' + ${#numbers.formatDecimal((booking != null and booking.ratePerDay != null and booking.daysRented != null) ? (booking.ratePerDay * booking.daysRented) : amount, 1, 2)}">RM 300.00</td>
+                </tr>
+                <tr th:if="${booking != null and booking.adjustments != null and !booking.adjustments.isEmpty()}" th:each="adj : ${booking.adjustments}">
+                    <td colspan="3" style="text-align: right; color: #555; padding-right: 15px;" th:text="${adj.description}">Discount</td>
+                    <td class="amount-col" th:text="'RM ' + ${#numbers.formatDecimal(adj.amount, 1, 2)}">-RM 10.00</td>
                 </tr>
             </tbody>
     </table>
@@ -276,7 +292,8 @@
     </div>
 
     <div class="footer">
-        <p>Merchant: <span th:text="${ownerName}">ABC Rentals</span></p>
+        <p>Merchant: <strong th:text="${ownerName}">ABC Rentals</strong></p>
+        <p th:if="${booking != null and booking.ownerContactPhone != null}" th:text="'Contact: ' + ${booking.ownerContactPhone}"></p>
         <p>This is a computer-generated confirmation of payment and requires no physical signature.</p>
         <p>Thank you for choosing FleetShare for your mobility needs.</p>
         <p style="margin-top: 15px; font-weight: bold; color: #28a745;">FleetShare Platform Security Verified</p>
