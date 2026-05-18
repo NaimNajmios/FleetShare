@@ -425,14 +425,6 @@ public class BookingService {
             throw new IllegalStateException("Cannot transition from " + currentStatus + " to " + targetStatus);
         }
 
-        // Block ACTIVE if the booking start date has passed (date-only comparison)
-        if (targetStatus == BookingStatusLog.BookingStatus.ACTIVE
-                && booking.getStartDate() != null && booking.getStartDate().toLocalDate().isBefore(java.time.LocalDate.now())) {
-            throw new IllegalStateException(
-                    "Cannot transition to " + targetStatus + " because the booking start date (" +
-                    booking.getStartDate() + ") has already passed.");
-        }
-
         // Gap#6: Block ACTIVE if vehicle has IN_PROGRESS maintenance
         if (targetStatus == BookingStatusLog.BookingStatus.ACTIVE) {
             List<VehicleMaintenance> activeMaints = vehicleMaintenanceRepository
