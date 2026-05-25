@@ -159,6 +159,22 @@
                 padding: 2rem;
                 color: #6c757d;
             }
+
+            @media (max-width: 768px) {
+                .action-buttons-container {
+                    flex-direction: column;
+                    width: 100%;
+                    margin-top: 1rem !important;
+                }
+                .action-buttons-container .btn {
+                    width: 100%;
+                    padding: 0.75rem;
+                }
+                .badge {
+                    display: inline-block;
+                    margin-bottom: 0.25rem;
+                }
+            }
         </style>
     </th:block>
 </head>
@@ -198,7 +214,7 @@
                               class="badge badge-warning" style="font-size: 1rem; padding: 0.5rem 1rem;">
                             <i class="mdi mdi-timer-sand"></i> Extended
                         </span>
-                        <div th:if="${maintenance.status != 'COMPLETED' && maintenance.status != 'CANCELLED'}" class="mt-3 d-flex gap-2 justify-content-xl-end">
+                        <div th:if="${maintenance.status != 'COMPLETED' && maintenance.status != 'CANCELLED'}" class="mt-3 action-buttons-container d-flex gap-2 justify-content-xl-end">
                             <button th:if="${maintenance.status == 'PENDING'}" type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#startWorkModal">
                                 <i class="mdi mdi-play me-1"></i> Start Work
                             </button>
