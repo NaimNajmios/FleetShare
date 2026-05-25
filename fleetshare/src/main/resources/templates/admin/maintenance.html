@@ -96,6 +96,45 @@
             .chart-container {
                 height: 280px;
             }
+
+            /* Mobile Responsiveness */
+            @media (max-width: 768px) {
+                .kpi-card {
+                    padding: 1rem;
+                }
+                .kpi-card .kpi-value {
+                    font-size: 1.5rem;
+                }
+                .kpi-card .kpi-icon {
+                    font-size: 1.75rem;
+                    right: 0.5rem;
+                }
+                
+                /* Filter controls full width */
+                .card-body .d-flex.gap-2 {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                }
+                .card-body .d-flex.gap-2 > * {
+                    width: 100% !important;
+                    margin-bottom: 0.25rem;
+                }
+                
+                .view-toggle {
+                    width: 100%;
+                    display: flex;
+                    margin-top: 0.5rem;
+                }
+                .view-toggle .btn {
+                    flex: 1;
+                }
+                
+                /* Allow smaller cards on narrow phones */
+                .grid-view {
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 1rem;
+                }
+            }
         </style>
     </th:block>
 </head>
@@ -110,26 +149,26 @@
         </div>
 
         <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-pending active" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
                     <div class="kpi-value" th:text="${stats != null ? stats.pendingCount : 0}">0</div>
                     <div class="kpi-label">Pending</div><i class="mdi mdi-clock-outline kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-progress" data-filter="IN_PROGRESS"
                     onclick="filterByStatus('IN_PROGRESS', this)">
                     <div class="kpi-value" th:text="${stats != null ? stats.inProgressCount : 0}">0</div>
                     <div class="kpi-label">In Progress</div><i class="mdi mdi-wrench kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-completed" data-filter="COMPLETED" onclick="filterByStatus('COMPLETED', this)">
                     <div class="kpi-value" th:text="${stats != null ? stats.completedCount : 0}">0</div>
                     <div class="kpi-label">Completed</div><i class="mdi mdi-check-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-cost" data-filter="all" onclick="filterByStatus('all', this)">
                     <div class="kpi-value"
                         th:text="'RM ' + ${stats != null ? #numbers.formatDecimal(stats.totalFinalCost, 1, 'COMMA', 0, 'POINT') : '0'}">
