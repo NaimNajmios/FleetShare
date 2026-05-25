@@ -420,6 +420,87 @@
                 margin: 0;
                 font-weight: 500;
             }
+
+            /* --- PREMIUM MOBILE REDESIGN --- */
+            @media (max-width: 992px) {
+                .booking-layout {
+                    grid-template-columns: 1fr;
+                }
+            }
+            @media (max-width: 768px) {
+                .booking-details-container {
+                    padding: 1rem 0.5rem;
+                }
+                .page-header {
+                    margin-bottom: 1.5rem;
+                }
+                .page-title {
+                    font-size: 1.5rem;
+                }
+                
+                /* Status Banner */
+                .status-banner {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    padding: 1.25rem;
+                    gap: 0.75rem;
+                }
+                .status-banner i {
+                    font-size: 2rem;
+                    margin-bottom: 0.25rem;
+                }
+                .countdown-timer {
+                    margin-left: 0;
+                    text-align: left;
+                    width: 100%;
+                    background: rgba(255,255,255,0.3);
+                    padding: 0.75rem;
+                    border-radius: 0.5rem;
+                    margin-top: 0.25rem;
+                }
+                
+                /* Info Grid */
+                .details-card {
+                    padding: 1.25rem;
+                }
+                .info-grid {
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                }
+                .info-label {
+                    font-size: 0.7rem;
+                }
+                .info-value {
+                    font-size: 0.95rem;
+                    word-break: break-word;
+                }
+                
+                /* Payment Breakdown */
+                .breakdown-row {
+                    font-size: 0.8rem;
+                }
+                
+                /* Action Buttons */
+                .action-buttons {
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                .btn-manage, .btn-cancel {
+                    width: 100%;
+                }
+                
+                .action-card .btn {
+                    width: 100%;
+                    margin-bottom: 0.75rem;
+                    display: flex;
+                    justify-content: center;
+                }
+                
+                /* Map */
+                .map-card, #bookingMap {
+                    height: 250px !important;
+                }
+            }
         </style>
     </th:block>
 </head>
