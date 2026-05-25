@@ -152,6 +152,44 @@
             .table-view {
                 display: block;
             }
+
+            /* Mobile Responsiveness */
+            @media (max-width: 768px) {
+                .kpi-card {
+                    padding: 1rem;
+                }
+                .kpi-card .kpi-value {
+                    font-size: 1.5rem;
+                }
+                .kpi-card .kpi-icon {
+                    font-size: 1.75rem;
+                    right: 0.5rem;
+                }
+                
+                /* Make filter controls full width on mobile */
+                .card-body .d-flex.gap-2 {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                }
+                .card-body .d-flex.gap-2 > * {
+                    width: 100% !important;
+                    margin-bottom: 0.25rem;
+                }
+                .view-toggle {
+                    width: 100%;
+                    display: flex;
+                    margin-top: 0.5rem;
+                }
+                .view-toggle .btn {
+                    flex: 1;
+                }
+                
+                /* Allow smaller cards on narrow phones */
+                .grid-view {
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 1rem;
+                }
+            }
         </style>
     </th:block>
 </head>
@@ -175,7 +213,7 @@
 
         <!-- KPI Cards Row -->
         <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-total position-relative" data-filter="all"
                     onclick="filterByStatus('all', this)">
                     <div class="kpi-value" th:text="${#lists.size(vehicles)}">0</div>
@@ -183,7 +221,7 @@
                     <i class="mdi mdi-car-multiple kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-available position-relative" data-filter="AVAILABLE"
                     onclick="filterByStatus('AVAILABLE', this)">
                     <div class="kpi-value" th:text="${availableCount != null ? availableCount : 0}">0</div>
@@ -191,7 +229,7 @@
                     <i class="mdi mdi-check-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-rented position-relative" data-filter="RENTED"
                     onclick="filterByStatus('RENTED', this)">
                     <div class="kpi-value" th:text="${rentedCount != null ? rentedCount : 0}">0</div>
@@ -199,7 +237,7 @@
                     <i class="mdi mdi-account-check kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-xl-3 col-md-6 col-6 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-maintenance position-relative" data-filter="MAINTENANCE"
                     onclick="filterByStatus('MAINTENANCE', this)">
                     <div class="kpi-value" th:text="${maintenanceCount != null ? maintenanceCount : 0}">0</div>

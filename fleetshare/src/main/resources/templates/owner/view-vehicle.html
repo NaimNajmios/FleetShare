@@ -153,6 +153,14 @@
 
                 .mode-toggle {
                     margin-left: 0;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    width: 100%;
+                }
+                
+                .mode-toggle .btn {
+                    flex: 1 1 auto;
+                    min-width: 120px;
                 }
             }
 
@@ -349,6 +357,23 @@
 
                 .status-rate-grid {
                     grid-template-columns: 1fr;
+                }
+                
+                .action-buttons .edit-actions {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .action-buttons .edit-actions .btn {
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                    margin-left: 0 !important;
+                }
+                
+                .rate-modal {
+                    width: calc(100% - 2rem);
+                    margin: 1rem;
                 }
             }
         </style>
