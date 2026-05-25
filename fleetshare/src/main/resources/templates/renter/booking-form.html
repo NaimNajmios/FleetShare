@@ -332,11 +332,43 @@
                 padding-top: 0.5rem;
             }
 
+            /* --- PREMIUM MOBILE REDESIGN --- */
             @media (max-width: 768px) {
+                .booking-container {
+                    padding: 1rem 0.5rem;
+                }
+                
+                /* Disable Sticky Summary on Mobile */
+                .vehicle-summary-card {
+                    position: static;
+                    margin-bottom: 1rem;
+                    padding: 1.25rem;
+                }
+                
+                /* Fix sideways text bug */
                 .date-connector-icon {
                     padding: 0;
-                    margin: 0.5rem 0;
+                    margin: 0.75rem 0;
+                    flex-direction: column;
+                }
+                .date-connector-icon .fa-arrow-right {
                     transform: rotate(90deg);
+                    margin-top: 0.25rem;
+                }
+                
+                /* Scale down stepper */
+                .step-circle {
+                    width: 28px;
+                    height: 28px;
+                    font-size: 0.85rem;
+                }
+                .step-label {
+                    font-size: 0.65rem;
+                }
+                
+                /* Adjust form padding */
+                .booking-form-card {
+                    padding: 1.25rem;
                 }
             }
 
