@@ -28,10 +28,11 @@ public class SecurityConfig {
                                                                                 +
                                                                                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; "
                                                                                 +
-                                                                                "img-src 'self' data: https://*.tile.openstreetmap.org; "
+                                                                                "img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org; "
                                                                                 +
                                                                                 "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; "
                                                                                 +
+                                                                                "connect-src 'self' https://unpkg.com; " +
                                                                                 "object-src 'none'; " +
                                                                                 "base-uri 'self'; " +
                                                                                 "form-action 'self' https://toyyibpay.com https://dev.toyyibpay.com; " +
