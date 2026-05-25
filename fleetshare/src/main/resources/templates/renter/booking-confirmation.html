@@ -416,7 +416,37 @@
                 margin-right: auto;
             }
 
+            /* --- PREMIUM MOBILE REDESIGN --- */
             @media (max-width: 768px) {
+                .confirmation-container {
+                    padding: 1rem 0.5rem;
+                }
+                
+                .page-title {
+                    font-size: 1.5rem;
+                }
+                
+                .page-subtitle {
+                    font-size: 0.9rem;
+                }
+                
+                /* Scale down stepper */
+                .step-indicator {
+                    gap: 0.25rem;
+                }
+                .step {
+                    font-size: 0.75rem;
+                    gap: 0.25rem;
+                }
+                .step-circle {
+                    width: 24px;
+                    height: 24px;
+                    font-size: 0.7rem;
+                }
+                .step-line {
+                    width: 20px;
+                }
+                
                 .vehicle-summary {
                     flex-direction: column;
                 }
@@ -430,17 +460,18 @@
                     grid-template-columns: 1fr;
                 }
 
+                /* Change to 2-column grid for specs */
                 .specs-grid {
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 0.5rem;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 0.75rem;
                 }
 
                 .action-buttons {
                     grid-template-columns: 1fr;
                 }
-
-                .step-indicator {
-                    flex-wrap: wrap;
+                
+                .info-card {
+                    padding: 1.25rem;
                 }
             }
         </style>
