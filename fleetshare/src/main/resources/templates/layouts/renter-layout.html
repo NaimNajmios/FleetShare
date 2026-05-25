@@ -24,6 +24,33 @@
         body[data-role="renter"] .navbar-menu-wrapper {
             padding-right: 0.5rem;
         }
+
+        /* Mobile responsiveness fixes */
+        @media (max-width: 991px) {
+            body[data-role="renter"] .navbar {
+                background: #ffffff !important;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            }
+            body[data-role="renter"] .content-wrapper {
+                padding-top: 5.5rem; /* clear fixed navbar */
+                padding-left: 0;     /* remove side padding — page has its own spacing */
+                padding-right: 0;
+            }
+            body[data-role="renter"] .navbar-brand-wrapper {
+                width: auto;
+            }
+            /* Ensure sidebar takes no layout width on mobile */
+            body[data-role="renter"] .page-body-wrapper {
+                display: block; /* break flex so sidebar doesn't add to width */
+            }
+            body[data-role="renter"] .sidebar {
+                display: none; /* hidden offcanvas — template JS handles toggle */
+            }
+            body[data-role="renter"] .main-panel {
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+        }
     </style>
     <!-- plugins:css -->
     <link rel="stylesheet" th:href="@{/assets/vendors/feather/feather.css}">

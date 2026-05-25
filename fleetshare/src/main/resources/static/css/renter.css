@@ -867,6 +867,10 @@ h6 {
         gap: 1.5rem;
     }
 
+    .vehicle-specs {
+        gap: 0.5rem;
+    }
+
     .filter-pills {
         overflow-x: auto;
         flex-wrap: nowrap;
@@ -907,6 +911,63 @@ h6 {
     .profile-header {
         flex-direction: column;
         text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .vehicle-image-container {
+        height: 180px;
+    }
+
+    .vehicle-details {
+        padding: 1rem;
+    }
+
+    .vehicle-title {
+        font-size: 1.125rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+    }
+
+    .spec-item {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .vehicle-image-container {
+        height: 160px;
+    }
+
+    .vehicle-card {
+        border-radius: 1rem;
+    }
+
+    .vehicle-grid {
+        gap: 1rem;
+    }
+
+    .vehicle-details {
+        padding: 0.875rem;
+    }
+
+    .price-badge {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8125rem;
+        top: 0.625rem;
+        right: 0.625rem;
+    }
+
+    .vehicle-specs {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .owner-info {
+        font-size: 0.8rem;
     }
 }
 
@@ -1132,4 +1193,39 @@ h6 {
     font-weight: 600;
     color: var(--gray-500);
     margin-right: 0.25rem;
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .vehicle-card {
+        transition: none;
+    }
+
+    .vehicle-card:hover {
+        transform: none;
+    }
+
+    .vehicle-image {
+        transition: none;
+    }
+
+    .vehicle-card:hover .vehicle-image {
+        transform: none;
+    }
+
+    .search-bar-large:focus {
+        transform: none;
+    }
+
+    .fade-in,
+    .animate-fade-in {
+        animation: none;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
 }
