@@ -219,28 +219,28 @@
 
         <!-- KPI Cards Row -->
         <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-pending" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
                     <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
                     <div class="kpi-label">Pending</div>
                     <i class="mdi mdi-clock-outline kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-verified" data-filter="VERIFIED" onclick="filterByStatus('VERIFIED', this)">
                     <div class="kpi-value" th:text="${verifiedCount} ?: 0">0</div>
                     <div class="kpi-label">Verified</div>
                     <i class="mdi mdi-check-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-failed" data-filter="FAILED" onclick="filterByStatus('FAILED', this)">
                     <div class="kpi-value" th:text="${failedCount} ?: 0">0</div>
                     <div class="kpi-label">Failed</div>
                     <i class="mdi mdi-close-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-amount" data-filter="all" onclick="filterByStatus('all', this)">
                     <div class="kpi-value"
                         th:text="'RM ' + ${#numbers.formatDecimal(verifiedAmount ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0
