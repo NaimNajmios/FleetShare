@@ -50,7 +50,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/css/**", "/js/**", "/assets/**", "/images/**")
                                                 .permitAll()
                                                 // Public pages
-                                                .requestMatchers("/", "/register", "/api/test/email/**").permitAll()
+                                                .requestMatchers("/", "/public/**", "/api/public/**", "/register", "/api/test/email/**").permitAll()
                                                 .requestMatchers("/api/payment/toyyibpay/**").permitAll()
                                                 .requestMatchers("/login").permitAll()
                                                 // Role-based URL protection

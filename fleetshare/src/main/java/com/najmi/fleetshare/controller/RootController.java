@@ -10,9 +10,9 @@ public class RootController {
 
     @GetMapping("/")
     public String root(Authentication authentication) {
-        // If user is not authenticated, redirect to login
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return "redirect:/login";
+        // If user is not authenticated, redirect to public landing page
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            return "redirect:/public/home";
         }
 
         // If authenticated, redirect based on role

@@ -1,0 +1,34 @@
+<nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row" th:fragment="navbar">
+    <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start ps-4">
+        <a class="navbar-brand brand-logo" th:href="@{/public/home}"
+            style="font-weight: bold; font-size: 1.5rem; color: #4B49AC;">
+            <i class="mdi mdi-car-connected text-primary me-2"></i>FleetShare
+        </a>
+        <a class="navbar-brand brand-logo-mini" th:href="@{/public/home}"
+            style="font-weight: bold; font-size: 1.5rem; color: #4B49AC;">FS</a>
+    </div>
+    
+    <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+        <ul class="navbar-nav mr-lg-2">
+            <li class="nav-item d-none d-sm-block">
+                <a class="nav-link" th:href="@{/public/home}" style="font-weight: 500;">Home</a>
+            </li>
+            <li class="nav-item d-none d-sm-block">
+                <a class="nav-link" th:href="@{/public/vehicles}" style="font-weight: 500;">Browse Vehicles</a>
+            </li>
+        </ul>
+        
+        <ul class="navbar-nav navbar-nav-right">
+            <li class="nav-item">
+                <a class="btn btn-outline-primary btn-sm me-2 fw-bold" th:href="@{/login}">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="btn btn-primary btn-sm fw-bold shadow-sm" th:href="@{/register}">Sign Up</a>
+            </li>
+        </ul>
+        <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
+            data-toggle="offcanvas">
+            <span class="icon-menu"></span>
+        </button>
+    </div>
+</nav>

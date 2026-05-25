@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/public-layout}">
+<head>
+    <title>Rent Vehicles Easily - FleetShare</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-bg-shapes">
+                <div class="hero-shape hero-shape-1"></div>
+                <div class="hero-shape hero-shape-2"></div>
+                <div class="hero-shape hero-shape-3"></div>
+            </div>
+            <div class="container hero-content">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-5 mb-lg-0">
+                        <span class="badge bg-white text-primary rounded-pill px-3 py-2 mb-4 shadow-sm fw-bold">
+                            #1 Vehicle Rental Platform
+                        </span>
+                        <h1 class="hero-title">Rent Your Perfect Vehicle Today</h1>
+                        <p class="hero-subtitle">
+                            Connect with verified fleet owners. Book cars, vans, and trucks for your next journey or business need with full transparency and secure payments.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a th:href="@{/public/vehicles}" class="btn btn-light btn-lg fw-bold px-4 shadow text-primary">
+                                Browse Vehicles
+                            </a>
+                            <a href="#how-it-works" class="btn btn-outline-light btn-lg fw-bold px-4">
+                                How It Works
+                            </a>
+                        </div>
+                        
+                        <!-- Optional Stats (can be dynamic) -->
+                        <div class="hero-stats">
+                            <div class="hero-stat-item">
+                                <span class="hero-stat-value" th:text="${totalVehicles != null ? totalVehicles + '+' : '50+'}">50+</span>
+                                <span class="hero-stat-label">Vehicles</span>
+                            </div>
+                            <div class="hero-stat-item">
+                                <span class="hero-stat-value">100%</span>
+                                <span class="hero-stat-label">Verified Owners</span>
+                            </div>
+                            <div class="hero-stat-item">
+                                <span class="hero-stat-value">24/7</span>
+                                <span class="hero-stat-label">Support</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 text-center position-relative">
+                        <!-- Abstract illustration or vehicle image -->
+                        <img src="/assets/images/dashboard/people.png" alt="FleetShare Vehicles" class="img-fluid" style="max-height: 450px; z-index: 2; position: relative;">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="how-it-works-section">
+            <div class="container">
+                <div class="text-center mb-5 pb-2">
+                    <h6 class="text-primary fw-bold text-uppercase tracking-wide">Simple Process</h6>
+                    <h2 class="fw-bold mb-3">How FleetShare Works</h2>
+                    <p class="text-muted max-w-2xl mx-auto">Rent a vehicle in three simple steps. We've made the process seamless so you can get on the road faster.</p>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-icon-wrapper">
+                                <i class="mdi mdi-car-search"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">1. Find a Vehicle</h4>
+                            <p class="text-muted mb-0">Browse our wide selection of verified vehicles. Filter by category, price, or dates to find your perfect match.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-icon-wrapper">
+                                <i class="mdi mdi-calendar-check"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">2. Book Securely</h4>
+                            <p class="text-muted mb-0">Select your dates and book instantly. Pay securely online or choose cash on pickup.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-icon-wrapper">
+                                <i class="mdi mdi-car-key"></i>
+                            </div>
+                            <h4 class="fw-bold mb-3">3. Hit the Road</h4>
+                            <p class="text-muted mb-0">Pick up the vehicle from the owner and enjoy your ride. Return it when you're done.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Vehicles Section -->
+        <section class="featured-vehicles-section bg-white">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-end mb-5">
+                    <div>
+                        <h6 class="text-primary fw-bold text-uppercase tracking-wide">Discover</h6>
+                        <h2 class="fw-bold mb-0">Featured Vehicles</h2>
+                    </div>
+                    <a th:href="@{/public/vehicles}" class="btn btn-outline-primary d-none d-sm-inline-block">View All Vehicles <i class="mdi mdi-arrow-right ms-1"></i></a>
+                </div>
+                
+                <div class="row g-4">
+                    <!-- Iterating over featured vehicles -->
+                    <div class="col-lg-4 col-md-6" th:each="vehicle : ${featuredVehicles}">
+                        <div class="vehicle-card">
+                            <div class="vehicle-img-wrapper">
+                                <span class="vehicle-badge" th:text="${vehicle.category}">Category</span>
+                                <img th:if="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}" 
+                                     th:src="${vehicle.vehicleImageUrl}" alt="Vehicle Image">
+                                <img th:unless="${vehicle.vehicleImageUrl != null and !vehicle.vehicleImageUrl.isEmpty()}" 
+                                     src="/assets/images/dashboard/people.png" alt="Default Vehicle" style="object-fit: contain; padding: 20px;">
+                            </div>
+                            <div class="vehicle-card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="fw-bold mb-0 text-truncate" th:text="${vehicle.brand + ' ' + vehicle.model}">Brand Model</h5>
+                                    <div class="vehicle-price text-end ms-2">
+                                        <span class="text-primary fw-bold d-block">RM <span th:text="${vehicle.ratePerDay}">0.00</span></span>
+                                        <small class="text-muted">/ day</small>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-3">
+                                    <i class="mdi mdi-map-marker-outline text-primary me-1"></i>
+                                    <span th:text="${vehicle.city != null ? vehicle.city + ', ' + vehicle.state : 'Location N/A'}">Location</span>
+                                </p>
+                                
+                                <div class="vehicle-features">
+                                    <div class="feature-item" title="Transmission">
+                                        <i class="mdi mdi-car-shift-pattern text-primary"></i>
+                                        <span th:text="${vehicle.transmissionType != null ? vehicle.transmissionType : 'Auto'}">Auto</span>
+                                    </div>
+                                    <div class="feature-item" title="Fuel">
+                                        <i class="mdi mdi-gas-station text-primary"></i>
+                                        <span th:text="${vehicle.fuelType != null ? vehicle.fuelType : 'Petrol'}">Petrol</span>
+                                    </div>
+                                    <div class="feature-item" title="Year">
+                                        <i class="mdi mdi-calendar text-primary"></i>
+                                        <span th:text="${vehicle.manufacturingYear}">2020</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mt-auto pt-3 border-top">
+                                    <div class="d-flex align-items-center flex-grow-1">
+                                        <div class="bg-light rounded-circle p-2 me-2">
+                                            <i class="mdi mdi-storefront text-primary"></i>
+                                        </div>
+                                        <div class="text-truncate">
+                                            <small class="text-muted d-block" style="font-size: 0.7rem;">Owner</small>
+                                            <span class="fw-bold small text-truncate d-block" th:text="${vehicle.ownerBusinessName}">Owner Name</span>
+                                        </div>
+                                    </div>
+                                    <a href="#" class="btn btn-primary px-3 auth-gated">Book Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${#lists.isEmpty(featuredVehicles)}" class="col-12 text-center py-5">
+                        <i class="mdi mdi-car-off fs-1 text-muted mb-3"></i>
+                        <h5>No vehicles available currently</h5>
+                        <p class="text-muted">Please check back later.</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-5 d-sm-none">
+                    <a th:href="@{/public/vehicles}" class="btn btn-outline-primary btn-lg w-100">View All Vehicles</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us -->
+        <section class="why-choose-us-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-5 mb-lg-0">
+                        <h6 class="text-light fw-bold text-uppercase tracking-wide opacity-75">Trust & Reliability</h6>
+                        <h2 class="fw-bold mb-4">Why Choose FleetShare?</h2>
+                        <p class="mb-5 opacity-75">We provide a secure and transparent platform for vehicle rentals. Both renters and fleet owners are protected by our comprehensive system.</p>
+                        
+                        <div class="feature-list-item">
+                            <div class="feature-list-icon">
+                                <i class="mdi mdi-shield-check-outline"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">Verified Owners</h5>
+                                <p class="opacity-75 mb-0">Every fleet owner on our platform undergoes a thorough verification process before they can list vehicles.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-list-item">
+                            <div class="feature-list-icon">
+                                <i class="mdi mdi-credit-card-shield-outline"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">Secure Payments</h5>
+                                <p class="opacity-75 mb-0">Pay safely through FPX, bank transfers, or QR pay. We hold the funds until your booking is confirmed.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-list-item">
+                            <div class="feature-list-icon">
+                                <i class="mdi mdi-wrench-clock-outline"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">Well-Maintained Fleet</h5>
+                                <p class="opacity-75 mb-0">Owners track their maintenance through our platform, ensuring you get a reliable vehicle every time.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 offset-lg-1">
+                        <div class="bg-white rounded-4 p-4 shadow-lg">
+                            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                                <img src="/assets/images/faces/face28.jpg" alt="User" class="rounded-circle me-3" width="60">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">Excellent Experience</h5>
+                                    <div class="text-warning">
+                                        <i class="mdi mdi-star"></i><i class="mdi mdi-star"></i><i class="mdi mdi-star"></i><i class="mdi mdi-star"></i><i class="mdi mdi-star"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-muted fs-5 fst-italic mb-0">"FleetShare made renting a van for our moving day so easy. The owner was responsive and the booking process was completely seamless. Highly recommended!"</p>
+                            <div class="text-end mt-3">
+                                <span class="text-primary fw-bold">— Sarah T., Renter</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-banner-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bold text-dark mb-4">Ready to get started?</h2>
+                        <p class="text-muted fs-5 mb-5">Join thousands of users who have found their perfect ride through FleetShare. Create your free account today.</p>
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                            <a th:href="@{/register}" class="btn btn-primary btn-lg fw-bold px-5 py-3 shadow">Create Renter Account</a>
+                            <a th:href="@{/register?role=owner}" class="btn btn-outline-dark btn-lg fw-bold px-5 py-3 bg-white">List Your Vehicle</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

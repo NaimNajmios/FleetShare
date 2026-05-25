@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title th:text="${pageTitle != null ? pageTitle + ' - FleetShare' : 'FleetShare'}">FleetShare</title>
+    
+    <!-- Font Awesome 6 for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- plugins:css -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/feather/feather.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/ti-icons/css/themify-icons.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    
+    <!-- inject:css -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/fleetshare-design-system.css}">
+    <!-- Custom Landing CSS -->
+    <link rel="stylesheet" th:href="@{/css/landing.css}">
+    <!-- endinject -->
+    
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+
+    <!-- Extra CSS fragment -->
+    <th:block layout:fragment="extra-css"></th:block>
+
+    <!-- Custom layout override to remove sidebar gap -->
+    <style>
+        .public-page-body-wrapper {
+            padding-top: 60px; /* Adjust based on navbar height */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .public-main-panel {
+            width: 100%;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+        }
+        .public-content-wrapper {
+            flex-grow: 1;
+            padding: 0; /* Remove default padding for full-width sections */
+        }
+    </style>
+</head>
+
+<body data-role="public">
+    <div class="container-scroller">
+        <!-- partial:fragments/public-nav.html -->
+        <div th:replace="~{fragments/public-nav :: navbar}"></div>
+        <!-- partial -->
+        <div class="container-fluid page-body-wrapper public-page-body-wrapper">
+            <!-- No Sidebar for public layout -->
+            <div class="main-panel public-main-panel">
+                <div class="content-wrapper public-content-wrapper">
+                    <!-- Toast Notifications -->
+                    <div th:replace="~{fragments/toast :: toast}"></div>
+                    
+                    <!-- Main Content -->
+                    <div layout:fragment="content">
+                        <!-- Default content can go here -->
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div th:replace="~{fragments/public-footer :: footer}"></div>
+            </div>
+            <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+
+    <!-- Auth Gate Modal -->
+    <div th:replace="~{fragments/auth-gate-modal :: modal}"></div>
+
+    <!-- plugins:js -->
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <!-- endinject -->
+    
+    <!-- inject:js -->
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/template.js}"></script>
+    <!-- endinject -->
+
+    <script>
+        // Global Auth-Gate logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const gatedElements = document.querySelectorAll('.auth-gated');
+            gatedElements.forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const authModal = new bootstrap.Modal(document.getElementById('authGateModal'));
+                    authModal.show();
+                });
+            });
+        });
+    </script>
+
+    <!-- Extra JS fragment -->
+    <th:block layout:fragment="extra-js"></th:block>
+</body>
+
+</html>
