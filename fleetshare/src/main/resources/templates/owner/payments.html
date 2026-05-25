@@ -162,19 +162,42 @@
 
             /* Mobile Responsiveness */
             @media (max-width: 768px) {
-                .kpi-card .kpi-value { font-size: 1.5rem; }
-                .kpi-card .kpi-icon { font-size: 2rem; }
-                .d-flex.flex-wrap.gap-2 {
+                .kpi-card {
+                    padding: 1rem;
+                }
+                .kpi-card .kpi-value {
+                    font-size: 1.5rem;
+                }
+                .kpi-card .kpi-icon {
+                    font-size: 1.75rem;
+                    right: 0.5rem;
+                }
+                
+                /* Filter controls full width */
+                .card-body .d-flex.gap-2 {
                     flex-direction: column;
                     align-items: stretch !important;
                 }
-                .d-flex.flex-wrap.gap-2 input,
-                .d-flex.flex-wrap.gap-2 select,
-                .d-flex.flex-wrap.gap-2 .btn-group {
+                .card-body .d-flex.gap-2 > * {
                     width: 100% !important;
+                    margin-bottom: 0.25rem;
                 }
-                .view-toggle { margin-left: 0 !important; margin-top: 0.5rem; width: 100%; display: flex; }
-                .view-toggle .btn { flex: 1; }
+                
+                .view-toggle {
+                    width: 100%;
+                    display: flex;
+                    margin-top: 0.5rem;
+                    margin-left: 0 !important;
+                }
+                .view-toggle .btn {
+                    flex: 1;
+                }
+                
+                /* Allow smaller cards on narrow phones */
+                .grid-view {
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 1rem;
+                }
             }
         </style>
     </th:block>
