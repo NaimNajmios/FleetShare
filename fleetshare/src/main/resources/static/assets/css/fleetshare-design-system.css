@@ -618,7 +618,7 @@ body .main-panel,
 }
 
 /* Sidebar Icon Only Overrides - DESKTOP ONLY */
-@media (min-width: 993px) {
+@media (min-width: 992px) {
     body.sidebar-icon-only .sidebar,
     body.sidebar-icon-only .sidebar-offcanvas,
     body.sidebar-icon-only nav.sidebar,
