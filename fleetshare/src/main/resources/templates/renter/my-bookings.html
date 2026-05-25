@@ -11,11 +11,7 @@
                 padding: 2rem 0.5rem;
             }
 
-            @media (max-width: 768px) {
-                .booking-list-container {
-                    padding: 1.5rem 0.5rem;
-                }
-            }
+
 
             .booking-card {
                 background: white;
@@ -158,11 +154,7 @@
                 margin-bottom: 1.25rem;
             }
 
-            @media (max-width: 768px) {
-                .booking-content {
-                    grid-template-columns: 1fr;
-                }
-            }
+
 
             .vehicle-image-box {
                 width: 120px;
@@ -394,6 +386,84 @@
             .booking-card.status-border-active { border-left: 5px solid #00897b; }
             .booking-card.status-border-completed { border-left: 5px solid #2e7d32; }
             .booking-card.status-border-cancelled { border-left: 5px solid #dc3545; }
+
+            /* --- PREMIUM MOBILE REDESIGN --- */
+            @media (max-width: 768px) {
+                .booking-list-container {
+                    padding: 0;
+                }
+                .section-title {
+                    font-size: 1.5rem;
+                    padding-left: 1rem;
+                }
+                
+                /* Booking Card Refinements */
+                .booking-card {
+                    margin: 0 0.5rem 1rem 0.5rem;
+                    padding: 1.25rem;
+                    border-radius: 16px;
+                }
+                
+                /* Keep image left, but make it smaller */
+                .booking-content {
+                    grid-template-columns: 80px 1fr;
+                    gap: 1rem;
+                }
+                .vehicle-image-box {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 12px;
+                }
+                .vehicle-image-box i {
+                    font-size: 2rem;
+                }
+                
+                /* Header wrap fixes */
+                .booking-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                    padding-bottom: 0.75rem;
+                    margin-bottom: 0.75rem;
+                }
+                .booking-id {
+                    font-size: 0.8rem;
+                }
+                .status-badge {
+                    font-size: 0.7rem;
+                    padding: 0.25rem 0.6rem;
+                }
+                
+                /* Info text adjustments */
+                .vehicle-title {
+                    font-size: 1.1rem;
+                }
+                .booking-details {
+                    grid-template-columns: 1fr;
+                    gap: 0.5rem;
+                    margin-top: 0.5rem;
+                }
+                
+                /* Actions stacking */
+                .booking-actions {
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+                .btn-action {
+                    width: 100%;
+                    justify-content: center;
+                    padding: 0.75rem;
+                    font-size: 1rem;
+                }
+                
+                /* Search and Filters */
+                .booking-search-container {
+                    padding: 0 0.5rem;
+                }
+                .filter-tabs {
+                    padding: 0 0.5rem 1rem 0.5rem;
+                }
+            }
         </style>
     </th:block>
 </head>
