@@ -146,6 +146,23 @@
                 70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
                 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
             }
+
+            /* Mobile Responsiveness */
+            @media (max-width: 768px) {
+                .kpi-card .kpi-value { font-size: 1.5rem; }
+                .kpi-card .kpi-icon { font-size: 2rem; }
+                .d-flex.flex-wrap.gap-2 {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                }
+                .d-flex.flex-wrap.gap-2 input,
+                .d-flex.flex-wrap.gap-2 select,
+                .d-flex.flex-wrap.gap-2 .btn-group {
+                    width: 100% !important;
+                }
+                .view-toggle { margin-left: 0 !important; margin-top: 0.5rem; width: 100%; display: flex; }
+                .view-toggle .btn { flex: 1; }
+            }
         </style>
     </th:block>
 </head>
