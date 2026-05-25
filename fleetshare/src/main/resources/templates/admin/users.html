@@ -91,6 +91,43 @@
             .table-view {
                 display: block;
             }
+        
+            /* --- PREMIUM MOBILE REDESIGN --- */
+            @media (max-width: 768px) {
+                .kpi-card {
+                    padding: 1rem 0.5rem;
+                }
+                .kpi-card .kpi-value {
+                    font-size: 1.25rem;
+                }
+                .kpi-card .kpi-label {
+                    font-size: 0.7rem;
+                }
+                .kpi-card .kpi-icon {
+                    font-size: 1.5rem;
+                    right: 0.5rem;
+                }
+                
+                .mobile-filter-container {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                }
+                .mobile-search-control {
+                    width: 100% !important;
+                }
+                
+                .view-toggle {
+                    width: 100%;
+                    display: flex;
+                }
+                .view-toggle .btn {
+                    flex: 1;
+                }
+                
+                .grid-view {
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                }
+            }
         </style>
     </th:block>
 </head>
@@ -105,26 +142,26 @@
         </div>
 
         <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-owners" data-filter="owners" onclick="showTab('owners')">
                     <div class="kpi-value" th:text="${#lists.size(fleetOwners)}">0</div>
                     <div class="kpi-label">Fleet Owners</div><i class="mdi mdi-domain kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-renters" data-filter="renters" onclick="showTab('renters')">
                     <div class="kpi-value" th:text="${#lists.size(renters)}">0</div>
                     <div class="kpi-label">Renters</div><i class="mdi mdi-account-group kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-active">
                     <div class="kpi-value"
                         th:text="${#lists.size(fleetOwners.?[isActive]) + #lists.size(renters.?[isActive])}">0</div>
                     <div class="kpi-label">Active Users</div><i class="mdi mdi-check-circle kpi-icon"></i>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-inactive">
                     <div class="kpi-value"
                         th:text="${#lists.size(fleetOwners.?[!isActive]) + #lists.size(renters.?[!isActive])}">0</div>
@@ -137,10 +174,10 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body py-3">
-                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <input type="text" class="form-control" id="user-search"
-                                placeholder="Search name, email, phone..." style="width: 250px;">
-                            <select class="form-select" id="status-filter" style="width: 140px;">
+                        <div class="d-flex flex-wrap gap-2 align-items-center mobile-filter-container">
+                            <input type="text" class="form-control mobile-search-control" id="user-search"
+                                placeholder="Search name, email, phone...">
+                            <select class="form-select mobile-search-control" id="status-filter">
                                 <option value="">All Status</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
