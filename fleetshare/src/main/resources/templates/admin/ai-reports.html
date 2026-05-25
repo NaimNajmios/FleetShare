@@ -164,6 +164,59 @@
                 padding: 0.75rem 1rem;
                 font-size: 0.875rem;
             }
+
+            /* Mobile Responsiveness */
+            @media (max-width: 768px) {
+                .feature-card {
+                    padding: 0.75rem;
+                }
+                .feature-card .feature-icon {
+                    font-size: 1.5rem;
+                }
+                .feature-card .feature-label {
+                    font-size: 0.75rem;
+                }
+                .results-panel .d-flex.justify-content-between.align-items-center {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                }
+                #export-options {
+                    display: flex !important;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    margin-top: 1rem;
+                }
+                #export-options button {
+                    flex: 1;
+                    margin-right: 0 !important;
+                }
+                .table-responsive {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                
+                /* Header button full width */
+                .header-actions {
+                    width: 100%;
+                }
+                .header-actions .btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                /* Ask AI button full width */
+                .btn-ai-generate {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                /* Suggestions wrap */
+                .suggestions-row .text-muted {
+                    display: block;
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                }
+            }
         </style>
     </th:block>
 </head>
@@ -177,32 +230,36 @@
                         <h3 class="font-weight-bold mb-1"><i class="mdi mdi-robot text-primary me-2"></i>AI Data
                             Assistant</h3>
                         <p class="text-muted mb-0">Ask questions in natural language to explore platform data</p>
-                    </div><a th:href="@{/admin/reports}" class="btn btn-outline-primary"><i
-                            class="mdi mdi-file-document me-1"></i> Standard Report Builder</a>
+                    </div>
+                    <div class="header-actions">
+                        <a th:href="@{/admin/reports}" class="btn btn-outline-primary d-inline-flex align-items-center">
+                            <i class="mdi mdi-file-document me-1"></i> Standard Report Builder
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="row mb-4">
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-revenue" onclick="setQuery('Total revenue today')"><i
                         class="mdi mdi-currency-usd feature-icon"></i><span class="feature-label">Revenue Today</span>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-overdue" onclick="setQuery('List overdue returns')"><i
                         class="mdi mdi-alert feature-icon"></i><span class="feature-label">Overdue Returns</span></div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-customers" onclick="setQuery('Top spending customers')"><i
                         class="mdi mdi-account-star feature-icon"></i><span class="feature-label">Top Customers</span>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-vehicles" onclick="setQuery('Most rented vehicles')"><i
                         class="mdi mdi-car feature-icon"></i><span class="feature-label">Popular Vehicles</span></div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-maintenance" onclick="setQuery('Vehicles due for maintenance')"><i
                         class="mdi mdi-wrench feature-icon"></i><span class="feature-label">Maintenance Due</span></div>
             </div>
@@ -269,10 +326,12 @@
                                 <div class="row mx-0 mb-3" id="summary-metrics" style="display: none;"></div>
 
                                 <!-- Dynamic Results Table -->
-                                <table class="results-table" id="results-table" style="display: none;">
-                                    <thead id="results-thead"></thead>
-                                    <tbody id="results-tbody"></tbody>
-                                </table>
+                                <div class="table-responsive">
+                                    <table class="results-table" id="results-table" style="display: none;">
+                                        <thead id="results-thead"></thead>
+                                        <tbody id="results-tbody"></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

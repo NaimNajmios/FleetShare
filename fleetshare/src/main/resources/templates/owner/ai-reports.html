@@ -264,6 +264,57 @@
             .color-red {
                 background-color: #dc3545;
             }
+
+            /* Mobile Responsiveness */
+            @media (max-width: 768px) {
+                .feature-card {
+                    padding: 0.75rem;
+                }
+                .feature-card .feature-icon {
+                    font-size: 1.5rem;
+                }
+                .feature-card .feature-label {
+                    font-size: 0.75rem;
+                }
+                .results-header {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                }
+                .export-options {
+                    flex-wrap: wrap;
+                    margin-top: 1rem;
+                }
+                .export-btn {
+                    flex: 1;
+                    justify-content: center;
+                }
+                .results-table-wrapper {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                /* Header button full width */
+                .header-actions {
+                    width: 100%;
+                }
+                .header-actions .btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                /* Ask AI button full width */
+                .btn-ai-generate {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                /* Suggestions wrap */
+                .suggestions-row .text-muted {
+                    display: block;
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                }
+            }
         </style>
     </th:block>
 </head>
@@ -280,41 +331,43 @@
                         </h3>
                         <p class="text-muted mb-0">Ask questions in natural language to explore your fleet data</p>
                     </div>
-                    <a th:href="@{/owner/reports}" class="btn btn-outline-primary">
-                        <i class="mdi mdi-file-document me-1"></i> Standard Report Builder
-                    </a>
+                    <div class="header-actions">
+                        <a th:href="@{/owner/reports}" class="btn btn-outline-primary d-inline-flex align-items-center">
+                            <i class="mdi mdi-file-document me-1"></i> Standard Report Builder
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Quick Query Feature Cards -->
         <div class="row mb-4">
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-revenue cursor-pointer" onclick="setQuery('Total revenue today')">
                     <i class="mdi mdi-currency-usd feature-icon"></i>
                     <span class="feature-label">Revenue Today</span>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-overdue cursor-pointer" onclick="setQuery('List overdue returns')">
                     <i class="mdi mdi-alert feature-icon"></i>
                     <span class="feature-label">Overdue Returns</span>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-customers cursor-pointer" onclick="setQuery('Top spending customers')">
                     <i class="mdi mdi-account-star feature-icon"></i>
                     <span class="feature-label">Top Customers</span>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-vehicles cursor-pointer"
                     onclick="setQuery('Most rented vehicles this month')">
                     <i class="mdi mdi-car feature-icon"></i>
                     <span class="feature-label">Popular Vehicles</span>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-6 col-md mb-3 mb-md-0">
                 <div class="feature-card feat-maintenance cursor-pointer"
                     onclick="setQuery('Vehicles due for maintenance')">
                     <i class="mdi mdi-wrench feature-icon"></i>

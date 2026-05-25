@@ -79,6 +79,7 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
             transition: all 0.3s ease;
         }
@@ -101,6 +102,42 @@
 
         .empty-vehicles-alert .btn {
             margin-top: 0.5rem;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .config-section {
+                padding: 1rem;
+            }
+            .duration-pills {
+                gap: 0.25rem;
+            }
+            .duration-pill {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+                flex: 1 1 calc(50% - 0.25rem);
+                text-align: center;
+            }
+            .comparison-toggle {
+                flex: 1 1 100%;
+            }
+            .d-flex.justify-content-between.align-items-center {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+            .text-muted.small {
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .btn-group > .btn, .btn-group > .btn-generate {
+                width: 100%;
+                border-radius: 0.5rem !important;
+            }
         }
     </style>
 
