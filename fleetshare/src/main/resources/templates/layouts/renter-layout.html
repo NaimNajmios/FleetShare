@@ -39,13 +39,13 @@
             body[data-role="renter"] .navbar-brand-wrapper {
                 width: auto;
             }
-            /* Ensure sidebar takes no layout width on mobile */
-            body[data-role="renter"] .page-body-wrapper {
-                display: block; /* break flex so sidebar doesn't add to width */
-            }
-            body[data-role="renter"] .sidebar {
-                display: none; /* hidden offcanvas — template JS handles toggle */
-            }
+            /*
+             * DO NOT hide .sidebar or change page-body-wrapper display.
+             * style.css already positions .sidebar-offcanvas at right:-235px on mobile
+             * (position: fixed, off-screen). off-canvas.js toggles .active to bring
+             * it in. Hiding it breaks that JS toggle entirely.
+             * Just ensure main-panel fills full width.
+             */
             body[data-role="renter"] .main-panel {
                 width: 100% !important;
                 margin-left: 0 !important;
