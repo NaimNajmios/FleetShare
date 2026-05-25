@@ -433,6 +433,110 @@
                 margin-bottom: 1.5rem;
                 border-radius: 0.5rem;
             }
+
+            /* --- PREMIUM MOBILE REDESIGN --- */
+            @media (max-width: 768px) {
+                .payment-container {
+                    padding: 1rem 0.5rem;
+                    padding-bottom: 120px; /* Space for stacked footer */
+                }
+                
+                /* Status Banners */
+                .status-banner {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    padding: 1.25rem;
+                    gap: 0.75rem;
+                }
+                .status-banner i {
+                    font-size: 2rem;
+                    margin-bottom: 0.25rem;
+                }
+                .countdown-timer {
+                    margin-left: 0;
+                    text-align: left;
+                    width: 100%;
+                    background: rgba(255,255,255,0.3);
+                    padding: 0.75rem;
+                    border-radius: 0.5rem;
+                    margin-top: 0.25rem;
+                }
+                
+                /* Context Card */
+                .context-card {
+                    padding: 1rem;
+                    gap: 1rem;
+                }
+                .vehicle-thumbnail {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 0.5rem;
+                }
+                .context-details {
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.75rem;
+                }
+                .context-label {
+                    font-size: 0.65rem;
+                }
+                .context-value {
+                    font-size: 0.9rem;
+                }
+                .total-payable {
+                    font-size: 1.1rem;
+                }
+                
+                /* Payment Options */
+                .method-selection-card {
+                    padding: 1.25rem;
+                }
+                .payment-options-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+                    gap: 0.5rem;
+                }
+                .payment-option-card {
+                    padding: 1rem 0.25rem;
+                    font-size: 0.8rem;
+                }
+                .payment-option-card i {
+                    font-size: 1.5rem;
+                }
+                
+                /* Dynamic Area */
+                .dynamic-input-area {
+                    padding: 1.5rem;
+                }
+                
+                /* Current Method Card */
+                .current-method-card {
+                    padding: 1.25rem;
+                }
+                
+                /* Sticky Footer */
+                .sticky-footer {
+                    padding: 1rem;
+                }
+                .payment-footer-container {
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                .payment-footer-container .btn-cancel,
+                .payment-footer-container button,
+                .payment-footer-container a {
+                    width: 100%;
+                    text-align: center;
+                    display: block;
+                }
+                .btn-cancel {
+                    padding: 0.75rem 2rem;
+                    background: #f8f9fa;
+                    border-radius: 0.5rem;
+                    border: 1px solid #dee2e6;
+                }
+                .btn-cancel:hover {
+                    background: #e9ecef;
+                }
+            }
         </style>
     </th:block>
 </head>
