@@ -47,7 +47,7 @@ public class SecurityConfig {
                                                                 "camera=(), microphone=(), geolocation=(), payment=()")))
                                 .authorizeHttpRequests(auth -> auth
                                                 // Public resources
-                                                .requestMatchers("/css/**", "/js/**", "/assets/**", "/images/**")
+                                                .requestMatchers("/css/**", "/js/**", "/assets/**", "/images/**", "/uploads/**")
                                                 .permitAll()
                                                 // Public pages
                                                 .requestMatchers("/", "/public/**", "/api/public/**", "/register", "/api/test/email/**").permitAll()

@@ -37,20 +37,27 @@
     <!-- Custom layout override to remove sidebar gap -->
     <style>
         .public-page-body-wrapper {
-            padding-top: 60px; /* Adjust based on navbar height */
+            padding-top: 60px !important; /* Adjust based on navbar height */
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: block !important; /* Override flex-row to avoid sidebar spacing */
+            width: 100% !important;
+            margin: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
         }
         .public-main-panel {
-            width: 100%;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
             min-height: calc(100vh - 60px);
-            display: flex;
-            flex-direction: column;
+            display: flex !important;
+            flex-direction: column !important;
         }
         .public-content-wrapper {
-            flex-grow: 1;
-            padding: 0; /* Remove default padding for full-width sections */
+            flex-grow: 1 !important;
+            padding: 0 !important; /* Remove default padding for full-width sections */
+            width: 100% !important;
+            margin: 0 !important;
         }
     </style>
 </head>
