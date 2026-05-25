@@ -354,6 +354,23 @@
                 from { box-shadow: 0 0 5px #dc3545; }
                 to { box-shadow: 0 0 15px #dc3545; }
             }
+
+            @media (max-width: 768px) {
+                .booking-header {
+                    flex-direction: column;
+                    align-items: flex-start !important;
+                    gap: 1rem;
+                }
+                .d-flex.align-items-center {
+                    width: 100%;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                }
+                .countdown-badge {
+                    margin-right: 0;
+                    margin-bottom: 0.25rem;
+                }
+            }
         </style>
     </th:block>
 </head>

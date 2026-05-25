@@ -176,6 +176,45 @@
                 from { box-shadow: 0 0 5px #dc3545; }
                 to { box-shadow: 0 0 15px #dc3545; }
             }
+
+            /* Mobile Responsiveness */
+            @media (max-width: 768px) {
+                .kpi-card {
+                    padding: 1rem;
+                }
+                .kpi-card .kpi-value {
+                    font-size: 1.5rem;
+                }
+                .kpi-card .kpi-icon {
+                    font-size: 1.75rem;
+                    right: 0.5rem;
+                }
+                
+                /* Filter controls full width */
+                .card-body .d-flex.gap-2 {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                }
+                .card-body .d-flex.gap-2 > * {
+                    width: 100% !important;
+                    margin-bottom: 0.25rem;
+                }
+                
+                .view-toggle {
+                    width: 100%;
+                    display: flex;
+                    margin-top: 0.5rem;
+                }
+                .view-toggle .btn {
+                    flex: 1;
+                }
+                
+                /* Allow smaller cards on narrow phones */
+                .grid-view {
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 1rem;
+                }
+            }
         </style>
     </th:block>
 </head>
