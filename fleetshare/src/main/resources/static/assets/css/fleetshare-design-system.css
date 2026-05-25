@@ -617,22 +617,24 @@ body .main-panel,
     min-height: calc(100vh - 60px) !important;
 }
 
-/* Sidebar Icon Only Overrides */
-body.sidebar-icon-only .sidebar,
-body.sidebar-icon-only .sidebar-offcanvas,
-body.sidebar-icon-only nav.sidebar,
-body.sidebar-icon-only #sidebar,
-body.sidebar-icon-only .sidebar.sidebar-offcanvas {
-    width: 70px !important;
-    overflow: visible !important;
-}
+/* Sidebar Icon Only Overrides - DESKTOP ONLY */
+@media (min-width: 993px) {
+    body.sidebar-icon-only .sidebar,
+    body.sidebar-icon-only .sidebar-offcanvas,
+    body.sidebar-icon-only nav.sidebar,
+    body.sidebar-icon-only #sidebar,
+    body.sidebar-icon-only .sidebar.sidebar-offcanvas {
+        width: 70px !important;
+        overflow: visible !important;
+    }
 
-body.sidebar-icon-only .page-body-wrapper {
-    margin-left: 70px !important;
-}
+    body.sidebar-icon-only .page-body-wrapper {
+        margin-left: 70px !important;
+    }
 
-body.sidebar-icon-only .main-panel {
-    width: calc(100% - 70px) !important;
+    body.sidebar-icon-only .main-panel {
+        width: calc(100% - 70px) !important;
+    }
 }
 
 body .container-scroller,
@@ -654,6 +656,18 @@ body .container-scroller,
     body .page-body-wrapper,
     .page-body-wrapper {
         margin-left: 0 !important;
+    }
+
+    /* Fix: prevent the 235px gap on the right side on mobile */
+    body .main-panel,
+    .main-panel {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    body .container-scroller,
+    .container-scroller {
+        overflow-x: hidden !important;
     }
 }
 
