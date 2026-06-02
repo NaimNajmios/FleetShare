@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
 
     <!-- Custom Auth CSS -->
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" th:href="@{/css/auth.css(v='3.1.0')}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,9 +26,36 @@
 </head>
 
 <body class="auth-page">
-    <div class="auth-container">
-        <div class="auth-card auth-card-lg">
-            <button type="button" id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">
+    <div class="auth-noise-overlay"></div>
+    
+    <div class="auth-split-container">
+        <!-- Left Media Panel -->
+        <div class="auth-media-panel" style="background-image: url('/assets/images/auth/register-bg.jpg');">
+            <div class="auth-media-overlay"></div>
+            <div class="auth-media-content">
+                <h1 class="auth-media-title">Share Your Vehicle. Earn Extra Income.</h1>
+                <p class="auth-media-text">Join a community of fleet owners and renters. Register today and list your vehicles in under 10 minutes.</p>
+                <div class="auth-media-stats">
+                    <div class="auth-stat-badge">
+                        <span class="auth-stat-num">10%</span>
+                        <span class="auth-stat-lbl">Low Commission</span>
+                    </div>
+                    <div class="auth-stat-badge">
+                        <span class="auth-stat-num">Secure</span>
+                        <span class="auth-stat-lbl">ToyyibPay Gateway</span>
+                    </div>
+                    <div class="auth-stat-badge">
+                        <span class="auth-stat-num">AI</span>
+                        <span class="auth-stat-lbl">Data Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Form Panel -->
+        <div class="auth-form-panel">
+            <div class="auth-card auth-card-lg">
+                <button type="button" id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">
                 <i class="mdi mdi-weather-night"></i>
             </button>
 
@@ -315,6 +342,7 @@
             </div>
         </div>
     </div>
+</div>
 
     <!-- Auth Logic -->
     <script src="/js/auth.js"></script>

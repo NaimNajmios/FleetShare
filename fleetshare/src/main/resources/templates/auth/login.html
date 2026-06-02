@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
 
     <!-- Custom Auth CSS -->
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" th:href="@{/css/auth.css(v='3.1.0')}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,17 +26,36 @@
 </head>
 
 <body class="auth-page">
-    <div class="auth-bg-decoration">
-        <div class="auth-bg-circle auth-bg-circle-1"></div>
-        <div class="auth-bg-circle auth-bg-circle-2"></div>
-        <div class="auth-bg-circle auth-bg-circle-3"></div>
-    </div>
-    
     <div class="auth-noise-overlay"></div>
     
-    <div class="auth-container">
-        <div class="auth-card">
-            <button type="button" id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">
+    <div class="auth-split-container">
+        <!-- Left Media Panel -->
+        <div class="auth-media-panel" style="background-image: url('/assets/images/auth/login-bg.jpg');">
+            <div class="auth-media-overlay"></div>
+            <div class="auth-media-content">
+                <h1 class="auth-media-title">Rent Your Perfect Vehicle Today</h1>
+                <p class="auth-media-text">Connect with verified fleet owners. Book cars, vans, and trucks for your next journey or business need with full transparency and secure payments.</p>
+                <div class="auth-media-stats">
+                    <div class="auth-stat-badge">
+                        <span class="auth-stat-num">13+</span>
+                        <span class="auth-stat-lbl">Vehicles</span>
+                    </div>
+                    <div class="auth-stat-badge">
+                        <span class="auth-stat-num">100%</span>
+                        <span class="auth-stat-lbl">Verified Owners</span>
+                    </div>
+                    <div class="auth-stat-badge">
+                        <span class="auth-stat-num">24/7</span>
+                        <span class="auth-stat-lbl">Support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Form Panel -->
+        <div class="auth-form-panel">
+            <div class="auth-card">
+                <button type="button" id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">
                 <i class="mdi mdi-weather-night"></i>
             </button>
 
@@ -143,6 +162,7 @@
             </div>
         </div>
     </div>
+</div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
