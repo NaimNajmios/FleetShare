@@ -36,16 +36,19 @@
 
     <!-- Custom layout override to remove sidebar gap -->
     <style>
-        .public-page-body-wrapper {
+        body[data-role="public"] .page-body-wrapper,
+        body .public-page-body-wrapper {
+            margin-left: 0 !important;
             padding-top: 60px !important; /* Adjust based on navbar height */
             min-height: 100vh;
             display: block !important; /* Override flex-row to avoid sidebar spacing */
             width: 100% !important;
-            margin: 0 !important;
             padding-left: 0 !important;
             padding-right: 0 !important;
         }
-        .public-main-panel {
+        body[data-role="public"] .main-panel,
+        body .public-main-panel {
+            margin-left: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 !important;
@@ -53,7 +56,8 @@
             display: flex !important;
             flex-direction: column !important;
         }
-        .public-content-wrapper {
+        body[data-role="public"] .content-wrapper,
+        body .public-content-wrapper {
             flex-grow: 1 !important;
             padding: 0 !important; /* Remove default padding for full-width sections */
             width: 100% !important;
