@@ -5,10 +5,10 @@
 
 :root {
     /* Primary Colors */
-    --fs-primary: #2563eb;
-    --fs-primary-hover: #1d4ed8;
-    --fs-primary-light: #3b82f6;
-    --fs-primary-glow: rgba(37, 99, 235, 0.15);
+    --fs-primary: #4B49AC;
+    --fs-primary-hover: #3f3da3;
+    --fs-primary-light: #7978E9;
+    --fs-primary-glow: rgba(75, 73, 172, 0.15);
 
     /* Background Colors */
     --fs-bg-main: #f8fafc;
@@ -65,7 +65,7 @@
     --fs-text-primary: #ffffff;
     --fs-text-secondary: #e2e8f0;
     --fs-text-muted: #b4beca;
-    --fs-primary-glow: rgba(59, 130, 246, 0.25);
+    --fs-primary-glow: rgba(121, 120, 233, 0.25);
     --fs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
     --fs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
     --fs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
@@ -126,7 +126,7 @@ body.auth-page {
 .auth-bg-circle-2 {
     width: 400px;
     height: 400px;
-    background: #0ea5e9;
+    background: var(--fs-primary-light);
     bottom: -100px;
     left: -100px;
     opacity: 0.06;
@@ -190,7 +190,7 @@ body.auth-page {
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 15px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 15px rgba(75, 73, 172, 0.1);
 }
 
 .auth-card::before {
@@ -200,7 +200,7 @@ body.auth-page {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--fs-primary) 0%, var(--fs-primary-light) 50%, #0ea5e9 100%);
+    background: linear-gradient(90deg, var(--fs-primary) 0%, var(--fs-primary-light) 50%, var(--fs-primary-light) 100%);
 }
 
 @keyframes cardEntrance {
@@ -230,7 +230,7 @@ body.auth-page {
 }
 
 .auth-logo-icon {
-    filter: drop-shadow(0 4px 8px rgba(37, 99, 235, 0.25));
+    filter: drop-shadow(0 4px 8px rgba(75, 73, 172, 0.25));
 }
 
 .brand-text {
@@ -250,7 +250,7 @@ body.auth-page {
 }
 
 .brand-share {
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, var(--fs-primary) 0%, var(--fs-primary-light) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -564,12 +564,12 @@ body.auth-page {
 .btn-primary {
     background: linear-gradient(135deg, var(--fs-primary) 0%, var(--fs-primary-light) 100%);
     color: white;
-    box-shadow: var(--fs-shadow-md), 0 4px 12px rgba(37, 99, 235, 0.25);
+    box-shadow: var(--fs-shadow-md), 0 4px 12px rgba(75, 73, 172, 0.25);
 }
 
 .btn-primary:hover {
     background: linear-gradient(135deg, var(--fs-primary-hover) 0%, var(--fs-primary) 100%);
-    box-shadow: var(--fs-shadow-lg), 0 8px 20px rgba(37, 99, 235, 0.35);
+    box-shadow: var(--fs-shadow-lg), 0 8px 20px rgba(75, 73, 172, 0.35);
     transform: translateY(-2px);
 }
 
@@ -853,7 +853,7 @@ body.auth-page {
 
 .role-card.selected {
     border-color: var(--fs-primary);
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.04) 0%, rgba(59, 130, 246, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(75, 73, 172, 0.04) 0%, rgba(121, 120, 233, 0.08) 100%);
 }
 
 .role-icon {
@@ -1463,12 +1463,12 @@ input:focus-visible {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.85) 0%, rgba(139, 92, 246, 0.85) 100%);
+    background: linear-gradient(135deg, rgba(75, 73, 172, 0.85) 0%, rgba(121, 120, 233, 0.85) 100%);
     z-index: 1;
 }
 
 [data-theme="dark"] .auth-media-overlay {
-    background: linear-gradient(135deg, rgba(11, 15, 26, 0.9) 0%, rgba(37, 99, 235, 0.75) 100%);
+    background: linear-gradient(135deg, rgba(11, 15, 26, 0.9) 0%, rgba(75, 73, 172, 0.75) 100%);
 }
 
 .auth-media-content {
