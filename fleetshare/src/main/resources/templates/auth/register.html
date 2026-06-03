@@ -91,25 +91,76 @@
             <div class="form-steps">
                 <div class="step active" data-step="1">
                     <span class="step-number">1</span>
-                    <span class="step-label">Account</span>
+                    <span class="step-label">Role</span>
                 </div>
                 <div class="step-line"></div>
                 <div class="step" data-step="2">
                     <span class="step-number">2</span>
-                    <span class="step-label">Address</span>
+                    <span class="step-label">Account</span>
                 </div>
                 <div class="step-line"></div>
                 <div class="step" data-step="3">
                     <span class="step-number">3</span>
-                    <span class="step-label">Role</span>
+                    <span class="step-label">Address</span>
                 </div>
             </div>
 
             <!-- Registration Form -->
             <form class="auth-form" id="registerForm" th:action="@{/register}" method="post">
 
-                <!-- Step 1: Account Info -->
+                <!-- Step 1: Role Selection -->
                 <div class="form-step-content active" data-step="1">
+                    <div class="form-group">
+                        <label class="form-label" id="roleLabel">Select Your Role</label>
+                        <div class="role-selection-group" role="radiogroup" aria-labelledby="roleLabel">
+                            <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="renter">
+                                <div class="role-icon">
+                                    <i class="mdi mdi-car-key"></i>
+                                </div>
+                                <div class="role-content">
+                                    <div class="role-title">Renter</div>
+                                    <div class="role-description">I want to rent vehicles from fleet owners</div>
+                                </div>
+                                <div class="role-check">
+                                    <i class="mdi mdi-check-circle"></i>
+                                </div>
+                            </div>
+
+                            <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="owner">
+                                <div class="role-icon">
+                                    <i class="mdi mdi-car-multiple"></i>
+                                </div>
+                                <div class="role-content">
+                                    <div class="role-title">Fleet Owner</div>
+                                    <div class="role-description">I want to share my vehicles and earn money</div>
+                                </div>
+                                <div class="role-check">
+                                    <i class="mdi mdi-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <select class="form-select visually-hidden" id="userRole" name="userRole" required
+                            tabindex="-1">
+                            <option value="">Select your role</option>
+                            <option value="renter">Renter</option>
+                            <option value="owner">Vehicle Owner</option>
+                        </select>
+                        <div class="form-error d-none" id="roleError">
+                            <i class="mdi mdi-alert-circle"></i> Please select a role
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="grid-template-columns: 1fr;">
+                        <button type="button" class="btn btn-primary" data-action="next-step" data-target="2">
+                            Continue
+                            <i class="mdi mdi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Account Info -->
+                <div class="form-step-content" data-step="2">
                     <div class="form-group">
                         <label class="form-label" for="fullName">
                             <i class="mdi mdi-account-outline label-icon"></i>
@@ -182,14 +233,20 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-primary" data-action="next-step" data-target="2">
-                        Continue
-                        <i class="mdi mdi-arrow-right"></i>
-                    </button>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" data-action="prev-step" data-target="1">
+                            <i class="mdi mdi-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-primary" data-action="next-step" data-target="3">
+                            Continue
+                            <i class="mdi mdi-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Step 2: Address Info -->
-                <div class="form-step-content" data-step="2">
+                <!-- Step 3: Address Info -->
+                <div class="form-step-content" data-step="3">
                     <div class="form-group">
                         <label class="form-label" for="addressLine1">
                             <i class="mdi mdi-map-marker-outline label-icon"></i>
@@ -249,61 +306,6 @@
                             <datalist id="postalCodeList">
                                 <!-- Postal codes will be dynamically populated based on city -->
                             </datalist>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" data-action="prev-step" data-target="1">
-                            <i class="mdi mdi-arrow-left"></i>
-                            Back
-                        </button>
-                        <button type="button" class="btn btn-primary" data-action="next-step" data-target="3">
-                            Continue
-                            <i class="mdi mdi-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Role Selection -->
-                <div class="form-step-content" data-step="3">
-                    <div class="form-group">
-                        <label class="form-label" id="roleLabel">Select Your Role</label>
-                        <div class="role-selection-group" role="radiogroup" aria-labelledby="roleLabel">
-                            <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="renter">
-                                <div class="role-icon">
-                                    <i class="mdi mdi-car-key"></i>
-                                </div>
-                                <div class="role-content">
-                                    <div class="role-title">Renter</div>
-                                    <div class="role-description">I want to rent vehicles from fleet owners</div>
-                                </div>
-                                <div class="role-check">
-                                    <i class="mdi mdi-check-circle"></i>
-                                </div>
-                            </div>
-
-                            <div class="role-card" tabindex="0" role="radio" aria-checked="false" data-value="owner">
-                                <div class="role-icon">
-                                    <i class="mdi mdi-car-multiple"></i>
-                                </div>
-                                <div class="role-content">
-                                    <div class="role-title">Fleet Owner</div>
-                                    <div class="role-description">I want to share my vehicles and earn money</div>
-                                </div>
-                                <div class="role-check">
-                                    <i class="mdi mdi-check-circle"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <select class="form-select visually-hidden" id="userRole" name="userRole" required
-                            tabindex="-1">
-                            <option value="">Select your role</option>
-                            <option value="renter">Renter</option>
-                            <option value="owner">Vehicle Owner</option>
-                        </select>
-                        <div class="form-error d-none" id="roleError">
-                            <i class="mdi mdi-alert-circle"></i> Please select a role
                         </div>
                     </div>
 

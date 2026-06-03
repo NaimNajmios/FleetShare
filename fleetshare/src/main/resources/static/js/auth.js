@@ -439,8 +439,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Special check for password match on Step 1
+        // Special check for Role Selection on Step 1
         if (stepEl.dataset.step === '1') {
+            const roleSelect = document.getElementById('userRole');
+            const roleError = document.getElementById('roleError');
+            if (roleSelect && !roleSelect.value) {
+                isValid = false;
+                if (roleError) roleError.classList.remove('d-none');
+            }
+        }
+
+        // Special check for password match on Step 2
+        if (stepEl.dataset.step === '2') {
             const p1 = document.getElementById('registerPassword');
             const p2 = document.getElementById('confirmPassword');
             const err = document.getElementById('passwordMatchError');
