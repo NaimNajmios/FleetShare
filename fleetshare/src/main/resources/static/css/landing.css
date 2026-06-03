@@ -252,3 +252,23 @@
         padding: 100px 0 60px;
     }
 }
+
+/* Fix "How It Works" outline button readability contrast */
+.hero-section .btn-outline-light {
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease !important;
+}
+
+.hero-section .btn-outline-light:hover,
+.hero-section .btn-outline-light:focus,
+.hero-section .btn-outline-light:active {
+    background-color: #ffffff !important;
+    color: #4B49AC !important;
+    border-color: #ffffff !important;
+    text-shadow: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
