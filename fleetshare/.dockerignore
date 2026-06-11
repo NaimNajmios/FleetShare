@@ -1,0 +1,29 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IDE ###
+.idea
+.vscode
+*.iws
+*.iml
+*.ipr
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### Environment Variables ###
+.env
+.env.*
+
+### Local Uploads ###
+C:/fleetshare-uploads/
+
+### OS Files ###
+.DS_Store
+Thumbs.db
