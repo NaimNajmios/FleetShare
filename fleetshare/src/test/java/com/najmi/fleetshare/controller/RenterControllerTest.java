@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,7 +41,7 @@ public class RenterControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @MockitoBean
+    @MockBean
     private UserRepository userRepository;
 
     // We need to mock other dependencies to avoid context load failure if any
