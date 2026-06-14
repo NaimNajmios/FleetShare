@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error</title>
+</head>
+<body>
+    <h1>Something went wrong!</h1>
+    <p th:text="${status}">Status</p>
+    <p th:text="${error}">Error</p>
+    <p th:text="${message}">Message</p>
+    <a href="/">Go back to Home</a>
+</body>
+</html>
