@@ -23,8 +23,7 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 # Create the uploads directory for persistent storage
-RUN mkdir -p /app/uploads
-VOLUME /app/uploads
+RUN mkdir -p /app/uploads/vehicles /app/uploads/profiles /app/uploads/payments /app/uploads/qrcodes
 
 # Copy the built JAR file from the build stage
 COPY --from=build /app/target/*.jar app.jar
@@ -33,4 +32,4 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Run the application using the production profile
-ENTRYPOINT ["java", "-Dserver.port=${PORT:8080}", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -jar app.jar"]
