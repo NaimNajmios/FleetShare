@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: May 14, 2026 at 06:38 AM
+-- Generation Time: Jun 14, 2026 at 10:39 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -51,7 +51,7 @@ INSERT INTO `addresses` (`address_id`, `address_user_id`, `address_line1`, `addr
 (2, 2, '41, Jalan Tun Abdul Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2023-04-15', '2026-01-24 02:56:19', '2026-03-01 10:37:24', 5.40716132, 103.0879484),
 (3, 3, 'Lot 5, Jalan Pantai', 'Tanjung Aru', 'Kota Kinabalu', 'Sabah', '88100', '2023-05-10', '2026-01-24 02:56:19', '2026-05-14 03:58:48', 5.924777, 116.070545),
 (4, 4, '15, Persiaran Gurney', 'George Town', 'George Town', 'Pulau Pinang', '10250', '2023-06-05', '2026-01-24 02:56:19', '2026-05-04 09:35:08', 5.40716132, 103.0879484),
-(5, 5, '12, Kolej Kediaman', 'Universiti Malaya', 'Kuala Lumpur', 'Wilayah Persekutuan', '50603', '2024-03-10', '2026-01-24 02:56:19', '2026-03-01 12:28:54', 5.40716132, 103.0879484),
+(5, 5, '12, Kolej Kediaman', 'Universiti Malaya', 'Kuala Lumpur', 'Wilayah Persekutuan', '50603', '2024-03-10', '2026-01-24 02:56:19', '2026-05-14 07:55:43', 3.056354, 101.616948),
 (6, 6, 'B-12-1, Pavilion Residences', 'Jalan Bukit Bintang', 'Kuala Lumpur', 'Wilayah Persekutuan', '55100', '2024-03-12', '2026-01-24 02:56:19', '2026-02-16 08:14:06', 5.40716132, 103.0879484),
 (7, 7, '45, Jalan Gasing', 'Section 10', 'Petaling Jaya', 'Selangor', '46000', '2024-04-01', '2026-01-24 02:56:19', '2026-02-16 08:14:06', 5.40716132, 103.0879484),
 (8, 8, 'Shangri-La Hotel', '11 Jalan Sultan Ismail', 'Kuala Lumpur', 'Wilayah Persekutuan', '50250', '2024-05-15', '2026-01-24 02:56:19', '2026-02-16 08:14:06', 5.40716132, 103.0879484),
@@ -61,7 +61,7 @@ INSERT INTO `addresses` (`address_id`, `address_user_id`, `address_line1`, `addr
 (12, 2, '41, Jalan Tun Abdul Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2026-03-01', '2026-03-01 11:12:05', '2026-03-01 11:12:05', 5.40716132, 103.0879484),
 (13, 10, 'No. 247', 'Jalan Sultan Mahmud', 'Kuala Terengganu', 'Terengganu', '20000', '2026-03-03', '2026-03-03 03:26:12', '2026-03-20 02:05:07', NULL, NULL),
 (14, 11, '41, Jalan Tun Abdul Razak', 'Taman U-Thant', 'Kuala Lumpur', 'Wilayah Persekutuan', '50400', '2026-03-06', '2026-03-06 03:19:07', '2026-03-19 03:20:40', NULL, NULL),
-(15, 12, '124, Kolej Kediaman', 'Universiti Malaysia Terengganu', 'Kuala Nerus', 'Terengganu', '21030', '2026-03-19', '2026-03-19 03:34:45', '2026-03-19 03:46:57', NULL, NULL),
+(15, 12, '124, Kolej Kediaman', 'Universiti Malaysia Terengganu', 'Kuala Nerus', 'Terengganu', '21030', '2026-03-19', '2026-03-19 03:34:45', '2026-05-21 01:31:36', 2.731813, 101.689572),
 (16, 13, '45, Jalan Tun Abdul Razak', 'Jalan Sultan Mahmud', 'Ipoh', 'Perak', '30200', '2026-04-25', '2026-04-25 08:20:11', '2026-04-25 09:08:28', 5.33049, 103.121153);
 
 -- --------------------------------------------------------
@@ -105,7 +105,13 @@ INSERT INTO `bookingpricesnapshot` (`booking_id`, `rate_per_day`, `days_rented`,
 (136, 850.00, 1, 850.00, NULL),
 (138, 220.00, 1, 220.00, NULL),
 (139, 220.00, 1, 220.00, NULL),
-(141, 500.00, 1, 500.00, NULL);
+(141, 500.00, 1, 500.00, NULL),
+(143, 150.00, 1, 150.00, NULL),
+(144, 450.00, 1, 450.00, NULL),
+(145, 350.00, 1, 350.00, NULL),
+(146, 900.00, 1, 900.00, NULL),
+(147, 500.00, 1, 500.00, NULL),
+(148, 500.00, 3, 1500.00, NULL);
 
 -- --------------------------------------------------------
 
@@ -150,7 +156,13 @@ INSERT INTO `bookings` (`booking_id`, `renter_id`, `vehicle_id`, `fleet_owner_id
 (136, 9, 8, 3, '2026-05-15 00:00:00', '2026-05-16 23:59:59', '2026-05-04 09:36:18'),
 (138, 9, 7, 3, '2026-05-12 00:00:00', '2026-05-13 23:59:59', '2026-05-12 10:01:47'),
 (139, 9, 7, 3, '2026-05-20 00:00:00', '2026-05-21 23:59:59', '2026-05-12 10:04:53'),
-(141, 1, 6, 2, '2026-05-29 00:00:00', '2026-05-30 23:59:59', '2026-05-14 04:36:58');
+(141, 1, 6, 2, '2026-05-29 00:00:00', '2026-05-30 23:59:59', '2026-05-14 04:36:58'),
+(143, 1, 1, 1, '2026-05-30 00:00:00', '2026-05-31 23:59:59', '2026-05-14 05:38:19'),
+(144, 9, 5, 2, '2026-05-16 00:00:00', '2026-05-17 23:59:59', '2026-05-14 09:33:27'),
+(145, 9, 4, 2, '2026-05-15 00:00:00', '2026-05-16 23:59:59', '2026-05-15 07:12:09'),
+(146, 9, 9, 3, '2026-05-29 00:00:00', '2026-05-30 23:59:59', '2026-05-21 01:13:42'),
+(147, 8, 6, 2, '2026-05-25 00:00:00', '2026-05-26 23:59:59', '2026-05-21 01:33:35'),
+(148, 9, 6, 2, '2026-06-12 00:00:00', '2026-06-15 23:59:59', '2026-06-11 01:47:15');
 
 -- --------------------------------------------------------
 
@@ -239,7 +251,25 @@ INSERT INTO `bookingstatuslog` (`booking_log_id`, `booking_id`, `status_value`, 
 (85, 138, 'CANCELLED', 13, '2026-05-12 10:01:47', 'Auto-cancelled by renter'),
 (86, 138, 'CANCELLED', 13, '2026-05-12 10:01:48', 'Auto-cancelled by renter'),
 (87, 139, 'PENDING', 13, '2026-05-12 10:04:53', 'Booking initiated by renter'),
-(89, 141, 'PENDING', 5, '2026-05-14 04:36:58', 'Booking initiated by renter');
+(89, 141, 'PENDING', 5, '2026-05-14 04:36:58', 'Booking initiated by renter'),
+(91, 143, 'PENDING', 5, '2026-05-14 05:38:19', 'Booking initiated by renter'),
+(92, 143, 'CANCELLED', 5, '2026-05-14 05:44:18', 'Mistake in choosing vehicle'),
+(93, 144, 'PENDING', 13, '2026-05-14 09:33:27', 'Booking initiated by renter'),
+(94, 141, 'CONFIRMED', 3, '2026-05-15 06:47:20', 'Booking confirmed by owner'),
+(95, 144, 'CONFIRMED', 3, '2026-05-15 07:10:21', 'Booking confirmed by owner'),
+(96, 145, 'PENDING', 13, '2026-05-15 07:12:09', 'Booking initiated by renter'),
+(97, 145, 'CANCELLED', 13, '2026-05-15 07:12:09', 'Auto-cancelled by renter'),
+(98, 145, 'CANCELLED', 13, '2026-05-15 07:12:11', 'Auto-cancelled by renter'),
+(99, 105, 'CANCELLED', 3, '2026-05-15 07:17:48', 'Past expiry'),
+(100, 136, 'CONFIRMED', 4, '2026-05-15 07:51:46', 'Booking confirmed by owner'),
+(101, 136, 'ACTIVE', 4, '2026-05-15 07:52:00', 'Customer has pickup the vehicle'),
+(102, 146, 'PENDING', 13, '2026-05-21 01:13:42', 'Booking initiated by renter'),
+(103, 147, 'PENDING', 12, '2026-05-21 01:33:35', 'Booking initiated by renter'),
+(104, 147, 'CONFIRMED', 3, '2026-05-21 01:37:32', 'User has paid'),
+(105, 148, 'PENDING', 13, '2026-06-11 01:47:15', 'Booking initiated by renter'),
+(106, 148, 'CONFIRMED', 3, '2026-06-11 01:53:19', 'Customer has paid'),
+(107, 148, 'ACTIVE', 3, '2026-06-11 01:54:53', 'Vehicle handed over'),
+(108, 148, 'COMPLETED', 3, '2026-06-11 01:57:34', 'Vehicle returned, good condition | [Early Return] Vehicle returned 4 day(s) before scheduled end date.');
 
 -- --------------------------------------------------------
 
@@ -318,7 +348,13 @@ INSERT INTO `invoices` (`invoice_id`, `booking_id`, `fleet_owner_id`, `renter_id
 (36, 136, 3, 9, 'INV-1777887378709', '2026-05-04', '2026-05-11', 850.00, 'Auto-generated invoice for Booking #136', 'PAID'),
 (38, 138, 3, 9, 'INV-1778580107398', '2026-05-12', '2026-05-19', 220.00, 'Auto-generated invoice for Booking #138', 'ISSUED'),
 (39, 139, 3, 9, 'INV-1778580293244', '2026-05-12', '2026-05-19', 220.00, 'Auto-generated invoice for Booking #139', 'PAID'),
-(41, 141, 2, 1, 'INV-1778733418177', '2026-05-14', '2026-05-21', 500.00, 'Auto-generated invoice for Booking #141', 'ISSUED');
+(41, 141, 2, 1, 'INV-1778733418177', '2026-05-14', '2026-05-21', 500.00, 'Auto-generated invoice for Booking #141', 'PAID'),
+(43, 143, 1, 1, 'INV-1778737099153', '2026-05-14', '2026-05-21', 150.00, 'Auto-generated invoice for Booking #143', 'ISSUED'),
+(44, 144, 2, 9, 'INV-1778751207146', '2026-05-14', '2026-05-21', 450.00, 'Auto-generated invoice for Booking #144', 'PAID'),
+(45, 145, 2, 9, 'INV-1778829129866', '2026-05-15', '2026-05-22', 350.00, 'Auto-generated invoice for Booking #145', 'ISSUED'),
+(46, 146, 3, 9, 'INV-1779326022834', '2026-05-21', '2026-05-28', 900.00, 'Auto-generated invoice for Booking #146', 'ISSUED'),
+(47, 147, 2, 8, 'INV-1779327215222', '2026-05-21', '2026-05-28', 500.00, 'Auto-generated invoice for Booking #147', 'PAID'),
+(48, 148, 2, 9, 'INV-1781142436006', '2026-06-11', '2026-06-18', 1500.00, 'Auto-generated invoice for Booking #148', 'PAID');
 
 -- --------------------------------------------------------
 
@@ -331,7 +367,7 @@ CREATE TABLE `payments` (
   `invoice_id` int(11) NOT NULL,
   `payment_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `amount` decimal(10,2) NOT NULL,
-  `payment_method` enum('CREDIT_CARD','BANK_TRANSFER','QR_PAYMENT','CASH') NOT NULL,
+  `payment_method` enum('CREDIT_CARD','BANK_TRANSFER','QR_PAYMENT','CASH','FPX') NOT NULL,
   `payment_status` enum('PENDING','VERIFIED','FAILED') DEFAULT 'PENDING',
   `transaction_reference` varchar(255) DEFAULT NULL,
   `verification_proof_url` varchar(1024) DEFAULT NULL,
@@ -351,8 +387,8 @@ CREATE TABLE `payments` (
 
 INSERT INTO `payments` (`payment_id`, `invoice_id`, `payment_date`, `amount`, `payment_method`, `payment_status`, `transaction_reference`, `verification_proof_url`, `verified_by_user_id`, `toyyibpay_bill_code`, `gateway_ref_no`, `platform_commission`, `owner_payout`, `commission_rate`, `payout_mode`, `split_payment_enabled`) VALUES
 (1, 1, '2025-05-01 01:05:00', 1760.00, 'BANK_TRANSFER', 'VERIFIED', 'FPX_99887711', 'https://receipts/1.pdf', 1, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
-(2, 2, '2025-07-20 06:05:00', 1350.00, 'CREDIT_CARD', 'VERIFIED', 'ch_3Lz9922aa', 'https://receipts/2.pdf', 1, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
-(3, 3, '2025-02-20 02:05:00', 1610.00, 'CREDIT_CARD', 'VERIFIED', 'tx_int_8877', 'https://receipts/3.pdf', 1, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
+(2, 2, '2025-07-20 06:05:00', 1350.00, 'FPX', 'VERIFIED', 'ch_3Lz9922aa', 'https://receipts/2.pdf', 1, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
+(3, 3, '2025-02-20 02:05:00', 1610.00, 'FPX', 'VERIFIED', 'tx_int_8877', 'https://receipts/3.pdf', 1, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
 (4, 4, '2025-07-10 00:05:00', 120.00, 'QR_PAYMENT', 'VERIFIED', 'tng_223344', 'https://receipts/4.pdf', 1, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
 (11, 12, '2026-03-19 03:44:08', 450.00, 'CASH', 'VERIFIED', 'CASH-1768794248864', NULL, 2, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
 (12, 13, '2026-03-19 03:44:57', 390.00, 'BANK_TRANSFER', 'VERIFIED', 'TRANSFER-1768794297830', '/uploads/payments/payment-113-1768794297823-ed3dc4a0.pdf', 2, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
@@ -361,13 +397,18 @@ INSERT INTO `payments` (`payment_id`, `invoice_id`, `payment_date`, `amount`, `p
 (15, 14, '2026-03-21 01:22:26', 2550.00, 'BANK_TRANSFER', 'PENDING', 'BANK_TRANSFER-1768958546826', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
 (16, 17, '2026-03-21 02:20:00', 450.00, 'BANK_TRANSFER', 'VERIFIED', 'TRANSFER-1768962000482', '/uploads/payments/payment-117-1768962000471-a4e3885b.pdf', 2, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
 (17, 19, '2026-04-25 07:52:28', 380.00, 'CASH', 'VERIFIED', 'CASH-1772005948404', NULL, 2, NULL, NULL, NULL, NULL, NULL, 'BYOK', 0),
-(23, 24, '2026-04-14 07:35:51', 245.00, 'CREDIT_CARD', 'VERIFIED', 'TP-RETURN-FS-124-1776152151677', NULL, NULL, 'ipwhz68a', NULL, NULL, NULL, NULL, 'BYOK', 0),
-(24, 25, '2026-04-15 01:25:53', 245.00, 'CREDIT_CARD', 'VERIFIED', 'TP-RETURN-FS-125-1776216353255', NULL, NULL, 'zwfi8qqz', NULL, NULL, NULL, NULL, 'BYOK', 0),
-(25, 26, '2026-04-19 09:03:12', 150.00, 'CREDIT_CARD', 'VERIFIED', 'TP-RETURN-FS-126-1776589392743', NULL, NULL, '6yx7mepb', NULL, NULL, NULL, NULL, 'BYOK', 0),
-(26, 27, '2026-04-22 01:28:36', 690.00, 'CREDIT_CARD', 'VERIFIED', 'TP-RETURN-FS-127-1776821316627', NULL, NULL, '2pnlncsh', NULL, NULL, NULL, NULL, 'BYOK', 0),
-(36, 35, '2026-04-27 08:25:28', 245.00, 'CREDIT_CARD', 'FAILED', 'GATEWAY-1777278328150', NULL, NULL, 'dakndhhh', NULL, NULL, NULL, NULL, 'BYOK', 0),
-(37, 36, '2026-05-04 09:38:20', 850.00, 'CREDIT_CARD', 'VERIFIED', 'TP-RETURN-FS-136-1777887500644', NULL, NULL, '0ql23kxh', NULL, 85.00, 765.00, 0.1000, 'BYOK', 1),
-(46, 39, '2026-05-12 10:06:54', 220.00, 'CREDIT_CARD', 'VERIFIED', 'TP-RETURN-FS-139-1778580414228', NULL, NULL, '8zgvlaw8', NULL, 22.00, 198.00, 0.1000, 'BYOK', 1);
+(23, 24, '2026-04-14 07:35:51', 245.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-124-1776152151677', NULL, NULL, 'ipwhz68a', NULL, NULL, NULL, NULL, 'BYOK', 0),
+(24, 25, '2026-04-15 01:25:53', 245.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-125-1776216353255', NULL, NULL, 'zwfi8qqz', NULL, NULL, NULL, NULL, 'BYOK', 0),
+(25, 26, '2026-04-19 09:03:12', 150.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-126-1776589392743', NULL, NULL, '6yx7mepb', NULL, NULL, NULL, NULL, 'BYOK', 0),
+(26, 27, '2026-04-22 01:28:36', 690.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-127-1776821316627', NULL, NULL, '2pnlncsh', NULL, NULL, NULL, NULL, 'BYOK', 0),
+(36, 35, '2026-04-27 08:25:28', 245.00, 'FPX', 'FAILED', 'GATEWAY-1777278328150', NULL, NULL, 'dakndhhh', NULL, NULL, NULL, NULL, 'BYOK', 0),
+(37, 36, '2026-05-04 09:38:20', 850.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-136-1777887500644', NULL, NULL, '0ql23kxh', NULL, 85.00, 765.00, 0.1000, 'BYOK', 1),
+(46, 39, '2026-05-12 10:06:54', 220.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-139-1778580414228', NULL, NULL, '8zgvlaw8', NULL, 22.00, 198.00, 0.1000, 'BYOK', 1),
+(48, 41, '2026-05-14 04:40:52', 500.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-141-1778733652826', NULL, NULL, 'o8ropz3z', NULL, 50.00, 450.00, 0.1000, 'BYOK', 1),
+(49, 44, '2026-05-15 07:09:54', 450.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-144-1778828994558', NULL, NULL, 'mx01waaa', NULL, 45.00, 405.00, 0.1000, 'BYOK', 1),
+(50, 46, '2026-05-21 01:17:41', 900.00, 'FPX', 'PENDING', 'GATEWAY-1779326261510', NULL, NULL, 'wr71kzuo', NULL, 90.00, 810.00, 0.1000, 'BYOK', 1),
+(51, 47, '2026-05-21 01:35:03', 500.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-147-1779327303118', NULL, NULL, '6gan9a1w', NULL, 50.00, 450.00, 0.1000, 'BYOK', 1),
+(52, 48, '2026-06-11 01:48:17', 1500.00, 'FPX', 'VERIFIED', 'TP-RETURN-FS-148-1781142497674', NULL, NULL, 'cvo5c3ac', NULL, 150.00, 1350.00, 0.1000, 'BYOK', 1);
 
 -- --------------------------------------------------------
 
@@ -423,7 +464,16 @@ INSERT INTO `paymentstatuslog` (`payment_log_id`, `payment_id`, `status_value`, 
 (58, 37, 'VERIFIED', NULL, '2026-05-04 09:39:00', 'Payment verified via ToyyibPay return. Order: FS-136-1777887500644'),
 (75, 17, 'VERIFIED', 2, '2026-05-06 08:50:38', 'Payment verified by owner'),
 (76, 46, 'PENDING', 13, '2026-05-12 10:06:54', 'Online payment (Card/FPX) initiated via ToyyibPay'),
-(77, 46, 'VERIFIED', NULL, '2026-05-12 10:07:34', 'Payment verified via ToyyibPay return. Order: FS-139-1778580414228');
+(77, 46, 'VERIFIED', NULL, '2026-05-12 10:07:34', 'Payment verified via ToyyibPay return. Order: FS-139-1778580414228'),
+(80, 48, 'PENDING', 5, '2026-05-14 04:40:52', 'Online payment (Card/FPX) initiated via ToyyibPay'),
+(81, 48, 'VERIFIED', NULL, '2026-05-14 04:41:08', 'Payment verified via ToyyibPay return. Order: FS-141-1778733652826'),
+(82, 49, 'PENDING', 13, '2026-05-15 07:09:54', 'Online payment (Card/FPX) initiated via ToyyibPay'),
+(83, 49, 'VERIFIED', NULL, '2026-05-15 07:10:09', 'Payment verified via ToyyibPay return. Order: FS-144-1778828994558'),
+(84, 50, 'PENDING', 13, '2026-05-21 01:17:41', 'Online payment (Card/FPX) initiated via ToyyibPay'),
+(85, 51, 'PENDING', 12, '2026-05-21 01:35:03', 'Online payment (Card/FPX) initiated via ToyyibPay'),
+(86, 51, 'VERIFIED', NULL, '2026-05-21 01:35:18', 'Payment verified via ToyyibPay return. Order: FS-147-1779327303118'),
+(87, 52, 'PENDING', 13, '2026-06-11 01:48:17', 'Online payment (Card/FPX) initiated via ToyyibPay'),
+(88, 52, 'VERIFIED', NULL, '2026-06-11 01:48:53', 'Payment verified via ToyyibPay return. Order: FS-148-1781142497674');
 
 -- --------------------------------------------------------
 
@@ -464,14 +514,14 @@ CREATE TABLE `renters` (
 --
 
 INSERT INTO `renters` (`renter_id`, `user_id`, `full_name`, `phone_number`, `updated_at`) VALUES
-(1, 5, 'Nurul Izzah binti Ahmad Jailani', '+6011223344555', '2026-01-01 12:28:54'),
+(1, 5, 'Nurul Izzah binti Ahmad Jailani', '+6011223344555', '2026-05-14 07:55:43'),
 (2, 6, 'Jason Lee Keng Wee', '+6012-3456789', '2025-11-24 02:55:07'),
 (3, 7, 'Muthu Kumar a/l Balakrishnan', '+6013-9876543', '2025-11-24 02:55:07'),
 (4, 8, 'Sarah Jenkins', '+44-7700900000', '2025-11-24 02:55:07'),
 (5, 9, 'Awang Damit', '+6019-8765432', '2025-11-24 02:55:07'),
 (6, 10, 'Naim Najmi', '+601125696678', '2026-01-20 02:05:07'),
 (7, 11, 'Naim Najmi', '60377214000', '2026-01-19 03:20:40'),
-(8, 12, 'Mazrini Bot', '0193220658', '2026-01-19 03:46:57'),
+(8, 12, 'Mazrini Bot', '0193220658', '2026-05-21 01:31:36'),
 (9, 13, 'Haris Farhan', '01139590996', '2026-04-25 09:08:28');
 
 -- --------------------------------------------------------
@@ -549,13 +599,13 @@ INSERT INTO `vehiclemaintenance` (`maintenance_id`, `vehicle_id`, `fleet_owner_i
 (8, 3, 1, 'Battery replacement (old battery weak)', '2025-08-08', '2025-08-08 11:00:00', '2025-08-08 13:00:00', 280.00, 280.00, 'COMPLETED', '2025-08-04 22:00:00', 0, NULL, NULL, NULL),
 (9, 4, 2, '30,000 km major service - Full inspection, all fluids changed', '2025-05-10', '2025-05-10 08:00:00', '2025-05-10 18:00:00', 850.00, 925.00, 'COMPLETED', '2025-04-30 17:00:00', 0, NULL, NULL, NULL),
 (10, 4, 2, 'Suspension check and alignment after off-road trip', '2025-07-25', '2025-07-25 09:00:00', '2025-07-25 15:00:00', 380.00, 380.00, 'COMPLETED', '2025-07-19 20:00:00', 0, NULL, NULL, NULL),
-(11, 4, 2, 'Replace cabin air filter and engine air filter', '2025-10-05', NULL, NULL, 150.00, NULL, 'PENDING', '2025-09-30 18:00:00', 0, NULL, NULL, NULL),
+(11, 4, 2, 'Replace cabin air filter and engine air filter', '2025-10-05', NULL, NULL, 150.00, NULL, 'CANCELLED', '2025-09-30 18:00:00', 0, NULL, NULL, NULL),
 (12, 5, 2, 'Diesel engine 25,000 km service - Oil, diesel filter, inspection', '2025-03-20', '2025-03-20 08:00:00', '2025-03-20 17:00:00', 520.00, 520.00, 'COMPLETED', '2025-03-14 17:00:00', 0, NULL, NULL, NULL),
 (13, 5, 2, '4x4 system check and differential oil change', '2025-06-15', '2025-06-15 09:00:00', '2025-06-15 16:00:00', 680.00, 720.00, 'COMPLETED', '2025-06-09 19:00:00', 0, NULL, NULL, NULL),
 (14, 5, 2, 'Brake system overhaul (front and rear)', '2025-11-10', '2025-11-10 08:00:00', NULL, 950.00, NULL, 'IN_PROGRESS', '2025-11-09 16:30:00', 0, NULL, NULL, NULL),
 (15, 6, 2, '10,000 km service - Oil change and multi-point inspection', '2025-01-25', '2025-01-25 09:00:00', '2025-01-25 15:00:00', 450.00, 450.00, 'COMPLETED', '2025-01-19 18:00:00', 0, NULL, NULL, NULL),
 (16, 6, 2, 'Underbody wash and rust protection treatment', '2025-04-28', '2025-04-28 10:00:00', '2025-04-28 14:00:00', 280.00, 280.00, 'COMPLETED', '2025-04-24 21:00:00', 0, NULL, NULL, NULL),
-(17, 6, 2, 'Scheduled 15,000 km service', '2026-02-20', NULL, NULL, 480.00, NULL, 'PENDING', '2026-02-14 17:00:00', 0, NULL, NULL, NULL),
+(17, 6, 2, 'Scheduled 15,000 km service', '2026-02-20', NULL, NULL, 480.00, NULL, 'CANCELLED', '2026-02-14 17:00:00', 0, NULL, NULL, NULL),
 (18, 7, 3, 'First 5,000 km service - Complimentary service', '2024-10-10', '2024-10-10 09:00:00', '2024-10-10 14:00:00', 0.00, 0.00, 'COMPLETED', '2024-10-04 17:00:00', 0, NULL, NULL, NULL),
 (19, 7, 3, '10,000 km service - Oil change, filters, brake inspection', '2025-04-18', '2025-04-18 09:00:00', '2025-04-18 15:00:00', 380.00, 380.00, 'COMPLETED', '2025-04-14 18:00:00', 0, NULL, NULL, NULL),
 (20, 7, 3, 'Professional detailing and paint protection', '2025-08-12', '2025-08-12 08:00:00', '2025-08-12 17:00:00', 550.00, 550.00, 'COMPLETED', '2025-08-07 19:00:00', 0, NULL, NULL, NULL),
@@ -571,7 +621,8 @@ INSERT INTO `vehiclemaintenance` (`maintenance_id`, `vehicle_id`, `fleet_owner_i
 (34, 13, 1, 'Oil replacement', '2026-04-20', NULL, NULL, 200.00, NULL, 'PENDING', '2026-04-14 01:37:06', 1, '2026-04-14 09:43:26', NULL, NULL),
 (35, 13, 1, 'Oil change', '2026-04-20', NULL, NULL, NULL, NULL, 'CANCELLED', '2026-04-14 01:43:53', 0, NULL, NULL, NULL),
 (36, 10, 1, 'oil change', '2026-04-21', '2026-04-15 09:21:55', NULL, 220.00, NULL, 'IN_PROGRESS', '2026-04-15 01:21:38', 0, NULL, NULL, 'AVAILABLE'),
-(37, 15, 1, 'Oil change', '2026-04-28', '2026-04-22 09:34:26', '2026-04-22 09:34:41', 120.00, 145.00, 'COMPLETED', '2026-04-22 01:33:37', 0, NULL, NULL, 'AVAILABLE');
+(37, 15, 1, 'Oil change', '2026-04-28', '2026-04-22 09:34:26', '2026-04-22 09:34:41', 120.00, 145.00, 'COMPLETED', '2026-04-22 01:33:37', 0, NULL, NULL, 'AVAILABLE'),
+(38, 5, 2, 'Oil change', '2026-05-20', '2026-05-15 15:07:59', '2026-05-15 15:08:05', 130.00, 130.00, 'COMPLETED', '2026-05-15 07:07:36', 0, NULL, NULL, 'AVAILABLE');
 
 -- --------------------------------------------------------
 
@@ -669,7 +720,12 @@ INSERT INTO `vehiclemaintenancelog` (`maintenance_log_id`, `maintenance_id`, `st
 (78, 37, 'IN_PROGRESS', 2, '2026-04-22 01:34:26', ''),
 (79, 37, 'COMPLETED', 2, '2026-04-22 01:34:41', ''),
 (80, 26, 'IN_PROGRESS', 4, '2026-05-12 09:58:45', ''),
-(81, 26, 'COMPLETED', 4, '2026-05-12 09:58:53', 'Done');
+(81, 26, 'COMPLETED', 4, '2026-05-12 09:58:53', 'Done'),
+(82, 38, 'PENDING', 3, '2026-05-15 07:07:36', 'Maintenance scheduled'),
+(83, 38, 'IN_PROGRESS', 3, '2026-05-15 07:07:59', 'Earlier due to open slot'),
+(84, 38, 'COMPLETED', 3, '2026-05-15 07:08:05', ''),
+(85, 11, 'CANCELLED', 3, '2026-05-15 07:43:24', 'Workshop closed'),
+(86, 17, 'CANCELLED', 3, '2026-05-15 07:43:50', 'Past expiry');
 
 -- --------------------------------------------------------
 
@@ -896,7 +952,7 @@ ALTER TABLE `bookings`
 -- AUTO_INCREMENT for table `bookingstatuslog`
 --
 ALTER TABLE `bookingstatuslog`
-  MODIFY `booking_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `booking_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
 
 --
 -- AUTO_INCREMENT for table `fleetowners`
@@ -920,7 +976,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `paymentstatuslog`
 --
 ALTER TABLE `paymentstatuslog`
-  MODIFY `payment_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `payment_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT for table `platformadmins`
@@ -944,13 +1000,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `vehiclemaintenance`
 --
 ALTER TABLE `vehiclemaintenance`
-  MODIFY `maintenance_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `maintenance_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `vehiclemaintenancelog`
 --
 ALTER TABLE `vehiclemaintenancelog`
-  MODIFY `maintenance_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `maintenance_log_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 
 --
 -- AUTO_INCREMENT for table `vehiclepricehistory`
