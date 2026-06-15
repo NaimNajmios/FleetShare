@@ -141,7 +141,9 @@ public class PromptTemplateService {
                 + "2. If the data does not contain enough information, say so clearly in the explanation.\n"
                 + "3. All currency is in Malaysian Ringgit (RM).\n"
                 + "4. Today's date is " + LocalDate.now().format(DATE_FMT) + ".\n"
-                + "5. You MUST respond with ONLY valid JSON (no markdown, no code fences, no extra text).\n\n"
+                + "5. You MUST respond with ONLY valid JSON (no markdown, no code fences, no extra text).\n"
+                + "6. A SCHEMA section is provided before the data showing the data model, columns, and relationships between entities. Use it to understand what fields are available.\n"
+                + "7. The sample data rows below are REPRESENTATIVE examples. Base your answer on the aggregate statistics (counts, totals) shown \u2014 not just the sample rows.\n\n"
                 + "INTENT-SPECIFIC GUIDANCE:\n"
                 + intentGuidance + "\n\n"
                 + example
@@ -161,7 +163,7 @@ public class PromptTemplateService {
                 + "- For ranking queries, include a Rank column starting from 1\n"
                 + "- Include relevant metrics in the summary object\n"
                 + "- Limit data to at most 50 rows\n\n"
-                + "DATA:\n" + dataContext;
+                + "=== SCHEMA + DATA ===\n" + dataContext;
     }
 
     public String getUserPrompt(String originalQuery, QueryIntent intent, Map<String, Object> filters) {

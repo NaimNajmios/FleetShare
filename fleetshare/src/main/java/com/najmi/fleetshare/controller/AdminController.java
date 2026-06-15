@@ -909,7 +909,7 @@ public class AdminController {
     }
 
     @Autowired
-    private com.najmi.fleetshare.service.AiAssistantService aiAssistantService;
+    private com.najmi.fleetshare.service.AiReportFacade aiReportFacade;
 
     @GetMapping("/ai-reports")
     public String aiReports(Model model) {
@@ -920,20 +920,11 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<com.najmi.fleetshare.dto.AiQueryResponse> aiQuery(
             @RequestBody com.najmi.fleetshare.dto.AiQueryRequest request, HttpSession session) {
-        SessionUser user = SessionHelper.getCurrentUser(session);
-        if (user == null || user.getAdminDetails() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(com.najmi.fleetshare.dto.AiQueryResponse.error("Unauthorized"));
+        com.najmi.fleetshare.dto.AiQueryResponse response = aiReportFacade.handleQuery(request, session, true);
+        if ("Unauthorized".equals(response.getError())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-
-        try {
-            com.najmi.fleetshare.dto.AiQueryResponse response = aiAssistantService.processQuery(
-                    request.getQuery(), user.getUserId(), true, request.getProvider());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(com.najmi.fleetshare.dto.AiQueryResponse.error("AI service error: " + e.getMessage()));
-        }
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/api/ai-query/download")
@@ -942,42 +933,14 @@ public class AdminController {
             @RequestBody com.najmi.fleetshare.dto.AiQueryRequest request,
             @RequestParam(defaultValue = "pdf") String format,
             HttpSession session) {
-        SessionUser user = SessionHelper.getCurrentUser(session);
-        if (user == null || user.getAdminDetails() == null) {
+        var result = aiReportFacade.handleDownload(request, format, session, true);
+        if (result == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        try {
-            com.najmi.fleetshare.dto.AiQueryResponse aiResponse = aiAssistantService.processQuery(
-                    request.getQuery(), user.getUserId(), true, request.getProvider());
-
-            if (!aiResponse.isSuccess()) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            byte[] content;
-            String contentType;
-            String filename;
-
-            List<String> remarks = request.getRemarks();
-
-            if ("csv".equalsIgnoreCase(format)) {
-                content = reportService.generateAiCsvReport(aiResponse, remarks);
-                contentType = "text/csv";
-                filename = "ai-report.csv";
-            } else {
-                content = reportService.generateAiPdfReport(aiResponse, request.getQuery(), remarks);
-                contentType = "application/pdf";
-                filename = "ai-report.pdf";
-            }
-
-            return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=" + filename)
-                    .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
-                    .body(content);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=" + result.filename)
+                .contentType(org.springframework.http.MediaType.parseMediaType(result.contentType))
+                .body(result.content);
     }
 
     @GetMapping("/vehicles")

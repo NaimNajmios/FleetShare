@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
@@ -79,6 +80,9 @@ public class AiAssistantService {
     @Value("${ai.assistant.max-data-rows:50}")
     private int maxDataRows;
 
+    @Value("${ai.assistant.sample-rows:5}")
+    private int sampleRows;
+
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -93,6 +97,18 @@ public class AiAssistantService {
         log.info("GROQ_API_KEY status: {}", maskedKey);
     }
 
+    private static class AiQueryCache {
+        final String query;
+        final AiQueryResponse response;
+        final java.time.Instant cachedAt;
+
+        AiQueryCache(String query, AiQueryResponse response) {
+            this.query = query;
+            this.response = response;
+            this.cachedAt = java.time.Instant.now();
+        }
+    }
+
     /**
      * Process a natural-language query against the fleet data.
      * 
@@ -103,6 +119,23 @@ public class AiAssistantService {
      * @return Structured AI response
      */
     public AiQueryResponse processQuery(String query, Long ownerId, boolean isAdmin, String provider) {
+        return processQuery(query, ownerId, isAdmin, provider, null);
+    }
+
+    /**
+     * Process a natural-language query with session-aware caching.
+     * Caches the last successful response per session to avoid redundant LLM calls.
+     */
+    public AiQueryResponse processQuery(String query, Long ownerId, boolean isAdmin, String provider, HttpSession session) {
+        if (session != null) {
+            String cacheKey = "aiQuery_cache_" + ownerId;
+            AiQueryCache cache = (AiQueryCache) session.getAttribute(cacheKey);
+            if (cache != null && cache.query.equals(query)) {
+                log.debug("Returning cached AI response for query: {}", query);
+                return cache.response;
+            }
+        }
+
         if (query == null || query.trim().isEmpty()) {
             return AiQueryResponse.error("Please enter a question.");
         }
@@ -132,7 +165,13 @@ public class AiAssistantService {
 
             String rawResponse = callLlmApiWithRetry(systemPrompt, userPrompt, activeProvider);
 
-            return parseAiResponse(rawResponse);
+            AiQueryResponse response = parseAiResponse(rawResponse);
+
+            if (session != null && response.isSuccess()) {
+                session.setAttribute("aiQuery_cache_" + ownerId, new AiQueryCache(query, response));
+            }
+
+            return response;
 
         } catch (Exception e) {
             String message = e.getMessage();
@@ -150,6 +189,25 @@ public class AiAssistantService {
 
     // ==================== DATA CONTEXT BUILDER ====================
 
+    private String buildSchema() {
+        return """
+               === SCHEMA ===
+               Vehicle: vehicleId, brand, model, registrationNo, manufacturingYear, category, ratePerDay, fuelType, transmissionType, mileage, status, city, state, fleetOwnerId, ownerBusinessName
+               Booking: bookingId, vehicleId, renterName, renterEmail, startDate, endDate, totalCost, status, createdAt, paymentMethod, paymentStatus, invoiceNumber
+               Payment: paymentId, invoiceNumber, amount, paymentMethod, paymentStatus, paymentDate, renterName
+               Maintenance: id, vehicleId, description, scheduledDate, status, estimatedCost, finalCost
+               FleetOwner: businessName, isVerified, contactPhone
+               Renter: fullName, email, isActive
+
+               Relationships:
+                 FleetOwner 1──N Vehicle (via fleetOwnerId)
+                 Vehicle   1──N Booking (via vehicleId)
+                 Booking   1──1 Payment (via invoiceNumber)
+                 Vehicle   1──N Maintenance (via vehicleId)
+
+               """;
+    }
+
     /**
      * Builds a compact text summary of fleet data for the LLM prompt context.
      * For owners: only their fleet data.
@@ -158,6 +216,7 @@ public class AiAssistantService {
     private String buildDataContext(Long ownerId, boolean isAdmin, java.time.LocalDate fromDate, java.time.LocalDate toDate, Map<String, Object> filters) {
         StringBuilder ctx = new StringBuilder();
         ctx.append("=== FLEET DATA SNAPSHOT (as of ").append(LocalDate.now().format(DATE_FMT)).append(") ===\n");
+        ctx.append(buildSchema());
 
         if (fromDate != null && toDate != null) {
             ctx.append("Period: ").append(fromDate.format(DATE_FMT)).append(" to ").append(toDate.format(DATE_FMT)).append("\n");
@@ -177,7 +236,7 @@ public class AiAssistantService {
                         Collectors.counting()));
         statusCounts.forEach((s, c) -> ctx.append("  ").append(s).append(": ").append(c).append("\n"));
         ctx.append("  Details:\n");
-        for (VehicleDTO v : vehicles.stream().limit(maxDataRows).collect(Collectors.toList())) {
+        for (VehicleDTO v : vehicles.stream().limit(sampleRows).collect(Collectors.toList())) {
             ctx.append("  - ").append(v.getBrand()).append(" ").append(v.getModel())
                     .append(" (").append(v.getRegistrationNo()).append(")")
                     .append(" | Status: ").append(v.getStatus())
@@ -216,7 +275,7 @@ public class AiAssistantService {
         bookings.stream()
                 .sorted(Comparator.comparing(BookingDTO::getCreatedAt,
                         Comparator.nullsLast(Comparator.reverseOrder())))
-                .limit(maxDataRows)
+                .limit(sampleRows)
                 .forEach(b -> {
                     ctx.append("  - #").append(b.getBookingId())
                             .append(" | ").append(b.getVehicleBrand()).append(" ").append(b.getVehicleModel())
@@ -265,7 +324,7 @@ public class AiAssistantService {
         payments.stream()
                 .sorted(Comparator.comparing(PaymentDTO::getPaymentDate,
                         Comparator.nullsLast(Comparator.reverseOrder())))
-                .limit(maxDataRows)
+                .limit(sampleRows)
                 .forEach(p -> {
                     ctx.append("  - #").append(p.getPaymentId())
                             .append(" | Invoice: ").append(p.getInvoiceNumber() != null ? p.getInvoiceNumber() : "N/A")
@@ -302,7 +361,7 @@ public class AiAssistantService {
         maintenance.stream()
                 .sorted(Comparator.comparing(MaintenanceDTO::getScheduledDate,
                         Comparator.nullsLast(Comparator.reverseOrder())))
-                .limit(maxDataRows)
+                .limit(sampleRows)
                 .forEach(m -> {
                     ctx.append("  - ").append(m.getVehicleBrand()).append(" ").append(m.getVehicleModel())
                             .append(" (").append(m.getVehicleRegistrationNo()).append(")")
