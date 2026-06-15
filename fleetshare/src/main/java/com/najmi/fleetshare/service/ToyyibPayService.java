@@ -20,6 +20,12 @@ import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
+
 @Service
 public class ToyyibPayService {
 
@@ -75,6 +81,7 @@ public class ToyyibPayService {
     /**
      * Creates a bill on ToyyibPay using the Central Payout model (platform credentials + split payment).
      * Falls back to BYOK (owner credentials) if platform is not configured or owner lacks a username.
+     * Uses Spring Retry with exponential backoff for transient API failures.
      *
      * @param owner              The fleet owner
      * @param payment            The payment entity
@@ -86,6 +93,12 @@ public class ToyyibPayService {
      * @param ownerPayout        Owner payout amount (null for BYOK fallback)
      * @return The bill code returned by ToyyibPay
      */
+    @Retryable(
+        retryFor = { ResourceAccessException.class, HttpServerErrorException.class },
+        noRetryFor = { IllegalStateException.class, IllegalArgumentException.class },
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 7000)
+    )
     public String createBill(FleetOwner owner, Payment payment, BookingDTO booking,
                              String renterEmail, String renterPhone, String renterName,
                              BigDecimal platformCommission, BigDecimal ownerPayout) {
@@ -223,6 +236,21 @@ public class ToyyibPayService {
             logger.error("Error creating ToyyibPay bill: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create ToyyibPay bill: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Recovery method invoked when all createBill retry attempts are exhausted.
+     */
+    @Recover
+    public String createBillRecover(RuntimeException e, FleetOwner owner, Payment payment,
+                                     BookingDTO booking, String renterEmail, String renterPhone,
+                                     String renterName, java.math.BigDecimal platformCommission,
+                                     java.math.BigDecimal ownerPayout) {
+        logger.error("All retry attempts exhausted for createBill. Owner={}, Booking#={}: {}",
+                owner != null ? owner.getFleetOwnerId() : "null",
+                booking != null ? booking.getBookingId() : "null",
+                e.getMessage());
+        throw new RuntimeException("Payment gateway is temporarily unavailable. Please try again later.", e);
     }
 
     /**

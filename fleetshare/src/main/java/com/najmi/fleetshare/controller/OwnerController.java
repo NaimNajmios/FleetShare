@@ -1310,6 +1310,32 @@ public class OwnerController {
         return "owner/payout-dashboard";
     }
 
+    /**
+     * Exports owner payout data as a CSV file.
+     */
+    @GetMapping("/payout-dashboard/export")
+    public ResponseEntity<byte[]> exportPayoutCsv(HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getOwnerDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            Long ownerId = user.getOwnerDetails().getFleetOwnerId();
+            java.util.List<com.najmi.fleetshare.dto.PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId);
+            byte[] csv = paymentService.buildPayoutCsv(payments, false);
+            String filename = "payout-report-" + LocalDate.now() + ".csv";
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + filename)
+                    .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
+                    .body(csv);
+        } catch (Exception e) {
+            logger.error("Exception exporting payout CSV: ", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("/reports")
     public String reports(HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);

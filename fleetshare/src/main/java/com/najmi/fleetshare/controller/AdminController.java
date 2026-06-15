@@ -1392,6 +1392,31 @@ public class AdminController {
         return "admin/payout-dashboard";
     }
 
+    /**
+     * Exports payout data as a CSV file.
+     */
+    @GetMapping("/payout-dashboard/export")
+    public ResponseEntity<byte[]> exportPayoutCsv(HttpSession session) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            var payments = paymentService.getAllPayments();
+            byte[] csv = paymentService.buildPayoutCsv(payments, true);
+            String filename = "payout-report-" + LocalDate.now() + ".csv";
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + filename)
+                    .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
+                    .body(csv);
+        } catch (Exception e) {
+            logger.error("Exception exporting payout CSV: ", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     // ── Sticky Note Dashboard Agenda (platform-wide) ──
 
     private Map<String, List<AgendaItemDTO>> buildDashboardAgenda(

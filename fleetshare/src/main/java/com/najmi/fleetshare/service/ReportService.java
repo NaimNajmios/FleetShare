@@ -60,6 +60,7 @@ public class ReportService {
             case "booking" -> generateBookingReport(request);
             case "vehicle" -> generateVehicleReport(request);
             case "payment" -> generatePaymentReport(request);
+            case "payout" -> generatePayoutReport(request);
             case "maintenance" -> generateMaintenanceReport(request);
             case "user" -> generateUserReport(request);
             default -> throw new IllegalArgumentException("Unknown report category: " + request.getCategory());
@@ -267,6 +268,7 @@ public class ReportService {
             case "booking" -> generateBookingReport(request);
             case "vehicle" -> generateVehicleReport(request);
             case "payment" -> generatePaymentReport(request);
+            case "payout" -> generatePayoutReport(request);
             case "maintenance" -> generateMaintenanceReport(request);
             case "user" -> generateUserReport(request);
             default -> throw new IllegalArgumentException("Unknown report category: " + request.getCategory());
@@ -695,6 +697,78 @@ public class ReportService {
 
         return buildResponse("Revenue Analysis Report", request,
                 Arrays.asList("Payment Method", "Transactions", "Revenue"), data, summary);
+    }
+
+    // ==================== PAYOUT REPORTS ====================
+
+    private ReportResponse<Map<String, Object>> generatePayoutReport(ReportRequest request) {
+        return switch (request.getReportType()) {
+            case "payout-summary" -> generatePayoutSummaryReport(request);
+            default -> generatePayoutSummaryReport(request);
+        };
+    }
+
+    private ReportResponse<Map<String, Object>> generatePayoutSummaryReport(ReportRequest request) {
+        List<PaymentDTO> payments = getFilteredPayments(request);
+        List<PaymentDTO> splitPayments = payments.stream()
+                .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
+                .collect(Collectors.toList());
+
+        // Monthly aggregation for trend chart
+        Map<String, BigDecimal> monthlyCommission = new LinkedHashMap<>();
+        Map<String, BigDecimal> monthlyPayout = new LinkedHashMap<>();
+
+        for (PaymentDTO p : splitPayments) {
+            if (p.getPaymentDate() == null) continue;
+            String month = p.getPaymentDate().format(DateTimeFormatter.ofPattern("MMM yyyy"));
+            monthlyCommission.merge(month,
+                    p.getPlatformCommission() != null ? p.getPlatformCommission() : BigDecimal.ZERO,
+                    BigDecimal::add);
+            monthlyPayout.merge(month,
+                    p.getOwnerPayout() != null ? p.getOwnerPayout() : BigDecimal.ZERO,
+                    BigDecimal::add);
+        }
+
+        // Build detail rows
+        List<Map<String, Object>> data = splitPayments.stream()
+                .sorted(Comparator.comparing(PaymentDTO::getPaymentDate,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(p -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("Invoice", p.getInvoiceNumber() != null ? p.getInvoiceNumber() : "-");
+                    row.put("Renter", p.getRenterName() != null ? p.getRenterName() : "-");
+                    row.put("Owner", p.getOwnerBusinessName() != null ? p.getOwnerBusinessName() : "-");
+                    row.put("Total", p.getAmount() != null ? "RM " + p.getAmount().setScale(2, RoundingMode.HALF_UP) : "-");
+                    row.put("Commission", p.getPlatformCommission() != null ? "RM " + p.getPlatformCommission().setScale(2, RoundingMode.HALF_UP) : "-");
+                    row.put("Payout", p.getOwnerPayout() != null ? "RM " + p.getOwnerPayout().setScale(2, RoundingMode.HALF_UP) : "-");
+                    row.put("Date", p.getPaymentDate() != null ? p.getPaymentDate().format(DATE_FORMATTER) : "-");
+                    row.put("Status", p.getPaymentStatus() != null ? p.getPaymentStatus() : "-");
+                    return row;
+                })
+                .collect(Collectors.toList());
+
+        BigDecimal totalCommission = splitPayments.stream()
+                .filter(p -> p.getPlatformCommission() != null)
+                .map(PaymentDTO::getPlatformCommission)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalPayout = splitPayments.stream()
+                .filter(p -> p.getOwnerPayout() != null)
+                .map(PaymentDTO::getOwnerPayout)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> summary = new LinkedHashMap<>();
+        summary.put("Total Split Payments", splitPayments.size());
+        summary.put("Total Platform Commission", "RM " + totalCommission.setScale(2, RoundingMode.HALF_UP));
+        summary.put("Total Owner Payouts", "RM " + totalPayout.setScale(2, RoundingMode.HALF_UP));
+
+        // Include monthly data in summary for chart rendering
+        summary.put("Monthly Commission", monthlyCommission);
+        summary.put("Monthly Payout", monthlyPayout);
+
+        return buildResponse("Central Payout Report", request,
+                Arrays.asList("Invoice", "Renter", "Owner", "Total", "Commission", "Payout", "Date", "Status"),
+                data, summary);
     }
 
     // ==================== MAINTENANCE REPORTS ====================

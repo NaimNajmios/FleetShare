@@ -3,6 +3,7 @@ package com.najmi.fleetshare.service;
 import com.najmi.fleetshare.dto.ReportResponse;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,7 @@ public class ReportChartService {
                     "Maintenance Cost per Vehicle (RM)", "#4facfe");
             case "top-customers" -> generateHorizontalBarChart(report, "Customer", "Revenue",
                     "Top Customers by Revenue (RM)", "#f093fb", false);
+            case "payout-summary" -> generatePayoutTrendChart(report);
             default -> null;
         };
     }
@@ -323,6 +325,147 @@ public class ReportChartService {
                     "<text x=\"%d\" y=\"%d\" font-size=\"10\" fill=\"#333\">%s (%.1f%%)</text>",
                     legendX + 18, legendY + i * 22 + 10, escapeXml(labels.get(i)), pct));
         }
+
+        sb.append("</svg>");
+        return sb.toString();
+    }
+
+    // ─── Payout Trend: grouped vertical bar chart ───
+
+    private String generatePayoutTrendChart(ReportResponse<Map<String, Object>> report) {
+        Map<String, Object> summary = report.getSummary();
+        if (summary == null) return null;
+
+        @SuppressWarnings("unchecked")
+        Map<String, BigDecimal> monthlyCommission = (Map<String, BigDecimal>) summary.get("Monthly Commission");
+        @SuppressWarnings("unchecked")
+        Map<String, BigDecimal> monthlyPayout = (Map<String, BigDecimal>) summary.get("Monthly Payout");
+        if (monthlyCommission == null || monthlyPayout == null || monthlyCommission.isEmpty()) return null;
+
+        List<String> labels = new ArrayList<>(monthlyCommission.keySet());
+        List<Double> commissionValues = labels.stream()
+                .map(m -> monthlyCommission.get(m) != null ? monthlyCommission.get(m).doubleValue() : 0.0)
+                .collect(Collectors.toList());
+        List<Double> payoutValues = labels.stream()
+                .map(m -> monthlyPayout.get(m) != null ? monthlyPayout.get(m).doubleValue() : 0.0)
+                .collect(Collectors.toList());
+
+        return buildGroupedVerticalBarSvg(labels, commissionValues, payoutValues,
+                "Commission vs Payout (RM)", "#667eea", "#11998e");
+    }
+
+    private String buildGroupedVerticalBarSvg(List<String> labels,
+            List<Double> series1, List<Double> series2,
+            String title, String color1, String color2) {
+        int svgWidth = 700;
+        int svgHeight = 280;
+        int marginLeft = 70;
+        int marginRight = 20;
+        int marginTop = 35;
+        int marginBottom = 60;
+        int chartWidth = svgWidth - marginLeft - marginRight;
+        int chartHeight = svgHeight - marginTop - marginBottom;
+
+        int count = Math.min(labels.size(), 15);
+        double maxVal = Math.max(
+                series1.stream().limit(count).mapToDouble(Double::doubleValue).max().orElse(1),
+                series2.stream().limit(count).mapToDouble(Double::doubleValue).max().orElse(1));
+        if (maxVal == 0) maxVal = 1;
+
+        maxVal = niceMax(maxVal);
+
+        double groupWidth = (double) chartWidth / count;
+        double barWidth = groupWidth * 0.35;
+        double gap = groupWidth * 0.1;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(
+                "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\" style=\"font-family:Arial,sans-serif;\">",
+                svgWidth, svgHeight, svgWidth, svgHeight));
+
+        // Title
+        sb.append(String.format(
+                "<text x=\"%d\" y=\"20\" font-size=\"13\" font-weight=\"bold\" fill=\"#333\" text-anchor=\"middle\">%s</text>",
+                svgWidth / 2, escapeXml(title)));
+
+        // Grid lines and Y-axis labels
+        int gridLines = 5;
+        for (int i = 0; i <= gridLines; i++) {
+            double yVal = maxVal * i / gridLines;
+            int y = marginTop + chartHeight - (int) (chartHeight * i / gridLines);
+            sb.append(String.format(
+                    "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#e0e0e0\" stroke-width=\"1\"/>",
+                    marginLeft, y, svgWidth - marginRight, y));
+            sb.append(String.format(
+                    "<text x=\"%d\" y=\"%d\" font-size=\"9\" fill=\"#666\" text-anchor=\"end\">%s</text>",
+                    marginLeft - 5, y + 3, formatNumber(yVal)));
+        }
+
+        // Bars (two per group)
+        for (int i = 0; i < count; i++) {
+            // Series 1 bar (commission)
+            double val1 = series1.get(i);
+            int barH1 = (int) (chartHeight * val1 / maxVal);
+            double x1 = marginLeft + i * groupWidth + gap;
+            int y1 = marginTop + chartHeight - barH1;
+            sb.append(String.format(
+                    "<rect x=\"%.1f\" y=\"%d\" width=\"%.1f\" height=\"%d\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1\" rx=\"2\"/>",
+                    x1, y1, barWidth, barH1, color1, color1));
+
+            // Value on top
+            if (barH1 > 0) {
+                sb.append(String.format(
+                        "<text x=\"%.1f\" y=\"%d\" font-size=\"7\" fill=\"#333\" text-anchor=\"middle\">%s</text>",
+                        x1 + barWidth / 2, y1 - 3, formatNumber(val1)));
+            }
+
+            // Series 2 bar (payout)
+            double val2 = series2.get(i);
+            int barH2 = (int) (chartHeight * val2 / maxVal);
+            double x2 = x1 + barWidth + gap;
+            int y2 = marginTop + chartHeight - barH2;
+            sb.append(String.format(
+                    "<rect x=\"%.1f\" y=\"%d\" width=\"%.1f\" height=\"%d\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1\" rx=\"2\"/>",
+                    x2, y2, barWidth, barH2, color2, color2));
+
+            if (barH2 > 0) {
+                sb.append(String.format(
+                        "<text x=\"%.1f\" y=\"%d\" font-size=\"7\" fill=\"#333\" text-anchor=\"middle\">%s</text>",
+                        x2 + barWidth / 2, y2 - 3, formatNumber(val2)));
+            }
+
+            // X-axis label
+            sb.append(String.format(
+                    "<text x=\"%.1f\" y=\"%d\" font-size=\"8\" fill=\"#666\" text-anchor=\"middle\" transform=\"rotate(-30,%.1f,%d)\">%s</text>",
+                    marginLeft + i * groupWidth + groupWidth / 2,
+                    marginTop + chartHeight + 15,
+                    marginLeft + i * groupWidth + groupWidth / 2,
+                    marginTop + chartHeight + 15,
+                    escapeXml(labels.get(i))));
+        }
+
+        // Axes
+        sb.append(String.format(
+                "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#333\" stroke-width=\"1.5\"/>",
+                marginLeft, marginTop, marginLeft, marginTop + chartHeight));
+        sb.append(String.format(
+                "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" stroke=\"#333\" stroke-width=\"1.5\"/>",
+                marginLeft, marginTop + chartHeight, svgWidth - marginRight, marginTop + chartHeight));
+
+        // Legend
+        int legendY = marginTop + chartHeight + 35;
+        sb.append(String.format(
+                "<rect x=\"%d\" y=\"%d\" width=\"10\" height=\"10\" rx=\"2\" fill=\"%s\"/>",
+                svgWidth / 2 - 80, legendY, color1));
+        sb.append(String.format(
+                "<text x=\"%d\" y=\"%d\" font-size=\"9\" fill=\"#333\">Commission</text>",
+                svgWidth / 2 - 65, legendY + 9));
+        sb.append(String.format(
+                "<rect x=\"%d\" y=\"%d\" width=\"10\" height=\"10\" rx=\"2\" fill=\"%s\"/>",
+                svgWidth / 2 + 10, legendY, color2));
+        sb.append(String.format(
+                "<text x=\"%d\" y=\"%d\" font-size=\"9\" fill=\"#333\">Payout</text>",
+                svgWidth / 2 + 25, legendY + 9));
 
         sb.append("</svg>");
         return sb.toString();

@@ -812,6 +812,52 @@ public class PaymentService {
     }
 
     /**
+     * Builds CSV bytes for payout report export.
+     *
+     * @param payments List of PaymentDTOs (should be filtered to split payments)
+     * @param isAdmin  true for admin view, false for owner view
+     * @return CSV byte array
+     */
+    public byte[] buildPayoutCsv(java.util.List<PaymentDTO> payments, boolean isAdmin) {
+        StringBuilder csv = new StringBuilder();
+
+        if (isAdmin) {
+            csv.append("Invoice,Renter,Owner,Total (RM),Commission (RM),Payout (RM),Date,Status\n");
+        } else {
+            csv.append("Invoice,Renter,Gross Total (RM),Commission (RM),Net Payout (RM),Date,Status\n");
+        }
+
+        for (PaymentDTO p : payments) {
+            if (!Boolean.TRUE.equals(p.getSplitPaymentEnabled())) continue;
+
+            String invoice = escapeCsv(p.getInvoiceNumber());
+            String renter = escapeCsv(p.getRenterName());
+            String owner = escapeCsv(p.getOwnerBusinessName());
+            String total = p.getAmount() != null ? p.getAmount().setScale(2, java.math.RoundingMode.HALF_UP).toString() : "0.00";
+            String commission = p.getPlatformCommission() != null ? p.getPlatformCommission().setScale(2, java.math.RoundingMode.HALF_UP).toString() : "0.00";
+            String payout = p.getOwnerPayout() != null ? p.getOwnerPayout().setScale(2, java.math.RoundingMode.HALF_UP).toString() : "0.00";
+            String date = p.getPaymentDate() != null ? p.getPaymentDate().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")) : "";
+            String status = p.getPaymentStatus() != null ? p.getPaymentStatus() : "";
+
+            if (isAdmin) {
+                csv.append(String.join(",", invoice, renter, owner, total, commission, payout, date, status)).append("\n");
+            } else {
+                csv.append(String.join(",", invoice, renter, total, commission, payout, date, status)).append("\n");
+            }
+        }
+
+        return csv.toString().getBytes();
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
+    }
+
+    /**
      * Finds a payment by its ToyyibPay bill code.
      *
      * @param billCode The ToyyibPay bill code
