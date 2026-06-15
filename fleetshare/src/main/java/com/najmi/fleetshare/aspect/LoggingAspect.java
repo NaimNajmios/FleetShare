@@ -67,8 +67,8 @@ public class LoggingAspect {
     @Around("applicationPackagePointcut() && springBeanPointcut()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
-        if (log.isInfoEnabled()) {
-            log.info(">>> ENTER {}.{} | ARGS: {}",
+        if (log.isTraceEnabled()) {
+            log.trace(">>> ENTER {}.{} | ARGS: {}",
                     joinPoint.getSignature().getDeclaringTypeName(),
                     joinPoint.getSignature().getName(),
                     Arrays.toString(joinPoint.getArgs()));
@@ -76,8 +76,8 @@ public class LoggingAspect {
         try {
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - start;
-            if (log.isInfoEnabled()) {
-                log.info("<<< EXIT  {}.{} | RETURN: {} | TIME: {}ms",
+            if (log.isTraceEnabled()) {
+                log.trace("<<< EXIT  {}.{} | RETURN: {} | TIME: {}ms",
                         joinPoint.getSignature().getDeclaringTypeName(),
                         joinPoint.getSignature().getName(),
                         result,

@@ -47,10 +47,14 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @Autowired
     private UserManagementService userManagementService;
@@ -199,7 +203,7 @@ public class AdminController {
             model.addAttribute("agenda", agenda);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             // Set defaults on error
             model.addAttribute("totalUsers", 0);
             model.addAttribute("renterCount", 0);
@@ -799,7 +803,7 @@ public class AdminController {
             var reportData = reportService.generateReportData(request);
             return ResponseEntity.ok(reportData);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             String errorMsg = e.getMessage() != null ? e.getMessage()
                     : "An unexpected error occurred during report generation";
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -875,7 +879,7 @@ public class AdminController {
                     .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
                     .body(content);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             return ResponseEntity.badRequest().build();
         }
     }
@@ -1405,7 +1409,7 @@ public class AdminController {
             model.addAttribute("splitPayments", splitPayments);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             model.addAttribute("totalPlatformCommission", BigDecimal.ZERO);
             model.addAttribute("totalOwnerPayouts", BigDecimal.ZERO);
             model.addAttribute("totalSplitVolume", BigDecimal.ZERO);

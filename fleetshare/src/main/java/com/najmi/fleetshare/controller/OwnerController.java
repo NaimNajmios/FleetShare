@@ -57,10 +57,14 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @RequestMapping("/owner")
 public class OwnerController {
+
+    private static final Logger logger = LoggerFactory.getLogger(OwnerController.class);
 
     @Autowired
     private UserManagementService userManagementService;
@@ -196,7 +200,7 @@ public class OwnerController {
                 model.addAttribute("agenda", agenda);
             } catch (Exception e) {
                 // Log error and set defaults
-                e.printStackTrace();
+                logger.error("Exception: ", e);
                 model.addAttribute("totalVehicles", 0);
                 model.addAttribute("availableVehicles", 0);
                 model.addAttribute("rentedVehicles", 0);
@@ -1291,7 +1295,7 @@ public class OwnerController {
             model.addAttribute("hasToyyibpayUsername", hasToyyibpayUsername);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             model.addAttribute("totalOwnerPayouts", BigDecimal.ZERO);
             model.addAttribute("totalCommissionPaid", BigDecimal.ZERO);
             model.addAttribute("totalSplitVolume", BigDecimal.ZERO);
@@ -1403,7 +1407,7 @@ public class OwnerController {
                     .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
                     .body(content);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             return ResponseEntity.badRequest().build();
         }
     }

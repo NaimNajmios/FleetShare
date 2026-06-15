@@ -35,10 +35,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.najmi.fleetshare.dto.PasswordChangeRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @RequestMapping("/renter")
 public class RenterController {
+
+    private static final Logger logger = LoggerFactory.getLogger(RenterController.class);
 
     @Autowired
     private VehicleManagementService vehicleManagementService;
@@ -206,7 +210,7 @@ public class RenterController {
 
             return "renter/booking-confirmation";
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             return "redirect:/renter/vehicles/" + id + "/book";
         }
     }
@@ -236,7 +240,7 @@ public class RenterController {
             return "redirect:/renter/bookings/" + booking.getBookingId() + "/payment";
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to confirm booking: " + e.getMessage());
             return "redirect:/renter/vehicles/" + id + "/book";
         }
@@ -527,7 +531,7 @@ public class RenterController {
 
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }
     }
@@ -567,7 +571,7 @@ public class RenterController {
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }
     }
@@ -586,7 +590,7 @@ public class RenterController {
                     "Cash payment option confirmed. Please pay at counter.");
             return "redirect:/renter/bookings/" + id;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to process cash payment: " + e.getMessage());
             return "redirect:/renter/bookings/" + id + "/payment";
         }
@@ -625,7 +629,7 @@ public class RenterController {
             redirectAttributes.addFlashAttribute("successMessage", "Payment method changed successfully.");
             return "redirect:/renter/bookings/" + id;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to change payment method: " + e.getMessage());
             return "redirect:/renter/bookings/" + id + "/payment";
         }
@@ -671,7 +675,7 @@ public class RenterController {
 
             return "redirect:/renter/bookings/" + id;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to retry payment: " + e.getMessage());
             return "redirect:/renter/bookings/" + id + "/payment";
         }
@@ -693,7 +697,7 @@ public class RenterController {
                     "Receipt submitted successfully. Your payment will be verified within 24 hours.");
             return "redirect:/renter/bookings/" + id;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to upload receipt: " + e.getMessage());
             return "redirect:/renter/bookings/" + id + "/payment";
         }
@@ -783,7 +787,7 @@ public class RenterController {
             return "redirect:" + paymentUrl;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception: ", e);
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Failed to initiate online payment: " + e.getMessage());
             return "redirect:/renter/bookings/" + id + "/payment";
