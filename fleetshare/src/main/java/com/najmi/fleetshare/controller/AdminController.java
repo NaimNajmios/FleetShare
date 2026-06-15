@@ -590,6 +590,24 @@ public class AdminController {
         return "admin/view-payment";
     }
 
+    @PostMapping("/payment/verify/{paymentId}")
+    public String verifyPayment(@PathVariable Long paymentId,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser user = SessionHelper.getCurrentUser(session);
+        if (user == null || user.getAdminDetails() == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            paymentService.verifyPayment(paymentId, user.getUserId());
+            redirectAttributes.addFlashAttribute("successMessage", "Payment verified successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to verify payment: " + e.getMessage());
+        }
+        return "redirect:/admin/payment/view/" + paymentId;
+    }
+
     @PostMapping("/payment/fail/{paymentId}")
     public String failPayment(@PathVariable Long paymentId,
             @RequestParam(value = "reason", required = false) String reason,

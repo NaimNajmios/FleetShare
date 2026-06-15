@@ -404,7 +404,7 @@ public class PaymentService {
         log.setStatusValue(Payment.PaymentStatus.VERIFIED);
         log.setStatusTimestamp(java.time.LocalDateTime.now());
         log.setActorUserId(verifiedByUserId);
-        log.setRemarks("Payment verified by owner");
+        log.setRemarks("Payment verified");
         paymentStatusLogRepository.save(log);
 
         // 3. Update invoice status to PAID
