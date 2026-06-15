@@ -191,19 +191,45 @@ public class AiAssistantService {
 
     private String buildSchema() {
         return """
-               === SCHEMA ===
-               Vehicle: vehicleId, brand, model, registrationNo, manufacturingYear, category, ratePerDay, fuelType, transmissionType, mileage, status, city, state, fleetOwnerId, ownerBusinessName
+               === BUSINESS OBJECTS (fields shown in data below) ===
+               Vehicle: vehicleId, brand, model, registrationNo, manufacturingYear, category, ratePerDay, fuelType, transmissionType, mileage, status, ownerBusinessName
                Booking: bookingId, vehicleId, renterName, renterEmail, startDate, endDate, totalCost, status, createdAt, paymentMethod, paymentStatus, invoiceNumber
-               Payment: paymentId, invoiceNumber, amount, paymentMethod, paymentStatus, paymentDate, renterName
-               Maintenance: id, vehicleId, description, scheduledDate, status, estimatedCost, finalCost
-               FleetOwner: businessName, isVerified, contactPhone
-               Renter: fullName, email, isActive
+               Payment: paymentId, invoiceId, invoiceNumber, amount, paymentMethod, paymentStatus, paymentDate, renterName
+               Maintenance: id, vehicleId, description, scheduledDate, actualStartTime, actualEndTime, estimatedCost, finalCost, status, maintenanceType
+               FleetOwner: businessName, isVerified, contactPhone, bankName
+               Renter: fullName, phoneNumber
 
-               Relationships:
-                 FleetOwner 1──N Vehicle (via fleetOwnerId)
-                 Vehicle   1──N Booking (via vehicleId)
-                 Booking   1──1 Payment (via invoiceNumber)
-                 Vehicle   1──N Maintenance (via vehicleId)
+               === DATABASE SCHEMA (14 tables) ===
+               users(user_id, email, user_role, is_active)
+                 linked to: fleetowners, renters, platformadmins, addresses
+
+               fleetowners(fleet_owner_id, user_id, business_name, contact_phone, is_verified, bank_name, bank_account_number)
+               renters(renter_id, user_id, full_name, phone_number)
+               platformadmins(admin_id, user_id, full_name)
+               addresses(address_id, address_user_id, address_line1, city, state, postal_code)
+
+               vehicles(vehicle_id, fleet_owner_id, brand, model, registration_no, manufacturing_year, category, fuel_type, transmission_type, mileage, status)
+                 linked to: bookings, vehiclemaintenance, vehiclepricehistory
+
+               bookings(booking_id, renter_id, vehicle_id, fleet_owner_id, start_date, end_date, created_at)
+                 linked to: bookingpricesnapshot, invoices
+
+               bookingpricesnapshot(booking_id, rate_per_day, days_rented, total_calculated_cost)
+               invoices(invoice_id, booking_id, fleet_owner_id, renter_id, invoice_number, total_amount, issue_date, due_date, status)
+               payments(payment_id, invoice_id, amount, payment_method, payment_status, platform_commission, owner_payout, commission_rate, payout_mode, transaction_reference)
+
+               vehiclemaintenance(maintenance_id, vehicle_id, fleet_owner_id, description, scheduled_date, current_status, estimated_cost, final_cost, maintenance_type)
+               vehiclepricehistory(price_id, vehicle_id, rate_per_day, effective_start_date)
+               bookingstatuslog(booking_log_id, booking_id, status_value, actor_user_id, status_timestamp)
+               paymentstatuslog(payment_log_id, payment_id, status_value, actor_user_id, status_timestamp)
+               vehiclemaintenancelog(maintenance_log_id, maintenance_id, status_value, actor_user_id, log_timestamp)
+
+               KEY RELATIONSHIPS:
+                 users 1──1 fleetowners | users 1──1 renters | users 1──1 platformadmins | users 1──N addresses
+                 fleetowners 1──N vehicles
+                 vehicles 1──N bookings | vehicles 1──N vehiclemaintenance | vehicles 1──N vehiclepricehistory
+                 bookings 1──1 bookingpricesnapshot | bookings 1──N invoices
+                 invoices 1──1 payments
 
                """;
     }
