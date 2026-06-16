@@ -24,9 +24,10 @@ public class GlobalExceptionHandler {
     /**
      * Handle 404 Not Found errors
      */
-    @ExceptionHandler(NoHandlerFoundException.class)
+    @ExceptionHandler({NoHandlerFoundException.class, org.springframework.web.servlet.resource.NoResourceFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleNotFound(NoHandlerFoundException ex, HttpServletRequest request, Model model) {
+    public String handleNotFound(Exception ex, HttpServletRequest request, Model model) {
+        // Only log at debug level for missing resources to avoid log spam, or we can keep it as warn but avoid stack traces
         logger.warn("404 Not Found: {} {}", request.getMethod(), request.getRequestURI());
 
         model.addAttribute("status", HttpStatus.NOT_FOUND.value());
