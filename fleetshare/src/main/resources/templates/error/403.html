@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 - Access Denied | FleetShare</title>
+    <title th:text="${status != null ? status + ' - ' + error : '403 - Access Denied'} + ' | FleetShare'">403 - Access Denied | FleetShare</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -229,16 +229,27 @@
             <i class="fas fa-shield-alt"></i>
         </div>
 
-        <div class="error-code">403</div>
+        <div class="error-code" th:text="${status != null ? status : '403'}">403</div>
 
-        <h1 class="error-title">Access Denied</h1>
+        <h1 class="error-title" th:text="${error != null ? error : 'Access Denied'}">Access Denied</h1>
 
-        <p class="error-message">
+        <p class="error-message"
+            th:text="${message != null ? message : 'Sorry, you don\'t have permission to access this page. This area is restricted and requires specific authorization.'}">
             Sorry, you don't have permission to access this page. This area is restricted and requires specific
             authorization.
         </p>
 
-        <div class="error-info">
+        <div class="error-details" th:if="${timestamp != null or path != null}" style="background: var(--gray-50); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem; text-align: left; border: 1px solid var(--gray-200);">
+            <h3>Error Details</h3>
+            <p th:if="${timestamp != null}" style="color: var(--gray-600); font-size: 0.938rem; margin-bottom: 0.5rem;">
+                <span style="font-weight: 600; color: var(--gray-700);">Time:</span> <span th:text="${#temporals.format(timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
+            </p>
+            <p th:if="${path != null}" style="color: var(--gray-600); font-size: 0.938rem; margin-bottom: 0.5rem;">
+                <span style="font-weight: 600; color: var(--gray-700);">Path:</span> <span th:text="${path}"></span>
+            </p>
+        </div>
+
+        <div class="error-info" th:if="${message == null}">
             <h3>Possible Reasons</h3>
             <ul>
                 <li>

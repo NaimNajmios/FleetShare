@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 - Internal Server Error | FleetShare</title>
+    <title th:text="${status != null ? status + ' - ' + error : '500 - Internal Server Error'} + ' | FleetShare'">500 - Internal Server Error | FleetShare</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -227,11 +227,12 @@
             <i class="fas fa-exclamation-triangle"></i>
         </div>
 
-        <div class="error-code">500</div>
+        <div class="error-code" th:text="${status != null ? status : '500'}">500</div>
 
-        <h1 class="error-title">Internal Server Error</h1>
+        <h1 class="error-title" th:text="${error != null ? error : 'Internal Server Error'}">Internal Server Error</h1>
 
-        <p class="error-message">
+        <p class="error-message"
+            th:text="${message != null ? message : 'We\'re sorry, but something went wrong on our end. Our team has been notified and is working to fix the issue.'}">
             We're sorry, but something went wrong on our end. Our team has been notified and is working to fix the
             issue.
         </p>
@@ -243,7 +244,15 @@
                 our support team with the reference ID below.
             </p>
             <div class="error-reference">
-                <i class="fas fa-hashtag"></i> REF-<span id="errorRef"></span>
+                <i class="fas fa-hashtag"></i> REF-<span id="errorRef" th:text="${#temporals.format(timestamp, 'yyyyMMddHHmmss')}"></span>
+            </div>
+            <div th:if="${timestamp != null or path != null}" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                <p th:if="${timestamp != null}" style="color: var(--gray-600); font-size: 0.938rem; margin-bottom: 0.25rem;">
+                    <span style="font-weight: 600; color: var(--gray-700);">Time:</span> <span th:text="${#temporals.format(timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                </p>
+                <p th:if="${path != null}" style="color: var(--gray-600); font-size: 0.938rem; margin-bottom: 0.25rem;">
+                    <span style="font-weight: 600; color: var(--gray-700);">Path:</span> <span th:text="${path}"></span>
+                </p>
             </div>
         </div>
 
@@ -260,14 +269,12 @@
     </div>
 
     <script>
-        // Generate a simple error reference ID based on timestamp
-        function generateErrorRef() {
-            const now = new Date();
-            const timestamp = now.getTime();
-            const ref = timestamp.toString(36).toUpperCase();
-            document.getElementById('errorRef').textContent = ref;
+        var refEl = document.getElementById('errorRef');
+        if (!refEl || refEl.textContent.trim() === '') {
+            var now = new Date();
+            var ts = now.getTime().toString(36).toUpperCase();
+            if (refEl) refEl.textContent = ts;
         }
-        generateErrorRef();
     </script>
 </body>
 
