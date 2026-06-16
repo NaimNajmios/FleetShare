@@ -12,6 +12,8 @@ import java.util.List;
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByFleetOwnerId(Long fleetOwnerId);
 
+    long countByStatus(String status);
+
     List<Vehicle> findByFleetOwnerIdAndIsDeletedFalse(Long fleetOwnerId);
 
     List<Vehicle> findByIsDeletedFalse();

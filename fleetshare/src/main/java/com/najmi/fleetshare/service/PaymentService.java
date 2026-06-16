@@ -642,6 +642,65 @@ public class PaymentService {
         }
     }
 
+    public List<PaymentDTO> getDashboardPaymentsByOwnerId(Long ownerId, java.time.LocalDateTime since) {
+        List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
+        if (ownerInvoices.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Set<Long> invoiceIds = ownerInvoices.stream()
+                .map(Invoice::getInvoiceId)
+                .collect(Collectors.toSet());
+
+        List<Payment> allPayments = paymentRepository.findDashboardPaymentsByInvoiceIds(invoiceIds, since);
+
+        Set<Long> renterIds = ownerInvoices.stream()
+                .map(Invoice::getRenterId)
+                .collect(Collectors.toSet());
+
+        Set<Long> fleetOwnerIds = ownerInvoices.stream()
+                .map(Invoice::getFleetOwnerId)
+                .collect(Collectors.toSet());
+
+        Map<Long, Renter> renterMap = renterRepository.findAllById(renterIds).stream()
+                .collect(Collectors.toMap(Renter::getRenterId, Function.identity()));
+
+        Map<Long, FleetOwner> ownerMap = fleetOwnerRepository.findAllById(fleetOwnerIds).stream()
+                .collect(Collectors.toMap(FleetOwner::getFleetOwnerId, Function.identity()));
+
+        Map<Long, Invoice> invoiceMap = ownerInvoices.stream()
+                .collect(Collectors.toMap(Invoice::getInvoiceId, Function.identity()));
+
+        List<PaymentDTO> paymentDTOs = new ArrayList<>();
+
+        for (Payment payment : allPayments) {
+            Invoice invoice = invoiceMap.get(payment.getInvoiceId());
+            if (invoice != null) {
+                Renter renter = renterMap.get(invoice.getRenterId());
+                FleetOwner owner = ownerMap.get(invoice.getFleetOwnerId());
+
+                PaymentDTO dto = new PaymentDTO(
+                        payment.getPaymentId(),
+                        invoice.getInvoiceNumber(),
+                        renter != null ? renter.getFullName() : "Unknown",
+                        owner != null ? owner.getBusinessName() : "Unknown",
+                        payment.getAmount(),
+                        payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : "N/A",
+                        payment.getPaymentStatus() != null ? payment.getPaymentStatus().name() : "PENDING",
+                        payment.getPaymentDate(),
+                        payment.getTransactionReference(),
+                        invoice.getBookingId() != null ? bookingRepository.findById(invoice.getBookingId()).map(Booking::getStartDate).orElse(null) : null,
+                        invoice.getBookingId(),
+                        payment.getPlatformCommission(),
+                        payment.getOwnerPayout(),
+                        payment.getSplitPaymentEnabled());
+                paymentDTOs.add(dto);
+            }
+        }
+
+        return paymentDTOs;
+    }
+
     public List<PaymentDTO> getPaymentsByOwnerId(Long ownerId) {
         // Get all invoices for this owner
         List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);

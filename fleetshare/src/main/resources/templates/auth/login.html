@@ -1,22 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/public-layout}">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Login - FleetShare</title>
 
-    <!-- Vendor CSS -->
-    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" th:href="@{/css/auth.css(v='3.2.0')}">
+    </th:block>
 
-    <!-- Custom Auth CSS -->
-    <link rel="stylesheet" th:href="@{/css/auth.css(v='3.2.0')}">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
     <script>
         const savedTheme = localStorage.getItem('theme') || 'light';
         if (savedTheme === 'dark') {
@@ -25,8 +20,10 @@
     </script>
 </head>
 
-<body class="auth-page">
-    <div class="auth-noise-overlay"></div>
+<body>
+    <div layout:fragment="content">
+        <div class="auth-page">
+            <div class="auth-noise-overlay"></div>
     
     <div class="auth-split-container">
         <!-- Left Media Panel -->
@@ -171,7 +168,10 @@
         </div>
     </div>
 </div>
+    </div>
+</div>
 
+<th:block layout:fragment="extra-js">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const togglePassword = document.querySelector('#togglePassword');
@@ -237,6 +237,7 @@
             }
         });
     </script>
+</th:block>
 </body>
 
 </html>

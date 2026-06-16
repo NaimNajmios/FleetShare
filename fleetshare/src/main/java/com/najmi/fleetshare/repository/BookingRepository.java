@@ -21,6 +21,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     org.springframework.data.domain.Page<Booking> findByFleetOwnerId(Long fleetOwnerId, org.springframework.data.domain.Pageable pageable);
 
+    @Query("SELECT b FROM Booking b WHERE b.fleetOwnerId = :fleetOwnerId AND (b.createdAt >= :since OR b.endDate >= :since OR b.startDate >= :since)")
+    List<Booking> findDashboardBookingsByOwnerId(@Param("fleetOwnerId") Long fleetOwnerId, @Param("since") LocalDateTime since);
+
+    @Query("SELECT b FROM Booking b WHERE b.createdAt >= :since OR b.endDate >= :since OR b.startDate >= :since")
+    List<Booking> findDashboardBookings(@Param("since") LocalDateTime since);
+
     @Query("SELECT DISTINCT b.renterId FROM Booking b WHERE b.fleetOwnerId = :fleetOwnerId")
     List<Long> findDistinctRenterIdsByFleetOwnerId(@Param("fleetOwnerId") Long fleetOwnerId);
 
@@ -76,4 +82,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Long> findUnavailableVehicleIds(@Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("statuses") List<BookingStatusLog.BookingStatus> statuses);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.createdAt >= :since")
+    long countBookingsSince(@Param("since") LocalDateTime since);
 }

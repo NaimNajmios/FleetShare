@@ -810,6 +810,29 @@ public class BookingService {
         return mapBookingsToDTOs(bookings);
     }
 
+    public List<BookingDTO> getDashboardBookingsByOwnerId(Long ownerId, java.time.LocalDateTime since) {
+        List<Booking> bookings = bookingRepository.findDashboardBookingsByOwnerId(ownerId, since);
+        return mapBookingsToDTOs(bookings);
+    }
+
+    public List<BookingDTO> getDashboardBookings(java.time.LocalDateTime since) {
+        List<Booking> bookings = bookingRepository.findDashboardBookings(since);
+        return mapBookingsToDTOs(bookings);
+    }
+
+    /**
+     * Fetches recent bookings globally (for admin)
+     *
+     * @param limit Number of bookings to fetch
+     * @return List of BookingDTO objects
+     */
+    public List<BookingDTO> getRecentBookings(int limit) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit,
+                org.springframework.data.domain.Sort.by("createdAt").descending());
+        List<Booking> bookings = bookingRepository.findAll(pageable).getContent();
+        return mapBookingsToDTOs(bookings);
+    }
+
     /**
      * Fetches recent bookings for a specific renter with a specific owner
      *

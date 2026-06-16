@@ -98,6 +98,12 @@ public class AdminController {
     @Autowired
     private com.najmi.fleetshare.service.EmailService emailService;
 
+    @Autowired private com.najmi.fleetshare.repository.RenterRepository renterRepository;
+    @Autowired private com.najmi.fleetshare.repository.VehicleRepository vehicleRepository;
+    @Autowired private com.najmi.fleetshare.repository.BookingRepository bookingRepository;
+    @Autowired private com.najmi.fleetshare.repository.BookingStatusLogRepository statusLogRepository;
+    @Autowired private com.najmi.fleetshare.repository.PaymentRepository paymentRepository;
+
     @GetMapping("/")
     public String index() {
         return "redirect:/admin/dashboard";
@@ -115,91 +121,77 @@ public class AdminController {
 
         try {
             // Platform-wide user statistics
-            var allOwners = userManagementService.getAllFleetOwners();
-            var allRenters = userManagementService.getAllRenters();
-            int ownerCount = allOwners != null ? allOwners.size() : 0;
-            int renterCount = allRenters != null ? allRenters.size() : 0;
-            int totalUsers = ownerCount + renterCount;
+            long ownerCount = fleetOwnerRepository.count();
+            long renterCount = renterRepository.count();
+            long totalUsers = ownerCount + renterCount;
             model.addAttribute("totalUsers", totalUsers);
             model.addAttribute("renterCount", renterCount);
             model.addAttribute("ownerCount", ownerCount);
 
             // Platform-wide vehicle statistics
-            List<VehicleDTO> allVehicles = vehicleManagementService.getAllVehicles();
-            int totalVehicles = allVehicles != null ? allVehicles.size() : 0;
-            long availableVehicles = allVehicles != null
-                    ? allVehicles.stream().filter(v -> "AVAILABLE".equals(v.getStatus())).count()
-                    : 0;
-            long rentedVehicles = allVehicles != null
-                    ? allVehicles.stream().filter(v -> "RENTED".equals(v.getStatus())).count()
-                    : 0;
-            long maintenanceVehicles = allVehicles != null
-                    ? allVehicles.stream().filter(v -> "MAINTENANCE".equals(v.getStatus())).count()
-                    : 0;
+            long totalVehicles = vehicleRepository.count();
+            long availableVehicles = vehicleRepository.countByStatus("AVAILABLE");
+            long rentedVehicles = vehicleRepository.countByStatus("RENTED");
+            long maintenanceVehicles = vehicleRepository.countByStatus("MAINTENANCE");
+            
             model.addAttribute("totalVehicles", totalVehicles);
             model.addAttribute("availableVehicles", availableVehicles);
             model.addAttribute("rentedVehicles", rentedVehicles);
             model.addAttribute("maintenanceVehicles", maintenanceVehicles);
 
             // Platform-wide booking statistics
-            List<BookingDTO> allBookings = bookingService.getAllBookings();
-            int totalBookings = allBookings != null ? allBookings.size() : 0;
-            long activeRentals = allBookings != null ? allBookings.stream()
-                    .filter(b -> "ACTIVE".equals(b.getStatus()) || "IN_PROGRESS".equals(b.getStatus()))
-                    .count() : 0;
-            long pendingBookings = allBookings != null ? allBookings.stream()
-                    .filter(b -> "PENDING".equals(b.getStatus()) || "CONFIRMED".equals(b.getStatus()))
-                    .count() : 0;
+            long totalBookings = bookingRepository.count();
+            long activeRentals = 0;
+            long pendingBookings = 0;
+            
+            List<Object[]> statusCounts = statusLogRepository.countBookingsByStatus();
+            for (Object[] result : statusCounts) {
+                com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus status = (com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus) result[0];
+                long count = ((Number) result[1]).longValue();
+                if (com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.ACTIVE.equals(status)) {
+                    activeRentals += count;
+                } else if (com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.PENDING.equals(status)
+                        || com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CONFIRMED.equals(status)) {
+                    pendingBookings += count;
+                }
+            }
+            
             model.addAttribute("totalBookings", totalBookings);
             model.addAttribute("activeRentals", activeRentals);
             model.addAttribute("pendingBookings", pendingBookings);
 
             // Recent bookings (last 5)
-            List<BookingDTO> recentBookings = allBookings != null ? allBookings.stream()
-                    .sorted((b1, b2) -> {
-                        if (b1.getCreatedAt() == null)
-                            return 1;
-                        if (b2.getCreatedAt() == null)
-                            return -1;
-                        return b2.getCreatedAt().compareTo(b1.getCreatedAt());
-                    })
-                    .limit(5)
-                    .collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>();
+            List<BookingDTO> recentBookings = bookingService.getRecentBookings(5);
             model.addAttribute("recentBookings", recentBookings);
 
             // Platform-wide revenue
-            var allPayments = paymentService.getAllPayments();
-            BigDecimal totalRevenue = allPayments != null ? allPayments.stream()
-                    .filter(p -> "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
-                    .map(p -> p.getAmount())
-                    .filter(a -> a != null)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+            java.util.List<com.najmi.fleetshare.entity.Payment.PaymentStatus> completedStatuses = java.util.Arrays.asList(
+                    com.najmi.fleetshare.entity.Payment.PaymentStatus.VERIFIED
+            );
+            BigDecimal totalRevenue = paymentRepository.calculateTotalPlatformRevenue(completedStatuses);
+            if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
             model.addAttribute("totalRevenue", totalRevenue);
 
             // Quick stats for widget
             LocalDate today = LocalDate.now();
-            long todayBookings = allBookings != null ? allBookings.stream()
-                    .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().toLocalDate().equals(today))
-                    .count() : 0;
-            BigDecimal todayRevenue = allPayments != null ? allPayments.stream()
-                    .filter(p -> p.getPaymentDate() != null && p.getPaymentDate().toLocalDate().equals(today))
-                    .filter(p -> "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus()))
-                    .map(p -> p.getAmount())
-                    .filter(a -> a != null)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO;
+            long todayBookings = bookingRepository.countBookingsSince(today.atStartOfDay());
             
-            long activeUsers = allRenters != null ? allRenters.stream()
-                    .filter(r -> r.getIsActive() != null && r.getIsActive())
-                    .count() : 0;
+            BigDecimal todayRevenue = paymentRepository.calculatePlatformRevenueSince(completedStatuses, today.atStartOfDay());
+            if (todayRevenue == null) todayRevenue = BigDecimal.ZERO;
+            
+            long activeUsers = userRepository.countByIsActiveAndUserRole(true, com.najmi.fleetshare.entity.UserRole.RENTER);
 
             model.addAttribute("todayBookings", todayBookings);
             model.addAttribute("todayRevenue", todayRevenue);
             model.addAttribute("activeUsers", activeUsers);
 
             // Build sticky-note agenda (platform-wide)
+            List<BookingDTO> agendaBookings = bookingService.getDashboardBookings(today.atStartOfDay());
             List<MaintenanceDTO> allMaintenance = maintenanceService.getAllMaintenance();
+            List<com.najmi.fleetshare.dto.PaymentDTO> agendaPayments = new java.util.ArrayList<>(); // Payments not heavily used in admin agenda today
+            
             Map<String, List<AgendaItemDTO>> agenda = buildDashboardAgenda(
-                today, allBookings, allMaintenance, allPayments);
+                today, agendaBookings, allMaintenance, agendaPayments);
             model.addAttribute("agenda", agenda);
 
         } catch (Exception e) {

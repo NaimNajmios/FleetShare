@@ -149,7 +149,7 @@ public class OwnerController {
                 LocalDate monthStart = today.withDayOfMonth(1);
                 
                 // Monthly bookings
-                List<BookingDTO> allOwnerBookings = bookingService.getBookingsByOwnerId(ownerId);
+                List<BookingDTO> allOwnerBookings = bookingService.getDashboardBookingsByOwnerId(ownerId, monthStart.atStartOfDay());
                 long monthlyBookings = allOwnerBookings != null ? allOwnerBookings.stream()
                         .filter(b -> b.getCreatedAt() != null)
                         .filter(b -> {
@@ -193,7 +193,7 @@ public class OwnerController {
                 model.addAttribute("vehicles", vehicles);
 
                 // Build sticky-note agenda
-                List<PaymentDTO> allPayments = paymentService.getPaymentsByOwnerId(ownerId);
+                List<PaymentDTO> allPayments = paymentService.getDashboardPaymentsByOwnerId(ownerId, monthStart.atStartOfDay());
                 model.addAttribute("pendingPayments", allPayments);
                 Map<String, List<AgendaItemDTO>> agenda = buildDashboardAgenda(
                     ownerId, today, allOwnerBookings, maintenanceRecords, allPayments);

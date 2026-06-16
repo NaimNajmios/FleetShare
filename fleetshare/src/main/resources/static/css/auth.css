@@ -76,12 +76,19 @@
    Global Auth Page Styles
    ============================================ */
 
-body.auth-page {
+.auth-page {
     background: linear-gradient(135deg, var(--fs-bg-main) 0%, color-mix(in srgb, var(--fs-bg-main) 85%, var(--fs-primary)) 100%);
-    min-height: 100vh;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     position: relative;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* Make the layout's content area a flex container so .auth-page fills available space */
+.public-content-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .auth-container {
@@ -1436,7 +1443,8 @@ input:focus-visible {
 
 .auth-split-container {
     display: flex;
-    min-height: 100vh;
+    flex: 1;
+    min-height: 0;
     width: 100%;
     overflow: hidden;
     position: relative;
@@ -1454,7 +1462,7 @@ input:focus-visible {
     justify-content: flex-end;
     padding: var(--fs-spacing-2xl) var(--fs-spacing-xl);
     color: #ffffff;
-    min-height: 100vh;
+    min-height: auto;
 }
 
 .auth-media-overlay {
