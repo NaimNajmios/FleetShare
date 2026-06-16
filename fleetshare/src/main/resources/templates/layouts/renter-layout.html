@@ -68,6 +68,8 @@
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
     <link rel="stylesheet" th:href="@{/assets/css/fleetshare-design-system.css}">
     <!-- endinject -->
+    <!-- Renter Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/renter.css}">
     <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
 
     <!-- Extra CSS fragment -->
@@ -98,6 +100,8 @@
                     </div>
                 </div>
                 <!-- content-wrapper ends -->
+                <!-- Footer -->
+                <div th:replace="~{fragments/renter-footer :: renter-footer}"></div>
             </div>
             <!-- main-panel ends -->
         </div>
