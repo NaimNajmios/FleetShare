@@ -85,4 +85,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.createdAt >= :since")
     long countBookingsSince(@Param("since") LocalDateTime since);
+
+    @Query("SELECT b FROM Booking b WHERE b.createdAt >= :since")
+    List<Booking> findBookingsCreatedSince(@Param("since") LocalDateTime since);
 }

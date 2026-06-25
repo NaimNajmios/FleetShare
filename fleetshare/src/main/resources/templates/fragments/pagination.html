@@ -1,0 +1,73 @@
+<div th:fragment="pagination(currentPage, totalPages, totalItems, baseUrl, pageParams, defaultSize)"
+     class="d-flex flex-column flex-md-row justify-content-between align-items-center w-100 pagination-container mt-3">
+
+    <!-- Pagination Info -->
+    <div class="mb-3 mb-md-0 text-muted small">
+        Showing
+        <span class="fw-semibold text-dark" th:text="${totalItems == 0 ? 0 : (currentPage * defaultSize) + 1}">1</span>
+        to
+        <span class="fw-semibold text-dark"
+              th:text="${(currentPage + 1) * defaultSize > totalItems ? totalItems : (currentPage + 1) * defaultSize}">12</span>
+        of
+        <span class="fw-semibold text-dark" th:text="${totalItems}">156</span>
+        results
+    </div>
+
+    <!-- Pagination Controls -->
+    <nav aria-label="Page navigation" th:if="${totalPages > 0}">
+        <ul class="pagination pagination-sm mb-0">
+            <!-- First Page -->
+            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${baseUrl}(page=0, size=${defaultSize})}"
+                   aria-label="First"
+                   title="First Page">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+
+            <!-- Previous Page -->
+            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${baseUrl}(page=${currentPage - 1}, size=${defaultSize})}"
+                   aria-label="Previous"
+                   title="Previous Page">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <!-- Page Numbers (Max 5 shown) -->
+            <li class="page-item d-none d-sm-inline-block"
+                th:if="${totalPages > 0}"
+                th:each="i : ${#numbers.sequence(
+                    currentPage > 2 ? (currentPage + 2 >= totalPages ? (totalPages - 5 < 0 ? 0 : totalPages - 5) : currentPage - 2) : 0,
+                    totalPages > 5 ? (currentPage > 2 ? (currentPage + 2 >= totalPages ? totalPages - 1 : currentPage + 2) : 4) : totalPages - 1
+                )}"
+                th:classappend="${i == currentPage ? 'active' : ''}">
+                <a class="page-link"
+                   th:href="@{${baseUrl}(page=${i}, size=${defaultSize})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+
+            <!-- Next Page -->
+            <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${baseUrl}(page=${currentPage + 1}, size=${defaultSize})}"
+                   aria-label="Next"
+                   title="Next Page">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+
+            <!-- Last Page -->
+            <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link"
+                   th:href="@{${baseUrl}(page=${totalPages - 1}, size=${defaultSize})}"
+                   aria-label="Last"
+                   title="Last Page">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

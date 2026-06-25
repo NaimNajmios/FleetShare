@@ -45,7 +45,9 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -346,17 +348,36 @@ public class AdminController {
     }
 
     @GetMapping("/bookings")
-    public String bookings(Model model) {
-        List<BookingDTO> allBookings = bookingService.getAllBookings();
-        model.addAttribute("bookings", allBookings);
+    public String bookings(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            Model model) {
+            
+        size = Math.min(Math.max(size, 1), 48);
+        Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
 
-        // Calculate booking statistics
-        long pendingCount = allBookings.stream().filter(b -> "PENDING".equals(b.getStatus())).count();
-        long confirmedCount = allBookings.stream().filter(b -> "CONFIRMED".equals(b.getStatus())).count();
-        long activeCount = allBookings.stream().filter(b -> "ACTIVE".equals(b.getStatus())).count();
-        long completedCount = allBookings.stream().filter(b -> "COMPLETED".equals(b.getStatus())).count();
-        long cancelledCount = allBookings.stream().filter(b -> "CANCELLED".equals(b.getStatus())).count();
-        long disputedCount = allBookings.stream().filter(b -> "DISPUTED".equals(b.getStatus())).count();
+        Page<BookingDTO> bookingPage = bookingService.getAllBookingsPaginated(pageable);
+        model.addAttribute("bookings", bookingPage.getContent());
+        model.addAttribute("currentPage", bookingPage.getNumber());
+        model.addAttribute("totalPages", bookingPage.getTotalPages());
+        model.addAttribute("totalItems", bookingPage.getTotalElements());
+        model.addAttribute("defaultSize", size);
+        model.addAttribute("pageParams", Collections.emptyMap());
+
+        // Calculate booking statistics using database grouping
+        List<Object[]> statusCounts = statusLogRepository.countBookingsByStatus();
+        long pendingCount = 0, confirmedCount = 0, activeCount = 0, completedCount = 0, cancelledCount = 0, disputedCount = 0;
+        
+        for (Object[] result : statusCounts) {
+            com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus status = (com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus) result[0];
+            long count = ((Number) result[1]).longValue();
+            if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.PENDING) pendingCount = count;
+            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CONFIRMED) confirmedCount = count;
+            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.ACTIVE) activeCount = count;
+            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.COMPLETED) completedCount = count;
+            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CANCELLED) cancelledCount = count;
+            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.DISPUTED) disputedCount = count;
+        }
 
         model.addAttribute("pendingCount", pendingCount);
         model.addAttribute("confirmedCount", confirmedCount);
@@ -366,15 +387,19 @@ public class AdminController {
         model.addAttribute("disputedCount", disputedCount);
 
         // Calculate total revenue from completed bookings
-        BigDecimal totalRevenue = allBookings.stream()
-                .filter(b -> "COMPLETED".equals(b.getStatus()) && b.getTotalCost() != null)
-                .map(BookingDTO::getTotalCost)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        java.util.List<com.najmi.fleetshare.entity.Payment.PaymentStatus> completedStatuses = java.util.Arrays.asList(
+                com.najmi.fleetshare.entity.Payment.PaymentStatus.VERIFIED
+        );
+        BigDecimal totalRevenue = paymentRepository.calculateTotalPlatformRevenue(completedStatuses);
+        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
         model.addAttribute("totalRevenue", totalRevenue);
 
         // Calculate monthly booking counts (last 6 months)
         java.util.Map<String, Long> monthlyBookings = new java.util.LinkedHashMap<>();
         java.util.Map<String, BigDecimal> monthlyRevenue = new java.util.LinkedHashMap<>();
+        
+        // Fetch only last 6 months of data
+        List<BookingDTO> recentBookings = bookingService.getBookingsCreatedSince(LocalDate.now().minusMonths(5).atStartOfDay());
 
         for (int i = 5; i >= 0; i--) {
             LocalDate monthDate = LocalDate.now().minusMonths(i);
@@ -382,14 +407,14 @@ public class AdminController {
             int year = monthDate.getYear();
             int month = monthDate.getMonthValue();
 
-            long count = allBookings.stream()
+            long count = recentBookings.stream()
                     .filter(b -> b.getCreatedAt() != null
                             && b.getCreatedAt().getYear() == year
                             && b.getCreatedAt().getMonthValue() == month)
                     .count();
             monthlyBookings.put(monthKey, count);
 
-            BigDecimal revenue = allBookings.stream()
+            BigDecimal revenue = recentBookings.stream()
                     .filter(b -> b.getCreatedAt() != null
                             && b.getCreatedAt().getYear() == year
                             && b.getCreatedAt().getMonthValue() == month

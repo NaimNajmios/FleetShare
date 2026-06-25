@@ -19,6 +19,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class BookingService {
@@ -71,6 +76,26 @@ public class BookingService {
      */
     public List<BookingDTO> getAllBookings() {
         List<Booking> bookings = bookingRepository.findAll();
+        return mapBookingsToDTOs(bookings);
+    }
+
+    /**
+     * Fetches a paginated list of all bookings with related information
+     *
+     * @param pageable Pagination information
+     * @return Page of BookingDTO objects
+     */
+    public Page<BookingDTO> getAllBookingsPaginated(Pageable pageable) {
+        Page<Booking> bookingPage = bookingRepository.findAll(pageable);
+        List<BookingDTO> dtos = mapBookingsToDTOs(bookingPage.getContent());
+        return new PageImpl<>(dtos, pageable, bookingPage.getTotalElements());
+    }
+
+    /**
+     * Fetches bookings created since a specific date for charting
+     */
+    public List<BookingDTO> getBookingsCreatedSince(java.time.LocalDateTime since) {
+        List<Booking> bookings = bookingRepository.findBookingsCreatedSince(since);
         return mapBookingsToDTOs(bookings);
     }
 

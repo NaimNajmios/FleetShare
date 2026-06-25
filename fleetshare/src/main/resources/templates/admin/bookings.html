@@ -482,6 +482,14 @@
                     </div>
                 </div>
 
+                <!-- Pagination -->
+                <div th:if="${totalPages > 1}" class="mt-4">
+                    <div th:replace="~{fragments/pagination :: pagination(
+                        ${currentPage}, ${totalPages}, ${totalItems},
+                        '/admin/bookings', ${pageParams}, ${defaultSize})}">
+                    </div>
+                </div>
+
                 <!-- No Results -->
                 <div id="no-results" class="card" style="display: none;">
                     <div class="card-body text-center py-5">
