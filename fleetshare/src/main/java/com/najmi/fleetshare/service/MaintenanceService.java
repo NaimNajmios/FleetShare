@@ -25,6 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 @Service
 public class MaintenanceService {
 
@@ -133,6 +137,12 @@ public class MaintenanceService {
         return mapToDTOs(maintenanceList);
     }
 
+    public Page<MaintenanceDTO> getAllMaintenancePaginated(Pageable pageable) {
+        Page<VehicleMaintenance> page = maintenanceRepository.findByIsDeletedFalse(pageable);
+        List<MaintenanceDTO> dtoList = mapToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
     public List<MaintenanceDTO> getMaintenanceByVehicleId(Long vehicleId) {
         List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByVehicleIdAndIsDeletedFalse(vehicleId);
         return mapToDTOs(maintenanceList);
@@ -183,6 +193,12 @@ public class MaintenanceService {
     public List<MaintenanceDTO> getMaintenanceByOwnerId(Long ownerId) {
         List<VehicleMaintenance> maintenanceList = maintenanceRepository.findByFleetOwnerIdAndIsDeletedFalse(ownerId);
         return mapToDTOs(maintenanceList);
+    }
+
+    public Page<MaintenanceDTO> getMaintenanceByOwnerIdPaginated(Long ownerId, Pageable pageable) {
+        Page<VehicleMaintenance> page = maintenanceRepository.findByFleetOwnerIdAndIsDeletedFalse(ownerId, pageable);
+        List<MaintenanceDTO> dtoList = mapToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 
     /**

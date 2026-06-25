@@ -228,8 +228,22 @@ public class AdminController {
     }
 
     @GetMapping("/maintenance")
-    public String maintenance(Model model) {
-        model.addAttribute("maintenanceRecords", maintenanceService.getAllMaintenance());
+    public String maintenance(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            Model model) {
+            
+        size = Math.min(Math.max(size, 1), 48);
+        Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+
+        Page<MaintenanceDTO> maintenancePage = maintenanceService.getAllMaintenancePaginated(pageable);
+        model.addAttribute("maintenanceRecords", maintenancePage.getContent());
+        model.addAttribute("currentPage", maintenancePage.getNumber());
+        model.addAttribute("totalPages", maintenancePage.getTotalPages());
+        model.addAttribute("totalItems", maintenancePage.getTotalElements());
+        model.addAttribute("defaultSize", size);
+        model.addAttribute("pageParams", Collections.emptyMap());
+
         model.addAttribute("stats", maintenanceService.getMaintenanceStats());
         return "admin/maintenance";
     }
