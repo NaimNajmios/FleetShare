@@ -784,6 +784,7 @@
 
 <body>
     <main layout:fragment="content">
+        <form id="vehicleFilterForm" method="GET" action="/renter/vehicles" style="display: contents;">
         <div class="browse-container">
             <!-- Left Sidebar: Filters -->
             <aside class="filter-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="filterSidebar" aria-labelledby="filterSidebarLabel">
@@ -805,7 +806,7 @@
                         <!-- Pickup Date -->
                         <div class="date-input-with-icon mb-2">
                             <i class="fas fa-calendar-alt date-icon text-primary"></i>
-                            <input type="text" id="filterPickupDate" class="form-control" placeholder="Select pickup date" th:value="${pickupDate}">
+                            <input type="text" id="filterPickupDate" name="pickupDate" class="form-control" placeholder="Select pickup date" th:value="${pickupDate}">
                         </div>
                         <div id="pickupDayLabel" class="day-of-week-label"></div>
                         
@@ -817,7 +818,7 @@
                         <!-- Return Date -->
                         <div class="date-input-with-icon mb-2">
                             <i class="fas fa-calendar-check date-icon text-success"></i>
-                            <input type="text" id="filterReturnDate" class="form-control" placeholder="Select return date" th:value="${returnDate}">
+                            <input type="text" id="filterReturnDate" name="returnDate" class="form-control" placeholder="Select return date" th:value="${returnDate}">
                         </div>
                         <div id="returnDayLabel" class="day-of-week-label"></div>
                         
@@ -828,7 +829,7 @@
                             <button type="button" class="quick-select-pill" onclick="addDays(7)" data-days="7">1 Week</button>
                         </div>
                         
-                        <button type="button" class="btn-search-dates" onclick="applyDateFilter()">
+                        <button type="button" class="btn-search-dates" onclick="document.getElementById('vehicleFilterForm').submit()">
                             <i class="fas fa-search me-1"></i> Search Availability
                         </button>
                     </div>
@@ -837,20 +838,20 @@
                 <div class="filter-group">
                     <div class="filter-group-title">Category</div>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="sedan" onchange="applyFilters(true)"> Sedan
+                        <input type="checkbox" name="category" value="sedan" th:checked="${pageParams.get('category') != null and #lists.contains(pageParams.get('category'), 'sedan')}" onchange="document.getElementById('vehicleFilterForm').submit()"> Sedan
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="suv" onchange="applyFilters(true)"> SUV
+                        <input type="checkbox" name="category" value="suv" th:checked="${pageParams.get('category') != null and #lists.contains(pageParams.get('category'), 'suv')}" onchange="document.getElementById('vehicleFilterForm').submit()"> SUV
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="hatchback" onchange="applyFilters(true)"> Hatchback
+                        <input type="checkbox" name="category" value="hatchback" th:checked="${pageParams.get('category') != null and #lists.contains(pageParams.get('category'), 'hatchback')}" onchange="document.getElementById('vehicleFilterForm').submit()"> Hatchback
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="convertible" onchange="applyFilters(true)">
+                        <input type="checkbox" name="category" value="convertible" th:checked="${pageParams.get('category') != null and #lists.contains(pageParams.get('category'), 'convertible')}" onchange="document.getElementById('vehicleFilterForm').submit()">
                         Convertible
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="category" value="mpv" onchange="applyFilters(true)"> MPV
+                        <input type="checkbox" name="category" value="mpv" th:checked="${pageParams.get('category') != null and #lists.contains(pageParams.get('category'), 'mpv')}" onchange="document.getElementById('vehicleFilterForm').submit()"> MPV
                     </label>
                 </div>
 
@@ -858,35 +859,35 @@
                 <div class="filter-group">
                     <div class="filter-group-title">Transmission</div>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="transmission" value="auto" onchange="applyFilters(true)"> Automatic
+                        <input type="checkbox" name="transmission" value="auto" th:checked="${pageParams.get('transmission') != null and #lists.contains(pageParams.get('transmission'), 'auto')}" onchange="document.getElementById('vehicleFilterForm').submit()"> Automatic
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" name="transmission" value="manual" onchange="applyFilters(true)"> Manual
+                        <input type="checkbox" name="transmission" value="manual" th:checked="${pageParams.get('transmission') != null and #lists.contains(pageParams.get('transmission'), 'manual')}" onchange="document.getElementById('vehicleFilterForm').submit()"> Manual
                     </label>
                 </div>
 
                 <!-- Location Filter -->
                 <div class="filter-group">
                     <div class="filter-group-title">Location</div>
-                    <select id="filterState" class="form-select form-select-sm mb-2" onchange="onStateChange()">
+                    <select id="filterState" name="state" class="form-select form-select-sm mb-2" onchange="onStateChange()">
                         <option value="">All States</option>
-                        <option value="Johor">Johor</option>
-                        <option value="Kedah">Kedah</option>
-                        <option value="Kelantan">Kelantan</option>
-                        <option value="Melaka">Melaka</option>
-                        <option value="Negeri Sembilan">Negeri Sembilan</option>
-                        <option value="Pahang">Pahang</option>
-                        <option value="Perak">Perak</option>
-                        <option value="Perlis">Perlis</option>
-                        <option value="Pulau Pinang">Pulau Pinang</option>
-                        <option value="Sabah">Sabah</option>
-                        <option value="Sarawak">Sarawak</option>
-                        <option value="Selangor">Selangor</option>
-                        <option value="Terengganu">Terengganu</option>
-                        <option value="Kuala Lumpur">Kuala Lumpur</option>
+                        <option value="Johor" th:selected="${pageParams.get('state') == 'Johor'}">Johor</option>
+                        <option value="Kedah" th:selected="${pageParams.get('state') == 'Kedah'}">Kedah</option>
+                        <option value="Kelantan" th:selected="${pageParams.get('state') == 'Kelantan'}">Kelantan</option>
+                        <option value="Melaka" th:selected="${pageParams.get('state') == 'Melaka'}">Melaka</option>
+                        <option value="Negeri Sembilan" th:selected="${pageParams.get('state') == 'Negeri Sembilan'}">Negeri Sembilan</option>
+                        <option value="Pahang" th:selected="${pageParams.get('state') == 'Pahang'}">Pahang</option>
+                        <option value="Perak" th:selected="${pageParams.get('state') == 'Perak'}">Perak</option>
+                        <option value="Perlis" th:selected="${pageParams.get('state') == 'Perlis'}">Perlis</option>
+                        <option value="Pulau Pinang" th:selected="${pageParams.get('state') == 'Pulau Pinang'}">Pulau Pinang</option>
+                        <option value="Sabah" th:selected="${pageParams.get('state') == 'Sabah'}">Sabah</option>
+                        <option value="Sarawak" th:selected="${pageParams.get('state') == 'Sarawak'}">Sarawak</option>
+                        <option value="Selangor" th:selected="${pageParams.get('state') == 'Selangor'}">Selangor</option>
+                        <option value="Terengganu" th:selected="${pageParams.get('state') == 'Terengganu'}">Terengganu</option>
+                        <option value="Kuala Lumpur" th:selected="${pageParams.get('state') == 'Kuala Lumpur'}">Kuala Lumpur</option>
                     </select>
-                    <select id="filterCity" class="form-select form-select-sm" onchange="applyFilters(true)" disabled>
-                        <option value="">Select City</option>
+                    <select id="filterCity" name="city" class="form-select form-select-sm" onchange="document.getElementById('vehicleFilterForm').submit()" disabled>
+                        <option value="">Select City</option><option th:if="${pageParams.get('city') != null}" th:value="${pageParams.get('city')}" th:text="${pageParams.get('city')}" selected></option>
                     </select>
                 </div>
 
@@ -896,13 +897,13 @@
                     <div class="price-inputs d-flex gap-2">
                         <div class="input-group flex-nowrap price-filter-group" style="flex: 1;">
                             <span class="input-group-text bg-light border-end-0 text-muted px-2">RM</span>
-                            <input type="number" id="minPrice" class="form-control price-input border-start-0 ps-1" placeholder="Min" aria-label="Minimum Price"
-                                oninput="applyFilters(true)">
+                            <input type="number" id="minPrice" name="minPrice" th:value="${pageParams.get('minPrice')}" class="form-control price-input border-start-0 ps-1" placeholder="Min" aria-label="Minimum Price"
+                                >
                         </div>
                         <div class="input-group flex-nowrap price-filter-group" style="flex: 1;">
                             <span class="input-group-text bg-light border-end-0 text-muted px-2">RM</span>
-                            <input type="number" id="maxPrice" class="form-control price-input border-start-0 ps-1" placeholder="Max" aria-label="Maximum Price"
-                                oninput="applyFilters(true)">
+                            <input type="number" id="maxPrice" name="maxPrice" th:value="${pageParams.get('maxPrice')}" class="form-control price-input border-start-0 ps-1" placeholder="Max" aria-label="Maximum Price"
+                                >
                         </div>
                     </div>
                 </div>
@@ -927,7 +928,7 @@
                     <div class="position-relative flex-grow-1">
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" class="search-bar-large" placeholder="Search by model, brand, or keywords..."
-                            id="vehicleSearch" aria-label="Search vehicles">
+                            id="vehicleSearch" name="search" th:value="${pageParams.get('search')}" aria-label="Search vehicles">
                         <button type="button" id="clearSearchBtn" class="btn border-0 p-0 position-absolute top-50 translate-middle-y text-muted d-none"
                                 style="right: 1.5rem; width: 24px; height: 24px; z-index: 5;" aria-label="Clear search">
                             <i class="fas fa-times-circle fs-5"></i>
@@ -1087,6 +1088,7 @@
                 </div>
             </div>
         </div>
+        </form>
 
         <!-- Quick View Modal -->
         <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
@@ -1371,185 +1373,14 @@
                 applyFilters();
             }
 
-            function applyFilters(autoClose = false) {
-                const container = document.getElementById('vehicleGrid');
-                const cards = Array.from(document.querySelectorAll('.vehicle-card'));
-                const searchInput = document.getElementById('vehicleSearch').value.toLowerCase();
-                const activeFiltersContainer = document.getElementById('activeFilters');
-                activeFiltersContainer.innerHTML = ''; // Clear existing chips
-
-                // Auto-close offcanvas on mobile after filter change
-                if (autoClose && window.innerWidth < 992) {
-                    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('filterSidebar'));
-                    if (offcanvas) {
-                        offcanvas.hide();
-                    }
-                }
-
-                // Get checked categories
-                const checkedCategoriesInputs = Array.from(document.querySelectorAll('input[name="category"]:checked'));
-                const checkedCategories = checkedCategoriesInputs.map(cb => cb.value);
-
-                // Add chips for categories
-                checkedCategoriesInputs.forEach(cb => {
-                    const label = cb.parentNode.textContent.trim();
-                    addFilterChip('category', cb.value, label);
-                });
-
-                // Get checked transmissions
-                const checkedTransmissionsInputs = Array.from(document.querySelectorAll('input[name="transmission"]:checked'));
-                const checkedTransmissions = checkedTransmissionsInputs.map(cb => cb.value);
-
-                // Add chips for transmission
-                checkedTransmissionsInputs.forEach(cb => {
-                    const label = cb.parentNode.textContent.trim();
-                    addFilterChip('transmission', cb.value, label);
-                });
-
-                // Get price range
-                const minPriceStr = document.getElementById('minPrice').value;
-                const maxPriceStr = document.getElementById('maxPrice').value;
-                const minPrice = parseFloat(minPriceStr) || 0;
-                const maxPrice = parseFloat(maxPriceStr) || Infinity;
-
-                if (minPriceStr || maxPriceStr) {
-                    let label = 'Price: ';
-                    if (minPriceStr && maxPriceStr) label += `RM${minPriceStr} - RM${maxPriceStr}`;
-                    else if (minPriceStr) label += `Min RM${minPriceStr}`;
-                    else if (maxPriceStr) label += `Max RM${maxPriceStr}`;
-                    addFilterChip('price', 'price', label);
-                }
-
-                // Search chip
-                if (searchInput) {
-                    addFilterChip('search', 'search', `Search: "${document.getElementById('vehicleSearch').value}"`);
-                }
-
-                // Location filters
-                const selectedState = document.getElementById('filterState')?.value || '';
-                const selectedCity = document.getElementById('filterCity')?.value || '';
-
-                // Add location chips
-                if (selectedState) {
-                    addFilterChip('location', selectedState, selectedState + (selectedCity ? ', ' + selectedCity : ''));
-                }
-
-                // Sorting Logic - only re-sort when sort option changes (performance optimization)
-                if (cachedSort !== currentSort) {
-                    cachedSort = currentSort;
-                    cards.sort((a, b) => {
-                        const priceA = parseFloat(a.dataset.price) || 0;
-                        const priceB = parseFloat(b.dataset.price) || 0;
-                        const yearA = parseInt(a.dataset.year) || 2000;
-                        const yearB = parseInt(b.dataset.year) || 2000;
-                        
-                        if (currentSort === 'price-asc') {
-                            return priceA - priceB;
-                        } else if (currentSort === 'price-desc') {
-                            return priceB - priceA;
-                        } else if (currentSort === 'year-desc') {
-                            return yearB - yearA;
-                        } else {
-                            // Default / Recommended
-                            return parseInt(a.dataset.originalIndex) - parseInt(b.dataset.originalIndex);
-                        }
-                    });
-
-                    // Re-append in sorted order
-                    cards.forEach(card => container.appendChild(card));
-                }
-
-                let visibleCount = 0;
-
-                cards.forEach(card => {
-                    const category = card.dataset.category;
-                    const transmission = card.dataset.transmission;
-const price = parseFloat(card.dataset.price);
-                    const brand = card.dataset.brand;
-                    const model = card.dataset.model;
-                    const title = (brand + ' ' + model).toLowerCase();
-                    const cardState = (card.dataset.state || '').toLowerCase();
-                    const cardCity = (card.dataset.city || '').toLowerCase();
-
-                    const matchesCategory = checkedCategories.length === 0 || checkedCategories.includes(category);
-                    const matchesTransmission = checkedTransmissions.length === 0 || checkedTransmissions.includes(transmission);
-                    const matchesPrice = price >= minPrice && price <= maxPrice;
-                    const matchesSearch = title.includes(searchInput);
-                    const matchesState = !selectedState || cardState.includes(selectedState.toLowerCase()) || cardState.includes(selectedState.toLowerCase().replace(' ', ''));
-                    const matchesCity = !selectedCity || cardCity.includes(selectedCity.toLowerCase()) || cardCity.includes(selectedCity.toLowerCase().replace(' ', ''));
-                    const matchesLocation = matchesState && matchesCity;
-
-                    if (matchesCategory && matchesTransmission && matchesPrice && matchesSearch && matchesLocation) {
-                        card.style.display = 'flex'; // Changed to flex for the card layout
-                        card.classList.add('animate-fade-in'); // Add animation class
-                        visibleCount++;
-                    } else {
-                        card.style.display = 'none';
-                        card.classList.remove('animate-fade-in');
-                    }
-                });
-
-                // Update result count
-                document.getElementById('resultCount').textContent = visibleCount + ' results';
-
-                // Update Mobile Button Text
-                const mobileBtnText = document.getElementById('mobileResultCountText');
-                if (mobileBtnText) {
-                    mobileBtnText.textContent = visibleCount + (visibleCount === 1 ? ' Vehicle' : ' Vehicles');
-                }
-                const mobileBtn = document.getElementById('mobileFilterBtn');
-                if (mobileBtn) {
-                     if (visibleCount === 0) {
-                         mobileBtn.disabled = true;
-                         mobileBtnText.textContent = '0 Vehicles';
-                     } else {
-                         mobileBtn.disabled = false;
-                     }
-                }
-
-                // Show/Hide empty states
-                const emptyState = document.getElementById('emptyState');
-                const noFilterResults = document.getElementById('noFilterResults');
-
-                if (visibleCount === 0) {
-                    if (emptyState) emptyState.style.display = 'none';
-                    noFilterResults.style.display = 'block';
-                } else {
-                    if (emptyState && cards.length === 0) emptyState.style.display = 'block';
-                    noFilterResults.style.display = 'none';
-                }
+            function applyFilters() {
+                document.getElementById('vehicleFilterForm').submit();
             }
 
             function clearAllFilters() {
-                // Reset inputs
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                document.getElementById('minPrice').value = '';
-                document.getElementById('maxPrice').value = '';
-
-                const searchInput = document.getElementById('vehicleSearch');
-                searchInput.value = '';
-                toggleClearButton(searchInput);
-
-                // Reset location filters
-                const stateSelect = document.getElementById('filterState');
-                const citySelect = document.getElementById('filterCity');
-                if (stateSelect) stateSelect.value = '';
-                if (citySelect) {
-                    citySelect.value = '';
-                    citySelect.disabled = true;
-                }
-
-                // Date Reset Logic
-                const filterPickupDate = document.getElementById('filterPickupDate');
-                if (filterPickupDate && filterPickupDate.value) {
-                    window.location.href = '/renter/vehicles';
-                    return;
-                }
-
-                // Invalidate sort cache
-                cachedSort = null;
-                applyFilters();
+                window.location.href = '/renter/vehicles';
             }
+
 
             // Debounce utility
             function debounce(func, wait) {
@@ -1673,7 +1504,7 @@ const price = parseFloat(card.dataset.price);
 
                 if (!selectedState) {
                     if (citySelect) {
-                        citySelect.innerHTML = '<option value="">Select City</option>';
+                        citySelect.innerHTML = '<option value="">Select City</option><option th:if="${pageParams.get('city') != null}" th:value="${pageParams.get('city')}" th:text="${pageParams.get('city')}" selected></option>';
                         citySelect.disabled = true;
                     }
                     applyFilters(true);
@@ -1690,7 +1521,7 @@ const price = parseFloat(card.dataset.price);
                     });
                     citySelect.disabled = false;
                 } else if (citySelect) {
-                    citySelect.innerHTML = '<option value="">Select City</option>';
+                    citySelect.innerHTML = '<option value="">Select City</option><option th:if="${pageParams.get('city') != null}" th:value="${pageParams.get('city')}" th:text="${pageParams.get('city')}" selected></option>';
                     citySelect.disabled = true;
                 }
 

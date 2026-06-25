@@ -35,4 +35,33 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
            "LOWER(v.model) LIKE LOWER(CONCAT('%', :term, '%')) OR " +
            "LOWER(v.registrationNo) LIKE LOWER(CONCAT('%', :term, '%')))")
     List<Vehicle> searchByOwner(@Param("ownerId") Long ownerId, @Param("term") String term);
+
+    @Query("SELECT v FROM Vehicle v WHERE v.isDeleted = false " +
+           "AND (:status IS NULL OR v.status = :status) " +
+           "AND (:year IS NULL OR v.manufacturingYear = :year) " +
+           "AND (:category IS NULL OR v.category = :category) " +
+           "AND (:term IS NULL OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :term, '%')) " +
+           "OR LOWER(v.model) LIKE LOWER(CONCAT('%', :term, '%')) " +
+           "OR LOWER(v.registrationNo) LIKE LOWER(CONCAT('%', :term, '%')))")
+    org.springframework.data.domain.Page<Vehicle> findVehiclesWithFilters(
+            @Param("term") String term,
+            @Param("year") Integer year,
+            @Param("category") String category,
+            @Param("status") Vehicle.VehicleStatus status,
+            org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT v FROM Vehicle v WHERE v.isDeleted = false AND v.fleetOwnerId = :ownerId " +
+           "AND (:status IS NULL OR v.status = :status) " +
+           "AND (:year IS NULL OR v.manufacturingYear = :year) " +
+           "AND (:category IS NULL OR v.category = :category) " +
+           "AND (:term IS NULL OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :term, '%')) " +
+           "OR LOWER(v.model) LIKE LOWER(CONCAT('%', :term, '%')) " +
+           "OR LOWER(v.registrationNo) LIKE LOWER(CONCAT('%', :term, '%')))")
+    org.springframework.data.domain.Page<Vehicle> findOwnerVehiclesWithFilters(
+            @Param("ownerId") Long ownerId,
+            @Param("term") String term,
+            @Param("year") Integer year,
+            @Param("category") String category,
+            @Param("status") Vehicle.VehicleStatus status,
+            org.springframework.data.domain.Pageable pageable);
 }

@@ -252,32 +252,36 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body py-3">
-                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <input type="text" class="form-control" id="vehicle-search" placeholder="Search plate, model, brand..." style="width: 250px;">
-                            <select class="form-select" id="year-filter" style="width: 130px;">
-                                <option value="">All Years</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                                <option value="2022">2022</option>
-                                <option value="2021">2021</option>
-                                <option value="2020">2020</option>
+                        <form method="GET" th:action="@{/owner/vehicles}" class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="text" class="form-control" id="vehicle-search" name="search" th:value="${currentSearch}" placeholder="Search plate, model, brand..." style="width: 250px;">
+                            <select class="form-select" id="year-filter" name="year" onchange="this.form.submit()" style="width: 130px;">
+                                <option value="" th:selected="${currentYear == null or currentYear == ''}">All Years</option>
+                                <option value="2024" th:selected="${currentYear == '2024'}">2024</option>
+                                <option value="2023" th:selected="${currentYear == '2023'}">2023</option>
+                                <option value="2022" th:selected="${currentYear == '2022'}">2022</option>
+                                <option value="2021" th:selected="${currentYear == '2021'}">2021</option>
+                                <option value="2020" th:selected="${currentYear == '2020'}">2020</option>
                             </select>
-                            <select class="form-select" id="category-filter" style="width: 160px;">
-                                <option value="">All Categories</option>
-                                <option value="Hatchback">Hatchback</option>
-                                <option value="Sedan">Sedan</option>
-                                <option value="SUV">SUV</option>
-                                <option value="Pickup 4x4">Pickup 4x4</option>
-                                <option value="Luxury MPV">Luxury MPV</option>
-                                <option value="Luxury Sedan">Luxury Sedan</option>
+                            <select class="form-select" id="category-filter" name="category" onchange="this.form.submit()" style="width: 160px;">
+                                <option value="" th:selected="${currentCategory == null or currentCategory == ''}">All Categories</option>
+                                <option value="Hatchback" th:selected="${currentCategory == 'Hatchback'}">Hatchback</option>
+                                <option value="Sedan" th:selected="${currentCategory == 'Sedan'}">Sedan</option>
+                                <option value="SUV" th:selected="${currentCategory == 'SUV'}">SUV</option>
+                                <option value="Pickup 4x4" th:selected="${currentCategory == 'Pickup 4x4'}">Pickup 4x4</option>
+                                <option value="Luxury MPV" th:selected="${currentCategory == 'Luxury MPV'}">Luxury MPV</option>
+                                <option value="Luxury Sedan" th:selected="${currentCategory == 'Luxury Sedan'}">Luxury Sedan</option>
                             </select>
-                            <select class="form-select" id="status-filter" style="width: 150px;">
-                                <option value="">All Statuses</option>
-                                <option value="AVAILABLE">Available</option>
-                                <option value="RENTED">Rented</option>
-                                <option value="MAINTENANCE">Maintenance</option>
-                                <option value="UNAVAILABLE">Unavailable</option>
+                            <select class="form-select" id="status-filter" name="status" onchange="this.form.submit()" style="width: 150px;">
+                                <option value="" th:selected="${currentStatus == null or currentStatus == ''}">All Statuses</option>
+                                <option value="AVAILABLE" th:selected="${currentStatus == 'AVAILABLE'}">Available</option>
+                                <option value="RENTED" th:selected="${currentStatus == 'RENTED'}">Rented</option>
+                                <option value="MAINTENANCE" th:selected="${currentStatus == 'MAINTENANCE'}">Maintenance</option>
+                                <option value="UNAVAILABLE" th:selected="${currentStatus == 'UNAVAILABLE'}">Unavailable</option>
                             </select>
+                            <button type="submit" class="btn btn-primary d-none d-md-block">Search</button>
+                            <a th:href="@{/owner/vehicles}" class="btn btn-outline-secondary d-none d-md-block" title="Clear Filters">
+                                <i class="mdi mdi-refresh"></i>
+                            </a>
                             <div class="ms-auto view-toggle btn-group" role="group" aria-label="View toggle">
                                 <button type="button" class="btn btn-outline-primary active" id="btn-grid-view"
                                     onclick="setView('grid')" title="Grid View">
@@ -288,7 +292,7 @@
                                     <i class="mdi mdi-table"></i>
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -298,7 +302,8 @@
         <div class="row">
             <div class="col-12">
                 <!-- Empty State -->
-                <div th:if="${#lists.isEmpty(vehicles)}" class="card">
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(vehicles) and currentSearch == null and currentYear == null and currentCategory == null and currentStatus == null}" class="card">
                     <div class="card-body text-center py-5">
                         <div class="mb-3">
                             <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle"
@@ -449,13 +454,13 @@
                 </div>
 
                 <!-- No Results Message -->
-                <div id="no-results" class="card" style="display: none;">
+                <div id="no-results" class="card" th:if="${#lists.isEmpty(vehicles) and (currentSearch != null or currentYear != null or currentCategory != null or currentStatus != null)}">
                     <div class="card-body text-center py-5">
                         <i class="mdi mdi-magnify-close mdi-48px text-muted mb-3"></i>
                         <h5 class="text-muted">No vehicles match your filters</h5>
-                        <button class="btn btn-outline-primary mt-3" onclick="clearFilters()">
+                        <a th:href="@{/owner/vehicles}" class="btn btn-outline-primary mt-3">
                             <i class="mdi mdi-filter-remove me-1"></i> Clear Filters
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -466,17 +471,10 @@
         <script>
             // State
             let currentView = 'grid';
-            let currentStatusFilter = 'all';
 
             // DOM Elements
-            const searchInput = document.getElementById('vehicle-search');
-            const yearFilter = document.getElementById('year-filter');
-            const categoryFilter = document.getElementById('category-filter');
-            const statusFilter = document.getElementById('status-filter');
             const gridContainer = document.getElementById('grid-view-container');
             const tableContainer = document.getElementById('table-view-container');
-            const noResults = document.getElementById('no-results');
-            const kpiCards = document.querySelectorAll('.kpi-card');
 
             // View Toggle
             function setView(view) {
@@ -496,84 +494,12 @@
 
             // Filter by KPI Card Click
             function filterByStatus(status, element) {
-                currentStatusFilter = status;
-
-                // Update KPI card active state
-                kpiCards.forEach(card => card.classList.remove('active'));
-                if (element) element.classList.add('active');
-
-                // Update dropdown to match
-                if (status === 'all') {
-                    statusFilter.value = '';
-                } else {
-                    statusFilter.value = status;
-                }
-
-                filterVehicles();
-            }
-
-            // Main Filter Function
-            function filterVehicles() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const yearValue = yearFilter.value;
-                const categoryValue = categoryFilter.value;
-                const statusValue = statusFilter.value || (currentStatusFilter !== 'all' ? currentStatusFilter : '');
-
-                const allItems = document.querySelectorAll('.vehicle-item');
-                let visibleCount = 0;
-
-                allItems.forEach(item => {
-                    const searchText = (item.dataset.search || '').toLowerCase();
-                    const itemYear = item.dataset.year || '';
-                    const itemCategory = item.dataset.category || '';
-                    const itemStatus = item.dataset.status || '';
-
-                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
-                    const matchesYear = !yearValue || itemYear === yearValue;
-                    const matchesCategory = !categoryValue || itemCategory === categoryValue;
-                    const matchesStatus = !statusValue || itemStatus === statusValue;
-
-                    const isVisible = matchesSearch && matchesYear && matchesCategory && matchesStatus;
-                    item.style.display = isVisible ? '' : 'none';
-
-                    if (isVisible) visibleCount++;
-                });
-
-                // Show/hide no results message
-                const hasVehicles = document.querySelectorAll('.vehicle-item').length > 0;
-                if (noResults) {
-                    noResults.style.display = (hasVehicles && visibleCount === 0) ? 'block' : 'none';
+                const statusFilter = document.getElementById('status-filter');
+                if (statusFilter) {
+                    statusFilter.value = status === 'all' ? '' : status;
+                    statusFilter.form.submit();
                 }
             }
-
-            // Clear All Filters
-            function clearFilters() {
-                searchInput.value = '';
-                yearFilter.value = '';
-                categoryFilter.value = '';
-                statusFilter.value = '';
-                currentStatusFilter = 'all';
-
-                kpiCards.forEach(card => card.classList.remove('active'));
-                document.querySelector('.kpi-card[data-filter="all"]')?.classList.add('active');
-
-                filterVehicles();
-            }
-
-            // Event Listeners
-            if (searchInput) searchInput.addEventListener('input', filterVehicles);
-            if (yearFilter) yearFilter.addEventListener('change', filterVehicles);
-            if (categoryFilter) categoryFilter.addEventListener('change', filterVehicles);
-            if (statusFilter) statusFilter.addEventListener('change', () => {
-                currentStatusFilter = statusFilter.value || 'all';
-
-                // Sync KPI card active state
-                kpiCards.forEach(card => {
-                    card.classList.toggle('active', card.dataset.filter === currentStatusFilter);
-                });
-
-                filterVehicles();
-            });
 
             // Initialize
             document.addEventListener('DOMContentLoaded', () => {
@@ -581,8 +507,11 @@
                 const savedView = localStorage.getItem('vehicleViewPreference') || 'grid';
                 setView(savedView);
 
-                // Set "All" KPI as active by default
-                document.querySelector('.kpi-card[data-filter="all"]')?.classList.add('active');
+                const currentStatus = document.getElementById('status-filter')?.value || 'all';
+                const activeCard = document.querySelector(`.kpi-card[data-filter="${currentStatus === '' ? 'all' : currentStatus}"]`);
+                if (activeCard) {
+                    activeCard.classList.add('active');
+                }
             });
         </script>
     </th:block>

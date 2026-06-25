@@ -317,6 +317,10 @@ public class OwnerController {
 
     @GetMapping("/vehicles")
     public String vehicles(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String year,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String status,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             HttpSession session, Model model) {
@@ -327,13 +331,24 @@ public class OwnerController {
             size = Math.min(Math.max(size, 1), 48);
             Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
             
-            Page<VehicleDTO> vehiclePage = vehicleManagementService.getVehiclesByOwnerIdPaginated(ownerId, pageable);
+            Page<VehicleDTO> vehiclePage = vehicleManagementService.getFilteredOwnerVehiclesPaginated(ownerId, search, year, category, status, pageable);
             model.addAttribute("vehicles", vehiclePage.getContent());
             model.addAttribute("currentPage", vehiclePage.getNumber());
             model.addAttribute("totalPages", vehiclePage.getTotalPages());
             model.addAttribute("totalItems", vehiclePage.getTotalElements());
             model.addAttribute("defaultSize", size);
-            model.addAttribute("pageParams", Collections.emptyMap());
+            
+            java.util.Map<String, String> pageParams = new java.util.HashMap<>();
+            if (search != null && !search.trim().isEmpty()) pageParams.put("search", search.trim());
+            if (year != null && !year.trim().isEmpty()) pageParams.put("year", year.trim());
+            if (category != null && !category.trim().isEmpty()) pageParams.put("category", category.trim());
+            if (status != null && !status.trim().isEmpty()) pageParams.put("status", status.trim());
+            model.addAttribute("pageParams", pageParams);
+
+            model.addAttribute("currentSearch", search);
+            model.addAttribute("currentYear", year);
+            model.addAttribute("currentCategory", category);
+            model.addAttribute("currentStatus", status);
 
             // Add counts for KPI cards using DB count methods
             long availableCount = vehicleManagementService.countVehiclesByOwnerAndStatus(ownerId, Vehicle.VehicleStatus.AVAILABLE);

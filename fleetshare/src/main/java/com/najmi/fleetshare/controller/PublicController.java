@@ -42,6 +42,13 @@ public class PublicController {
     public String browseVehicles(
             @RequestParam(value = "pickupDate", required = false) String pickupDateStr,
             @RequestParam(value = "returnDate", required = false) String returnDateStr,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "category", required = false) List<String> categories,
+            @RequestParam(value = "transmission", required = false) List<String> transmissions,
+            @RequestParam(value = "minPrice", required = false) Double minPrice,
+            @RequestParam(value = "maxPrice", required = false) Double maxPrice,
+            @RequestParam(value = "state", required = false) String state,
+            @RequestParam(value = "city", required = false) String city,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             Model model) {
@@ -49,17 +56,18 @@ public class PublicController {
         size = Math.min(Math.max(size, 1), 48);
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
         
-        org.springframework.data.domain.Page<VehicleDTO> vehiclePage;
+        LocalDate pickupDate = null;
+        LocalDate returnDate = null;
         
         if (pickupDateStr != null && returnDateStr != null && !pickupDateStr.trim().isEmpty() && !returnDateStr.trim().isEmpty()) {
-            LocalDate pickupDate = LocalDate.parse(pickupDateStr);
-            LocalDate returnDate = LocalDate.parse(returnDateStr);
-            vehiclePage = vehicleManagementService.getAvailableVehiclesPaginated(pickupDate, returnDate, pageable);
+            pickupDate = LocalDate.parse(pickupDateStr);
+            returnDate = LocalDate.parse(returnDateStr);
             model.addAttribute("pickupDate", pickupDateStr);
             model.addAttribute("returnDate", returnDateStr);
-        } else {
-            vehiclePage = vehicleManagementService.getAvailableVehiclesPaginated(pageable);
         }
+        
+        org.springframework.data.domain.Page<VehicleDTO> vehiclePage = vehicleManagementService.getAvailableVehiclesPaginated(
+                pickupDate, returnDate, search, categories, transmissions, minPrice, maxPrice, state, city, pageable);
 
         model.addAttribute("vehicles", vehiclePage.getContent());
         model.addAttribute("currentPage", vehiclePage.getNumber());
@@ -67,13 +75,17 @@ public class PublicController {
         model.addAttribute("totalItems", vehiclePage.getTotalElements());
         model.addAttribute("defaultSize", size);
         
-        java.util.Map<String, String> pageParams = new java.util.HashMap<>();
-        if (pickupDateStr != null && !pickupDateStr.trim().isEmpty()) {
-            pageParams.put("pickupDate", pickupDateStr);
-        }
-        if (returnDateStr != null && !returnDateStr.trim().isEmpty()) {
-            pageParams.put("returnDate", returnDateStr);
-        }
+        java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+        if (pickupDateStr != null && !pickupDateStr.trim().isEmpty()) pageParams.put("pickupDate", pickupDateStr);
+        if (returnDateStr != null && !returnDateStr.trim().isEmpty()) pageParams.put("returnDate", returnDateStr);
+        if (search != null && !search.trim().isEmpty()) pageParams.put("search", search.trim());
+        if (categories != null && !categories.isEmpty()) pageParams.put("category", categories);
+        if (transmissions != null && !transmissions.isEmpty()) pageParams.put("transmission", transmissions);
+        if (minPrice != null) pageParams.put("minPrice", minPrice.toString());
+        if (maxPrice != null) pageParams.put("maxPrice", maxPrice.toString());
+        if (state != null && !state.trim().isEmpty()) pageParams.put("state", state.trim());
+        if (city != null && !city.trim().isEmpty()) pageParams.put("city", city.trim());
+        
         model.addAttribute("pageParams", pageParams);
 
         return "public/browse-vehicles";

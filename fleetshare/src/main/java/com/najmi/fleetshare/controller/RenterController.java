@@ -90,6 +90,13 @@ public class RenterController {
     public String browseVehicles(
             @RequestParam(value = "pickupDate", required = false) String pickupDateStr,
             @RequestParam(value = "returnDate", required = false) String returnDateStr,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "category", required = false) List<String> categories,
+            @RequestParam(value = "transmission", required = false) List<String> transmissions,
+            @RequestParam(value = "minPrice", required = false) Double minPrice,
+            @RequestParam(value = "maxPrice", required = false) Double maxPrice,
+            @RequestParam(value = "state", required = false) String state,
+            @RequestParam(value = "city", required = false) String city,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             HttpSession session, Model model) {
@@ -105,17 +112,18 @@ public class RenterController {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
 
         // Fetch available vehicles directly from DB
-        org.springframework.data.domain.Page<VehicleDTO> vehiclePage;
+        java.time.LocalDate pickupDate = null;
+        java.time.LocalDate returnDate = null;
         
         if (pickupDateStr != null && returnDateStr != null && !pickupDateStr.trim().isEmpty() && !returnDateStr.trim().isEmpty()) {
-            java.time.LocalDate pickupDate = java.time.LocalDate.parse(pickupDateStr);
-            java.time.LocalDate returnDate = java.time.LocalDate.parse(returnDateStr);
-            vehiclePage = vehicleManagementService.getAvailableVehiclesPaginated(pickupDate, returnDate, pageable);
+            pickupDate = java.time.LocalDate.parse(pickupDateStr);
+            returnDate = java.time.LocalDate.parse(returnDateStr);
             model.addAttribute("pickupDate", pickupDateStr);
             model.addAttribute("returnDate", returnDateStr);
-        } else {
-            vehiclePage = vehicleManagementService.getAvailableVehiclesPaginated(pageable);
         }
+        
+        org.springframework.data.domain.Page<VehicleDTO> vehiclePage = vehicleManagementService.getAvailableVehiclesPaginated(
+                pickupDate, returnDate, search, categories, transmissions, minPrice, maxPrice, state, city, pageable);
 
         model.addAttribute("vehicles", vehiclePage.getContent());
         model.addAttribute("currentPage", vehiclePage.getNumber());
@@ -123,13 +131,17 @@ public class RenterController {
         model.addAttribute("totalItems", vehiclePage.getTotalElements());
         model.addAttribute("defaultSize", size);
         
-        java.util.Map<String, String> pageParams = new java.util.HashMap<>();
-        if (pickupDateStr != null && !pickupDateStr.trim().isEmpty()) {
-            pageParams.put("pickupDate", pickupDateStr);
-        }
-        if (returnDateStr != null && !returnDateStr.trim().isEmpty()) {
-            pageParams.put("returnDate", returnDateStr);
-        }
+        java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+        if (pickupDateStr != null && !pickupDateStr.trim().isEmpty()) pageParams.put("pickupDate", pickupDateStr);
+        if (returnDateStr != null && !returnDateStr.trim().isEmpty()) pageParams.put("returnDate", returnDateStr);
+        if (search != null && !search.trim().isEmpty()) pageParams.put("search", search.trim());
+        if (categories != null && !categories.isEmpty()) pageParams.put("category", categories);
+        if (transmissions != null && !transmissions.isEmpty()) pageParams.put("transmission", transmissions);
+        if (minPrice != null) pageParams.put("minPrice", minPrice.toString());
+        if (maxPrice != null) pageParams.put("maxPrice", maxPrice.toString());
+        if (state != null && !state.trim().isEmpty()) pageParams.put("state", state.trim());
+        if (city != null && !city.trim().isEmpty()) pageParams.put("city", city.trim());
+        
         model.addAttribute("pageParams", pageParams);
 
         return "renter/browse-vehicles";

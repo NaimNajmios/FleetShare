@@ -66,6 +66,42 @@ public class VehicleManagementService {
                 return new PageImpl<>(dtos, pageable, vehiclePage.getTotalElements());
         }
 
+        public Page<VehicleDTO> getFilteredVehiclesPaginated(String search, String yearStr, String category, String status, Pageable pageable) {
+                Vehicle.VehicleStatus vehicleStatus = null;
+                if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
+                        try { vehicleStatus = Vehicle.VehicleStatus.valueOf(status.toUpperCase()); } catch (Exception e) {}
+                }
+
+                String term = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+                Integer year = null;
+                if (yearStr != null && !yearStr.trim().isEmpty()) {
+                        try { year = Integer.parseInt(yearStr.trim()); } catch (Exception e) {}
+                }
+                String cat = (category != null && !category.trim().isEmpty() && !category.equalsIgnoreCase("all")) ? category.trim() : null;
+
+                Page<Vehicle> vehiclePage = vehicleRepository.findVehiclesWithFilters(term, year, cat, vehicleStatus, pageable);
+                List<VehicleDTO> dtos = mapVehiclesToDTOs(vehiclePage.getContent());
+                return new PageImpl<>(dtos, pageable, vehiclePage.getTotalElements());
+        }
+
+        public Page<VehicleDTO> getFilteredOwnerVehiclesPaginated(Long ownerId, String search, String yearStr, String category, String status, Pageable pageable) {
+                Vehicle.VehicleStatus vehicleStatus = null;
+                if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("all")) {
+                        try { vehicleStatus = Vehicle.VehicleStatus.valueOf(status.toUpperCase()); } catch (Exception e) {}
+                }
+
+                String term = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+                Integer year = null;
+                if (yearStr != null && !yearStr.trim().isEmpty()) {
+                        try { year = Integer.parseInt(yearStr.trim()); } catch (Exception e) {}
+                }
+                String cat = (category != null && !category.trim().isEmpty() && !category.equalsIgnoreCase("all")) ? category.trim() : null;
+
+                Page<Vehicle> vehiclePage = vehicleRepository.findOwnerVehiclesWithFilters(ownerId, term, year, cat, vehicleStatus, pageable);
+                List<VehicleDTO> dtos = mapVehiclesToDTOs(vehiclePage.getContent());
+                return new PageImpl<>(dtos, pageable, vehiclePage.getTotalElements());
+        }
+
         /**
          * Fetches available vehicles with their pricing and owner information.
          * Optimized to filter at database level.
@@ -81,9 +117,7 @@ public class VehicleManagementService {
         }
 
         public org.springframework.data.domain.Page<VehicleDTO> getAvailableVehiclesPaginated(org.springframework.data.domain.Pageable pageable) {
-                org.springframework.data.domain.Page<Vehicle> page = vehicleRepository.findByStatusAndIsDeletedFalse(Vehicle.VehicleStatus.AVAILABLE, pageable);
-                List<VehicleDTO> dtoList = mapVehiclesToDTOs(page.getContent());
-                return new org.springframework.data.domain.PageImpl<>(dtoList, pageable, page.getTotalElements());
+                return getAvailableVehiclesPaginated(null, null, null, null, null, null, null, null, null, pageable);
         }
 
         /**
@@ -117,15 +151,41 @@ public class VehicleManagementService {
         }
 
         /**
-         * Fetches available vehicles within a specific date range, with pagination.
-         * 
-         * @param startDate     Start date of the range
-         * @param endDate       End date of the range
-         * @param pageable      Pagination info
-         * @return Paginated list of VehicleDTO objects
+         * Fetches available vehicles with filters and pagination.
          */
-        public org.springframework.data.domain.Page<VehicleDTO> getAvailableVehiclesPaginated(java.time.LocalDate startDate, java.time.LocalDate endDate, org.springframework.data.domain.Pageable pageable) {
+        public org.springframework.data.domain.Page<VehicleDTO> getAvailableVehiclesPaginated(
+                java.time.LocalDate startDate, java.time.LocalDate endDate,
+                String search, List<String> categories, List<String> transmissions,
+                Double minPrice, Double maxPrice, String state, String city,
+                org.springframework.data.domain.Pageable pageable) {
+                
                 List<VehicleDTO> allAvailable = getAvailableVehicles(startDate, endDate);
+                
+                // Apply memory-based filters to ensure pagination accuracy
+                allAvailable = allAvailable.stream().filter(v -> {
+                        boolean matchesSearch = search == null || search.trim().isEmpty() ||
+                                (v.getBrand() != null && v.getBrand().toLowerCase().contains(search.toLowerCase())) ||
+                                (v.getModel() != null && v.getModel().toLowerCase().contains(search.toLowerCase()));
+                                
+                        boolean matchesCategory = categories == null || categories.isEmpty() || 
+                                (v.getCategory() != null && categories.stream().anyMatch(c -> c.equalsIgnoreCase(v.getCategory())));
+                                
+                        boolean matchesTransmission = transmissions == null || transmissions.isEmpty() || 
+                                (v.getTransmissionType() != null && transmissions.stream().anyMatch(t -> t.equalsIgnoreCase(v.getTransmissionType())));
+                        
+                        boolean matchesPrice = true;
+                        if (v.getRatePerDay() != null) {
+                                if (minPrice != null && v.getRatePerDay().doubleValue() < minPrice) matchesPrice = false;
+                                if (maxPrice != null && v.getRatePerDay().doubleValue() > maxPrice) matchesPrice = false;
+                        }
+                        
+                        boolean matchesState = state == null || state.trim().isEmpty() || 
+                                (v.getState() != null && (v.getState().toLowerCase().contains(state.toLowerCase()) || v.getState().replace(" ", "").toLowerCase().contains(state.replace(" ", "").toLowerCase())));
+                        boolean matchesCity = city == null || city.trim().isEmpty() || 
+                                (v.getCity() != null && (v.getCity().toLowerCase().contains(city.toLowerCase()) || v.getCity().replace(" ", "").toLowerCase().contains(city.replace(" ", "").toLowerCase())));
+                                
+                        return matchesSearch && matchesCategory && matchesTransmission && matchesPrice && matchesState && matchesCity;
+                }).collect(Collectors.toList());
                 
                 int start = (int) pageable.getOffset();
                 int end = Math.min((start + pageable.getPageSize()), allAvailable.size());
