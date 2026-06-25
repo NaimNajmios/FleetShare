@@ -80,6 +80,12 @@ public class VehicleManagementService {
                 return mapVehiclesToDTOs(vehicles);
         }
 
+        public org.springframework.data.domain.Page<VehicleDTO> getAvailableVehiclesPaginated(org.springframework.data.domain.Pageable pageable) {
+                org.springframework.data.domain.Page<Vehicle> page = vehicleRepository.findByStatusAndIsDeletedFalse(Vehicle.VehicleStatus.AVAILABLE, pageable);
+                List<VehicleDTO> dtoList = mapVehiclesToDTOs(page.getContent());
+                return new org.springframework.data.domain.PageImpl<>(dtoList, pageable, page.getTotalElements());
+        }
+
         /**
          * Fetches available vehicles filtered by a specific date range.
          *
@@ -108,6 +114,30 @@ public class VehicleManagementService {
                 return availableVehicles.stream()
                         .filter(v -> !unavailableIds.contains(v.getVehicleId()))
                         .collect(Collectors.toList());
+        }
+
+        /**
+         * Fetches available vehicles within a specific date range, with pagination.
+         * 
+         * @param startDate     Start date of the range
+         * @param endDate       End date of the range
+         * @param pageable      Pagination info
+         * @return Paginated list of VehicleDTO objects
+         */
+        public org.springframework.data.domain.Page<VehicleDTO> getAvailableVehiclesPaginated(java.time.LocalDate startDate, java.time.LocalDate endDate, org.springframework.data.domain.Pageable pageable) {
+                List<VehicleDTO> allAvailable = getAvailableVehicles(startDate, endDate);
+                
+                int start = (int) pageable.getOffset();
+                int end = Math.min((start + pageable.getPageSize()), allAvailable.size());
+                
+                List<VehicleDTO> pageContent;
+                if (start > allAvailable.size()) {
+                        pageContent = new ArrayList<>();
+                } else {
+                        pageContent = allAvailable.subList(start, end);
+                }
+                
+                return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, allAvailable.size());
         }
 
         private List<VehicleDTO> mapVehiclesToDTOs(List<Vehicle> vehicles) {

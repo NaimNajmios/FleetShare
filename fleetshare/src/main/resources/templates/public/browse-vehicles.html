@@ -1047,6 +1047,14 @@
                         </div>
                     </div>
 
+                    <!-- Pagination -->
+                    <div th:if="${totalPages != null and totalPages > 1}" class="mt-4 mb-4">
+                        <div th:replace="~{fragments/pagination :: pagination(
+                            ${currentPage}, ${totalPages}, ${totalItems},
+                            '/public/vehicles', ${pageParams}, ${defaultSize})}">
+                        </div>
+                    </div>
+
                     <!-- Empty State -->
                     <div id="emptyState" th:if="${#lists.isEmpty(vehicles)}"
                         style="text-align: center; padding: 5rem 2rem; color: #6c757d;">
