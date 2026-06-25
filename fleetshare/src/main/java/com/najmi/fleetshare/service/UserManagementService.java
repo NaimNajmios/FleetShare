@@ -270,6 +270,22 @@ public class UserManagementService {
         return customers;
     }
 
+    public org.springframework.data.domain.Page<RenterDTO> getCustomersByOwnerIdPaginated(Long ownerId, org.springframework.data.domain.Pageable pageable) {
+        List<RenterDTO> allCustomers = getCustomersByOwnerId(ownerId);
+        
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allCustomers.size());
+        
+        List<RenterDTO> pageContent;
+        if (start > allCustomers.size()) {
+            pageContent = new ArrayList<>();
+        } else {
+            pageContent = allCustomers.subList(start, end);
+        }
+        
+        return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, allCustomers.size());
+    }
+
     /**
      * Updates user information based on user type
      * 

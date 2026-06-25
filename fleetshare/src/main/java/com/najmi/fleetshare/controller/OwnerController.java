@@ -232,12 +232,26 @@ public class OwnerController {
     }
 
     @GetMapping("/customers")
-    public String customers(HttpSession session, Model model) {
+    public String customers(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null && user.getOwnerDetails() != null) {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-            List<RenterDTO> customers = userManagementService.getCustomersByOwnerId(ownerId);
-            model.addAttribute("customers", customers);
+            
+            size = Math.min(Math.max(size, 1), 48);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+            
+            List<RenterDTO> customers = userManagementService.getCustomersByOwnerId(ownerId); // For KPI
+            org.springframework.data.domain.Page<RenterDTO> customerPage = userManagementService.getCustomersByOwnerIdPaginated(ownerId, pageable);
+            
+            model.addAttribute("customers", customerPage.getContent());
+            model.addAttribute("currentPage", customerPage.getNumber());
+            model.addAttribute("totalPages", customerPage.getTotalPages());
+            model.addAttribute("totalItems", customerPage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", java.util.Collections.emptyMap());
 
             // KPI counts
             if (customers != null) {
@@ -553,12 +567,25 @@ public class OwnerController {
     }
 
     @GetMapping("/maintenance")
-    public String maintenance(HttpSession session, Model model) {
+    public String maintenance(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null && user.getOwnerDetails() != null) {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-            List<MaintenanceDTO> maintenanceRecords = maintenanceService.getMaintenanceByOwnerId(ownerId);
-            model.addAttribute("maintenanceRecords", maintenanceRecords);
+            
+            size = Math.min(Math.max(size, 1), 48);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("scheduledDate").descending());
+            
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.MaintenanceDTO> maintenancePage = maintenanceService.getMaintenanceByOwnerIdPaginated(ownerId, pageable);
+            
+            model.addAttribute("maintenanceRecords", maintenancePage.getContent());
+            model.addAttribute("currentPage", maintenancePage.getNumber());
+            model.addAttribute("totalPages", maintenancePage.getTotalPages());
+            model.addAttribute("totalItems", maintenancePage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", java.util.Collections.emptyMap());
             model.addAttribute("stats", maintenanceService.getMaintenanceStatsByOwnerId(ownerId));
 
             // Add vehicles for the dropdown
@@ -782,12 +809,26 @@ public class OwnerController {
     }
 
     @GetMapping("/bookings")
-    public String bookings(HttpSession session, Model model) {
+    public String bookings(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null && user.getOwnerDetails() != null) {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-            List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId);
-            model.addAttribute("bookings", bookings);
+            
+            size = Math.min(Math.max(size, 1), 48);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+            
+            List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId); // For stats
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.BookingDTO> bookingPage = bookingService.getBookingsByOwnerIdPaginated(ownerId, pageable);
+            
+            model.addAttribute("bookings", bookingPage.getContent());
+            model.addAttribute("currentPage", bookingPage.getNumber());
+            model.addAttribute("totalPages", bookingPage.getTotalPages());
+            model.addAttribute("totalItems", bookingPage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", java.util.Collections.emptyMap());
 
             // Calculate booking statistics
             long pendingCount = bookings.stream().filter(b -> "PENDING".equals(b.getStatus())).count();

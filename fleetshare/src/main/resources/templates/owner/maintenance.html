@@ -182,7 +182,7 @@
         <!-- KPI Cards -->
         <div class="row mb-4">
             <div class="col-xl-3 col-md-6 col-6 mb-3">
-                <div class="kpi-card kpi-pending active" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
+                <div class="kpi-card kpi-pending" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
                     <div class="kpi-value" th:text="${stats?.pendingCount ?: 0}">0</div>
                     <div class="kpi-label">Pending</div>
                     <i class="mdi mdi-clock-outline kpi-icon"></i>
@@ -203,7 +203,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-md-6 col-6 mb-3">
-                <div class="kpi-card kpi-cost" data-filter="all" onclick="filterByStatus('all', this)">
+                <div class="kpi-card kpi-cost active" data-filter="all" onclick="filterByStatus('all', this)">
                     <div class="kpi-value" th:text="'RM ' + ${#numbers.formatDecimal(stats?.totalFinalCost ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0</div>
                     <div class="kpi-label">Total Cost</div>
                     <i class="mdi mdi-currency-usd kpi-icon"></i>
@@ -243,11 +243,11 @@
                                 <option th:each="v : ${vehicles}" th:value="${v.vehicleId}" th:text="${v.brand + ' ' + v.model}"></option>
                             </select>
                             <select class="form-select" id="status-filter" style="width: 150px;">
-                                <option value="PENDING" selected>Pending</option>
+                                <option value="" selected>All Status</option>
+                                <option value="PENDING">Pending</option>
                                 <option value="IN_PROGRESS">In Progress</option>
                                 <option value="COMPLETED">Completed</option>
                                 <option value="CANCELLED">Cancelled</option>
-                                <option value="">All Status</option>
                             </select>
                             <input type="date" class="form-control" id="date-from" title="From Date" style="width: 140px;">
                             <input type="date" class="form-control" id="date-to" title="To Date" style="width: 140px;">
@@ -358,6 +358,14 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Pagination -->
+                <div th:if="${totalPages != null and totalPages > 1}" class="mt-4">
+                    <div th:replace="~{fragments/pagination :: pagination(
+                        ${currentPage}, ${totalPages}, ${totalItems},
+                        '/owner/maintenance', ${pageParams}, ${defaultSize})}">
+                    </div>
+                </div>
             </div>
 
             <!-- Add Maintenance Modal -->
@@ -433,7 +441,7 @@
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
             let currentView = 'grid';
-            let currentStatusFilter = 'PENDING';
+            let currentStatusFilter = 'all';
 
             const statsData = {
                 pending: /*[[${stats?.pendingCount ?: 0}]]*/ 0,
@@ -509,11 +517,13 @@
 
             function clearFilters() {
                 document.getElementById('maintenance-search').value = '';
-                document.getElementById('status-filter').value = 'PENDING';
+                document.getElementById('status-filter').value = '';
                 document.getElementById('vehicle-filter').value = '';
                 document.getElementById('date-from').value = '';
                 document.getElementById('date-to').value = '';
-                currentStatusFilter = 'PENDING';
+                currentStatusFilter = 'all';
+                document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active'));
+                document.querySelector('.kpi-cost').classList.add('active');
                 filterMaintenance();
             }
 

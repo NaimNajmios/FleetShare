@@ -835,6 +835,12 @@ public class BookingService {
         return mapBookingsToDTOs(bookings);
     }
 
+    public org.springframework.data.domain.Page<BookingDTO> getBookingsByOwnerIdPaginated(Long ownerId, org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<Booking> page = bookingRepository.findByFleetOwnerId(ownerId, pageable);
+        List<BookingDTO> dtoList = mapBookingsToDTOs(page.getContent());
+        return new org.springframework.data.domain.PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
     public List<BookingDTO> getDashboardBookingsByOwnerId(Long ownerId, java.time.LocalDateTime since) {
         List<Booking> bookings = bookingRepository.findDashboardBookingsByOwnerId(ownerId, since);
         return mapBookingsToDTOs(bookings);
