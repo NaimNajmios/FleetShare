@@ -1040,12 +1040,26 @@ public class OwnerController {
     }
 
     @GetMapping("/payments")
-    public String payments(HttpSession session, Model model) {
+    public String payments(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null && user.getOwnerDetails() != null) {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-            List<PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId);
-            model.addAttribute("payments", payments);
+            
+            size = Math.min(Math.max(size, 1), 48);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("paymentDate").descending());
+
+            List<PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId); // For stats
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> paymentPage = paymentService.getPaymentsByOwnerIdPaginated(ownerId, pageable);
+            
+            model.addAttribute("payments", paymentPage.getContent());
+            model.addAttribute("currentPage", paymentPage.getNumber());
+            model.addAttribute("totalPages", paymentPage.getTotalPages());
+            model.addAttribute("totalItems", paymentPage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", java.util.Collections.emptyMap());
 
             // Calculate payment statistics by status
             long pendingCount = payments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();
@@ -1209,7 +1223,10 @@ public class OwnerController {
      * Owner Payout Dashboard - shows owner's specific earnings and commission paid.
      */
     @GetMapping("/payout-dashboard")
-    public String payoutDashboard(HttpSession session, Model model) {
+    public String payoutDashboard(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getOwnerDetails() == null) {
             return "redirect:/login";
@@ -1285,17 +1302,17 @@ public class OwnerController {
             model.addAttribute("monthlyCommissionAmounts", monthlyCommission.values());
 
             // Recent split transactions
-            List<PaymentDTO> splitPayments = allPayments.stream()
-                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
-                    .sorted((a, b) -> {
-                        if (a.getPaymentDate() == null) return 1;
-                        if (b.getPaymentDate() == null) return -1;
-                        return b.getPaymentDate().compareTo(a.getPaymentDate());
-                    })
-                    .limit(50)
-                    .collect(Collectors.toList());
+            size = Math.min(Math.max(size, 1), 48);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("paymentDate").descending());
+            
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> splitPaymentPage = paymentService.getSplitPaymentsByOwnerIdPaginated(ownerId, pageable);
 
-            model.addAttribute("splitPayments", splitPayments);
+            model.addAttribute("splitPayments", splitPaymentPage.getContent());
+            model.addAttribute("currentPage", splitPaymentPage.getNumber());
+            model.addAttribute("totalPages", splitPaymentPage.getTotalPages());
+            model.addAttribute("totalItems", splitPaymentPage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", java.util.Collections.emptyMap());
             
             // Check if owner has configured their ToyyibPay Username
             boolean hasToyyibpayUsername = false;

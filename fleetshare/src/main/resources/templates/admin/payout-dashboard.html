@@ -328,6 +328,14 @@
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- Pagination -->
+                        <div th:if="${totalPages != null and totalPages > 1}" class="mt-4">
+                            <div th:replace="~{fragments/pagination :: pagination(
+                                ${currentPage}, ${totalPages}, ${totalItems},
+                                '/admin/payout-dashboard', ${pageParams}, ${defaultSize})}">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

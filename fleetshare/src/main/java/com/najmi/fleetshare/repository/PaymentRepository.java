@@ -4,6 +4,8 @@ import com.najmi.fleetshare.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +17,13 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Payment p WHERE p.invoiceId IN :invoiceIds")
     List<Payment> findByInvoiceIdIn(java.util.Collection<Long> invoiceIds);
+
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Payment p WHERE p.invoiceId IN :invoiceIds")
+    Page<Payment> findByInvoiceIdIn(java.util.Collection<Long> invoiceIds, Pageable pageable);
+
+    Page<Payment> findByInvoiceIdInAndSplitPaymentEnabledTrue(java.util.Collection<Long> invoiceIds, Pageable pageable);
+
+    Page<Payment> findBySplitPaymentEnabledTrue(Pageable pageable);
 
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Payment p WHERE p.invoiceId IN :invoiceIds AND (p.paymentStatus = 'PENDING' OR p.paymentDate >= :since)")
     List<Payment> findDashboardPaymentsByInvoiceIds(@org.springframework.data.repository.query.Param("invoiceIds") java.util.Collection<Long> invoiceIds, @org.springframework.data.repository.query.Param("since") java.time.LocalDateTime since);

@@ -452,6 +452,14 @@
                     </div>
                 </div>
 
+                <!-- Pagination -->
+                <div th:if="${totalPages != null and totalPages > 1}" class="mt-4">
+                    <div th:replace="~{fragments/pagination :: pagination(
+                        ${currentPage}, ${totalPages}, ${totalItems},
+                        '/owner/payments', ${pageParams}, ${defaultSize})}">
+                    </div>
+                </div>
+
                 <!-- No Results Message -->
                 <div id="no-results" class="card" style="display: none;">
                     <div class="card-body text-center py-5">

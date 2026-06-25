@@ -509,9 +509,23 @@ public class AdminController {
     }
 
     @GetMapping("/payment")
-    public String payment(Model model) {
-        var allPayments = paymentService.getAllPayments();
-        model.addAttribute("payments", allPayments);
+    public String payment(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            Model model) {
+            
+        size = Math.min(Math.max(size, 1), 48);
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("paymentDate").descending());
+
+        var allPayments = paymentService.getAllPayments(); // For stats
+        org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> paymentPage = paymentService.getAllPaymentsPaginated(pageable);
+        
+        model.addAttribute("payments", paymentPage.getContent());
+        model.addAttribute("currentPage", paymentPage.getNumber());
+        model.addAttribute("totalPages", paymentPage.getTotalPages());
+        model.addAttribute("totalItems", paymentPage.getTotalElements());
+        model.addAttribute("defaultSize", size);
+        model.addAttribute("pageParams", java.util.Collections.emptyMap());
 
         // Calculate payment statistics by status
         long pendingCount = allPayments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();
@@ -1313,7 +1327,10 @@ public class AdminController {
      * Payout Dashboard - shows platform commission revenue and per-owner split details.
      */
     @GetMapping("/payout-dashboard")
-    public String payoutDashboard(HttpSession session, Model model) {
+    public String payoutDashboard(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user == null || user.getAdminDetails() == null) {
             return "redirect:/login";
@@ -1422,17 +1439,17 @@ public class AdminController {
             model.addAttribute("monthlyPayoutAmounts", monthlyPayout.values());
 
             // Split payment list (recent split transactions)
-            var splitPayments = allPayments.stream()
-                    .filter(p -> Boolean.TRUE.equals(p.getSplitPaymentEnabled()))
-                    .sorted((a, b) -> {
-                        if (a.getPaymentDate() == null) return 1;
-                        if (b.getPaymentDate() == null) return -1;
-                        return b.getPaymentDate().compareTo(a.getPaymentDate());
-                    })
-                    .limit(50)
-                    .collect(Collectors.toList());
+            size = Math.min(Math.max(size, 1), 48);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("paymentDate").descending());
+            
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> splitPaymentPage = paymentService.getSplitPaymentsPaginated(pageable);
 
-            model.addAttribute("splitPayments", splitPayments);
+            model.addAttribute("splitPayments", splitPaymentPage.getContent());
+            model.addAttribute("currentPage", splitPaymentPage.getNumber());
+            model.addAttribute("totalPages", splitPaymentPage.getTotalPages());
+            model.addAttribute("totalItems", splitPaymentPage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", java.util.Collections.emptyMap());
 
         } catch (Exception e) {
             logger.error("Exception: ", e);

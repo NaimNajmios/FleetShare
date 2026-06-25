@@ -16,6 +16,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class PaymentService {
@@ -86,6 +89,46 @@ public class PaymentService {
             }
         }
 
+        return paymentDTOs;
+    }
+
+    public Page<PaymentDTO> getAllPaymentsPaginated(Pageable pageable) {
+        Page<Payment> page = paymentRepository.findAll(pageable);
+        List<PaymentDTO> dtoList = mapPaymentsToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
+    public Page<PaymentDTO> getSplitPaymentsPaginated(Pageable pageable) {
+        Page<Payment> page = paymentRepository.findBySplitPaymentEnabledTrue(pageable);
+        List<PaymentDTO> dtoList = mapPaymentsToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
+    private List<PaymentDTO> mapPaymentsToDTOs(List<Payment> payments) {
+        List<PaymentDTO> paymentDTOs = new ArrayList<>();
+        for (Payment payment : payments) {
+            Invoice invoice = invoiceRepository.findById(payment.getInvoiceId()).orElse(null);
+            if (invoice != null) {
+                Renter renter = renterRepository.findById(invoice.getRenterId()).orElse(null);
+                FleetOwner owner = fleetOwnerRepository.findById(invoice.getFleetOwnerId()).orElse(null);
+                PaymentDTO dto = new PaymentDTO(
+                        payment.getPaymentId(),
+                        invoice.getInvoiceNumber(),
+                        renter != null ? renter.getFullName() : "Unknown",
+                        owner != null ? owner.getBusinessName() : "Unknown",
+                        payment.getAmount(),
+                        payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : "N/A",
+                        payment.getPaymentStatus() != null ? payment.getPaymentStatus().name() : "PENDING",
+                        payment.getPaymentDate(),
+                        payment.getTransactionReference(),
+                        invoice.getBookingId() != null ? bookingRepository.findById(invoice.getBookingId()).map(Booking::getStartDate).orElse(null) : null,
+                        invoice.getBookingId(),
+                        payment.getPlatformCommission(),
+                        payment.getOwnerPayout(),
+                        payment.getSplitPaymentEnabled());
+                paymentDTOs.add(dto);
+            }
+        }
         return paymentDTOs;
     }
 
@@ -765,6 +808,34 @@ public class PaymentService {
         }
 
         return paymentDTOs;
+    }
+
+    public Page<PaymentDTO> getPaymentsByOwnerIdPaginated(Long ownerId, Pageable pageable) {
+        List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
+        if (ownerInvoices.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+        Set<Long> invoiceIds = ownerInvoices.stream()
+                .map(Invoice::getInvoiceId)
+                .collect(Collectors.toSet());
+                
+        Page<Payment> page = paymentRepository.findByInvoiceIdIn(invoiceIds, pageable);
+        List<PaymentDTO> dtoList = mapPaymentsToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
+    public Page<PaymentDTO> getSplitPaymentsByOwnerIdPaginated(Long ownerId, Pageable pageable) {
+        List<Invoice> ownerInvoices = invoiceRepository.findByFleetOwnerId(ownerId);
+        if (ownerInvoices.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+        Set<Long> invoiceIds = ownerInvoices.stream()
+                .map(Invoice::getInvoiceId)
+                .collect(Collectors.toSet());
+                
+        Page<Payment> page = paymentRepository.findByInvoiceIdInAndSplitPaymentEnabledTrue(invoiceIds, pageable);
+        List<PaymentDTO> dtoList = mapPaymentsToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 
     /**
