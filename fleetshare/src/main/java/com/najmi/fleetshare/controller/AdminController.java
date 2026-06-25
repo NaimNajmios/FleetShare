@@ -979,8 +979,22 @@ public class AdminController {
     }
 
     @GetMapping("/vehicles")
-    public String vehicles(Model model) {
-        model.addAttribute("vehicles", vehicleManagementService.getAllVehicles());
+    public String vehicles(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            Model model) {
+        
+        size = Math.min(Math.max(size, 1), 48);
+        Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+
+        Page<VehicleDTO> vehiclePage = vehicleManagementService.getAllVehiclesPaginated(pageable);
+        model.addAttribute("vehicles", vehiclePage.getContent());
+        model.addAttribute("currentPage", vehiclePage.getNumber());
+        model.addAttribute("totalPages", vehiclePage.getTotalPages());
+        model.addAttribute("totalItems", vehiclePage.getTotalElements());
+        model.addAttribute("defaultSize", size);
+        model.addAttribute("pageParams", Collections.emptyMap());
+        
         return "admin/vehicles";
     }
 

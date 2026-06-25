@@ -57,6 +57,9 @@ import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -299,26 +302,35 @@ public class OwnerController {
     }
 
     @GetMapping("/vehicles")
-    public String vehicles(HttpSession session, Model model) {
+    public String vehicles(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null && user.getOwnerDetails() != null) {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-            List<VehicleDTO> vehicles = vehicleManagementService.getVehiclesByOwnerId(ownerId);
-            model.addAttribute("vehicles", vehicles);
+            
+            size = Math.min(Math.max(size, 1), 48);
+            Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+            
+            Page<VehicleDTO> vehiclePage = vehicleManagementService.getVehiclesByOwnerIdPaginated(ownerId, pageable);
+            model.addAttribute("vehicles", vehiclePage.getContent());
+            model.addAttribute("currentPage", vehiclePage.getNumber());
+            model.addAttribute("totalPages", vehiclePage.getTotalPages());
+            model.addAttribute("totalItems", vehiclePage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", Collections.emptyMap());
 
-            // Add counts for KPI cards
-            if (vehicles != null) {
-                long availableCount = vehicles.stream().filter(v -> "AVAILABLE".equals(v.getStatus())).count();
-                long rentedCount = vehicles.stream().filter(v -> "RENTED".equals(v.getStatus())).count();
-                long maintenanceCount = vehicles.stream().filter(v -> "MAINTENANCE".equals(v.getStatus())).count();
-                model.addAttribute("availableCount", availableCount);
-                model.addAttribute("rentedCount", rentedCount);
-                model.addAttribute("maintenanceCount", maintenanceCount);
-            } else {
-                model.addAttribute("availableCount", 0);
-                model.addAttribute("rentedCount", 0);
-                model.addAttribute("maintenanceCount", 0);
-            }
+            // Add counts for KPI cards using DB count methods
+            long availableCount = vehicleManagementService.countVehiclesByOwnerAndStatus(ownerId, Vehicle.VehicleStatus.AVAILABLE);
+            long rentedCount = vehicleManagementService.countVehiclesByOwnerAndStatus(ownerId, Vehicle.VehicleStatus.RENTED);
+            long maintenanceCount = vehicleManagementService.countVehiclesByOwnerAndStatus(ownerId, Vehicle.VehicleStatus.MAINTENANCE);
+            
+            model.addAttribute("availableCount", availableCount);
+            model.addAttribute("rentedCount", rentedCount);
+            model.addAttribute("maintenanceCount", maintenanceCount);
+        } else {
+            return "redirect:/login";
         }
         return "owner/vehicles";
     }

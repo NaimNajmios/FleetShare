@@ -13,12 +13,16 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByFleetOwnerId(Long fleetOwnerId);
 
     long countByStatus(String status);
+    long countByFleetOwnerIdAndStatusAndIsDeletedFalse(Long fleetOwnerId, Vehicle.VehicleStatus status);
 
     List<Vehicle> findByFleetOwnerIdAndIsDeletedFalse(Long fleetOwnerId);
+    org.springframework.data.domain.Page<Vehicle> findByFleetOwnerIdAndIsDeletedFalse(Long fleetOwnerId, org.springframework.data.domain.Pageable pageable);
 
     List<Vehicle> findByIsDeletedFalse();
+    org.springframework.data.domain.Page<Vehicle> findByIsDeletedFalse(org.springframework.data.domain.Pageable pageable);
 
     List<Vehicle> findByStatusAndIsDeletedFalse(Vehicle.VehicleStatus status);
+    org.springframework.data.domain.Page<Vehicle> findByStatusAndIsDeletedFalse(Vehicle.VehicleStatus status, org.springframework.data.domain.Pageable pageable);
 
     @Query("SELECT v FROM Vehicle v WHERE v.isDeleted = false AND (" +
            "LOWER(v.brand) LIKE LOWER(CONCAT('%', :term, '%')) OR " +

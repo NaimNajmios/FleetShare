@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class VehicleManagementService {
@@ -55,6 +58,12 @@ public class VehicleManagementService {
                         return Collections.emptyList();
                 }
                 return mapVehiclesToDTOs(vehicles);
+        }
+
+        public Page<VehicleDTO> getAllVehiclesPaginated(Pageable pageable) {
+                Page<Vehicle> vehiclePage = vehicleRepository.findByIsDeletedFalse(pageable);
+                List<VehicleDTO> dtos = mapVehiclesToDTOs(vehiclePage.getContent());
+                return new PageImpl<>(dtos, pageable, vehiclePage.getTotalElements());
         }
 
         /**
@@ -258,6 +267,16 @@ public class VehicleManagementService {
                         return Collections.emptyList();
                 }
                 return mapVehiclesToDTOs(vehicles);
+        }
+
+        public Page<VehicleDTO> getVehiclesByOwnerIdPaginated(Long ownerId, Pageable pageable) {
+                Page<Vehicle> vehiclePage = vehicleRepository.findByFleetOwnerIdAndIsDeletedFalse(ownerId, pageable);
+                List<VehicleDTO> dtos = mapVehiclesToDTOs(vehiclePage.getContent());
+                return new PageImpl<>(dtos, pageable, vehiclePage.getTotalElements());
+        }
+
+        public long countVehiclesByOwnerAndStatus(Long ownerId, Vehicle.VehicleStatus status) {
+                return vehicleRepository.countByFleetOwnerIdAndStatusAndIsDeletedFalse(ownerId, status);
         }
 
         /**
