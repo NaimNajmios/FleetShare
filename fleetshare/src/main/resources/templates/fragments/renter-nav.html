@@ -1,9 +1,13 @@
 <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row flex-nowrap" th:fragment="navbar">
-    <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-        <a class="navbar-brand brand-logo me-5" th:href="@{/renter/home}"
-            style="font-weight: bold; font-size: 1.5rem; color: #4B49AC;">FleetShare</a>
+    <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start ps-4">
+        <a class="navbar-brand brand-logo" th:href="@{/renter/home}"
+            style="font-weight: bold; font-size: 1.5rem; color: #4B49AC;">
+            <i class="mdi mdi-car-connected text-primary me-2"></i>FleetShare
+        </a>
         <a class="navbar-brand brand-logo-mini" th:href="@{/renter/home}"
-            style="font-weight: bold; font-size: 1.5rem; color: #4B49AC;">FS</a>
+            style="font-weight: bold; font-size: 1.5rem; color: #4B49AC;">
+            <i class="mdi mdi-car-connected text-primary"></i>
+        </a>
     </div>
     <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
         <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
