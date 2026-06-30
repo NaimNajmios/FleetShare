@@ -192,17 +192,27 @@
         <!-- Filter Card -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body py-3">
-                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <input type="text" class="form-control" id="payout-search"
-                                placeholder="Search invoice, renter..." style="width: 250px;">
-                            <select class="form-select" id="status-filter" style="width: 150px;">
-                                <option value="">All Status</option>
-                                <option value="PENDING">Pending</option>
-                                <option value="VERIFIED">Verified</option>
-                                <option value="FAILED">Failed</option>
-                            </select>
+                <div class="card filter-card">
+                    <div class="card-body p-3">
+                        <div class="row align-items-center g-3">
+                            <div class="col-12 col-xl-9">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-12 col-md-5">
+                                        <div class="search-input-wrapper">
+                                            <i class="mdi mdi-magnify"></i>
+                                            <input type="text" class="form-control" id="payout-search" placeholder="Search invoice, renter...">
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <select class="form-select" id="status-filter">
+                                            <option value="">All Status</option>
+                                            <option value="PENDING">Pending</option>
+                                            <option value="VERIFIED">Verified</option>
+                                            <option value="FAILED">Failed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

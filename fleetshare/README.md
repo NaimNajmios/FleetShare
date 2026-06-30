@@ -31,26 +31,16 @@ These elements are currently present in the codebase:
  * **MVC Controllers**: `@Controller` for serving Thymeleaf templates (`.html`).
  * **Model**: Used to pass data from controllers to views.
 
-### 3. Planned / Future Architecture
-These elements are planned for upcoming modules to enhance functionality and robustness:
+### 3. Implemented Architecture Features
+All features previously listed as "planned" are now implemented:
 
-* **Advanced Data Modeling**:
- * **Relationships**: `@OneToMany` (Owner -> Vehicles), `@ManyToOne` (Booking -> Vehicle), `@OneToOne` (Booking -> Payment) to model complex data associations.
- * **Auditing**: `@EnableJpaAuditing` and `@EntityListeners(AuditingEntityListener.class)` to automatically track `createdAt` and `updatedAt` timestamps.
-* **Business Logic & Transaction Management**:
- * **Transactions**: `@Transactional` on Service methods to ensure data consistency (ACID properties), especially for Booking creation and Payment processing.
- * **Scheduling**: `@EnableScheduling` and `@Scheduled` (cron jobs) for automated tasks like expiring pending bookings or generating monthly reports.
- * **Async Processing**: `@EnableAsync` and `@Async` for non-blocking operations like sending email notifications (`JavaMailSender`) to improve response times.
-* **Validation & Error Handling**:
- * **Bean Validation**: `@Valid`, `@NotNull`, `@Email`, `@Size` on DTOs to ensure data integrity before it reaches the service layer.
- * **Global Exception Handling**: `@ControllerAdvice` and `@ExceptionHandler` to provide consistent error responses (JSON/HTML) across the application.
- * **Custom Exceptions**: `@ResponseStatus` on custom exception classes (e.g., `ResourceNotFoundException`) to control HTTP status codes.
-* **API & Integration**:
- * **REST API**: `@RestController` (combines `@Controller` and `@ResponseBody`) for exposing JSON endpoints for mobile apps or SPA frontends.
- * **External Calls**: `RestTemplate` or `WebClient` for integrating with third-party services (e.g., Payment Gateways, SMS providers).
-* **Testing Strategy**:
- * **Integration Tests**: `@SpringBootTest` to load the full application context.
- * **Slice Tests**: `@WebMvcTest` for controllers and `@DataJpaTest` for repositories to test layers in isolation.
+* **Advanced Data Modeling**: JPA relationships (`@OneToMany`, `@ManyToOne`, `@OneToOne`) across all entities.
+* **Async Processing**: `@EnableAsync` with `AsyncConfig` for non-blocking email and background tasks.
+* **Validation & Error Handling**: Bean Validation (`@Valid` on DTOs), `@ControllerAdvice` via `GlobalExceptionHandler`, and custom exceptions (`RegistrationException`).
+* **Retry & Resilience**: `@EnableRetry` via `RetryConfig` for fault-tolerant external API calls (payment gateway).
+* **AOP Audit Logging**: `LoggingAspect` for method-level logging across controllers, services, and repositories.
+* **REST API**: JSON endpoints for search, payments, reports, and platform management.
+* **External Integrations**: ToyyibPay payment gateway, multi-provider LLM AI assistant (Groq/Cerebras/OpenRouter), Gmail SMTP.
 
 -----
 
@@ -309,20 +299,27 @@ These elements are planned for upcoming modules to enhance functionality and rob
 **Development Environment:**
 
 * **JDK:** Java 17 or 21 (LTS)
-* **Framework:** Spring Boot 3.2+
+* **Framework:** Spring Boot 3.2.5
 * **Build Tool:** Maven 3.8+
-* **Database:** MySQL 8.0
+* **Database:** MySQL 8.0 (H2 in-memory for tests)
 
 **Core Dependencies:**
 
-* `spring-boot-starter-web` (REST / MVC)
-* `spring-boot-starter-data-jpa` (Database Access)
-* `spring-boot-starter-security` (Auth & RBAC)
-* `spring-boot-starter-validation` (Form Validation)
-* `spring-boot-starter-mail` (Email / SMTP)
-* `spring-dotenv` (Environment variable management via `.env`)
-* `mysql-connector-j` (Driver)
-* `lombok` (Optional, for reducing boilerplate code)
+* `spring-boot-starter-web` — REST / MVC
+* `spring-boot-starter-data-jpa` — Database access via JPA/Hibernate
+* `spring-boot-starter-security` — Auth & RBAC (`@EnableMethodSecurity`)
+* `spring-boot-starter-validation` — Bean Validation (`@Valid`)
+* `spring-boot-starter-mail` — Async email via Gmail SMTP
+* `spring-boot-starter-thymeleaf` — Server-side HTML templating
+* `thymeleaf-extras-springsecurity6` — Thymeleaf security integration
+* `thymeleaf-layout-dialect` — Layout composition (decorator pattern)
+* `spring-boot-devtools` — Development-time hot reload
+* `spring-retry` + `aspectjweaver` — Fault-tolerant external API calls
+* `openhtmltopdf-pdfbox v1.0.10` + `openhtmltopdf-svg-support` — PDF generation (invoices, receipts, reports)
+* `poi-ooxml v5.2.5` — Excel spreadsheet export
+* `mysql-connector-j` — MySQL JDBC driver
+* `h2` — In-memory database for testing
+* `spring-dotenv` — `.env` file support for local development secrets
 
 -----
 
@@ -330,111 +327,170 @@ These elements are planned for upcoming modules to enhance functionality and rob
 
 1. **Clone the repository.**
 2. **Database Setup:**
- * Create a MySQL database named `fleetshare`.
- * Update `src/main/resources/application.properties`:
+ * Create a MySQL database (default dev: `fleetshareplayground` on port 3307).
+ * Import schema: `mysql -u root -p fleetshareplayground < db/fleetshare_dump.sql`
+ * Or copy `application.properties` and update:
  ```properties
- spring.datasource.url=jdbc:mysql://localhost:3306/fleetshare
+ spring.datasource.url=jdbc:mysql://localhost:3306/fleetshareplayground
  spring.datasource.username=root
  spring.datasource.password=yourpassword
- spring.jpa.hibernate.ddl-auto=update
+ spring.jpa.hibernate.ddl-auto=none
  ```
-3. **Build:**
+3. **Environment:**
+ * Copy `.env.example` (or create `.env`) and configure API keys:
+   - `GROQ_API_KEY` / `CEREBRAS_API_KEY` / `OPENROUTER_API_KEY` (AI assistant)
+   - `TOYYIBPAY_SECRET_KEY` / `TOYYIBPAY_CATEGORY_CODE` (payment gateway)
+   - `MAIL_USERNAME` / `MAIL_PASSWORD` (Gmail SMTP)
+4. **Build:**
  * Run `mvn clean install`
-4. **Run:**
+5. **Run:**
  * Run `mvn spring-boot:run`
-5. **Access:**
- * API Documentation (Swagger/OpenAPI): `http://localhost:8080/swagger-ui.html` (if dependency added).
+6. **Access:**
  * App: `http://localhost:8080`
 
 -----
 
-## Project Directory Structure
-src/main/java/
-├── com.najmi.fleetshare/
-│ ├── FleetshareApplication.java # Main entry point
-│ ├── TestPasswordEncoder.java # Utility for generating BCrypt passwords
-│ │
-│ ├── config/ # Configuration classes
-│ │ └── SecurityConfig.java # Spring Security configuration
-│ │
-│ ├── controller/ # Web layer (MVC Controllers)
-│ │ ├── AdminController.java # Admin dashboard routes
-│ │ ├── AuthController.java # Authentication routes
-│ │ ├── OwnerController.java # Fleet Owner routes
-│ │ └── RenterController.java # Renter routes
-│ │
-│ ├── dto/ # Data Transfer Objects
-│ │ ├── AdminDetails.java
-│ │ ├── OwnerDetails.java
-│ │ ├── RenterDetails.java
-│ │ └── SessionUser.java # Session-scoped user data
-│ │
-│ ├── entity/ # JPA Entities
-│ │ ├── User.java # Base user entity
-│ │ ├── FleetOwner.java # Owner specific attributes
-│ │ ├── Renter.java # Renter specific attributes
-│ │ ├── PlatformAdmin.java # Admin specific attributes
-│ │ └── UserRole.java # Role enumeration
-│ │
-│ ├── repository/ # Data Access Layer
-│ │ ├── UserRepository.java
-│ │ ├── FleetOwnerRepository.java
-│ │ ├── RenterRepository.java
-│ │ └── PlatformAdminRepository.java
-│ │
-│ ├── security/ # Security Components
-│ │ ├── CustomUserDetailsService.java
-│ │ ├── CustomUserDetails.java
-│ │ └── CustomAuthenticationSuccessHandler.java
-│ │
-│ ├── service/ # Business Logic
-│ │ ├── UserSessionService.java # Session management service
-│ │ ├── AiAssistantService.java # Multi-provider LLM AI Data Assistant
-│ │ ├── MaintenanceService.java # Maintenance CRUD, validation, stats
-│ │ ├── BookingService.java # Booking lifecycle & bulk fetch
-│ │ ├── VehicleManagementService.java # Vehicle fleet operations
-│ │ ├── PaymentService.java # Payment processing & history
-│ │ ├── ToyyibPayService.java # Payment gateway integration
-│ │ ├── CommissionService.java # Platform fee & payout logic
-│ │ ├── InvoiceService.java # Billing & Invoice management
-│ │ ├── ReceiptService.java # Payment receipt generation
-│ │ ├── EmailService.java # Async email with HTML templates
-│ │ ├── ReportService.java # Modular reporting & PDF export
-│ │ ├── QueryClassifier.java # AI query categorization component
-│ │ ├── PromptTemplateService.java # Dynamic LLM prompt management
-│ │ └── PredictiveMaintenanceService.java # Predictive analytics
-│ │
-│ └── util/ # Utilities
-│ └── SessionHelper.java
-│
-src/main/resources/
-├── application.properties # Main configuration
-├── static/ # Static assets (CSS, JS, Images)
-└── templates/ # Thymeleaf templates
- ├── admin/ # Admin views
- ├── auth/ # Login/Register views
- ├── email/ # HTML email templates
- ├── fragments/ # Reusable UI fragments
- ├── layouts/ # Base layouts
- ├── owner/ # Owner views
- ├── pages/ # Miscellaneous pages
- ├── pdf/ # HTML templates for PDF generation (receipts, reports)
- ├── public/ # Public access views
- ├── renter/ # Renter views
- └── index.html # Landing page
+## Codebase Index
 
-src/test/java/
-└── com.najmi.fleetshare/
- └── FleetshareApplicationTests.java # Context load tests
+### Package Map
+
+Base package: `com.najmi.fleetshare` (11 packages, ~114 Java source files)
+
+| Package | Files | Purpose |
+|---|---|---|
+| `config/` | 4 | `SecurityConfig`, `WebConfig`, `AsyncConfig`, `RetryConfig` |
+| `controller/` | 10 | MVC controllers for all roles + utility controllers |
+| `dto/` | 31 | Data Transfer Objects for request/response |
+| `entity/` | 18 | JPA entities with joined-table inheritance |
+| `exception/` | 1 | `RegistrationException` |
+| `repository/` | 17 | Spring Data JPA repositories |
+| `security/` | 3 | `CustomUserDetails`, `CustomUserDetailsService`, `CustomAuthenticationSuccessHandler` |
+| `service/` | 24 | Business logic layer |
+| `util/` | 1 | `SessionHelper` |
+| `aspect/` | 1 | `LoggingAspect` (AOP) |
+| — | 1 | `FleetshareApplication.java` (main entry) |
+
+### Entity Model (18 entities)
+
+| Entity | Key Relationships |
+|---|---|
+| `User` (base) | Joined-table inheritance → Renter, FleetOwner, PlatformAdmin |
+| `Renter` | extends User |
+| `FleetOwner` | extends User; `@OneToMany` → Vehicle; payment config fields |
+| `PlatformAdmin` | extends User |
+| `Vehicle` | `@ManyToOne` → FleetOwner; `@OneToMany` → Booking, VehiclePriceHistory, VehicleMaintenance |
+| `VehiclePriceHistory` | Historical pricing per vehicle |
+| `Booking` | `@ManyToOne` → Vehicle, Renter; `@OneToMany` → BookingStatusLog; `@OneToOne` → Invoice |
+| `BookingPriceSnapshot` | Frozen price/terms at booking time |
+| `BookingStatusLog` | Status change audit trail |
+| `Invoice` | `@OneToMany` → Payment |
+| `Payment` | Proof-of-payment uploads |
+| `PaymentStatusLog` | Payment status audit trail |
+| `VehicleMaintenance` | Unified maintenance with status lifecycle; soft-delete support |
+| `VehicleMaintenanceLog` | Maintenance status audit trail |
+| `MaintenancePart` | Parts tracking per maintenance record |
+| `ServiceProvider` | External service provider management |
+| `Address` | User addresses with geolocation (lat/lng) |
+| `UserRole` | Role enumeration |
+
+### Controllers (10)
+
+| Controller | Route Prefix | Role |
+|---|---|---|
+| `RootController` | `/` | Public — landing page routing |
+| `AuthController` | `/auth` | Public — login, register |
+| `PublicController` | — | Public — browse vehicles |
+| `RenterController` | `/renter` | Renter — dashboard, bookings, payments |
+| `OwnerController` | `/owner` | Owner — vehicles, bookings, maintenance, payouts, reports, AI assistant |
+| `AdminController` | `/admin` | Admin — users, maintenance, reports, analytics |
+| `SearchController` | `/api/search` | Global cross-entity search |
+| `ToyyibPayController` | — | Payment gateway callbacks |
+| `TestEmailController` | — | Email debugging |
+| `GlobalExceptionHandler` | — | `@ControllerAdvice` — global error handling |
+
+### Services (24)
+
+| Category | Services |
+|---|---|
+| **Booking & Rental** | `BookingService`, `VehicleManagementService` |
+| **Payment & Finance** | `PaymentService`, `ToyyibPayService`, `CommissionService`, `InvoiceService`, `ReceiptService` |
+| **Maintenance** | `MaintenanceService`, `MaintenancePartService`, `PredictiveMaintenanceService`, `ServiceProviderService` |
+| **AI Assistant** | `AiAssistantService`, `AiReportFacade`, `QueryClassifier`, `PromptTemplateService` |
+| **Reporting** | `ReportService`, `ReportChartService`, `CostAnalyticsService` |
+| **User Management** | `UserManagementService`, `UserSessionService`, `RegistrationService` |
+| **Communication** | `EmailService`, `EmailServiceImpl` |
+| **Infrastructure** | `FileStorageService` |
+
+### Configuration (4)
+
+| Config | Key Annotations |
+|---|---|
+| `SecurityConfig` | `@EnableWebSecurity`, `@EnableMethodSecurity`, `BCryptPasswordEncoder`, CSP headers |
+| `WebConfig` | Static resource handling for uploads directory |
+| `AsyncConfig` | `@EnableAsync` for non-blocking email/background tasks |
+| `RetryConfig` | `@EnableRetry` for fault-tolerant external API calls |
+
+### Frontend Architecture
+
+**Templating**: Thymeleaf with `thymeleaf-layout-dialect` for layout composition
+
+**Layouts** (4): `admin-layout`, `owner-layout`, `renter-layout`, `public-layout`
+
+**Fragments** (23 reusable): sidebars, navbars, footers, pagination, search results, report widgets, modals, vehicle filters, toast notifications
+
+**Template directories** (by role):
+- `admin/` — 18 templates
+- `owner/` — 20 templates
+- `renter/` — 10 templates
+- `public/` — Landing + browse vehicles
+- `auth/` — Login, register (with light/dark mode toggle)
+- `email/` — 7 HTML email templates (welcome, booking, payment, etc.)
+- `pdf/` — 4 PDF templates (invoice, receipt, report, AI report)
+- `error/` — 403, 404, 500, generic error
+- `fragments/` — 23 reusable UI parts
+- `pages/ui-features/` — Buttons, dropdowns, typography demos
+
+**Static assets**:
+- `css/` — Custom styles (auth, landing, renter, browse-vehicles-ux)
+- `js/` — `auth.js`, `analytics.js`, `report-config.js`
+- `assets/` — Bootstrap dashboard template with SCSS pipeline, ~25 JS files (charts, data tables, booking management, search)
+- `fonts/Roboto/` — Full font family
+- `vendors/` — ti-icons, feather icons
+
+**Design System**: `assets/css/fleetshare-design-system.css` with CSS custom properties for consistent theming
+
+### Key Directories
+
+| Directory | Contents |
+|---|---|
+| `db/` | `fleetshare_dump.sql` — MySQL schema dump with all tables, indexes, and seed data |
+| `md/` | 13 prompt engineering markdown files for AI-assisted development (ADR, code review, UI/UX, module enhancement, etc.) |
+| `project_file_reference/` | Thesis drafts (PDF + text) |
+| `.vscode/` | VS Code workspace settings |
+
+### Test Structure
+
+```
+src/test/java/com.najmi.fleetshare/
+├── FleetshareApplicationTests.java          # Context load test
+├── controller/
+│   ├── AuthControllerTest.java              # Auth flow tests
+│   └── RenterControllerTest.java            # Renter flow tests
+├── performance/
+│   └── VehicleFilteringPerformanceTest.java  # Search performance benchmarks
+└── service/                                  # (empty — tests pending)
+```
+
+Test profile: `application-test.properties` — H2 in-memory with MySQL compatibility mode
 
 -----
 
 ## Additional Requirements
 
 ### R23: Audit Logging
-- Implement comprehensive audit logging using Spring AOP
-- Track user actions, system events, and security-related activities
-- Store audit logs in a dedicated database table
+- [x] AOP-based audit logging via `LoggingAspect` (method entry/exit, exception tracking)
+- [x] `audit_logs` database table for persistent audit trail
+- [x] Status change tracking via `BookingStatusLog`, `PaymentStatusLog`, `VehicleMaintenanceLog` entities
 
 ### R24: Notification System
 - [x] Implement email sending service with HTML template support and asynchronous processing
@@ -473,15 +529,28 @@ src/test/java/
 
 ## Deployment Notes
 
-- Configure production database connection
+### Docker
+A multi-stage `Dockerfile` is included for containerized deployment. Build and run:
+```bash
+docker build -t fleetshare .
+docker run -p 8080:8080 --env-file .env fleetshare
+```
+
+### Railway (Production)
+A `Procfile` and `application-prod.properties` are pre-configured for Railway deployment:
+- Reads DB connection from Railway-provided env vars (`MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`)
+- Uses ephemeral filesystem (uploads stored in Railway's temp storage)
+- Configure AI assistant API keys and ToyyibPay credentials as Railway secrets
+
+### General Deployment
+- Configure production database connection (update `application-prod.properties`)
 - Set up proper logging levels and rotation
-- Configure email service for notifications
-- Set up file storage for uploads (configure `app.upload.dir` in application.properties):
+- Configure email service for notifications (Gmail SMTP via `.env`)
+- Set up persistent file storage for uploads (`app.upload.dir`):
  - `app.upload.profile-images` — User profile photos
  - `app.upload.payment-proofs` — Payment receipt uploads
  - `app.upload.qr-codes` — Owner payment QR code images
-- Configure AI assistant API keys in `.env` (`ai.assistant.groq.api-key`, `ai.assistant.cerebras.api-key`, `ai.assistant.openrouter.api-key`)
-- Configure CORS for frontend integration
+- Configure AI assistant API keys: `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `OPENROUTER_API_KEY`
 - Set up monitoring and health checks
 
 -----
@@ -489,27 +558,32 @@ src/test/java/
 ## Database Schema Overview
 
 ### Core Tables:
-- `users` - Base user table with common attributes
-- `renters` - Renter-specific details (extends users)
-- `fleet_owners` - Owner-specific details (extends users), includes payment config (`toyyibpay_secret_key`, `toyyibpay_category_code`, `payment_qr_url`, `bank_name`, `bank_account_number`, `bank_account_holder`)
-- `platform_admins` - Admin-specific details (extends users)
-- `vehicles` - Vehicle inventory with status and pricing
-- `vehicle_price_history` - Historical pricing data
-- `bookings` - Reservation records
-- `booking_status_log` - Audit trail for booking status changes
-- `vehiclemaintenance` - Vehicle maintenance records with status lifecycle & soft-delete
-- `vehicle_maintenance_log` - Audit trail for maintenance status changes
-- `invoices` - Billing information
-- `payments` - Payment transactions
-- `audit_logs` - System audit trail
-- `addresses` - User address with geolocation (latitude/longitude)
+- `users` — Base user table with common attributes (joined-table inheritance)
+- `renters` — Renter-specific details (extends users)
+- `fleet_owners` — Owner-specific details (extends users), includes payment config (`toyyibpay_secret_key`, `toyyibpay_category_code`, `payment_qr_url`, `bank_name`, `bank_account_number`, `bank_account_holder`)
+- `platform_admins` — Admin-specific details (extends users)
+- `vehicles` — Vehicle inventory with status and pricing
+- `vehicle_price_history` — Historical pricing data
+- `bookings` — Reservation records
+- `booking_price_snapshot` — Frozen price and terms at time of booking
+- `booking_status_log` — Audit trail for booking status changes
+- `vehiclemaintenance` — Vehicle maintenance records with status lifecycle & soft-delete
+- `vehicle_maintenance_log` — Audit trail for maintenance status changes
+- `maintenance_part` — Parts and materials tracking per maintenance record
+- `service_providers` — External service provider management
+- `invoices` — Billing information
+- `payments` — Payment transactions
+- `payment_status_log` — Audit trail for payment status changes
+- `audit_logs` — System audit trail (AOP-based)
+- `addresses` — User address with geolocation (latitude/longitude)
 
 ### Key Relationships:
 - One-to-Many: User → Vehicles (for owners)
-- One-to-Many: Vehicle → Bookings
+- One-to-Many: Vehicle → Bookings, VehiclePriceHistory, VehicleMaintenance
 - One-to-Many: Booking → BookingStatusLog
+- One-to-One: Booking → Invoice
 - One-to-Many: Invoice → Payments
-- One-to-Many: VehicleMaintenance → VehicleMaintenanceLog
+- One-to-Many: VehicleMaintenance → VehicleMaintenanceLog, MaintenancePart
 
 -----
 

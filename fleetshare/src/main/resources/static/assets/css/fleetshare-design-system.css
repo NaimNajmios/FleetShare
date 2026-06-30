@@ -819,3 +819,75 @@ body .container-scroller,
     background-color: var(--fs-surface);
     padding: 0.5rem;
 }
+
+/* Premium Filter Layout Styling */
+.filter-card {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    border-radius: 12px;
+}
+
+/* Ensure consistent height and styling for filter controls */
+.filter-card .form-control,
+.filter-card .form-select,
+.filter-card .btn,
+.filter-card .input-group-text {
+    min-height: 44px;
+    height: 44px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--fs-border);
+}
+
+.filter-card .btn {
+    justify-content: center;
+}
+
+/* Force light theme colors for inputs to prevent OS dark mode bleed */
+.filter-card .form-control,
+.filter-card .form-select {
+    color: #1e293b !important;
+    background-color: #ffffff !important;
+}
+
+/* Make placeholder text darker and clearly readable */
+.filter-card .form-control::placeholder {
+    color: #64748b !important;
+    opacity: 1 !important;
+}
+
+/* Maintain proper focus states */
+.filter-card .form-control:focus,
+.filter-card .form-select:focus {
+    border-color: var(--fs-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    outline: none;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+}
+
+.search-input-wrapper .mdi-magnify {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 1.25rem;
+    z-index: 4;
+}
+
+.search-input-wrapper .form-control {
+    padding-left: 2.75rem !important;
+}
+
+/* Filter Card Toggle Group Consistency */
+.filter-card .btn-group .btn {
+    min-height: 44px;
+    height: 44px;
+}

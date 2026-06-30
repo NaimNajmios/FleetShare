@@ -172,21 +172,40 @@
 
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body py-3">
-                        <div class="d-flex flex-wrap gap-2 align-items-center mobile-filter-container">
-                            <input type="text" class="form-control mobile-search-control" id="user-search"
-                                placeholder="Search name, email, phone...">
-                            <select class="form-select mobile-search-control" id="status-filter">
-                                <option value="">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                            <div class="ms-auto view-toggle btn-group" role="group"><button type="button"
-                                    class="btn btn-outline-primary active" id="btn-grid-view"
-                                    onclick="setView('grid')"><i class="mdi mdi-view-grid"></i></button><button
-                                    type="button" class="btn btn-outline-primary" id="btn-table-view"
-                                    onclick="setView('table')"><i class="mdi mdi-table"></i></button></div>
+                <div class="card filter-card">
+                    <div class="card-body p-3">
+                        <div class="row align-items-center g-3">
+                            <!-- Left Side: Form -->
+                            <div class="col-12 col-xl-9">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-12 col-md-5">
+                                        <div class="search-input-wrapper">
+                                            <i class="mdi mdi-magnify"></i>
+                                            <input type="text" class="form-control mobile-search-control" id="user-search" placeholder="Search name, email, phone...">
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <select class="form-select mobile-search-control" id="status-filter">
+                                            <option value="">All Status</option>
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-md-3 d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-secondary rounded-3 px-3 w-100" onclick="document.getElementById('user-search').value=''; document.getElementById('status-filter').value=''; filter();" title="Clear Filters">
+                                            <i class="mdi mdi-refresh"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Side: View Toggle -->
+                            <div class="col-12 col-xl-3 text-xl-end d-flex justify-content-xl-end justify-content-start mt-2 mt-xl-0 border-xl-start">
+                                <div class="view-toggle btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary active" id="btn-grid-view" onclick="setView('grid')"><i class="mdi mdi-view-grid"></i></button>
+                                    <button type="button" class="btn btn-outline-primary" id="btn-table-view" onclick="setView('table')"><i class="mdi mdi-table"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
