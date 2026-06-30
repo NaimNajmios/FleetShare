@@ -627,6 +627,43 @@
                 }
             }
 
+            /* Modern Pagination Styling */
+            .pagination-container {
+                background: white;
+                padding: 1rem 1.5rem;
+                border-radius: 20px;
+                box-shadow: var(--card-shadow);
+                border: 1px solid rgba(0, 0, 0, 0.02);
+            }
+            .pagination {
+                gap: 0.35rem;
+            }
+            .page-item .page-link {
+                border-radius: 12px;
+                border: none;
+                color: var(--text-dark);
+                font-weight: 600;
+                padding: 0.6rem 1rem;
+                transition: all 0.2s ease;
+                background: transparent;
+            }
+            .page-item.active .page-link {
+                background: var(--primary-color);
+                color: white;
+                box-shadow: 0 4px 10px rgba(75, 73, 172, 0.2);
+            }
+            .page-item:not(.active):not(.disabled) .page-link:hover {
+                background: #f4f7fa;
+                color: var(--primary-color);
+            }
+            .page-item.disabled .page-link {
+                background: transparent;
+                color: #ced4da;
+            }
+            .page-link:focus {
+                box-shadow: none;
+            }
+
             /* --- PREMIUM MOBILE REDESIGN --- */
             @media (max-width: 768px) {
                 /* Search pill layout */
@@ -776,6 +813,75 @@
                 }
                 .vehicle-image-container {
                     height: 195px;
+                }
+            }
+
+            /* --- MODERN PAGINATION --- */
+            .pagination-info {
+                color: var(--text-muted);
+                font-size: 0.85rem;
+            }
+            .pagination-info .fw-bold {
+                color: var(--text-dark);
+            }
+            .pagination-modern {
+                gap: 0.35rem;
+            }
+            .pagination-modern .page-item {
+                margin: 0;
+            }
+            .pagination-modern .page-item .page-link {
+                border: none;
+                border-radius: 10px;
+                padding: 0.45rem 0.85rem;
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: var(--text-muted);
+                background: transparent;
+                transition: all 0.2s ease;
+                min-width: 36px;
+                text-align: center;
+            }
+            .pagination-modern .page-item .page-link.page-link-icon {
+                padding: 0.45rem 0.65rem;
+            }
+            .pagination-modern .page-item:hover .page-link {
+                background: #f0f0f8;
+                color: var(--primary-color);
+            }
+            .pagination-modern .page-item.active .page-link {
+                background: var(--primary-color);
+                color: #fff;
+                box-shadow: 0 4px 12px rgba(75, 73, 172, 0.25);
+            }
+            .pagination-modern .page-item.active:hover .page-link {
+                background: #3f3e91;
+                color: #fff;
+            }
+            .pagination-modern .page-item.disabled .page-link {
+                color: #d0d0d0;
+                background: transparent;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+            .pagination-modern .page-item.disabled:hover .page-link {
+                background: transparent;
+                color: #d0d0d0;
+            }
+            @media (max-width: 576px) {
+                .pagination-modern .page-item .page-link {
+                    padding: 0.4rem 0.7rem;
+                    font-size: 0.8rem;
+                    min-width: 32px;
+                }
+                .pagination-modern .page-item .page-link.page-link-icon {
+                    padding: 0.4rem 0.55rem;
+                }
+                .pagination-modern {
+                    gap: 0.2rem;
+                }
+                .pagination-info {
+                    font-size: 0.8rem;
                 }
             }
         </style>
