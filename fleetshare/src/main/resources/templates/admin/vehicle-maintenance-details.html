@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/admin-layout}"
-    th:with="activePage='maintenance-management', pageTitle='Vehicle Maintenance History'">
+    th:with="activePage='maintenance-management', pageTitle='Vehicle Maintenance History', breadcrumbParentLabel='Maintenance', breadcrumbParentUrl='/admin/maintenance'">
 
 <head>
     <th:block layout:fragment="extra-css">

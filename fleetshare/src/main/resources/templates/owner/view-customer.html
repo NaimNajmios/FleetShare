@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/owner-layout}" th:with="activePage='customers', pageTitle='Customer Details'">
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='customers', pageTitle='Customer Details', breadcrumbParentLabel='Customers', breadcrumbParentUrl='/owner/customers'">
 
 <head>
     <th:block layout:fragment="extra-css">

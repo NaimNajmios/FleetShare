@@ -1,0 +1,51 @@
+<nav aria-label="breadcrumb" class="fs-breadcrumb" th:fragment="breadcrumb(role, activePage, pageTitle, parentLabel, parentUrl)">
+    <ol class="breadcrumb mb-0">
+        <!-- Home Crumb (always present) -->
+        <li class="breadcrumb-item" th:if="${activePage != 'dashboard'}">
+            <a th:href="${role == 'admin'} ? @{/admin/dashboard} : @{/owner/dashboard}">
+                <i class="mdi mdi-home"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" th:if="${activePage == 'dashboard'}">
+            <i class="mdi mdi-home"></i> Home
+        </li>
+
+        <!-- Parent Section Crumb (for detail/sub-pages with explicit parent) -->
+        <th:block th:if="${parentLabel != null and parentUrl != null and activePage != 'dashboard'}">
+            <li class="breadcrumb-item">
+                <a th:href="${parentUrl}" th:text="${parentLabel}">Section</a>
+            </li>
+        </th:block>
+
+        <!-- Section Crumb (for list pages without explicit parent, resolved from activePage) -->
+        <th:block th:if="${parentLabel == null and activePage != 'dashboard'}">
+            <!-- Admin Sections -->
+            <th:block th:if="${role == 'admin'}">
+                <li class="breadcrumb-item active" th:if="${activePage == 'user-management'}" th:text="${pageTitle}">User Management</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'vehicle-management'}" th:text="${pageTitle}">Vehicle Management</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'maintenance-management'}" th:text="${pageTitle}">Maintenance</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'booking-management'}" th:text="${pageTitle}">Bookings</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payment'}" th:text="${pageTitle}">Payment</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payout-dashboard'}" th:text="${pageTitle}">Payout Dashboard</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'reports'}" th:text="${pageTitle}">Reports</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'profile'}" th:text="${pageTitle}">Profile</li>
+                <!-- Detail pages that share activePage with list pages (e.g. view-vehicle uses 'vehicles') -->
+                <li class="breadcrumb-item active" th:if="${activePage == 'vehicles'}" th:text="${pageTitle}">Vehicles</li>
+            </th:block>
+            <!-- Owner Sections -->
+            <th:block th:if="${role == 'owner'}">
+                <li class="breadcrumb-item active" th:if="${activePage == 'customers'}" th:text="${pageTitle}">Customers</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'vehicles'}" th:text="${pageTitle}">Vehicles</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'maintenance'}" th:text="${pageTitle}">Maintenance</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'bookings'}" th:text="${pageTitle}">Bookings</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payments'}" th:text="${pageTitle}">Payments</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payout-dashboard'}" th:text="${pageTitle}">Payout Dashboard</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'reports'}" th:text="${pageTitle}">Reports</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'profile'}" th:text="${pageTitle}">Profile</li>
+            </th:block>
+        </th:block>
+
+        <!-- Current Page Crumb (only when we have a parent, making this the 3rd level) -->
+        <li class="breadcrumb-item active" th:if="${parentLabel != null and activePage != 'dashboard'}" th:text="${pageTitle}">Current Page</li>
+    </ol>
+</nav>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/owner-layout}" th:with="activePage='vehicles', pageTitle='Vehicle Details'">
+    layout:decorate="~{layouts/owner-layout}" th:with="activePage='vehicles', pageTitle='Vehicle Details', breadcrumbParentLabel='My Vehicles', breadcrumbParentUrl='/owner/vehicles'">
 
 <head>
     <meta name="_csrf" th:content="${_csrf.token}" />

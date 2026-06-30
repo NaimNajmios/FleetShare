@@ -882,6 +882,201 @@ body .container-scroller,
     z-index: 4;
 }
 
+/* Search Dropdown Styles */
+.search-results-dropdown {
+    min-width: 320px;
+    max-width: 400px;
+}
+
+.search-results-dropdown .search-section {
+    border-bottom: 1px solid var(--fs-border);
+}
+
+.search-results-dropdown .search-section:last-child {
+    border-bottom: none;
+}
+
+.search-results-dropdown .search-section-header {
+    background: var(--fs-surface-hover);
+    color: var(--fs-primary);
+}
+
+.search-results-dropdown .search-result-item {
+    padding: 0.625rem 1rem;
+    display: block;
+    text-decoration: none;
+    color: var(--fs-text-primary);
+    transition: background var(--fs-transition);
+}
+
+.search-results-dropdown .search-result-item:hover {
+    background: var(--fs-surface-hover);
+}
+
+.search-results-dropdown .search-result-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fs-surface-hover);
+    border-radius: var(--fs-radius-sm);
+    color: var(--fs-primary);
+}
+
+.search-results-dropdown .search-result-title {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.search-results-dropdown .search-result-subtitle {
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.search-header {
+    background: var(--fs-surface-hover);
+}
+
+.search-loading,
+.search-no-results,
+.search-error {
+    padding: 1rem;
+}
+
+/* -----------------------------------------
+   Stat Card Component 
+   ----------------------------------------- */
+.stat-card {
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-icon.primary {
+    background: rgba(75, 73, 172, 0.15);
+    color: #4B49AC;
+}
+
+.stat-icon.success {
+    background: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+}
+
+.stat-icon.warning {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+}
+
+.stat-icon.info {
+    background: rgba(23, 162, 184, 0.15);
+    color: #17a2b8;
+}
+
+.stat-icon.danger {
+    background: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+}
+
+/* Custom Icon Colors - Standalone */
+.icon-primary { color: #4B49AC !important; }
+.icon-success { color: #28a745 !important; }
+.icon-warning { color: #ffc107 !important; }
+.icon-info { color: #17a2b8 !important; }
+.icon-danger { color: #dc3545 !important; }
+
+/* Form Select Contrast Fix for Maintenance Modal */
+.modal .form-select {
+    color: var(--fs-text-primary);
+    background-color: var(--fs-surface);
+    border-color: var(--fs-border);
+}
+
+.modal .form-select:focus {
+    border-color: var(--fs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+}
+
+.modal .form-select option {
+    color: var(--fs-text-primary);
+    background-color: var(--fs-surface);
+    padding: 0.5rem;
+}
+
+/* Premium Filter Layout Styling */
+.filter-card {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    border-radius: 12px;
+}
+
+/* Ensure consistent height and styling for filter controls */
+.filter-card .form-control,
+.filter-card .form-select,
+.filter-card .btn,
+.filter-card .input-group-text {
+    min-height: 44px;
+    height: 44px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--fs-border);
+}
+
+.filter-card .btn {
+    justify-content: center;
+}
+
+/* Force light theme colors for inputs to prevent OS dark mode bleed */
+.filter-card .form-control,
+.filter-card .form-select {
+    color: #1e293b !important;
+    background-color: #ffffff !important;
+}
+
+/* Make placeholder text darker and clearly readable */
+.filter-card .form-control::placeholder {
+    color: #64748b !important;
+    opacity: 1 !important;
+}
+
+/* Maintain proper focus states */
+.filter-card .form-control:focus,
+.filter-card .form-select:focus {
+    border-color: var(--fs-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    outline: none;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+}
+
+.search-input-wrapper .mdi-magnify {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 1.25rem;
+    z-index: 4;
+}
+
 .search-input-wrapper .form-control {
     padding-left: 2.75rem !important;
 }
@@ -890,6 +1085,66 @@ body .container-scroller,
 .filter-card .btn-group .btn {
     min-height: 44px;
     height: 44px;
+}
+
+/* Breadcrumb Navigation */
+.fs-breadcrumb {
+    background: #f1f5f9;
+    border-radius: 50rem; /* pill shape */
+    padding: 0.5rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.fs-breadcrumb .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+}
+
+.fs-breadcrumb .breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.fs-breadcrumb .breadcrumb-item a {
+    color: var(--fs-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.fs-breadcrumb .breadcrumb-item a:hover {
+    color: #4338ca;
+    text-decoration: underline;
+}
+
+.fs-breadcrumb .breadcrumb-item.active {
+    color: #64748b;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.fs-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 1.2rem;
+    line-height: 1;
+    margin-top: -2px; /* slight visual tweak for the arrow character */
+}
+
+.fs-breadcrumb .breadcrumb-item a i.mdi-home {
+    font-size: 1.1rem;
+    margin-right: 4px;
 }
 
 /* Hide Horizontal Scrollbar on Tables */

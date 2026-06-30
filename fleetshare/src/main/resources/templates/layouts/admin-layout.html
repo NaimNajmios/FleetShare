@@ -49,6 +49,8 @@
           <!-- Main Content -->
           <!-- Toast Notifications -->
           <div th:replace="~{fragments/toast :: toast}"></div>
+          <!-- Breadcrumb Navigation -->
+          <div th:replace="~{fragments/breadcrumb :: breadcrumb('admin', ${activePage}, ${pageTitle}, ${breadcrumbParentLabel}, ${breadcrumbParentUrl})}"></div>
           <!-- Main Content -->
           <div layout:fragment="content">
             <!-- Default content can go here -->
