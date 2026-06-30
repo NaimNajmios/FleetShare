@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{layouts/admin-layout}" th:with="activePage='payment', pageTitle='Payment Details', breadcrumbParentLabel='Payments', breadcrumbParentUrl='/admin/payment'">
+    layout:decorate="~{layouts/admin-layout}" th:with="activePage='payments', pageTitle='Payment Details', breadcrumbParentLabel='Payments', breadcrumbParentUrl='/admin/payments'">
 
 <head>
     <th:block layout:fragment="extra-css">
@@ -371,12 +371,6 @@
                             <i class="mdi mdi-clock-fast"></i>
                             <span class="countdown-timer">...</span>
                         </div>
-                        <span th:text="${payment.paymentStatus}" th:class="'status-badge ' + 
-                              (${payment.paymentStatus == 'VERIFIED'} ? 'status-verified' : 
-                              (${payment.paymentStatus == 'PENDING'} ? 'status-pending' : 
-                              (${payment.paymentStatus == 'FAILED'} ? 'status-failed' : '')))">
-                            PENDING
-                        </span>
                     </div>
                 </div>
 
@@ -388,11 +382,11 @@
                             <div>
                                 <h5 class="alert-heading mb-1" style="font-weight: bold; color: #721c24;">Payment Attempt Failed</h5>
                                 <p class="mb-0" style="color: #721c24;">The renter's payment attempt was unsuccessful. A notification has been sent to them to retry their payment via the Manage Payment page.</p>
-                                
+
                                 <div class="mt-3 p-3 rounded" style="background-color: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.2);" th:if="${not #lists.isEmpty(statusLogs)}">
                                     <div th:each="log, iterStat : ${statusLogs}" th:if="${log.status == 'FAILED' and iterStat.index == 0}">
                                         <strong>Reason:</strong> <span th:text="${log.remarks}">Failure reason</span><br>
-                                        <small class="text-muted">Failed by: <span th:text="${log.actorName}">Admin</span> at <span th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">Time</span></small>
+                                        <small class="text-muted">Failed by: <span th:text="${log.actorName}">Owner</span> at <span th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">Time</span></small>
                                     </div>
                                 </div>
                             </div>
@@ -491,7 +485,7 @@
                 <!-- Entity References -->
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="info-card h-100">
+                        <div class="info-card h-100 mb-0">
                             <div class="card-header-custom">Renter Information</div>
                             <div class="detail-row">
                                 <span class="detail-label">Name</span>
@@ -508,16 +502,16 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="info-card h-100">
+                        <div class="info-card h-100 mb-0">
                             <div class="card-header-custom">Fleet Owner</div>
                             <div class="detail-row">
                                 <span class="detail-label">Business Name</span>
-                                <span class="detail-value" th:text="${payment.ownerBusinessName}">Metro Car
-                                    Rental</span>
+                                <span class="detail-value" th:text="${payment.ownerBusinessName}">Metro Car Rental</span>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="mb-4"></div>
 
                 <!-- Payout / Commission Information (only when split payment is enabled) -->
                 <div class="info-card" th:if="${payment.splitPaymentEnabled == true}">
@@ -552,7 +546,7 @@
             <div class="col-lg-4">
                 <div class="action-panel">
                     <div class="card-header-custom">Actions</div>
-                    <a href="/admin/payment" class="btn btn-outline-secondary btn-block mb-3">
+                    <a href="/admin/payments" class="btn btn-outline-secondary btn-block mb-3">
                         <i class="mdi mdi-arrow-left"></i> Back to Payments
                     </a>
                     <a href="/admin/payout-dashboard" class="btn btn-outline-info btn-block mb-3">
@@ -561,19 +555,6 @@
                     <button class="btn btn-secondary btn-block mb-3" onclick="window.print()">
                         <i class="mdi mdi-printer"></i> Print Details
                     </button>
-                    
-                    <div th:if="${payment.paymentStatus == 'PENDING'}" class="mt-3 pt-3"
-                        style="border-top: 1px solid #dee2e6;">
-                        <div class="text-muted small mb-2">Payment Actions</div>
-                        <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal"
-                            data-bs-target="#verifyModal">
-                            <i class="mdi mdi-check-circle"></i> Verify Payment
-                        </button>
-                        <button class="btn btn-danger btn-block mb-2" data-bs-toggle="modal"
-                            data-bs-target="#rejectPaymentModal">
-                            <i class="mdi mdi-close-circle"></i> Reject Payment
-                        </button>
-                    </div>
 
                     <!-- Documents -->
                     <div th:if="${payment.bookingId != null}" class="mt-3 pt-3" style="border-top: 1px solid #dee2e6;">
@@ -614,6 +595,20 @@
                                 </button>
                             </form>
                         </div>
+                    </div>
+
+                    <!-- Verify Payment Button (Only for PENDING status) -->
+                    <div th:if="${payment.paymentStatus == 'PENDING'}" class="mt-3 pt-3"
+                        style="border-top: 1px solid #dee2e6;">
+                        <div class="text-muted small mb-2">Payment Actions</div>
+                        <button class="btn btn-success btn-block mb-2" data-bs-toggle="modal"
+                            data-bs-target="#verifyModal">
+                            <i class="mdi mdi-check-circle"></i> Verify Payment
+                        </button>
+                        <button class="btn btn-danger btn-block mb-2" data-bs-toggle="modal"
+                            data-bs-target="#rejectPaymentModal">
+                            <i class="mdi mdi-close-circle"></i> Reject Payment
+                        </button>
                     </div>
                 </div>
 
@@ -703,70 +698,74 @@
                 </div>
             </div>
         </div>
-        </div>
-
         <!-- Verify Payment Modal -->
-        <div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title" id="verifyModalLabel">
-                            <i class="mdi mdi-check-circle me-2"></i>Verify Payment
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to verify this payment?</p>
-                        <div class="alert alert-info mb-0">
-                            <i class="mdi mdi-information me-1"></i>
-                            This will mark the payment as <strong>VERIFIED</strong> and update the invoice status to <strong>PAID</strong>.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form th:action="@{/admin/payment/verify/{id}(id=${payment.paymentId})}" method="POST" style="display: inline;">
-                            <button type="submit" class="btn btn-success">
-                                <i class="mdi mdi-check"></i> Confirm Verification
-                            </button>
-                        </form>
+    <div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="verifyModalLabel">
+                        <i class="mdi mdi-check-circle me-2"></i>Verify Payment
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to verify this payment?</p>
+                    <div class="alert alert-info mb-0">
+                        <i class="mdi mdi-information me-1"></i>
+                        This will mark the payment as <strong>VERIFIED</strong> and update the invoice status to
+                        <strong>PAID</strong>.
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Reject Payment Modal -->
-        <div class="modal fade" id="rejectPaymentModal" tabindex="-1" aria-labelledby="rejectPaymentModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="rejectPaymentModalLabel">
-                            <i class="mdi mdi-close-circle me-2"></i>Reject Payment
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form th:action="@{/admin/payment/fail/{paymentId}(paymentId=${payment.paymentId})}" method="POST">
-                        <div class="modal-body">
-                            <p>Are you sure you want to reject this payment?</p>
-                            <div class="alert alert-warning mb-3">
-                                <i class="mdi mdi-alert me-1"></i>
-                                This will mark the payment as <strong>FAILED</strong> and notify the renter to retry.
-                            </div>
-                            <div class="form-group mb-0">
-                                <label for="reason" class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="reason" name="reason" rows="3" required placeholder="e.g. Uploaded receipt is blurred, fraudulent transaction, etc."></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="mdi mdi-check"></i> Confirm Rejection
-                            </button>
-                        </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form th:action="@{/admin/payments/verify/{id}(id=${payment.paymentId})}" method="POST"
+                        style="display: inline;">
+                        <button type="submit" class="btn btn-success">
+                            <i class="mdi mdi-check"></i> Confirm Verification
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
-
+    </div>
+        </div>
+    </div>
+    
+    <!-- Reject Payment Modal -->
+    <div class="modal fade" id="rejectPaymentModal" tabindex="-1" aria-labelledby="rejectPaymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="rejectPaymentModalLabel">
+                        <i class="mdi mdi-close-circle me-2"></i>Reject Payment
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form th:action="@{/admin/payments/fail/{paymentId}(paymentId=${payment.paymentId})}" method="POST">
+                    <div class="modal-body">
+                        <p>Are you sure you want to reject this payment?</p>
+                        <div class="alert alert-warning mb-3">
+                            <i class="mdi mdi-alert me-1"></i>
+                            This will mark the payment as <strong>FAILED</strong> and notify the renter to retry.
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="reason" class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required placeholder="e.g. Uploaded receipt is blurred, fraudulent transaction, etc."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="mdi mdi-check"></i> Confirm Rejection
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     </div>
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
