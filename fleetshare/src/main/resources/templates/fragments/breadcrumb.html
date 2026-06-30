@@ -21,27 +21,27 @@
         <th:block th:if="${parentLabel == null and activePage != 'dashboard'}">
             <!-- Admin Sections -->
             <th:block th:if="${role == 'admin'}">
-                <li class="breadcrumb-item active" th:if="${activePage == 'user-management'}" th:text="${pageTitle}">User Management</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'vehicle-management'}" th:text="${pageTitle}">Vehicle Management</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'maintenance-management'}" th:text="${pageTitle}">Maintenance</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'booking-management'}" th:text="${pageTitle}">Bookings</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'payment'}" th:text="${pageTitle}">Payment</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'payout-dashboard'}" th:text="${pageTitle}">Payout Dashboard</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'reports'}" th:text="${pageTitle}">Reports</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'profile'}" th:text="${pageTitle}">Profile</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'user-management'}">Users</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'vehicle-management'}">Vehicles</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'maintenance-management'}">Maintenance</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'booking-management'}">Bookings</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payment'}">Payments</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payout-dashboard'}">Payout Dashboard</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'reports'}">Reports</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'profile'}">Profile</li>
                 <!-- Detail pages that share activePage with list pages (e.g. view-vehicle uses 'vehicles') -->
-                <li class="breadcrumb-item active" th:if="${activePage == 'vehicles'}" th:text="${pageTitle}">Vehicles</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'vehicles'}">Vehicles</li>
             </th:block>
             <!-- Owner Sections -->
             <th:block th:if="${role == 'owner'}">
-                <li class="breadcrumb-item active" th:if="${activePage == 'customers'}" th:text="${pageTitle}">Customers</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'vehicles'}" th:text="${pageTitle}">Vehicles</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'maintenance'}" th:text="${pageTitle}">Maintenance</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'bookings'}" th:text="${pageTitle}">Bookings</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'payments'}" th:text="${pageTitle}">Payments</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'payout-dashboard'}" th:text="${pageTitle}">Payout Dashboard</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'reports'}" th:text="${pageTitle}">Reports</li>
-                <li class="breadcrumb-item active" th:if="${activePage == 'profile'}" th:text="${pageTitle}">Profile</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'customers'}">Customers</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'vehicles'}">Vehicles</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'maintenance'}">Maintenance</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'bookings'}">Bookings</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payments'}">Payments</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'payout-dashboard'}">Payout Dashboard</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'reports'}">Reports</li>
+                <li class="breadcrumb-item active" th:if="${activePage == 'profile'}">Profile</li>
             </th:block>
         </th:block>
 
