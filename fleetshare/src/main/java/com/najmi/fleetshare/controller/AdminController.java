@@ -226,6 +226,20 @@ public class AdminController {
         model.addAttribute("renters", userManagementService.getAllRenters());
         return "admin/users";
     }
+    @GetMapping("/vehicles/{vehicleId}/rate-history")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> getRateHistory(@PathVariable Long vehicleId, HttpSession session) {
+        if (!SessionHelper.isAdmin(session)) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body(java.util.Map.of("error", "Unauthorized"));
+        }
+        try {
+            java.util.List<com.najmi.fleetshare.entity.VehiclePriceHistory> history = vehicleManagementService.getRateHistory(vehicleId);
+            return org.springframework.http.ResponseEntity.ok(history);
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
 
     @GetMapping("/maintenance")
     public String maintenance(
