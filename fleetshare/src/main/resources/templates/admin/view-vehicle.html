@@ -870,6 +870,15 @@
             const container = document.getElementById('viewMode') || document.getElementById('editMode');
             const vehicleForm = document.getElementById('vehicleForm');
 
+            // --- CSRF Utility ---
+            function getCsrfConfig() {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+                const headers = {};
+                headers[header] = token;
+                return headers;
+            }
+
             // Mode Toggle
             document.getElementById('editBtn').addEventListener('click', () => {
                 container.id = 'editMode';
