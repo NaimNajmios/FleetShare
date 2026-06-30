@@ -7,6 +7,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <style>
             /* Fix for sticky position broken by overflow hidden in template */
             body, html {
@@ -779,7 +780,7 @@
             <div class="rate-modal">
                 <div class="rate-modal-header p-3 border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="mdi mdi-currency-usd mr-2"></i>Manage Rate</h5>
-                    <button class="rate-modal-close border-0 bg-transparent" id="closeRateModal"
+                    <button type="button" class="rate-modal-close border-0 bg-transparent" id="closeRateModal"
                         style="font-size: 1.5rem; line-height: 1;">&times;</button>
                 </div>
                 <div class="rate-modal-body p-4">
@@ -809,7 +810,7 @@
                     </div>
                 </div>
                 <div class="rate-modal-footer p-3 border-top d-flex justify-content-end gap-2">
-                    <button class="btn btn-secondary" id="cancelRateModal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" id="cancelRateModal">Cancel</button>
                     <button class="btn btn-primary" id="saveRateModal"><i class="mdi mdi-check mr-1"></i>Update
                         Rate</button>
                 </div>
@@ -821,7 +822,7 @@
             <div class="rate-modal" style="max-width: 500px;">
                 <div class="rate-modal-header p-3 border-bottom d-flex justify-content-between">
                     <h5><i class="mdi mdi-history mr-2"></i>Rate History</h5>
-                    <button class="rate-modal-close border-0 bg-transparent" id="closeHistoryModal">&times;</button>
+                    <button type="button" class="rate-modal-close border-0 bg-transparent" id="closeHistoryModal">&times;</button>
                 </div>
                 <div class="rate-modal-body p-3" id="historyModalBody" style="max-height: 400px; overflow-y: auto;">
                     <div class="text-center py-3" id="historyLoading">
@@ -832,7 +833,7 @@
                     <div id="historyContent"></div>
                 </div>
                 <div class="rate-modal-footer p-3 border-top d-flex justify-content-end">
-                    <button class="btn btn-secondary" id="closeHistoryModalBtn">Close</button>
+                    <button type="button" class="btn btn-secondary" id="closeHistoryModalBtn">Close</button>
                 </div>
             </div>
         </div>
@@ -934,7 +935,7 @@
                 const effectiveDateInput = document.getElementById('effectiveDateInput').value;
 
                 if (val <= 0) {
-                    alert('Please enter a valid rate greater than 0');
+                    showToast('Please enter a valid rate greater than 0', 'error', 'Invalid Rate');
                     return;
                 }
 
@@ -947,7 +948,7 @@
 
                 // Show scheduled date info if future date selected
                 if (effectiveDateInput && new Date(effectiveDateInput) > new Date()) {
-                    alert('Rate will be scheduled for ' + new Date(effectiveDateInput).toLocaleDateString() + ' when you save all changes.');
+                    showToast('Rate will be scheduled for ' + new Date(effectiveDateInput).toLocaleDateString() + ' when you save all changes.', 'info', 'Rate Scheduled');
                 }
             });
 
@@ -1077,12 +1078,12 @@
                             if (data.success) {
                                 submitFormData();
                             } else {
-                                alert('Error uploading image: ' + (data.error || 'Failed'));
+                                showToast('Error uploading image: ' + (data.error || 'Failed'), 'error', 'Upload Failed');
                                 resetModalBtn();
                             }
                         })
                         .catch(err => {
-                            alert('Error: ' + err.message);
+                            showToast('Error: ' + err.message, 'error', 'Error');
                             resetModalBtn();
                         });
                 } else {
@@ -1165,7 +1166,7 @@
                     const rate = document.getElementById('newRateInput').value;
                     const date = document.getElementById('newRateDateInput').value;
 
-                    if (!rate || !date) return alert('Enter rate and date');
+                    if (!rate || !date) return showToast('Enter rate and date', 'warning', 'Missing Details');
 
                     const headers = getCsrfConfig();
                     headers['Content-Type'] = 'application/json';
@@ -1176,7 +1177,7 @@
                         body: JSON.stringify({ rate: rate, effectiveDate: date })
                     })
                         .then(res => res.json())
-                        .then(data => data.success ? location.reload() : alert('Error adding rate'))
+                        .then(data => data.success ? location.reload() : showToast('Error adding rate', 'error', 'Error'))
                         .catch(err => console.error(err));
                 });
             }
@@ -1200,7 +1201,21 @@
                     deleteModalOverlay.classList.remove('show');
                 }
             });
+
+            // Initialize Flatpickr
+            document.addEventListener('DOMContentLoaded', function() {
+                const effectiveDateInput = document.getElementById('effectiveDateInput');
+                if (effectiveDateInput) {
+                    flatpickr(effectiveDateInput, {
+                        enableTime: true,
+                        dateFormat: "Y-m-d\\TH:i",
+                        minDate: "today"
+                    });
+                }
+            });
+
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     </th:block>
 </body>
 
