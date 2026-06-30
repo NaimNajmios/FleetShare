@@ -361,10 +361,10 @@
                                         <tr>
                                             <th style="width: 20%;">Vehicle</th>
                                             <th style="width: 10%;">Plate No.</th>
-                                            <th style="width: 8%;">Year</th>
-                                            <th style="width: 10%;">Category</th>
+                                            <th class="d-none d-md-table-cell" style="width: 8%;">Year</th>
+                                            <th class="d-none d-lg-table-cell" style="width: 10%;">Category</th>
                                             <th style="width: 10%;">Rate/Day</th>
-                                            <th style="width: 20%;">Owner</th>
+                                            <th class="d-none d-lg-table-cell" style="width: 20%;">Owner</th>
                                             <th style="width: 10%;">Status</th>
                                             <th class="text-end" style="width: 12%;">Actions</th>
                                         </tr>
@@ -389,11 +389,11 @@
                                                 </div>
                                             </td>
                                             <td class="fw-bold" th:text="${vehicle.registrationNo}">VHJ 8821</td>
-                                            <td th:text="${vehicle.manufacturingYear}">2023</td>
-                                            <td th:text="${vehicle.category}">Hatchback</td>
+                                            <td class="d-none d-md-table-cell" th:text="${vehicle.manufacturingYear}">2023</td>
+                                            <td class="d-none d-lg-table-cell" th:text="${vehicle.category}">Hatchback</td>
                                             <td class="fw-bold text-primary">RM <span
                                                     th:text="${vehicle.ratePerDay}">120</span></td>
-                                            <td th:text="${vehicle.ownerBusinessName}">Owner</td>
+                                            <td class="d-none d-lg-table-cell" th:text="${vehicle.ownerBusinessName}">Owner</td>
                                             <td>
                                                 <span th:if="${vehicle.status == 'AVAILABLE'}"
                                                     class="badge bg-success">Available</span>

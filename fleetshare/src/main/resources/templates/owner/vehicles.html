@@ -403,8 +403,8 @@
                                         <tr>
                                             <th scope="col" style="width: 25%;">Vehicle</th>
                                             <th scope="col" style="width: 12%;">Plate No.</th>
-                                            <th scope="col" style="width: 8%;">Year</th>
-                                            <th scope="col" style="width: 12%;">Category</th>
+                                            <th scope="col" class="d-none d-md-table-cell" style="width: 8%;">Year</th>
+                                            <th scope="col" class="d-none d-lg-table-cell" style="width: 12%;">Category</th>
                                             <th scope="col" style="width: 12%;">Rate/Day</th>
                                             <th scope="col" style="width: 10%;">Status</th>
                                             <th scope="col" class="text-end" style="width: 10%;">Actions</th>
@@ -439,8 +439,8 @@
                                                 </div>
                                             </td>
                                             <td class="fw-bold" th:text="${vehicle.registrationNo}">ABC-1234</td>
-                                            <td th:text="${vehicle.manufacturingYear}">2023</td>
-                                            <td th:text="${vehicle.category}">Sedan</td>
+                                            <td class="d-none d-md-table-cell" th:text="${vehicle.manufacturingYear}">2023</td>
+                                            <td class="d-none d-lg-table-cell" th:text="${vehicle.category}">Sedan</td>
                                             <td class="fw-bold text-primary">RM <span
                                                     th:text="${vehicle.ratePerDay}">150</span></td>
                                             <td>

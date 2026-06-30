@@ -266,8 +266,8 @@
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>Business Name</th>
-                                                    <th>Email</th>
-                                                    <th>Phone</th>
+                                                    <th class="d-none d-md-table-cell">Email</th>
+                                                    <th class="d-none d-lg-table-cell">Phone</th>
                                                     <th>Status</th>
                                                     <th class="text-end">Actions</th>
                                                 </tr>
@@ -277,8 +277,8 @@
                                                     th:data-status="${owner.isActive ? 'active' : 'inactive'}"
                                                     th:data-search="${owner.businessName + ' ' + owner.email}">
                                                     <td class="fw-bold" th:text="${owner.businessName}">Business</td>
-                                                    <td th:text="${owner.email}">Email</td>
-                                                    <td th:text="${owner.contactPhone ?: 'N/A'}">Phone</td>
+                                                    <td class="d-none d-md-table-cell" th:text="${owner.email}">Email</td>
+                                                    <td class="d-none d-lg-table-cell" th:text="${owner.contactPhone ?: 'N/A'}">Phone</td>
                                                     <td><span th:if="${owner.isActive}"
                                                             class="badge bg-success">Active</span><span
                                                             th:unless="${owner.isActive}"
@@ -337,8 +337,8 @@
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>Full Name</th>
-                                                    <th>Email</th>
-                                                    <th>Phone</th>
+                                                    <th class="d-none d-md-table-cell">Email</th>
+                                                    <th class="d-none d-lg-table-cell">Phone</th>
                                                     <th>Status</th>
                                                     <th class="text-end">Actions</th>
                                                 </tr>
@@ -348,8 +348,8 @@
                                                     th:data-status="${renter.isActive ? 'active' : 'inactive'}"
                                                     th:data-search="${renter.fullName + ' ' + renter.email}">
                                                     <td class="fw-bold" th:text="${renter.fullName}">Name</td>
-                                                    <td th:text="${renter.email}">Email</td>
-                                                    <td th:text="${renter.phoneNumber ?: 'N/A'}">Phone</td>
+                                                    <td class="d-none d-md-table-cell" th:text="${renter.email}">Email</td>
+                                                    <td class="d-none d-lg-table-cell" th:text="${renter.phoneNumber ?: 'N/A'}">Phone</td>
                                                     <td><span th:if="${renter.isActive}"
                                                             class="badge bg-success">Active</span><span
                                                             th:unless="${renter.isActive}"

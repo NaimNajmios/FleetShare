@@ -891,3 +891,8 @@ body .container-scroller,
     min-height: 44px;
     height: 44px;
 }
+
+/* Hide Horizontal Scrollbar on Tables */
+.table-responsive {
+    overflow-x: hidden !important;
+}
