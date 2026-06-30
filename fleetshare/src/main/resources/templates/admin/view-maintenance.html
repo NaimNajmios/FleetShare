@@ -168,6 +168,74 @@
                     margin-bottom: 0.25rem;
                 }
             }
+
+            /* Info Grid Styles */
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .info-card-box {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 1.25rem;
+                border: 1px solid #e9ecef;
+                transition: all 0.3s ease;
+                height: 100%;
+            }
+
+            .info-card-box:hover {
+                background: #fff;
+                border-color: #dee2e6;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+                transform: translateY(-2px);
+            }
+
+            .info-card-header {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 0.75rem;
+                color: #6c757d;
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .info-card-header i {
+                font-size: 1.2rem;
+                color: #4B49AC;
+            }
+
+            .info-card-value {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #2c2e30;
+                word-wrap: break-word;
+            }
+            
+            .info-card-value.empty-value {
+                color: #adb5bd;
+                font-style: italic;
+                font-weight: 500;
+            }
+
+
+            .page-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .status-badge-lg {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+            }
         </style>
     </th:block>
 </head>
@@ -175,50 +243,39 @@
 <body>
     <div layout:fragment="content">
         <!-- Page Header with Back Button -->
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <a th:href="@{/admin/maintenance}" class="btn btn-outline-secondary btn-sm mb-3">
-                            <i class="mdi mdi-arrow-left"></i> Back to Maintenance
-                        </a>
-                        <h3 class="font-weight-bold">Maintenance Details</h3>
-                        <h6 class="font-weight-normal mb-0">
-                            Maintenance ID: <span class="font-weight-bold"
-                                th:text="'#' + ${maintenance.maintenanceId}">#1</span>
-                        </h6>
-                    </div>
-                    <div class="col-12 col-xl-4 text-xl-right">
-                        <span th:if="${maintenance.status == 'PENDING'}" class="badge badge-warning"
-                            style="font-size: 1rem; padding: 0.5rem 1rem;">Pending</span>
-                        <span th:if="${maintenance.status == 'IN_PROGRESS'}" class="badge badge-info"
-                            style="font-size: 1rem; padding: 0.5rem 1rem;">In Progress</span>
-                        <span th:if="${maintenance.status == 'COMPLETED'}" class="badge badge-success"
-                            style="font-size: 1rem; padding: 0.5rem 1rem;">Completed</span>
-                        <span th:if="${maintenance.status == 'CANCELLED'}" class="badge badge-danger"
-                            style="font-size: 1rem; padding: 0.5rem 1rem;">Cancelled</span>
-                        <!-- Gap#3: Overdue maintenance badge -->
-                        <span th:if="${maintenance.status == 'PENDING' and daysSinceScheduled != null and daysSinceScheduled > 30}"
-                              class="badge badge-danger" style="font-size: 1rem; padding: 0.5rem 1rem;">
-                            <i class="mdi mdi-clock-alert"></i> Overdue
-                        </span>
-                        <!-- Gap#4: Long-running maintenance badge -->
-                        <span th:if="${maintenance.status == 'IN_PROGRESS' and hoursInProgress != null and hoursInProgress > 336}"
-                              class="badge badge-warning" style="font-size: 1rem; padding: 0.5rem 1rem;">
-                            <i class="mdi mdi-timer-sand"></i> Extended
-                        </span>
-                        <div th:if="${maintenance.status != 'COMPLETED' && maintenance.status != 'CANCELLED'}" class="mt-3 action-buttons-container d-flex gap-2 justify-content-xl-end">
-                            <button th:if="${maintenance.status == 'PENDING'}" type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#startWorkModal">
-                                <i class="mdi mdi-play me-1"></i> Start Work
-                            </button>
-                            <button th:if="${maintenance.status == 'IN_PROGRESS'}" type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#completeModal">
-                                <i class="mdi mdi-check me-1"></i> Complete
-                            </button>
-                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal">
-                                <i class="mdi mdi-close me-1"></i> Cancel
-                            </button>
-                        </div>
-                    </div>
+        <div class="page-header mb-4">
+            <div>
+                <a th:href="@{/admin/maintenance}" class="btn btn-outline-secondary btn-sm mb-2">
+                    <i class="mdi mdi-arrow-left me-1"></i> Back to Maintenance
+                </a>
+                <h3 class="font-weight-bold mb-1">Maintenance Details</h3>
+                <h6 class="text-muted mb-0">Maintenance ID: <span class="font-weight-bold" th:text="'#' + ${maintenance.maintenanceId}">#1</span></h6>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span th:if="${maintenance.status == 'COMPLETED'}" class="badge badge-success status-badge-lg">Completed</span>
+                <span th:if="${maintenance.status == 'CANCELLED'}" class="badge badge-danger status-badge-lg">Cancelled</span>
+                <span th:if="${maintenance.status == 'PENDING'}" class="badge badge-warning status-badge-lg">Pending</span>
+                <span th:if="${maintenance.status == 'IN_PROGRESS'}" class="badge badge-info status-badge-lg">In Progress</span>
+                <!-- Gap#3: Overdue maintenance badge -->
+                <span th:if="${maintenance.status == 'PENDING' and daysSinceScheduled != null and daysSinceScheduled > 30}"
+                      class="badge badge-danger status-badge-lg" title="Scheduled ${#temporals.format(maintenance.scheduledDate, 'dd MMM yyyy')}">
+                    <i class="mdi mdi-clock-alert"></i> Overdue
+                </span>
+                <!-- Gap#4: Long-running maintenance badge -->
+                <span th:if="${maintenance.status == 'IN_PROGRESS' and hoursInProgress != null and hoursInProgress > 336}"
+                      class="badge badge-warning status-badge-lg" title="Started ${#temporals.format(maintenance.actualStartTime, 'dd MMM yyyy HH:mm')}">
+                    <i class="mdi mdi-timer-sand"></i> Extended
+                </span>
+                <div th:if="${maintenance.status != 'COMPLETED' && maintenance.status != 'CANCELLED'}" class="action-buttons-container d-flex gap-2">
+                    <button th:if="${maintenance.status == 'PENDING'}" type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#startWorkModal">
+                        <i class="mdi mdi-play me-1"></i> Start Work
+                    </button>
+                    <button th:if="${maintenance.status == 'IN_PROGRESS'}" type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#completeModal">
+                        <i class="mdi mdi-check me-1"></i> Complete
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                        <i class="mdi mdi-close me-1"></i> Cancel
+                    </button>
                 </div>
             </div>
         </div>
@@ -267,63 +324,50 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Maintenance Information</h4>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="detail-label">Maintenance Type</div>
-                                <div class="detail-value" th:text="${maintenance.maintenanceType != null ? maintenance.maintenanceType : 'General'}">General</div>
+                        <div class="info-grid mt-4">
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-tag"></i> Maintenance Type</div>
+                                <div class="info-card-value" th:text="${maintenance.maintenanceType != null ? maintenance.maintenanceType : 'General'}">General</div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="detail-label">Fleet Owner</div>
-                                <div class="detail-value" th:text="${maintenance.ownerBusinessName}">Fleet Owner</div>
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-account-tie"></i> Owner</div>
+                                <div class="info-card-value" th:text="${maintenance.ownerBusinessName}">Fleet Owner</div>
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <div class="detail-label">Scheduled Date</div>
-                                <div class="detail-value"
-                                    th:text="${maintenance.scheduledDate != null ? #temporals.format(maintenance.scheduledDate, 'dd MMM yyyy') : 'N/A'}">
-                                    01 Jan 2024</div>
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-calendar"></i> Scheduled Date</div>
+                                <div class="info-card-value" th:text="${maintenance.scheduledDate != null ? #temporals.format(maintenance.scheduledDate, 'dd MMM yyyy') : 'N/A'}">01 Jan 2024</div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="detail-label">Started At</div>
-                                <div class="detail-value">
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-clock-start"></i> Started At</div>
+                                <div class="info-card-value">
                                     <span th:if="${maintenance.actualStartTime != null}" th:text="${#temporals.format(maintenance.actualStartTime, 'dd MMM yyyy HH:mm')}">01 Jan 2024</span>
-                                    <span th:unless="${maintenance.actualStartTime != null}" class="text-muted font-italic">Not Started</span>
+                                    <span th:unless="${maintenance.actualStartTime != null}" class="empty-value">Not Started</span>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="detail-label">Ended At</div>
-                                <div class="detail-value">
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-clock-end"></i> Ended At</div>
+                                <div class="info-card-value">
                                     <span th:if="${maintenance.actualEndTime != null}" th:text="${#temporals.format(maintenance.actualEndTime, 'dd MMM yyyy HH:mm')}">01 Jan 2024</span>
-                                    <span th:unless="${maintenance.actualEndTime != null}" class="text-muted font-italic">Not Completed</span>
+                                    <span th:unless="${maintenance.actualEndTime != null}" class="empty-value">Not Completed</span>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="detail-label">Estimated Cost</div>
-                                <div class="detail-value"
-                                    th:text="${maintenance.estimatedCost != null ? 'RM ' + #numbers.formatDecimal(maintenance.estimatedCost, 1, 'COMMA', 2, 'POINT') : 'N/A'}">
-                                    RM 150.00</div>
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-cash"></i> Estimated Cost</div>
+                                <div class="info-card-value" th:text="${maintenance.estimatedCost != null ? 'RM ' + #numbers.formatDecimal(maintenance.estimatedCost, 1, 'COMMA', 2, 'POINT') : 'N/A'}">RM 150.00</div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="detail-label">Final Cost</div>
-                                <div class="detail-value">
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-cash-check"></i> Final Cost</div>
+                                <div class="info-card-value">
                                     <span th:if="${maintenance.finalCost != null}" th:text="${'RM ' + #numbers.formatDecimal(maintenance.finalCost, 1, 'COMMA', 2, 'POINT')}">RM 145.00</span>
-                                    <span th:unless="${maintenance.finalCost != null}" class="text-muted font-italic">Not Finalized</span>
+                                    <span th:unless="${maintenance.finalCost != null}" class="empty-value">Not Finalized</span>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="detail-label">Description</div>
-                                <div class="detail-value" th:text="${maintenance.description}">Description text</div>
-                            </div>
+                        <div class="info-card-box w-100 mb-3" style="min-height: 0;">
+                            <div class="info-card-header"><i class="mdi mdi-text"></i> Description</div>
+                            <div class="info-card-value" style="font-weight: 500; font-size: 1rem; color: #495057;" th:text="${maintenance.description}">Description text</div>
                         </div>
+                    
                     </div>
                 </div>
             </div>
@@ -333,55 +377,39 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Vehicle Information</h4>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="detail-label">Vehicle</div>
-                                <div class="detail-value" th:text="${vehicle.brand + ' ' + vehicle.model}">Toyota Camry
-                                </div>
+                        <div class="info-grid mt-4">
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-car-info"></i> Vehicle</div>
+                                <div class="info-card-value" th:text="${vehicle.brand + ' ' + vehicle.model}">Toyota Camry</div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="detail-label">Registration No.</div>
-                                <div class="detail-value font-weight-bold" th:text="${vehicle.registrationNo}">WXY 1234
-                                </div>
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-card-text-outline"></i> Reg. No.</div>
+                                <div class="info-card-value text-primary" th:text="${vehicle.registrationNo}">WXY 1234</div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="detail-label">Category</div>
-                                <div class="detail-value" th:text="${vehicle.category}">Sedan</div>
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-shape"></i> Category</div>
+                                <div class="info-card-value" th:text="${vehicle.category}">Sedan</div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="detail-label">Year</div>
-                                <div class="detail-value" th:text="${vehicle.manufacturingYear}">2022</div>
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-calendar-blank"></i> Year</div>
+                                <div class="info-card-value" th:text="${vehicle.manufacturingYear}">2022</div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="detail-label">Current Status</div>
-                                <div class="detail-value">
-                                    <span th:if="${vehicle.status == 'AVAILABLE'}"
-                                        class="badge badge-success">Available</span>
-                                    <span th:if="${vehicle.status == 'RENTED'}"
-                                        class="badge badge-warning">Rented</span>
-                                    <span th:if="${vehicle.status == 'MAINTENANCE'}"
-                                        class="badge badge-info">Maintenance</span>
-                                    <span th:if="${vehicle.status == 'UNAVAILABLE'}"
-                                        class="badge badge-secondary">Unavailable</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="detail-label">View Details</div>
-                                <div class="detail-value">
-                                    <a th:href="@{/admin/vehicles/view/{id}(id=${vehicle.vehicleId})}"
-                                        class="btn btn-sm btn-outline-primary">
-                                        <i class="mdi mdi-eye"></i> View Vehicle
-                                    </a>
+                            <div class="info-card-box">
+                                <div class="info-card-header"><i class="mdi mdi-information-outline"></i> Status</div>
+                                <div class="info-card-value" style="font-weight: normal; margin-top: 5px;">
+                                    <span th:if="${vehicle.status == 'AVAILABLE'}" class="badge badge-success">Available</span>
+                                    <span th:if="${vehicle.status == 'RENTED'}" class="badge badge-warning">Rented</span>
+                                    <span th:if="${vehicle.status == 'MAINTENANCE'}" class="badge badge-info">Maintenance</span>
+                                    <span th:if="${vehicle.status == 'UNAVAILABLE'}" class="badge badge-secondary">Unavailable</span>
                                 </div>
                             </div>
                         </div>
+                        <div class="mt-3">
+                            <a th:href="@{/admin/vehicles/view/{id}(id=${vehicle.vehicleId})}" class="btn btn-outline-primary w-100">
+                                <i class="mdi mdi-eye me-1"></i> View Full Vehicle Details
+                            </a>
+                        </div>
+                    
                     </div>
                 </div>
             </div>
