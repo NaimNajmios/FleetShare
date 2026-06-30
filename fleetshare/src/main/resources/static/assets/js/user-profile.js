@@ -36,6 +36,11 @@
             selectControls.forEach(select => {
                 select.removeAttribute('disabled');
             });
+            
+            // Enable map editing
+            if (typeof enableMapEditing === 'function') {
+                enableMapEditing();
+            }
         });
     }
 
@@ -52,6 +57,17 @@
                 select.value = originalValues['select_' + index];
                 select.setAttribute('disabled', true);
             });
+            
+            // Disable map editing and restore original coordinates
+            if (typeof disableMapEditing === 'function' && typeof leafletMarker !== 'undefined' && leafletMarker) {
+                disableMapEditing();
+                let origLat = parseFloat(originalValues[Array.from(formControls).findIndex(el => el.id === 'latitude')]);
+                let origLng = parseFloat(originalValues[Array.from(formControls).findIndex(el => el.id === 'longitude')]);
+                if (!isNaN(origLat) && !isNaN(origLng)) {
+                    leafletMarker.setLatLng([origLat, origLng]);
+                    if (leafletMap) leafletMap.setView([origLat, origLng]);
+                }
+            }
         });
     }
 
@@ -77,7 +93,16 @@
                 addressLine2: document.getElementById('addressLine2')?.value || null,
                 city: document.getElementById('city')?.value || null,
                 state: document.getElementById('state')?.value || null,
-                postalCode: document.getElementById('postalCode')?.value || null
+                postalCode: document.getElementById('postalCode')?.value || null,
+                latitude: document.getElementById('latitude')?.value ? parseFloat(document.getElementById('latitude').value) : null,
+                longitude: document.getElementById('longitude')?.value ? parseFloat(document.getElementById('longitude').value) : null,
+                bankName: document.getElementById('bankName')?.value || null,
+                bankAccountNumber: document.getElementById('bankAccountNumber')?.value || null,
+                bankAccountHolder: document.getElementById('bankAccountHolder')?.value || null,
+                paymentQrUrl: document.getElementById('paymentQrUrl')?.value || null,
+                toyyibpaySecretKey: document.getElementById('toyyibpaySecretKey')?.value || null,
+                toyyibpayCategoryCode: document.getElementById('toyyibpayCategoryCode')?.value || null,
+                toyyibpayUsername: document.getElementById('toyyibpayUsername')?.value || null
             };
 
             try {
@@ -237,6 +262,113 @@
 
         const result = await response.json();
         return response.ok && result.success;
+    }
+
+    // Leaflet Map Initialization
+    var leafletMap = null;
+    var leafletMarker = null;
+
+    (function initMap() {
+        var mapEl = document.getElementById('user-map');
+        if (!mapEl) return;
+
+        var lat = mapEl.dataset.lat ? parseFloat(mapEl.dataset.lat) : null;
+        var lng = mapEl.dataset.lng ? parseFloat(mapEl.dataset.lng) : null;
+        var businessName = mapEl.dataset.name || 'User Location';
+
+        // Load Leaflet JS dynamically
+        var leafletJS = document.createElement('script');
+        leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        leafletJS.onload = function () {
+            // Fix marker icon issue with Leaflet and Webpack/dynamic load
+            delete L.Icon.Default.prototype._getIconUrl;
+            L.Icon.Default.mergeOptions({
+                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+            });
+
+            var centerLat = lat !== null ? lat : 4.2105;
+            var centerLng = lng !== null ? lng : 101.9758;
+            var zoom = lat !== null ? 15 : 6;
+
+            leafletMap = L.map('user-map').setView([centerLat, centerLng], zoom);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(leafletMap);
+
+            if (lat !== null && lng !== null) {
+                leafletMarker = L.marker([lat, lng])
+                    .addTo(leafletMap)
+                    .bindPopup('<strong>' + businessName + '</strong>')
+                    .openPopup();
+            }
+
+            setTimeout(function () { leafletMap.invalidateSize(); }, 200);
+        };
+        document.head.appendChild(leafletJS);
+    })();
+
+    // Enable/Disable Map Editing
+    function enableMapEditing() {
+        if (!leafletMap) return;
+
+        var mapEditHint = document.getElementById('map-edit-hint');
+        if (mapEditHint) mapEditHint.style.display = 'block';
+
+        if (leafletMarker) {
+            leafletMarker.dragging.enable();
+            leafletMarker.closePopup();
+            leafletMarker.bindPopup('<strong>Drag me or click elsewhere</strong>');
+        } else {
+            var center = leafletMap.getCenter();
+            leafletMarker = L.marker([center.lat, center.lng], { draggable: true })
+                .addTo(leafletMap)
+                .bindPopup('<strong>Drag me or click elsewhere</strong>');
+            
+            // Update fields immediately
+            var latInput = document.getElementById('latitude');
+            var lngInput = document.getElementById('longitude');
+            if (latInput) latInput.value = center.lat.toFixed(6);
+            if (lngInput) lngInput.value = center.lng.toFixed(6);
+        }
+
+        leafletMarker.on('dragend', function (e) {
+            var position = leafletMarker.getLatLng();
+            var latInput = document.getElementById('latitude');
+            var lngInput = document.getElementById('longitude');
+            if (latInput) latInput.value = position.lat.toFixed(6);
+            if (lngInput) lngInput.value = position.lng.toFixed(6);
+        });
+
+        leafletMap.on('click', function (e) {
+            if (leafletMarker) {
+                leafletMarker.setLatLng(e.latlng);
+            } else {
+                leafletMarker = L.marker(e.latlng, { draggable: true }).addTo(leafletMap);
+            }
+            
+            var latInput = document.getElementById('latitude');
+            var lngInput = document.getElementById('longitude');
+            if (latInput) latInput.value = e.latlng.lat.toFixed(6);
+            if (lngInput) lngInput.value = e.latlng.lng.toFixed(6);
+        });
+    }
+
+    function disableMapEditing() {
+        if (!leafletMap) return;
+        
+        var mapEditHint = document.getElementById('map-edit-hint');
+        if (mapEditHint) mapEditHint.style.display = 'none';
+
+        leafletMap.off('click');
+        if (leafletMarker) {
+            leafletMarker.dragging.disable();
+            
+            var mapEl = document.getElementById('user-map');
+            var businessName = mapEl ? (mapEl.dataset.name || 'User Location') : 'User Location';
+            leafletMarker.bindPopup('<strong>' + businessName + '</strong>');
+        }
     }
 
 })();

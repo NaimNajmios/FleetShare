@@ -4,7 +4,16 @@
 
 <head>
     <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <style>
+            /* Fix for sticky position broken by overflow hidden in template */
+            body, html {
+                overflow-x: visible !important;
+            }
+            .container-scroller, .page-body-wrapper, .main-panel, .content-wrapper {
+                overflow: visible !important;
+            }
+            
             /* Profile Card Styles */
             .profile-card {
                 background: white;
@@ -301,7 +310,7 @@
 
         <div class="row" id="viewMode">
             <!-- Left Column: Profile Card -->
-            <div class="col-lg-4 col-md-5">
+            <div class="col-lg-4 col-md-5" style="position: sticky; top: 90px; align-self: flex-start; z-index: 10;">
                 <div class="profile-card">
                     <!-- Avatar -->
                     <div class="avatar-wrapper profile-avatar">
@@ -334,6 +343,10 @@
 
                     <!-- Quick Stats -->
                     <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Joined Date</span>
+                            <span class="stat-value" th:text="${userDetail.createdAt != null ? #temporals.format(userDetail.createdAt, 'dd MMM yyyy') : 'N/A'}">01 Jan 2023</span>
+                        </div>
                         <div class="stat-item">
                             <span class="stat-label">Client ID</span>
                             <span class="stat-value" th:text="${userDetail.userId}">#123</span>
@@ -440,6 +453,25 @@
                                     th:value="${userDetail.postalCode}" readonly style="max-width: 200px;">
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Latitude</label>
+                                <input type="text" class="form-control" id="latitude" name="latitude"
+                                    th:value="${userDetail.latitude}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Longitude</label>
+                                <input type="text" class="form-control" id="longitude" name="longitude"
+                                    th:value="${userDetail.longitude}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Effective Start Date</label>
+                                <input type="text" class="form-control" id="addressEffectiveStartDate" name="addressEffectiveStartDate"
+                                    th:value="${userDetail.addressEffectiveStartDate}" readonly>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Empty State -->
@@ -447,6 +479,77 @@
                         <i class="mdi mdi-map-marker-off"></i>
                         <p>No address on file</p>
                         <p class="text-muted small">Click "Edit Profile" to add address information</p>
+                    </div>
+
+                    <div class="card-header-title mt-4">
+                        <i class="mdi mdi-map"></i>
+                        <h5>Location on Map</h5>
+                    </div>
+                    <div id="map-edit-hint" class="hidden mb-2" style="display: none;">
+                        <small class="text-muted"><i class="mdi mdi-information-outline mr-1"></i>Click on the map or drag the marker to update location</small>
+                    </div>
+                    <div id="user-map" th:data-lat="${userDetail.latitude}" th:data-lng="${userDetail.longitude}" th:data-name="${userDetail.fullName}" style="height: 300px; width: 100%; border-radius: 8px; background-color: #f8f9fa; z-index: 1;"></div>
+                </div>
+
+                <!-- Financial & Integration Details Card -->
+                <div class="info-card" th:if="${userType == 'owner'}">
+                    <div class="card-header-title">
+                        <i class="mdi mdi-bank"></i>
+                        <h5>Financial & Integration Details</h5>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Bank Name</label>
+                            <input type="text" class="form-control" id="bankName" name="bankName"
+                                th:value="${userDetail.bankName}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Bank Account Number</label>
+                            <input type="text" class="form-control" id="bankAccountNumber" name="bankAccountNumber"
+                                th:value="${userDetail.bankAccountNumber}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Bank Account Holder</label>
+                            <input type="text" class="form-control" id="bankAccountHolder" name="bankAccountHolder"
+                                th:value="${userDetail.bankAccountHolder}" readonly>
+                        </div>
+                        <div class="form-group" th:if="${!#strings.isEmpty(userDetail.paymentQrUrl)}">
+                            <label>Payment QR Code</label>
+                            <div class="mb-2">
+                                <img th:src="@{${userDetail.paymentQrUrl}}" alt="QR Code" style="max-height: 150px; border-radius: 8px; border: 1px solid #dee2e6; padding: 5px;" />
+                            </div>
+                            <input type="hidden" id="paymentQrUrl" name="paymentQrUrl" th:value="${userDetail.paymentQrUrl}">
+                        </div>
+                        <div class="form-group" th:if="${#strings.isEmpty(userDetail.paymentQrUrl)}">
+                            <input type="hidden" id="paymentQrUrl" name="paymentQrUrl" th:value="${userDetail.paymentQrUrl}">
+                        </div>
+                    </div>
+                    <h6 class="mt-4 mb-3">ToyyibPay Configuration</h6>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Secret Key</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="toyyibpaySecretKey" name="toyyibpaySecretKey"
+                                    th:value="${userDetail.toyyibpaySecretKey}" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="const input = document.getElementById('toyyibpaySecretKey'); input.type = input.type === 'password' ? 'text' : 'password';">
+                                    <i class="mdi mdi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Category Code</label>
+                            <input type="text" class="form-control" id="toyyibpayCategoryCode" name="toyyibpayCategoryCode"
+                                th:value="${userDetail.toyyibpayCategoryCode}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-control" id="toyyibpayUsername" name="toyyibpayUsername"
+                                th:value="${userDetail.toyyibpayUsername}" readonly>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -24,6 +24,21 @@ public class UserDetailDTO {
     private String city;
     private String state;
     private String postalCode;
+    private Double latitude;
+    private Double longitude;
+    private java.time.LocalDate addressEffectiveStartDate;
+
+    // Additional User Info
+    private java.time.LocalDateTime createdAt;
+
+    // Fleet Owner Bank & Integration Info
+    private String bankName;
+    private String bankAccountNumber;
+    private String bankAccountHolder;
+    private String paymentQrUrl;
+    private String toyyibpaySecretKey;
+    private String toyyibpayCategoryCode;
+    private String toyyibpayUsername;
 
     // Constructors
     public UserDetailDTO() {
@@ -140,5 +155,93 @@ public class UserDetailDTO {
 
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public java.time.LocalDate getAddressEffectiveStartDate() {
+        return addressEffectiveStartDate;
+    }
+
+    public void setAddressEffectiveStartDate(java.time.LocalDate addressEffectiveStartDate) {
+        this.addressEffectiveStartDate = addressEffectiveStartDate;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getBankAccountNumber() {
+        return bankAccountNumber;
+    }
+
+    public void setBankAccountNumber(String bankAccountNumber) {
+        this.bankAccountNumber = bankAccountNumber;
+    }
+
+    public String getBankAccountHolder() {
+        return bankAccountHolder;
+    }
+
+    public void setBankAccountHolder(String bankAccountHolder) {
+        this.bankAccountHolder = bankAccountHolder;
+    }
+
+    public String getPaymentQrUrl() {
+        return paymentQrUrl;
+    }
+
+    public void setPaymentQrUrl(String paymentQrUrl) {
+        this.paymentQrUrl = paymentQrUrl;
+    }
+
+    public String getToyyibpaySecretKey() {
+        return toyyibpaySecretKey;
+    }
+
+    public void setToyyibpaySecretKey(String toyyibpaySecretKey) {
+        this.toyyibpaySecretKey = toyyibpaySecretKey;
+    }
+
+    public String getToyyibpayCategoryCode() {
+        return toyyibpayCategoryCode;
+    }
+
+    public void setToyyibpayCategoryCode(String toyyibpayCategoryCode) {
+        this.toyyibpayCategoryCode = toyyibpayCategoryCode;
+    }
+
+    public String getToyyibpayUsername() {
+        return toyyibpayUsername;
+    }
+
+    public void setToyyibpayUsername(String toyyibpayUsername) {
+        this.toyyibpayUsername = toyyibpayUsername;
     }
 }

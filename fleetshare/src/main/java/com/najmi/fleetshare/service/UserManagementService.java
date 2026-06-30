@@ -141,6 +141,7 @@ public class UserManagementService {
         dto.setUserRole(user.getUserRole().name());
         dto.setIsActive(user.getIsActive());
         dto.setProfileImageUrl(user.getProfileImageUrl());
+        dto.setCreatedAt(user.getCreatedAt());
 
         // Get role-specific info
         if ("owner".equalsIgnoreCase(userType)) {
@@ -150,6 +151,15 @@ public class UserManagementService {
                 dto.setPhoneNumber(owner.getContactPhone());
                 dto.setIsVerified(owner.getIsVerified());
                 dto.setFullName(owner.getBusinessName()); // Use business name as display name
+                
+                // Set bank & integration details
+                dto.setBankName(owner.getBankName());
+                dto.setBankAccountNumber(owner.getBankAccountNumber());
+                dto.setBankAccountHolder(owner.getBankAccountHolder());
+                dto.setPaymentQrUrl(owner.getPaymentQrUrl());
+                dto.setToyyibpaySecretKey(owner.getToyyibpaySecretKey());
+                dto.setToyyibpayCategoryCode(owner.getToyyibpayCategoryCode());
+                dto.setToyyibpayUsername(owner.getToyyibpayUsername());
             }
         } else if ("renter".equalsIgnoreCase(userType)) {
             Renter renter = renterRepository.findByUserId(userId).orElse(null);
@@ -167,6 +177,9 @@ public class UserManagementService {
             dto.setCity(address.getCity());
             dto.setState(address.getState());
             dto.setPostalCode(address.getPostalCode());
+            dto.setLatitude(address.getLatitude());
+            dto.setLongitude(address.getLongitude());
+            dto.setAddressEffectiveStartDate(address.getEffectiveStartDate());
         }
 
         return dto;
@@ -323,6 +336,27 @@ public class UserManagementService {
                 if (dto.getIsVerified() != null) {
                     owner.setIsVerified(dto.getIsVerified());
                 }
+                if (dto.getBankName() != null) {
+                    owner.setBankName(dto.getBankName().trim());
+                }
+                if (dto.getBankAccountNumber() != null) {
+                    owner.setBankAccountNumber(dto.getBankAccountNumber().trim());
+                }
+                if (dto.getBankAccountHolder() != null) {
+                    owner.setBankAccountHolder(dto.getBankAccountHolder().trim());
+                }
+                if (dto.getPaymentQrUrl() != null) {
+                    owner.setPaymentQrUrl(dto.getPaymentQrUrl().trim());
+                }
+                if (dto.getToyyibpaySecretKey() != null) {
+                    owner.setToyyibpaySecretKey(dto.getToyyibpaySecretKey().trim());
+                }
+                if (dto.getToyyibpayCategoryCode() != null) {
+                    owner.setToyyibpayCategoryCode(dto.getToyyibpayCategoryCode().trim());
+                }
+                if (dto.getToyyibpayUsername() != null) {
+                    owner.setToyyibpayUsername(dto.getToyyibpayUsername().trim());
+                }
                 owner.setUpdatedAt(LocalDateTime.now());
                 fleetOwnerRepository.save(owner);
             }
@@ -368,11 +402,19 @@ public class UserManagementService {
                 newAddress.setEffectiveStartDate(LocalDate.now());
                 newAddress.setCreatedAt(LocalDateTime.now());
                 newAddress.setUpdatedAt(LocalDateTime.now());
-                // Copy existing coordinates if available
-                if (existingAddress != null) {
+                // Update coordinates if available
+                if (dto.getLatitude() != null) {
+                    newAddress.setLatitude(dto.getLatitude());
+                } else if (existingAddress != null) {
                     newAddress.setLatitude(existingAddress.getLatitude());
+                }
+
+                if (dto.getLongitude() != null) {
+                    newAddress.setLongitude(dto.getLongitude());
+                } else if (existingAddress != null) {
                     newAddress.setLongitude(existingAddress.getLongitude());
                 }
+                
                 addressRepository.save(newAddress);
             }
         }
