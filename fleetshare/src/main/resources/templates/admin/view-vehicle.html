@@ -11,10 +11,11 @@
         <style>
             /* Fix for sticky position broken by overflow hidden in template */
             body, html {
-                overflow-x: visible !important;
+                overflow-x: hidden !important;
             }
             .container-scroller, .page-body-wrapper, .main-panel, .content-wrapper {
-                overflow: visible !important;
+                overflow-x: clip !important;
+                overflow-y: visible !important;
             }
             
             /* Profile Card Styles */
@@ -450,8 +451,8 @@
 
 <body>
     <div layout:fragment="content">
-        <div class="row">
-            <div class="col-md-12 grid-margin">
+        <div class="row m-0">
+            <div class="col-md-12 grid-margin px-0">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h3 class="font-weight-bold">Vehicle Details</h3>
@@ -466,7 +467,7 @@
 
         <form th:action="@{/admin/vehicles/update/{id}(id=${vehicle.vehicleId})}" method="post"
                             id="vehicleForm">
-        <div class="row" id="viewMode">
+        <div class="row m-0" id="viewMode">
             <div class="col-lg-4 grid-margin">
                 <div class="profile-card sticky-top" style="top: 90px; z-index: 10;">
                                     <div>
