@@ -26,6 +26,10 @@ public class VehicleDTO {
     private Double ownerLongitude;
     private Long fleetOwnerId;
 
+    // Audit fields
+    private java.time.LocalDateTime createdAt;
+    private java.time.LocalDateTime updatedAt;
+
     // Constructors
     public VehicleDTO() {
     }
@@ -35,7 +39,8 @@ public class VehicleDTO {
             String vehicleImageUrl, String ownerBusinessName,
             String fuelType, String transmissionType, Integer mileage, String status,
             String ownerContactPhone, Boolean ownerIsVerified, String city, String state,
-            Double ownerLatitude, Double ownerLongitude) {
+            Double ownerLatitude, Double ownerLongitude,
+            java.time.LocalDateTime createdAt, java.time.LocalDateTime updatedAt) {
         this.vehicleId = vehicleId;
         this.registrationNo = registrationNo;
         this.model = model;
@@ -55,6 +60,8 @@ public class VehicleDTO {
         this.state = state;
         this.ownerLatitude = ownerLatitude;
         this.ownerLongitude = ownerLongitude;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getters and Setters
@@ -216,5 +223,21 @@ public class VehicleDTO {
 
     public void setFleetOwnerId(Long fleetOwnerId) {
         this.fleetOwnerId = fleetOwnerId;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public java.time.LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

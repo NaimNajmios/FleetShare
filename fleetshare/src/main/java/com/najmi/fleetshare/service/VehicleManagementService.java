@@ -273,7 +273,9 @@ public class VehicleManagementService {
                                         city,
                                         state,
                                         ownerLatitude,
-                                        ownerLongitude);
+                                        ownerLongitude,
+                                        vehicle.getCreatedAt(),
+                                        vehicle.getUpdatedAt());
                         dto.setFleetOwnerId(vehicle.getFleetOwnerId());
                         vehicleDTOs.add(dto);
                 }
@@ -340,7 +342,9 @@ public class VehicleManagementService {
                                 city,
                                 state,
                                 ownerLatitude,
-                                ownerLongitude);
+                                ownerLongitude,
+                                vehicle.getCreatedAt(),
+                                vehicle.getUpdatedAt());
                 result.setFleetOwnerId(vehicle.getFleetOwnerId());
                 return result;
         }

@@ -692,6 +692,39 @@
                                     </div>
                                 </div>
 
+                                <!-- Audit Information Section -->
+                                <div class="form-section">
+                                    <h4><i class="mdi mdi-history"></i> Audit Information</h4>
+                                    <div class="status-rate-grid">
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-calendar-plus"></i> Registered Date
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value">
+                                                <span th:text="${vehicle.createdAt != null ? #temporals.format(vehicle.createdAt, 'dd MMM yyyy HH:mm') : 'N/A'}"></span>
+                                            </div>
+                                            <div class="info-card-footer edit-actions">
+                                                <input type="text" class="form-control form-control-plaintext" th:value="${vehicle.createdAt != null ? #temporals.format(vehicle.createdAt, 'dd MMM yyyy HH:mm') : 'N/A'}" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="info-card">
+                                            <div class="info-card-header">
+                                                <span class="info-card-label">
+                                                    <i class="mdi mdi-update"></i> Last Updated
+                                                </span>
+                                            </div>
+                                            <div class="info-card-value">
+                                                <span th:text="${vehicle.updatedAt != null ? #temporals.format(vehicle.updatedAt, 'dd MMM yyyy HH:mm') : 'N/A'}"></span>
+                                            </div>
+                                            <div class="info-card-footer edit-actions">
+                                                <input type="text" class="form-control form-control-plaintext" th:value="${vehicle.updatedAt != null ? #temporals.format(vehicle.updatedAt, 'dd MMM yyyy HH:mm') : 'N/A'}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="action-buttons">
                                     <div class="edit-actions">
                                         <button id="cancelBtn" type="button" class="btn btn-secondary">Cancel</button>
