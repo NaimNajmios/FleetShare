@@ -50,111 +50,104 @@
                 margin-bottom: 1rem;
             }
 
-            /* Timeline Styles */
-            .timeline {
+            /* Horizontal Timeline Styles */
+            .horizontal-timeline {
+                display: flex;
+                align-items: flex-start;
                 position: relative;
-                padding-left: 40px;
-                margin-top: 1rem;
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+                padding-top: 10px;
             }
 
-            .timeline::before {
+            .horizontal-timeline::before {
                 content: '';
                 position: absolute;
-                left: 15px;
-                top: 0;
-                bottom: 0;
-                width: 3px;
-                background: linear-gradient(to bottom, #4B49AC, #7978E9);
-                border-radius: 3px;
+                top: 32px;
+                left: 10%;
+                right: 10%;
+                height: 3px;
+                background: #e9ecef;
+                z-index: 1;
             }
 
-            .timeline-item {
+            .timeline-step {
+                flex: 1;
+                min-width: 150px;
+                text-align: center;
                 position: relative;
-                padding-bottom: 1.5rem;
+                z-index: 2;
+                padding: 0 10px;
             }
 
-            .timeline-item:last-child {
-                padding-bottom: 0;
-            }
-
-            .timeline-item::before {
-                content: '';
-                position: absolute;
-                left: -29px;
-                top: 5px;
-                width: 14px;
-                height: 14px;
+            .step-icon {
+                width: 48px;
+                height: 48px;
                 border-radius: 50%;
-                background: #4B49AC;
-                border: 3px solid white;
-                box-shadow: 0 0 0 3px #4B49AC;
+                background: #e9ecef;
+                color: #6c757d;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+                font-size: 1.5rem;
+                border: 4px solid #fff;
+                box-shadow: 0 0 0 2px #e9ecef;
+                transition: all 0.3s ease;
             }
 
-            .timeline-item.status-PENDING::before {
+            .timeline-step.status-PENDING .step-icon {
                 background: #ffc107;
-                box-shadow: 0 0 0 3px #ffc107;
+                color: #fff;
+                box-shadow: 0 0 0 2px #ffc107;
             }
 
-            .timeline-item.status-IN_PROGRESS::before {
+            .timeline-step.status-IN_PROGRESS .step-icon {
                 background: #17a2b8;
-                box-shadow: 0 0 0 3px #17a2b8;
+                color: #fff;
+                box-shadow: 0 0 0 2px #17a2b8;
             }
 
-            .timeline-item.status-COMPLETED::before {
+            .timeline-step.status-COMPLETED .step-icon {
                 background: #28a745;
-                box-shadow: 0 0 0 3px #28a745;
+                color: #fff;
+                box-shadow: 0 0 0 2px #28a745;
             }
 
-            .timeline-item.status-CANCELLED::before {
+            .timeline-step.status-CANCELLED .step-icon {
                 background: #dc3545;
-                box-shadow: 0 0 0 3px #dc3545;
+                color: #fff;
+                box-shadow: 0 0 0 2px #dc3545;
             }
 
-            .timeline-content {
-                background: #f8f9fa;
-                border-radius: 8px;
-                padding: 1rem;
-                border-left: 4px solid #4B49AC;
+            .step-title {
+                font-weight: 700;
+                font-size: 0.95rem;
+                color: #343a40;
+                margin-bottom: 4px;
             }
 
-            .timeline-item.status-PENDING .timeline-content {
-                border-left-color: #ffc107;
-            }
-
-            .timeline-item.status-IN_PROGRESS .timeline-content {
-                border-left-color: #17a2b8;
-            }
-
-            .timeline-item.status-COMPLETED .timeline-content {
-                border-left-color: #28a745;
-            }
-
-            .timeline-item.status-CANCELLED .timeline-content {
-                border-left-color: #dc3545;
-            }
-
-            .timeline-time {
+            .step-time {
                 font-size: 0.8rem;
                 color: #6c757d;
+                margin-bottom: 2px;
             }
-
-            .timeline-status {
-                font-weight: 600;
-                font-size: 1rem;
+            
+            .step-actor {
+                font-size: 0.75rem;
+                color: #adb5bd;
             }
-
-            .timeline-actor {
-                font-size: 0.85rem;
-                color: #6c757d;
-            }
-
-            .timeline-remarks {
-                margin-top: 0.5rem;
+            
+            .step-remarks {
                 font-style: italic;
-                color: #495057;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
-
-            .no-data {
+            
+                        .no-data {
                 text-align: center;
                 padding: 2rem;
                 color: #6c757d;
@@ -230,6 +223,44 @@
             </div>
         </div>
 
+        <!-- Status Timeline Card -->
+        <div class="row mb-4">
+            <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="mdi mdi-timeline-clock mr-2"></i>Maintenance Progress</h4>
+                        
+                        <div class="horizontal-timeline" th:if="${!#lists.isEmpty(statusLogs)}">
+                            <div class="timeline-step" th:each="log : ${statusLogs}" th:classappend="'status-' + ${log.status}">
+                                <div class="step-icon">
+                                    <i th:if="${log.status == 'PENDING'}" class="mdi mdi-calendar-clock"></i>
+                                    <i th:if="${log.status == 'IN_PROGRESS'}" class="mdi mdi-wrench"></i>
+                                    <i th:if="${log.status == 'COMPLETED'}" class="mdi mdi-check-bold"></i>
+                                    <i th:if="${log.status == 'CANCELLED'}" class="mdi mdi-close-thick"></i>
+                                </div>
+                                <div class="step-details">
+                                    <div class="step-title">
+                                        <span th:if="${log.status == 'PENDING'}">Pending</span>
+                                        <span th:if="${log.status == 'IN_PROGRESS'}">In Progress</span>
+                                        <span th:if="${log.status == 'COMPLETED'}">Completed</span>
+                                        <span th:if="${log.status == 'CANCELLED'}">Cancelled</span>
+                                    </div>
+                                    <div class="step-time" th:text="${#temporals.format(log.timestamp, 'dd MMM yy HH:mm')}">01 Jan 24 10:00</div>
+                                    <div class="step-actor" th:text="${log.actorName}">admin</div>
+                                    <div th:if="${log.remarks != null && !log.remarks.isEmpty()}" class="step-remarks text-muted small mt-1" title="Remarks" th:text="${log.remarks}">Remarks</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(statusLogs)}" class="no-data text-center p-4">
+                            <i class="mdi mdi-timeline-text mdi-48px text-muted mb-2"></i>
+                            <p class="mb-0 text-muted">No status changes recorded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <!-- Maintenance Details Card -->
             <div class="col-lg-6 grid-margin stretch-card">
@@ -237,10 +268,10 @@
                     <div class="card-body">
                         <h4 class="card-title">Maintenance Information</h4>
 
-                        <div class="row">
+                        <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="detail-label">Description</div>
-                                <div class="detail-value" th:text="${maintenance.description}">Oil Change</div>
+                                <div class="detail-label">Maintenance Type</div>
+                                <div class="detail-value" th:text="${maintenance.maintenanceType != null ? maintenance.maintenanceType : 'General'}">General</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="detail-label">Fleet Owner</div>
@@ -248,22 +279,30 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
                                 <div class="detail-label">Scheduled Date</div>
                                 <div class="detail-value"
                                     th:text="${maintenance.scheduledDate != null ? #temporals.format(maintenance.scheduledDate, 'dd MMM yyyy') : 'N/A'}">
                                     01 Jan 2024</div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="detail-label">Started At</div>
-                                <div class="detail-value"
-                                    th:text="${maintenance.actualStartTime != null ? #temporals.format(maintenance.actualStartTime, 'dd MMM yyyy HH:mm') : 'Not Started'}">
-                                    01 Jan 2024</div>
+                                <div class="detail-value">
+                                    <span th:if="${maintenance.actualStartTime != null}" th:text="${#temporals.format(maintenance.actualStartTime, 'dd MMM yyyy HH:mm')}">01 Jan 2024</span>
+                                    <span th:unless="${maintenance.actualStartTime != null}" class="text-muted font-italic">Not Started</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-label">Ended At</div>
+                                <div class="detail-value">
+                                    <span th:if="${maintenance.actualEndTime != null}" th:text="${#temporals.format(maintenance.actualEndTime, 'dd MMM yyyy HH:mm')}">01 Jan 2024</span>
+                                    <span th:unless="${maintenance.actualEndTime != null}" class="text-muted font-italic">Not Completed</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="detail-label">Estimated Cost</div>
                                 <div class="detail-value"
@@ -272,9 +311,17 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="detail-label">Final Cost</div>
-                                <div class="detail-value"
-                                    th:text="${maintenance.finalCost != null ? 'RM ' + #numbers.formatDecimal(maintenance.finalCost, 1, 'COMMA', 2, 'POINT') : 'Not Finalized'}">
-                                    RM 145.00</div>
+                                <div class="detail-value">
+                                    <span th:if="${maintenance.finalCost != null}" th:text="${'RM ' + #numbers.formatDecimal(maintenance.finalCost, 1, 'COMMA', 2, 'POINT')}">RM 145.00</span>
+                                    <span th:unless="${maintenance.finalCost != null}" class="text-muted font-italic">Not Finalized</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value" th:text="${maintenance.description}">Description text</div>
                             </div>
                         </div>
                     </div>
@@ -340,50 +387,6 @@
             </div>
         </div>
 
-        <!-- Status Timeline Card -->
-        <div class="row">
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Status Timeline</h4>
-                        <p class="card-description">History of status changes for this maintenance record</p>
-
-                        <div th:if="${!#lists.isEmpty(statusLogs)}" class="timeline">
-                            <div th:each="log : ${statusLogs}" th:class="'timeline-item status-' + ${log.status}">
-                                <div class="timeline-content">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="timeline-status">
-                                                <span th:if="${log.status == 'PENDING'}"
-                                                    class="badge badge-warning">Pending</span>
-                                                <span th:if="${log.status == 'IN_PROGRESS'}" class="badge badge-info">In
-                                                    Progress</span>
-                                                <span th:if="${log.status == 'COMPLETED'}"
-                                                    class="badge badge-success">Completed</span>
-                                                <span th:if="${log.status == 'CANCELLED'}"
-                                                    class="badge badge-danger">Cancelled</span>
-                                            </div>
-                                            <div class="timeline-actor" th:text="'By: ' + ${log.actorName}">By:
-                                                admin@example.com</div>
-                                        </div>
-                                        <div class="timeline-time"
-                                            th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy HH:mm')}">01 Jan
-                                            2024 10:00</div>
-                                    </div>
-                                    <div th:if="${log.remarks != null && !log.remarks.isEmpty()}"
-                                        class="timeline-remarks" th:text="${log.remarks}">Remarks</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div th:if="${#lists.isEmpty(statusLogs)}" class="no-data">
-                            <i class="mdi mdi-timeline-text mdi-48px"></i>
-                            <p>No status changes recorded yet</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     <!-- Start Work Modal -->
     <div class="modal fade" id="startWorkModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
