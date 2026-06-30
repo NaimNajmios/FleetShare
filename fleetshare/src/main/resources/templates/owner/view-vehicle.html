@@ -183,6 +183,11 @@
                 display: none;
             }
 
+            #editMode .info-card-value:not(.keep-visible):not(.rate-value) {
+                display: none;
+            }
+
+
             @media (max-width: 768px) {
                 .profile-container {
                     padding: 1rem;
@@ -533,7 +538,7 @@
                                                 th:text="${vehicle.manufacturingYear ?: 'N/A'}">2023</div>
                                             <div class="info-card-footer edit-actions">
                                                 <input type="number" class="form-control" name="manufacturingYear"
-                                                    th:value="${vehicle.manufacturingYear}" placeholder="Enter year">
+                                                    th:value="${vehicle.manufacturingYear}" placeholder="Enter year" min="1900">
                                             </div>
                                         </div>
 
@@ -592,7 +597,7 @@
                                             </div>
                                             <div class="info-card-footer edit-actions">
                                                 <input type="number" class="form-control" name="mileage"
-                                                    th:value="${vehicle.mileage}" placeholder="Enter mileage">
+                                                    th:value="${vehicle.mileage}" placeholder="Enter mileage" min="0">
                                             </div>
                                         </div>
 
@@ -655,7 +660,7 @@
                                                     Availability Status
                                                 </span>
                                             </div>
-                                            <div class="info-card-value">
+                                            <div class="info-card-value keep-visible">
                                                 <span class="status-badge"
                                                     th:classappend="${'status-' + #strings.toLowerCase(vehicle.status)}"
                                                     th:text="${vehicle.status}">AVAILABLE</span>
@@ -734,11 +739,8 @@
                                                     <i class="mdi mdi-calendar-plus"></i> Registered Date
                                                 </span>
                                             </div>
-                                            <div class="info-card-value">
+                                            <div class="info-card-value keep-visible">
                                                 <span th:text="${vehicle.createdAt != null ? #temporals.format(vehicle.createdAt, 'dd MMM yyyy HH:mm') : 'N/A'}"></span>
-                                            </div>
-                                            <div class="info-card-footer edit-actions">
-                                                <input type="text" class="form-control form-control-plaintext" th:value="${vehicle.createdAt != null ? #temporals.format(vehicle.createdAt, 'dd MMM yyyy HH:mm') : 'N/A'}" readonly>
                                             </div>
                                         </div>
                                         <div class="info-card">
@@ -747,11 +749,8 @@
                                                     <i class="mdi mdi-update"></i> Last Updated
                                                 </span>
                                             </div>
-                                            <div class="info-card-value">
+                                            <div class="info-card-value keep-visible">
                                                 <span th:text="${vehicle.updatedAt != null ? #temporals.format(vehicle.updatedAt, 'dd MMM yyyy HH:mm') : 'N/A'}"></span>
-                                            </div>
-                                            <div class="info-card-footer edit-actions">
-                                                <input type="text" class="form-control form-control-plaintext" th:value="${vehicle.updatedAt != null ? #temporals.format(vehicle.updatedAt, 'dd MMM yyyy HH:mm') : 'N/A'}" readonly>
                                             </div>
                                         </div>
                                     </div>
