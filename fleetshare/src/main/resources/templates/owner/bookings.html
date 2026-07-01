@@ -310,31 +310,37 @@
             <div class="col-12">
                 <div class="card filter-card">
                     <div class="card-body p-3">
+                        <form method="get" th:action="@{/owner/bookings}" id="filter-form">
                         <div class="row align-items-center g-3">
                             <!-- Left Side: Form -->
                             <div class="col-12 col-xl-9">
                                 <div class="row g-2 align-items-center">
-                                    <div class="col-12 col-md-5">
+                                    <div class="col-12 col-md-4">
                                         <div class="search-input-wrapper">
                                             <i class="mdi mdi-magnify"></i>
-                                            <input type="text" class="form-control" id="booking-search" placeholder="Search renter, vehicle...">
+                                            <input type="text" name="search" class="form-control" id="booking-search" placeholder="Search renter, vehicle..." th:value="${currentSearch}">
                                         </div>
                                     </div>
-                                    <div class="col-6 col-md-4">
-                                        <select class="form-select" id="status-filter">
-                                            <option value="" selected>All Status</option>
-                                            <option value="PENDING">Pending</option>
-                                            <option value="CONFIRMED">Confirmed</option>
-                                            <option value="ACTIVE">Active</option>
-                                            <option value="COMPLETED">Completed</option>
-                                            <option value="CANCELLED">Cancelled</option>
-                                            <option value="DISPUTED">Disputed</option>
+                                    <div class="col-6 col-md-3">
+                                        <select class="form-select" name="status" id="status-filter" onchange="this.form.submit()">
+                                            <option value="">All Status</option>
+                                            <option value="PENDING" th:selected="${currentStatus == 'PENDING'}">Pending</option>
+                                            <option value="CONFIRMED" th:selected="${currentStatus == 'CONFIRMED'}">Confirmed</option>
+                                            <option value="ACTIVE" th:selected="${currentStatus == 'ACTIVE'}">Active</option>
+                                            <option value="COMPLETED" th:selected="${currentStatus == 'COMPLETED'}">Completed</option>
+                                            <option value="CANCELLED" th:selected="${currentStatus == 'CANCELLED'}">Cancelled</option>
+                                            <option value="DISPUTED" th:selected="${currentStatus == 'DISPUTED'}">Disputed</option>
                                         </select>
                                     </div>
                                     <div class="col-6 col-md-3 d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-secondary rounded-3 px-3 w-100" onclick="clearFilters()" title="Clear Filters">
-                                            <i class="mdi mdi-refresh"></i> Clear
+                                        <button type="submit" class="btn btn-primary rounded-3 px-3 w-100">
+                                            <i class="mdi mdi-magnify"></i> Search
                                         </button>
+                                    </div>
+                                    <div class="col-6 col-md-2 d-flex gap-2">
+                                        <a th:href="@{/owner/bookings}" class="btn btn-outline-secondary rounded-3 px-3 w-100" title="Clear Filters">
+                                            <i class="mdi mdi-refresh"></i> Clear
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -351,6 +357,7 @@
                                 </div>
                             </div>
                         </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -600,8 +607,13 @@
             const statusFilter = document.getElementById('status-filter');
             const gridContainer = document.getElementById('grid-view-container');
             const tableContainer = document.getElementById('table-view-container');
-            const noResults = document.getElementById('no-results');
             const kpiCards = document.querySelectorAll('.kpi-card');
+
+            // Highlight the correct KPI card based on current status
+            const currentServerStatus = /*[[${currentStatus} ?: 'all']]*/ 'all';
+            kpiCards.forEach(card => {
+                card.classList.toggle('active', card.dataset.filter === currentServerStatus);
+            });
 
             // View Toggle
             function setView(view) {
@@ -615,64 +627,14 @@
 
             // Filter by KPI Card Click
             function filterByStatus(status, element) {
-                currentStatusFilter = status;
-                kpiCards.forEach(card => card.classList.remove('active'));
-                if (element) element.classList.add('active');
-                statusFilter.value = status === 'all' ? '' : status;
-                filterBookings();
+                document.getElementById('status-filter').value = status === 'all' ? '' : status;
+                document.getElementById('filter-form').submit();
             }
-
-            // Main Filter Function
-            function filterBookings() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value || (currentStatusFilter !== 'all' ? currentStatusFilter : '');
-
-                const allItems = document.querySelectorAll('.booking-item');
-                let visibleCount = 0;
-
-                allItems.forEach(item => {
-                    const searchText = (item.dataset.search || '').toLowerCase();
-                    const itemStatus = item.dataset.status || '';
-
-                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
-                    const matchesStatus = !statusValue || itemStatus === statusValue;
-
-                    const isVisible = matchesSearch && matchesStatus;
-                    item.style.display = isVisible ? '' : 'none';
-                    if (isVisible) visibleCount++;
-                });
-
-                const hasRecords = document.querySelectorAll('.booking-item').length > 0;
-                if (noResults) {
-                    noResults.style.display = (hasRecords && visibleCount === 0) ? 'block' : 'none';
-                }
-            }
-
-            // Clear All Filters
-            function clearFilters() {
-                searchInput.value = '';
-                statusFilter.value = '';
-                currentStatusFilter = 'all';
-                kpiCards.forEach(card => card.classList.remove('active'));
-                document.querySelector('.kpi-revenue').classList.add('active');
-                filterBookings();
-            }
-
-            // Event Listeners
-            if (searchInput) searchInput.addEventListener('input', filterBookings);
-            if (statusFilter) statusFilter.addEventListener('change', () => {
-                currentStatusFilter = statusFilter.value || 'all';
-                kpiCards.forEach(card => {
-                    card.classList.toggle('active', card.dataset.filter === currentStatusFilter);
-                });
-                filterBookings();
-            });
 
             // Initialize
             document.addEventListener('DOMContentLoaded', () => {
                 const savedView = localStorage.getItem('bookingViewPreference') || 'grid';
                 setView(savedView);
-                filterBookings();
 
                 // Initialize countdowns
                 initCountdowns();

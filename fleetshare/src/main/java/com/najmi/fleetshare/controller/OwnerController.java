@@ -825,6 +825,10 @@ public class OwnerController {
 
     @GetMapping("/bookings")
     public String bookings(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "startDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             HttpSession session, Model model) {
@@ -836,14 +840,26 @@ public class OwnerController {
             org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
             
             List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId); // For stats
-            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.BookingDTO> bookingPage = bookingService.getBookingsByOwnerIdPaginated(ownerId, pageable);
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.BookingDTO> bookingPage = bookingService.getFilteredBookingsPaginated(ownerId, search, status, startDate, endDate, pageable);
             
             model.addAttribute("bookings", bookingPage.getContent());
             model.addAttribute("currentPage", bookingPage.getNumber());
             model.addAttribute("totalPages", bookingPage.getTotalPages());
             model.addAttribute("totalItems", bookingPage.getTotalElements());
             model.addAttribute("defaultSize", size);
-            model.addAttribute("pageParams", java.util.Collections.emptyMap());
+            
+            java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+            if (search != null && !search.isEmpty()) pageParams.put("search", search);
+            if (status != null && !status.isEmpty()) pageParams.put("status", status);
+            if (startDate != null) pageParams.put("startDate", startDate);
+            if (endDate != null) pageParams.put("endDate", endDate);
+            model.addAttribute("pageParams", pageParams);
+
+            // Pass filter criteria back to view
+            model.addAttribute("currentSearch", search);
+            model.addAttribute("currentStatus", status);
+            model.addAttribute("currentStartDate", startDate);
+            model.addAttribute("currentEndDate", endDate);
 
             // Calculate booking statistics
             long pendingCount = bookings.stream().filter(b -> "PENDING".equals(b.getStatus())).count();

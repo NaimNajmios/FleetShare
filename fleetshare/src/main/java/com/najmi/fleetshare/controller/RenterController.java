@@ -279,13 +279,26 @@ public class RenterController {
     }
 
     @GetMapping("/bookings")
-    public String myBookings(HttpSession session, Model model) {
+    public String myBookings(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            HttpSession session, Model model) {
         SessionUser user = SessionHelper.getCurrentUser(session);
         if (user != null && user.getRenterDetails() != null) {
             // Fetch bookings for the current renter
             Long renterId = user.getRenterDetails().getRenterId();
-            List<BookingDTO> bookings = bookingService.getBookingsByRenterId(renterId);
-            model.addAttribute("bookings", bookings);
+            
+            size = Math.min(Math.max(size, 1), 48);
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+            
+            org.springframework.data.domain.Page<BookingDTO> bookingPage = bookingService.getBookingsByRenterIdPaginated(renterId, pageable);
+            
+            model.addAttribute("bookings", bookingPage.getContent());
+            model.addAttribute("currentPage", bookingPage.getNumber());
+            model.addAttribute("totalPages", bookingPage.getTotalPages());
+            model.addAttribute("totalItems", bookingPage.getTotalElements());
+            model.addAttribute("defaultSize", size);
+            model.addAttribute("pageParams", java.util.Collections.emptyMap());
         }
         return "renter/my-bookings";
     }

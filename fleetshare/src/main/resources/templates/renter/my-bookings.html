@@ -650,6 +650,11 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="mt-4">
+                <div th:replace="~{fragments/pagination :: pagination}"></div>
+            </div>
 
             <!-- Filter Empty State -->
             <div id="filterEmptyState" class="filter-empty-state">

@@ -92,6 +92,29 @@ public class BookingService {
     }
 
     /**
+     * Fetches a paginated list of filtered bookings
+     *
+     * @return Page of BookingDTO objects
+     */
+    public Page<BookingDTO> getFilteredBookingsPaginated(Long ownerId, String search, String status, java.time.LocalDate startDate, java.time.LocalDate endDate, Pageable pageable) {
+        BookingStatusLog.BookingStatus enumStatus = null;
+        if (status != null && !status.trim().isEmpty()) {
+            try {
+                enumStatus = BookingStatusLog.BookingStatus.valueOf(status.toUpperCase());
+            } catch (Exception e) {}
+        }
+        
+        java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+        
+        String processedSearch = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+
+        Page<Booking> bookingPage = bookingRepository.findFilteredBookings(ownerId, processedSearch, enumStatus, startDateTime, endDateTime, pageable);
+        List<BookingDTO> dtos = mapBookingsToDTOs(bookingPage.getContent());
+        return new PageImpl<>(dtos, pageable, bookingPage.getTotalElements());
+    }
+
+    /**
      * Fetches bookings created since a specific date for charting
      */
     public List<BookingDTO> getBookingsCreatedSince(java.time.LocalDateTime since) {
@@ -283,6 +306,19 @@ public class BookingService {
     public List<BookingDTO> getBookingsByRenterId(Long renterId) {
         List<Booking> bookings = bookingRepository.findByRenterId(renterId);
         return mapBookingsToDTOs(bookings);
+    }
+
+    /**
+     * Fetches a paginated list of bookings for a specific renter
+     *
+     * @param renterId Renter ID
+     * @param pageable Pagination information
+     * @return Page of BookingDTO objects
+     */
+    public Page<BookingDTO> getBookingsByRenterIdPaginated(Long renterId, Pageable pageable) {
+        Page<Booking> bookingPage = bookingRepository.findByRenterId(renterId, pageable);
+        List<BookingDTO> dtos = mapBookingsToDTOs(bookingPage.getContent());
+        return new PageImpl<>(dtos, pageable, bookingPage.getTotalElements());
     }
 
     /**

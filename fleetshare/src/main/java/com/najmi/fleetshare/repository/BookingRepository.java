@@ -21,6 +21,22 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     org.springframework.data.domain.Page<Booking> findByFleetOwnerId(Long fleetOwnerId, org.springframework.data.domain.Pageable pageable);
 
+    @Query("SELECT b FROM Booking b " +
+           "LEFT JOIN Renter r ON b.renterId = r.renterId " +
+           "LEFT JOIN Vehicle v ON b.vehicleId = v.vehicleId " +
+           "WHERE (:ownerId IS NULL OR b.fleetOwnerId = :ownerId) " +
+           "AND (:status IS NULL OR b.bookingId IN (SELECT bsl.bookingId FROM BookingStatusLog bsl WHERE bsl.statusValue = :status AND bsl.statusTimestamp = (SELECT MAX(bsl2.statusTimestamp) FROM BookingStatusLog bsl2 WHERE bsl2.bookingId = b.bookingId))) " +
+           "AND (:startDate IS NULL OR b.startDate >= :startDate) " +
+           "AND (:endDate IS NULL OR b.endDate <= :endDate) " +
+           "AND (:search IS NULL OR LOWER(r.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(v.registrationNo) LIKE LOWER(CONCAT('%', :search, '%')) OR CAST(b.bookingId AS string) LIKE CONCAT('%', :search, '%'))")
+    org.springframework.data.domain.Page<Booking> findFilteredBookings(
+            @Param("ownerId") Long ownerId,
+            @Param("search") String search,
+            @Param("status") BookingStatusLog.BookingStatus status,
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            org.springframework.data.domain.Pageable pageable);
+
     @Query("SELECT b FROM Booking b WHERE b.fleetOwnerId = :fleetOwnerId AND (b.createdAt >= :since OR b.endDate >= :since OR b.startDate >= :since)")
     List<Booking> findDashboardBookingsByOwnerId(@Param("fleetOwnerId") Long fleetOwnerId, @Param("since") LocalDateTime since);
 

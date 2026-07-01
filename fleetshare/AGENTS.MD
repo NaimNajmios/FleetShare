@@ -1,4 +1,4 @@
- # AGENTS.md
+# AGENTS.md
 
 This file exists because LLMs make predictable mistakes when writing code. Not random mistakes. The same ones, over and over. I've watched it happen enough times to write them down.
 
@@ -33,7 +33,25 @@ What this looks like in practice:
 
 **If something is confusing, stop.** Don't fill confusion with plausible-sounding code. The result of generating code when you don't understand the requirements is code that passes a casual review but fails when it matters. Just say what's confusing and ask.
 
-## 3. Simplicity
+## 3. Reversibility: The Cost of Being Wrong
+
+Not every decision deserves the same amount of deliberation. Some choices are cheap to undo: a function name, an internal helper's signature, how you structure a loop. Others are expensive: a database schema, the shape of a public API, an authentication strategy, a file format you're about to commit to. Treating these the same wastes time in both directions.
+
+For a cheap-to-undo decision, just make it and move on. Don't ask permission to name a variable `userId` instead of `user_id`. Don't present three options for whether to use a for-loop or a map. That's noise, and it trains the user to stop reading your questions carefully.
+
+For an expensive-to-undo decision, slow down, even if you're confident. "I'm adding a `deleted_at` column for soft deletes rather than hard-deleting rows" is a one-way door — once other code starts depending on soft-delete semantics, reversing it means touching everything downstream. The user should know you made that call before it becomes load-bearing.
+
+The test: if this turns out to be wrong, how many files, systems, or people would need to change to fix it? One file, low stakes — decide and move on. Many files, external consumers, or data that's hard to migrate — stop and flag it before you write the code, not after.
+
+## 4. Invisible Callers
+
+Reversibility asks how many files would need to change if a decision turns out to be wrong. This is the sharper version of that question for anything that crosses a boundary you can't see across.
+
+When you change a function signature, an API response shape, a database column, or a file format, grepping the repository only finds the callers that live in the repository. It won't find another service hitting that endpoint, a mobile client that's already been shipped, a cron job running from a different repo, a partner integration consuming your webhook, or a downstream consumer of the file you just reformatted.
+
+The instinct should be: "I can verify nothing in this codebase breaks. I can't verify nothing outside it does." That distinction matters and should be said out loud, not absorbed into a confident "this is safe" statement. If the change touches anything that looks like a public contract, a single line like "this is technically a breaking change to the API, are there other consumers I should know about?" costs one sentence and can save a production incident.
+
+## 5. Simplicity
 
 Write the minimum amount of code that solves the problem. Not the minimum amount of code you can imagine theoretically solving the problem. The minimum amount that actually solves this specific problem right now.
 
@@ -66,7 +84,15 @@ async def send_welcome_email(user):
 
 The test for simplicity: show your code to someone unfamiliar with the project. If they have to ask "why is this abstracted like this?" and the answer is "in case we need to..." then you've over-engineered it. "In case we need to" is not a requirement. It's a guess about the future, and guesses about the future are usually wrong.
 
-## 4. Surgical Changes
+## 6. Performance Intuition, Not Premature Optimization
+
+Simplicity says not to optimize speculatively, and that's correct. It is not a license to never think about performance until something breaks in production. The two instincts have to coexist.
+
+The most common offender is a loop that does one database call, one API request, or one file read per iteration. At 10 items this is invisible. At 10,000 items it's an outage. This isn't a hypothetical edge case to defend against with a try/catch; it's a structural property of the code that's predictable just by looking at it.
+
+The rule isn't "optimize everything." It's "notice when something scales with the size of the input in a way that will eventually matter, and say so." A line like "this loads everything into memory at once, fine for now, but worth knowing if this list could grow past a few thousand" takes one sentence and turns a future incident into a known tradeoff someone signed off on.
+
+## 7. Surgical Changes
 
 When you edit existing code, your diff should be as small as possible. Every line you change is a line that could introduce a bug, a line someone has to review, and a line that shows up in git blame forever.
 
@@ -82,7 +108,28 @@ Rules:
 
 The test: look at your diff. Can you justify every single changed line with a direct connection to what was asked? If any line is there because "while I was in there I thought I'd..." then revert it.
 
-## 5. Verification
+## 8. Security Posture
+
+Treat anything that didn't originate in code you wrote and reviewed as untrusted until proven otherwise: user input, query parameters, API responses, file contents, environment variables, even data from your own database if it was written by a different code path. Generated code has a habit of assuming everything is well-formed, because in most training examples it was.
+
+This shows up in specific, checkable ways:
+
+- Don't build SQL, shell commands, or file paths by concatenating strings with untrusted input. Use parameterized queries, escaping, or path sanitization, even for "internal" tools that feel low-risk.
+- Don't log values that might be secrets. If a credential, token, or password is sitting in a variable while you're debugging, it doesn't belong in a `console.log` or a log line, not even temporarily.
+- Don't trust the shape of external data. An API response with a missing field, a webhook payload with the wrong type, a CSV with an extra column — these will eventually show up. Validate before you use.
+- Secrets go in environment variables or a secrets manager, never in source. If you find yourself typing an API key directly into a file, stop.
+
+This isn't a license to add defensive code everywhere — that contradicts the simplicity rule above. It's about correctly identifying which inputs actually cross a trust boundary and treating only those with suspicion.
+
+## 9. Blast Radius of Your Own Actions
+
+Everything so far governs the code you write. None of it governs the actions you take while writing it. An agent can be perfectly disciplined about diffs and still drop a database table, force-push over someone's commits, run a migration against production instead of staging, or delete a branch that wasn't merged yet.
+
+The same caution that applies to code applies to commands. Before running anything destructive or hard to undo — `git push --force`, `DROP TABLE`, `rm -rf`, a migration, anything that touches a real environment instead of a local one — stop and confirm explicitly, even if the command is technically correct and even if it feels routine. "Routine" is exactly the condition under which destructive actions get run on autopilot.
+
+If you're not certain whether an environment is production, treat it as if it is until proven otherwise.
+
+## 10. Verification
 
 The difference between code that works and code you think works is testing. You should be paranoid about this distinction.
 
@@ -90,11 +137,17 @@ The difference between code that works and code you think works is testing. You 
 
 **Run existing tests before and after your changes.** If tests passed before your change and fail after, you broke something. This is obvious. What's less obvious: if tests were already failing before your change, say so. Don't silently ignore pre-existing failures and let your changes get blamed for them.
 
-**Don't write tests for the sake of writing tests.** A test that checks whether a constructor sets properties is worthless. A test that checks whether your validation actually rejects bad input is valuable. Test behavior, not implementation. Test the interesting cases, not the trivial ones.
-
 **If you can't write a test, say why.** Sometimes the architecture makes testing hard. That's useful information. "I can't easily test this because the database calls are tightly coupled to the business logic" is a signal that something might need to be restructured. Don't just skip testing and hope.
 
-## 6. Goal-Driven Execution
+## 11. Self-Review Before You Present
+
+Verification proves the code works. It doesn't prove the diff is clean. Before you show your change to the user, read it once as if a stranger wrote it and you're the one reviewing it.
+
+Ask: does every changed line trace back to something that was actually asked for? Is there a line you added "while you were in there"? Is there a comment explaining something that should already be obvious from the code? Is there a variable name that made sense mid-generation but won't make sense to anyone reading it cold in six months?
+
+This catches a different category of mistake than testing does. Tests catch logic errors. A self-review catches scope creep, style drift, and the leftover debugging line you forgot to remove. It costs you one read-through. Skipping it costs the user a slower code review.
+
+## 12. Goal-Driven Execution
 
 Every task should have a clear success criterion before you start writing code. If the criterion is vague, make it specific. If you can't make it specific, ask.
 
@@ -118,7 +171,15 @@ Plan:
 
 This does two things: it lets the user catch mistakes in your approach before you waste time implementing them, and it forces you to actually think through the steps instead of just diving in and figuring it out as you go.
 
-## 7. Debugging
+## 13. Silent Scope Narrowing
+
+The Kitchen Sink failure mode, described below, is doing more than was asked. This is its mirror: doing less, quietly, and presenting it as complete.
+
+Asked to "add validation and write tests," it's common to ship the validation, run out of context or hit friction on the tests, and just not mention it. The result looks like a finished task in the conversation, but it isn't one. The user has to notice the gap themselves, usually later, usually at a worse time than now.
+
+If part of what was asked didn't get done — a test wasn't written, an edge case wasn't handled, a step in the plan was skipped — say so explicitly in the same message where you present the rest. "I added the validation but didn't get to the tests yet, want me to continue?" costs nothing. A silently partial result costs trust.
+
+## 14. Debugging
 
 When something doesn't work, don't guess. Investigate.
 
@@ -132,7 +193,22 @@ When something doesn't work, don't guess. Investigate.
 
 **If you're stuck, say so.** "I've tried X and Y and neither worked. Here's what I'm seeing. I think the issue might be Z but I'm not sure." This is infinitely more useful than silently trying random things for 20 iterations.
 
-## 8. Dependencies
+**Don't confabulate explanations for runtime behavior.** When asked "why does this function return null sometimes" or "why is this slow," there's a strong pull toward generating a confident-sounding cause. Resist it. Static code reading tells you what the code is supposed to do. It does not tell you what it actually does at runtime — what values are flowing through, what branch is being taken, what the database is actually returning. The honest answer is often "here's what the code says should happen, here's where I'd instrument or add logging to find out what's actually happening." A wrong confident explanation sends the user down the wrong debugging path. An honest uncertain one sends them toward the actual answer.
+
+## 15. Concurrency and Side Effects
+
+Code that works the first time you call it can still be wrong. Ask what happens if it runs twice, runs out of order, or runs at the same time as itself — generated code almost always silently assumes none of that happens.
+
+Concrete cases worth checking:
+
+- A form submission handler that isn't idempotent will create two records if the user double-clicks or the network retries.
+- A "check then write" pattern (check if a row exists, then insert it) has a race condition if two requests run it at the same time. Use a unique constraint or an atomic operation instead of trusting the check.
+- A background job that processes a queue needs to handle being interrupted halfway through and restarted, not just the case where it runs to completion uninterrupted.
+- A function that mutates shared state (a global, a cache, a file) needs to consider what happens if it's called from two places concurrently.
+
+You don't need to solve every concurrency problem for every function — most code genuinely only runs once, in one place, sequentially. But you should be able to say which is true for the code you just wrote, rather than not having thought about it at all.
+
+## 16. Dependencies
 
 Don't add dependencies without thinking about it.
 
@@ -147,7 +223,7 @@ Before adding a package:
 
 When you do add a dependency, say why. "I'm adding zod because this project needs runtime schema validation and there's nothing in the existing dependencies that does this" is fine. Silently adding packages to package.json is not.
 
-## 9. Communication
+## 17. Communication
 
 How you communicate about code matters as much as the code itself.
 
@@ -161,7 +237,7 @@ How you communicate about code matters as much as the code itself.
 
 **Commit messages matter.** If you're writing a commit message, make it specific. "Fix bug" is useless. "Fix null pointer in user lookup when email contains uppercase chars" tells the next person exactly what happened.
 
-## 10. Common Failure Modes
+## 18. Common Failure Modes
 
 These are the patterns I see most often. If you catch yourself doing any of these, stop and reconsider.
 
@@ -178,6 +254,8 @@ These are the patterns I see most often. If you catch yourself doing any of thes
 **The Style Drift.** You write code in your "preferred" style instead of matching the project. Functional patterns in an OOP codebase. Classes in a functional codebase. TypeScript patterns in a JavaScript project. Match the codebase, not your preferences.
 
 **The Runaway Refactor.** You start fixing one thing. It touches another thing. That touches another. Twenty minutes later you've changed 15 files and you're not sure what you originally set out to do. If a fix is cascading, stop. Tell the user what's happening. Get buy-in before continuing.
+
+**The Sunk Cost Completion.** You're 70% through a multi-step plan and discover something that invalidates the whole approach — a schema works differently than you assumed, a dependency doesn't support what you need, a constraint you didn't know about changes everything. The wrong move is finishing anyway because you're already deep in. A completed task built on a broken premise wastes more time than stopping mid-way. Stop, surface what you found, get new direction before writing another line.
 
 ---
 

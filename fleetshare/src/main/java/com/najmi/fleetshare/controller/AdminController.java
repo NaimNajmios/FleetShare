@@ -377,6 +377,10 @@ public class AdminController {
 
     @GetMapping("/bookings")
     public String bookings(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "startDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             Model model) {
@@ -384,27 +388,39 @@ public class AdminController {
         size = Math.min(Math.max(size, 1), 48);
         Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
 
-        Page<BookingDTO> bookingPage = bookingService.getAllBookingsPaginated(pageable);
+        Page<BookingDTO> bookingPage = bookingService.getFilteredBookingsPaginated(null, search, status, startDate, endDate, pageable);
         model.addAttribute("bookings", bookingPage.getContent());
         model.addAttribute("currentPage", bookingPage.getNumber());
         model.addAttribute("totalPages", bookingPage.getTotalPages());
         model.addAttribute("totalItems", bookingPage.getTotalElements());
         model.addAttribute("defaultSize", size);
-        model.addAttribute("pageParams", Collections.emptyMap());
+        
+        java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+        if (search != null && !search.isEmpty()) pageParams.put("search", search);
+        if (status != null && !status.isEmpty()) pageParams.put("status", status);
+        if (startDate != null) pageParams.put("startDate", startDate);
+        if (endDate != null) pageParams.put("endDate", endDate);
+        model.addAttribute("pageParams", pageParams);
+
+        // Pass filter criteria back to view
+        model.addAttribute("currentSearch", search);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentStartDate", startDate);
+        model.addAttribute("currentEndDate", endDate);
 
         // Calculate booking statistics using database grouping
         List<Object[]> statusCounts = statusLogRepository.countBookingsByStatus();
         long pendingCount = 0, confirmedCount = 0, activeCount = 0, completedCount = 0, cancelledCount = 0, disputedCount = 0;
         
         for (Object[] result : statusCounts) {
-            com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus status = (com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus) result[0];
+            com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus dbStatus = (com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus) result[0];
             long count = ((Number) result[1]).longValue();
-            if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.PENDING) pendingCount = count;
-            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CONFIRMED) confirmedCount = count;
-            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.ACTIVE) activeCount = count;
-            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.COMPLETED) completedCount = count;
-            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CANCELLED) cancelledCount = count;
-            else if (status == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.DISPUTED) disputedCount = count;
+            if (dbStatus == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.PENDING) pendingCount = count;
+            else if (dbStatus == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CONFIRMED) confirmedCount = count;
+            else if (dbStatus == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.ACTIVE) activeCount = count;
+            else if (dbStatus == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.COMPLETED) completedCount = count;
+            else if (dbStatus == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.CANCELLED) cancelledCount = count;
+            else if (dbStatus == com.najmi.fleetshare.entity.BookingStatusLog.BookingStatus.DISPUTED) disputedCount = count;
         }
 
         model.addAttribute("pendingCount", pendingCount);
