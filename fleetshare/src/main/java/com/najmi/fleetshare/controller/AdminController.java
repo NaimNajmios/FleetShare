@@ -134,9 +134,9 @@ public class AdminController {
 
             // Platform-wide vehicle statistics
             long totalVehicles = vehicleRepository.count();
-            long availableVehicles = vehicleRepository.countByStatus("AVAILABLE");
-            long rentedVehicles = vehicleRepository.countByStatus("RENTED");
-            long maintenanceVehicles = vehicleRepository.countByStatus("MAINTENANCE");
+            long availableVehicles = vehicleRepository.countByStatus(com.najmi.fleetshare.entity.Vehicle.VehicleStatus.AVAILABLE);
+            long rentedVehicles = vehicleRepository.countByStatus(com.najmi.fleetshare.entity.Vehicle.VehicleStatus.RENTED);
+            long maintenanceVehicles = vehicleRepository.countByStatus(com.najmi.fleetshare.entity.Vehicle.VehicleStatus.MAINTENANCE);
             
             model.addAttribute("totalVehicles", totalVehicles);
             model.addAttribute("availableVehicles", availableVehicles);

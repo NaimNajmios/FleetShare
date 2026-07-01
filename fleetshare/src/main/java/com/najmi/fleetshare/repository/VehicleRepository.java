@@ -12,7 +12,7 @@ import java.util.List;
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByFleetOwnerId(Long fleetOwnerId);
 
-    long countByStatus(String status);
+    long countByStatus(Vehicle.VehicleStatus status);
     long countByFleetOwnerIdAndStatusAndIsDeletedFalse(Long fleetOwnerId, Vehicle.VehicleStatus status);
 
     List<Vehicle> findByFleetOwnerIdAndIsDeletedFalse(Long fleetOwnerId);
