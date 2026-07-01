@@ -292,7 +292,7 @@ public class OwnerController {
 
         // Validate that this customer has rented from the current owner
         Long ownerId = user.getOwnerDetails().getFleetOwnerId();
-        List<RenterDTO> customers = userManagementService.getCustomersByOwnerId(ownerId);
+        List<RenterDTO> customers = userManagementService.getCustomersByOwnerId(ownerId, null, null);
         // customerId is actually the userId (passed to getUserDetails which expects
         // userId)
         boolean isMyCustomer = customers.stream().anyMatch(c -> c.getUserId().equals(customerId));
