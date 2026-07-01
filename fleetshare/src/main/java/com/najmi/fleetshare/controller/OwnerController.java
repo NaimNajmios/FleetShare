@@ -583,6 +583,10 @@ public class OwnerController {
 
     @GetMapping("/maintenance")
     public String maintenance(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "startDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             HttpSession session, Model model) {
@@ -593,14 +597,26 @@ public class OwnerController {
             size = Math.min(Math.max(size, 1), 48);
             org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("scheduledDate").descending());
             
-            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.MaintenanceDTO> maintenancePage = maintenanceService.getMaintenanceByOwnerIdPaginated(ownerId, pageable);
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.MaintenanceDTO> maintenancePage = maintenanceService.getFilteredMaintenancePaginated(ownerId, search, status, startDate, endDate, pageable);
             
             model.addAttribute("maintenanceRecords", maintenancePage.getContent());
             model.addAttribute("currentPage", maintenancePage.getNumber());
             model.addAttribute("totalPages", maintenancePage.getTotalPages());
             model.addAttribute("totalItems", maintenancePage.getTotalElements());
             model.addAttribute("defaultSize", size);
-            model.addAttribute("pageParams", java.util.Collections.emptyMap());
+            
+            java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+            if (search != null && !search.isEmpty()) pageParams.put("search", search);
+            if (status != null && !status.isEmpty()) pageParams.put("status", status);
+            if (startDate != null) pageParams.put("startDate", startDate);
+            if (endDate != null) pageParams.put("endDate", endDate);
+            model.addAttribute("pageParams", pageParams);
+
+            // Pass filter criteria back to view
+            model.addAttribute("currentSearch", search);
+            model.addAttribute("currentStatus", status);
+            model.addAttribute("currentStartDate", startDate);
+            model.addAttribute("currentEndDate", endDate);
             model.addAttribute("stats", maintenanceService.getMaintenanceStatsByOwnerId(ownerId));
 
             // Add vehicles for the dropdown

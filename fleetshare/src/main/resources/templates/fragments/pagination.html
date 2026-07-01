@@ -19,7 +19,7 @@
             <!-- First Page -->
             <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
                 <a class="page-link page-link-icon"
-                   th:href="@{${baseUrl}(page=0, size=${defaultSize})}"
+                   th:href="@{${baseUrl}(page=0, size=${defaultSize}, search=${pageParams?.get('search')}, status=${pageParams?.get('status')}, startDate=${pageParams?.get('startDate')}, endDate=${pageParams?.get('endDate')}, category=${pageParams?.get('category')}, brand=${pageParams?.get('brand')}, transmission=${pageParams?.get('transmission')}, minPrice=${pageParams?.get('minPrice')}, maxPrice=${pageParams?.get('maxPrice')})}"
                    aria-label="First"
                    title="First Page">
                     <span aria-hidden="true">&laquo;&laquo;</span>
@@ -29,7 +29,7 @@
             <!-- Previous Page -->
             <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
                 <a class="page-link page-link-icon"
-                   th:href="@{${baseUrl}(page=${currentPage - 1}, size=${defaultSize})}"
+                   th:href="@{${baseUrl}(page=${currentPage - 1}, size=${defaultSize}, search=${pageParams?.get('search')}, status=${pageParams?.get('status')}, startDate=${pageParams?.get('startDate')}, endDate=${pageParams?.get('endDate')}, category=${pageParams?.get('category')}, brand=${pageParams?.get('brand')}, transmission=${pageParams?.get('transmission')}, minPrice=${pageParams?.get('minPrice')}, maxPrice=${pageParams?.get('maxPrice')})}"
                    aria-label="Previous"
                    title="Previous Page">
                     <span aria-hidden="true">&laquo;</span>
@@ -45,14 +45,14 @@
                 )}"
                 th:classappend="${i == currentPage ? 'active' : ''}">
                 <a class="page-link"
-                   th:href="@{${baseUrl}(page=${i}, size=${defaultSize})}"
+                   th:href="@{${baseUrl}(page=${i}, size=${defaultSize}, search=${pageParams?.get('search')}, status=${pageParams?.get('status')}, startDate=${pageParams?.get('startDate')}, endDate=${pageParams?.get('endDate')}, category=${pageParams?.get('category')}, brand=${pageParams?.get('brand')}, transmission=${pageParams?.get('transmission')}, minPrice=${pageParams?.get('minPrice')}, maxPrice=${pageParams?.get('maxPrice')})}"
                    th:text="${i + 1}">1</a>
             </li>
 
             <!-- Next Page -->
             <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
                 <a class="page-link page-link-icon"
-                   th:href="@{${baseUrl}(page=${currentPage + 1}, size=${defaultSize})}"
+                   th:href="@{${baseUrl}(page=${currentPage + 1}, size=${defaultSize}, search=${pageParams?.get('search')}, status=${pageParams?.get('status')}, startDate=${pageParams?.get('startDate')}, endDate=${pageParams?.get('endDate')}, category=${pageParams?.get('category')}, brand=${pageParams?.get('brand')}, transmission=${pageParams?.get('transmission')}, minPrice=${pageParams?.get('minPrice')}, maxPrice=${pageParams?.get('maxPrice')})}"
                    aria-label="Next"
                    title="Next Page">
                     <span aria-hidden="true">&raquo;</span>
@@ -62,7 +62,7 @@
             <!-- Last Page -->
             <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
                 <a class="page-link page-link-icon"
-                   th:href="@{${baseUrl}(page=${totalPages - 1}, size=${defaultSize})}"
+                   th:href="@{${baseUrl}(page=${totalPages - 1}, size=${defaultSize}, search=${pageParams?.get('search')}, status=${pageParams?.get('status')}, startDate=${pageParams?.get('startDate')}, endDate=${pageParams?.get('endDate')}, category=${pageParams?.get('category')}, brand=${pageParams?.get('brand')}, transmission=${pageParams?.get('transmission')}, minPrice=${pageParams?.get('minPrice')}, maxPrice=${pageParams?.get('maxPrice')})}"
                    aria-label="Last"
                    title="Last Page">
                     <span aria-hidden="true">&raquo;&raquo;</span>

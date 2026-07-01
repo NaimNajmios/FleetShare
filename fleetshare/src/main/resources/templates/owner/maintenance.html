@@ -236,41 +236,35 @@
             <div class="col-12">
                 <div class="card filter-card">
                     <div class="card-body p-3">
+                        <form method="get" th:action="@{/owner/maintenance}" id="filter-form">
                         <div class="row align-items-center g-3">
                             <!-- Left Side: Form -->
                             <div class="col-12 col-xl-9">
                                 <div class="row g-2 align-items-center">
-                                    <div class="col-12 col-md-3">
+                                    <div class="col-12 col-md-4">
                                         <div class="search-input-wrapper">
                                             <i class="mdi mdi-magnify"></i>
-                                            <input type="text" class="form-control" id="maintenance-search" placeholder="Search...">
+                                            <input type="text" name="search" class="form-control" id="maintenance-search" placeholder="Search vehicle, owner..." th:value="${currentSearch}">
                                         </div>
                                     </div>
-                                    <div class="col-6 col-md-2">
-                                        <select class="form-select" id="vehicle-filter">
-                                            <option value="">All Vehicles</option>
-                                            <option th:each="v : ${vehicles}" th:value="${v.vehicleId}" th:text="${v.brand + ' ' + v.model}"></option>
+                                    <div class="col-6 col-md-3">
+                                        <select class="form-select" name="status" id="status-filter" onchange="this.form.submit()">
+                                            <option value="">All Status</option>
+                                            <option value="PENDING" th:selected="${currentStatus == 'PENDING'}">Pending</option>
+                                            <option value="IN_PROGRESS" th:selected="${currentStatus == 'IN_PROGRESS'}">In Progress</option>
+                                            <option value="COMPLETED" th:selected="${currentStatus == 'COMPLETED'}">Completed</option>
+                                            <option value="CANCELLED" th:selected="${currentStatus == 'CANCELLED'}">Cancelled</option>
                                         </select>
                                     </div>
-                                    <div class="col-6 col-md-2">
-                                        <select class="form-select" id="status-filter">
-                                            <option value="" selected>All Status</option>
-                                            <option value="PENDING">Pending</option>
-                                            <option value="IN_PROGRESS">In Progress</option>
-                                            <option value="COMPLETED">Completed</option>
-                                            <option value="CANCELLED">Cancelled</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-6 col-md-2">
-                                        <input type="date" class="form-control" id="date-from" title="From Date">
-                                    </div>
-                                    <div class="col-6 col-md-2">
-                                        <input type="date" class="form-control" id="date-to" title="To Date">
-                                    </div>
-                                    <div class="col-12 col-md-1 d-flex gap-2">
-                                        <button class="btn btn-outline-secondary rounded-3 px-3 w-100" onclick="clearFilters()" title="Clear Filters">
-                                            <i class="mdi mdi-refresh"></i>
+                                    <div class="col-6 col-md-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary rounded-3 px-3 w-100">
+                                            <i class="mdi mdi-magnify"></i> Search
                                         </button>
+                                    </div>
+                                    <div class="col-6 col-md-2 d-flex gap-2">
+                                        <a th:href="@{/owner/maintenance}" class="btn btn-outline-secondary rounded-3 px-3 w-100" title="Clear Filters">
+                                            <i class="mdi mdi-refresh"></i> Clear
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -287,6 +281,7 @@
                                 </div>
                             </div>
                         </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -506,59 +501,22 @@
                 document.getElementById('btn-table-view').classList.toggle('active', view === 'table');
                 document.getElementById('grid-view-container').style.display = view === 'grid' ? 'grid' : 'none';
                 document.getElementById('table-view-container').style.display = view === 'table' ? 'block' : 'none';
+                localStorage.setItem('ownerMaintViewPref', view);
             }
 
             // Filter
+            // Highlight the correct KPI card based on current status
+            const currentServerStatus = /*[[${currentStatus} ?: 'all']]*/ 'all';
+            document.querySelectorAll('.kpi-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.filter === currentServerStatus);
+            });
+
             function filterByStatus(status, element) {
-                currentStatusFilter = status;
-                document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active'));
-                if (element) element.classList.add('active');
                 document.getElementById('status-filter').value = status === 'all' ? '' : status;
-                filterMaintenance();
+                document.getElementById('filter-form').submit();
             }
 
-            function filterMaintenance() {
-                const searchTerm = document.getElementById('maintenance-search').value.toLowerCase();
-                const statusValue = document.getElementById('status-filter').value;
-                const vehicleValue = document.getElementById('vehicle-filter').value;
-                const dateFrom = document.getElementById('date-from').value;
-                const dateTo = document.getElementById('date-to').value;
-
-                document.querySelectorAll('.maintenance-item').forEach(item => {
-                    const searchText = (item.dataset.search || '').toLowerCase();
-                    const itemStatus = item.dataset.status || '';
-                    const itemVehicleId = String(item.dataset.vehicleId || '');
-                    const itemDate = item.dataset.scheduledDate || '';
-                    
-                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
-                    const matchesStatus = !statusValue || itemStatus === statusValue;
-                    const matchesVehicle = !vehicleValue || itemVehicleId === vehicleValue;
-                    const matchesDate = (!dateFrom || itemDate >= dateFrom) && (!dateTo || itemDate <= dateTo);
-                    
-                    item.style.display = matchesSearch && matchesStatus && matchesVehicle && matchesDate ? '' : 'none';
-                });
-            }
-
-            function clearFilters() {
-                document.getElementById('maintenance-search').value = '';
-                document.getElementById('status-filter').value = '';
-                document.getElementById('vehicle-filter').value = '';
-                document.getElementById('date-from').value = '';
-                document.getElementById('date-to').value = '';
-                currentStatusFilter = 'all';
-                document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active'));
-                document.querySelector('.kpi-cost').classList.add('active');
-                filterMaintenance();
-            }
-
-            // Event listeners
-            document.getElementById('maintenance-search').addEventListener('input', filterMaintenance);
-            document.getElementById('status-filter').addEventListener('change', filterMaintenance);
-            document.getElementById('vehicle-filter').addEventListener('change', filterMaintenance);
-            document.getElementById('date-from').addEventListener('change', filterMaintenance);
-            document.getElementById('date-to').addEventListener('change', filterMaintenance);
-
-            filterMaintenance();
+            document.addEventListener('DOMContentLoaded', () => { setView(localStorage.getItem('ownerMaintViewPref') || 'grid'); });
 
             let pendingDeleteId = null;
 

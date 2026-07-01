@@ -201,30 +201,35 @@
             <div class="col-12">
                 <div class="card filter-card">
                     <div class="card-body p-3">
+                        <form method="get" th:action="@{/admin/maintenance}" id="filter-form">
                         <div class="row align-items-center g-3">
                             <!-- Left Side: Form -->
                             <div class="col-12 col-xl-9">
                                 <div class="row g-2 align-items-center">
-                                    <div class="col-12 col-md-5">
+                                    <div class="col-12 col-md-4">
                                         <div class="search-input-wrapper">
                                             <i class="mdi mdi-magnify"></i>
-                                            <input type="text" class="form-control" id="maintenance-search" placeholder="Search vehicle, owner...">
+                                            <input type="text" name="search" class="form-control" id="maintenance-search" placeholder="Search vehicle, owner..." th:value="${currentSearch}">
                                         </div>
                                     </div>
-                                    <div class="col-6 col-md-4">
-                                        <select class="form-select" id="status-filter">
-                                            <option value="PENDING" selected>Pending</option>
+                                    <div class="col-6 col-md-3">
+                                        <select class="form-select" name="status" id="status-filter" onchange="this.form.submit()">
                                             <option value="">All Status</option>
-                                            <option value="PENDING">Pending</option>
-                                            <option value="IN_PROGRESS">In Progress</option>
-                                            <option value="COMPLETED">Completed</option>
-                                            <option value="CANCELLED">Cancelled</option>
+                                            <option value="PENDING" th:selected="${currentStatus == 'PENDING'}">Pending</option>
+                                            <option value="IN_PROGRESS" th:selected="${currentStatus == 'IN_PROGRESS'}">In Progress</option>
+                                            <option value="COMPLETED" th:selected="${currentStatus == 'COMPLETED'}">Completed</option>
+                                            <option value="CANCELLED" th:selected="${currentStatus == 'CANCELLED'}">Cancelled</option>
                                         </select>
                                     </div>
                                     <div class="col-6 col-md-3 d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-secondary rounded-3 px-3 w-100" onclick="clearFilters()" title="Clear Filters">
-                                            <i class="mdi mdi-refresh"></i> Clear
+                                        <button type="submit" class="btn btn-primary rounded-3 px-3 w-100">
+                                            <i class="mdi mdi-magnify"></i> Search
                                         </button>
+                                    </div>
+                                    <div class="col-6 col-md-2 d-flex gap-2">
+                                        <a th:href="@{/admin/maintenance}" class="btn btn-outline-secondary rounded-3 px-3 w-100" title="Clear Filters">
+                                            <i class="mdi mdi-refresh"></i> Clear
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -237,6 +242,7 @@
                                 </div>
                             </div>
                         </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -358,17 +364,24 @@
 
     <th:block layout:fragment="extra-js">
         <script th:inline="javascript">
-            let currentView = 'grid', currentStatusFilter = 'PENDING';
+            let currentView = 'grid';
             const statsData = { pending: /*[[${stats?.pendingCount ?: 0}]]*/ 0, inProgress: /*[[${stats?.inProgressCount ?: 0}]]*/ 0, completed: /*[[${stats?.completedCount ?: 0}]]*/ 0, cancelled: /*[[${stats?.cancelledCount ?: 0}]]*/ 0, monthlyLabels: /*[[${stats?.monthlyCountData?.keySet() ?: {}}]]*/[], monthlyCosts: /*[[${stats?.monthlyCostData?.values() ?: {}}]]*/[] };
             const statusCtx = document.getElementById('statusChart'); if (statusCtx) new Chart(statusCtx.getContext('2d'), { type: 'doughnut', data: { labels: ['Pending', 'In Progress', 'Completed', 'Cancelled'], datasets: [{ data: [statsData.pending, statsData.inProgress, statsData.completed, statsData.cancelled], backgroundColor: ['#f5576c', '#4facfe', '#38ef7d', '#adb5bd'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
             const costCtx = document.getElementById('costChart'); if (costCtx) new Chart(costCtx.getContext('2d'), { type: 'bar', data: { labels: statsData.monthlyLabels, datasets: [{ label: 'Cost', data: statsData.monthlyCosts, backgroundColor: 'rgba(75,73,172,0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
-            const searchInput = document.getElementById('maintenance-search'), statusFilter = document.getElementById('status-filter'), gridC = document.getElementById('grid-view-container'), tableC = document.getElementById('table-view-container'), noRes = document.getElementById('no-results'), kpi = document.querySelectorAll('.kpi-card');
+            const searchInput = document.getElementById('maintenance-search'), statusFilter = document.getElementById('status-filter'), gridC = document.getElementById('grid-view-container'), tableC = document.getElementById('table-view-container'), kpi = document.querySelectorAll('.kpi-card');
+            
+            // Highlight the correct KPI card based on current status
+            const currentServerStatus = /*[[${currentStatus} ?: 'all']]*/ 'all';
+            kpi.forEach(card => {
+                card.classList.toggle('active', card.dataset.filter === currentServerStatus);
+            });
+
             function setView(v) { currentView = v; document.getElementById('btn-grid-view').classList.toggle('active', v === 'grid'); document.getElementById('btn-table-view').classList.toggle('active', v === 'table'); if (gridC) gridC.style.display = v === 'grid' ? 'grid' : 'none'; if (tableC) tableC.style.display = v === 'table' ? 'block' : 'none'; localStorage.setItem('adminMaintViewPref', v); }
-            function filterByStatus(s, el) { currentStatusFilter = s; kpi.forEach(c => c.classList.remove('active')); if (el) el.classList.add('active'); statusFilter.value = s === 'all' ? '' : s; filter(); }
-            function filter() { const st = searchInput.value.toLowerCase(), sv = statusFilter.value || (currentStatusFilter !== 'all' ? currentStatusFilter : ''); let vc = 0; document.querySelectorAll('.maintenance-item').forEach(i => { const m1 = !st || (i.dataset.search || '').toLowerCase().includes(st), m2 = !sv || i.dataset.status === sv, v = m1 && m2; i.style.display = v ? '' : 'none'; if (v) vc++; }); if (noRes) noRes.style.display = (document.querySelectorAll('.maintenance-item').length > 0 && vc === 0) ? 'block' : 'none'; }
-            function clearFilters() { searchInput.value = ''; statusFilter.value = ''; currentStatusFilter = 'all'; kpi.forEach(c => c.classList.remove('active')); filter(); }
-            if (searchInput) searchInput.addEventListener('input', filter); if (statusFilter) statusFilter.addEventListener('change', () => { currentStatusFilter = statusFilter.value || 'all'; kpi.forEach(c => c.classList.toggle('active', c.dataset.filter === currentStatusFilter)); filter(); });
-            document.addEventListener('DOMContentLoaded', () => { setView(localStorage.getItem('adminMaintViewPref') || 'grid'); filter(); });
+            function filterByStatus(s, el) { 
+                document.getElementById('status-filter').value = s === 'all' ? '' : s;
+                document.getElementById('filter-form').submit();
+            }
+            document.addEventListener('DOMContentLoaded', () => { setView(localStorage.getItem('adminMaintViewPref') || 'grid'); });
         </script>
     </th:block>
 </body>

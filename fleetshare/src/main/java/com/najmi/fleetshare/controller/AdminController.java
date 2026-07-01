@@ -243,6 +243,10 @@ public class AdminController {
 
     @GetMapping("/maintenance")
     public String maintenance(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "startDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             Model model) {
@@ -250,13 +254,25 @@ public class AdminController {
         size = Math.min(Math.max(size, 1), 48);
         Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
 
-        Page<MaintenanceDTO> maintenancePage = maintenanceService.getAllMaintenancePaginated(pageable);
+        Page<MaintenanceDTO> maintenancePage = maintenanceService.getFilteredMaintenancePaginated(null, search, status, startDate, endDate, pageable);
         model.addAttribute("maintenanceRecords", maintenancePage.getContent());
         model.addAttribute("currentPage", maintenancePage.getNumber());
         model.addAttribute("totalPages", maintenancePage.getTotalPages());
         model.addAttribute("totalItems", maintenancePage.getTotalElements());
         model.addAttribute("defaultSize", size);
-        model.addAttribute("pageParams", Collections.emptyMap());
+        
+        java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+        if (search != null && !search.isEmpty()) pageParams.put("search", search);
+        if (status != null && !status.isEmpty()) pageParams.put("status", status);
+        if (startDate != null) pageParams.put("startDate", startDate);
+        if (endDate != null) pageParams.put("endDate", endDate);
+        model.addAttribute("pageParams", pageParams);
+
+        // Pass filter criteria back to view
+        model.addAttribute("currentSearch", search);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentStartDate", startDate);
+        model.addAttribute("currentEndDate", endDate);
 
         model.addAttribute("stats", maintenanceService.getMaintenanceStats());
         return "admin/maintenance";

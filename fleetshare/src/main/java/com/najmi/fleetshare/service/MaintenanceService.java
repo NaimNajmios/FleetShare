@@ -201,6 +201,21 @@ public class MaintenanceService {
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 
+    public Page<MaintenanceDTO> getFilteredMaintenancePaginated(Long ownerId, String search, String statusStr, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        VehicleMaintenance.MaintenanceStatus status = null;
+        if (statusStr != null && !statusStr.isEmpty() && !statusStr.equals("all")) {
+            try {
+                status = VehicleMaintenance.MaintenanceStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status
+            }
+        }
+        
+        Page<VehicleMaintenance> page = maintenanceRepository.findFilteredMaintenance(ownerId, search, status, startDate, endDate, pageable);
+        List<MaintenanceDTO> dtoList = mapToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
     /**
      * Get maintenance status logs for a specific maintenance record
      */
