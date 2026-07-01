@@ -143,28 +143,32 @@
 
         <div class="row mb-4">
             <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
-                <div class="kpi-card kpi-owners" data-filter="owners" onclick="showTab('owners')">
-                    <div class="kpi-value" th:text="${#lists.size(fleetOwners)}">0</div>
-                    <div class="kpi-label">Fleet Owners</div><i class="mdi mdi-domain kpi-icon"></i>
-                </div>
+                <a th:href="@{/admin/users(role='OWNER', search=${currentSearch}, status=${currentStatus})}" class="text-decoration-none">
+                    <div class="kpi-card kpi-owners" th:classappend="${currentRole == 'OWNER'} ? 'active' : ''">
+                        <div class="kpi-value" th:text="${#lists.size(allFleetOwners)}">0</div>
+                        <div class="kpi-label">Fleet Owners</div><i class="mdi mdi-domain kpi-icon"></i>
+                    </div>
+                </a>
             </div>
             <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
-                <div class="kpi-card kpi-renters" data-filter="renters" onclick="showTab('renters')">
-                    <div class="kpi-value" th:text="${#lists.size(renters)}">0</div>
-                    <div class="kpi-label">Renters</div><i class="mdi mdi-account-group kpi-icon"></i>
-                </div>
+                <a th:href="@{/admin/users(role='RENTER', search=${currentSearch}, status=${currentStatus})}" class="text-decoration-none">
+                    <div class="kpi-card kpi-renters" th:classappend="${currentRole == 'RENTER'} ? 'active' : ''">
+                        <div class="kpi-value" th:text="${#lists.size(allRenters)}">0</div>
+                        <div class="kpi-label">Renters</div><i class="mdi mdi-account-group kpi-icon"></i>
+                    </div>
+                </a>
             </div>
             <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-active">
                     <div class="kpi-value"
-                        th:text="${#lists.size(fleetOwners.?[isActive]) + #lists.size(renters.?[isActive])}">0</div>
+                        th:text="${#lists.size(allFleetOwners.?[isActive]) + #lists.size(allRenters.?[isActive])}">0</div>
                     <div class="kpi-label">Active Users</div><i class="mdi mdi-check-circle kpi-icon"></i>
                 </div>
             </div>
             <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
                 <div class="kpi-card kpi-inactive">
                     <div class="kpi-value"
-                        th:text="${#lists.size(fleetOwners.?[!isActive]) + #lists.size(renters.?[!isActive])}">0</div>
+                        th:text="${#lists.size(allFleetOwners.?[!isActive]) + #lists.size(allRenters.?[!isActive])}">0</div>
                     <div class="kpi-label">Inactive Users</div><i class="mdi mdi-close-circle kpi-icon"></i>
                 </div>
             </div>
@@ -174,39 +178,45 @@
             <div class="col-12">
                 <div class="card filter-card">
                     <div class="card-body p-3">
-                        <div class="row align-items-center g-3">
-                            <!-- Left Side: Form -->
-                            <div class="col-12 col-xl-9">
-                                <div class="row g-2 align-items-center">
-                                    <div class="col-12 col-md-5">
-                                        <div class="search-input-wrapper">
-                                            <i class="mdi mdi-magnify"></i>
-                                            <input type="text" class="form-control mobile-search-control" id="user-search" placeholder="Search name, email, phone...">
+                        <form id="filterForm" th:action="@{/admin/users}" method="get">
+                            <input type="hidden" name="role" th:value="${currentRole}">
+                            <div class="row align-items-center g-3">
+                                <!-- Left Side: Form -->
+                                <div class="col-12 col-xl-9">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-12 col-md-5">
+                                            <div class="search-input-wrapper">
+                                                <i class="mdi mdi-magnify"></i>
+                                                <input type="text" class="form-control mobile-search-control" name="search" th:value="${currentSearch}" placeholder="Search name, email, phone...">
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <select class="form-select mobile-search-control" name="status" onchange="this.form.submit()">
+                                                <option value="">All Status</option>
+                                                <option value="active" th:selected="${currentStatus == 'active'}">Active</option>
+                                                <option value="inactive" th:selected="${currentStatus == 'inactive'}">Inactive</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-3 d-flex gap-2">
+                                            <a th:href="@{/admin/users(role=${currentRole})}" class="btn btn-outline-secondary rounded-3 px-3 w-100" title="Clear Filters">
+                                                <i class="mdi mdi-refresh"></i> Clear
+                                            </a>
+                                            <button type="submit" class="btn btn-primary d-md-none rounded-3 px-3 w-100">
+                                                Apply
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="col-6 col-md-4">
-                                        <select class="form-select mobile-search-control" id="status-filter">
-                                            <option value="">All Status</option>
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-6 col-md-3 d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-secondary rounded-3 px-3 w-100" onclick="document.getElementById('user-search').value=''; document.getElementById('status-filter').value=''; filter();" title="Clear Filters">
-                                            <i class="mdi mdi-refresh"></i> Clear
-                                        </button>
-                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Right Side: View Toggle -->
-                            <div class="col-12 col-xl-3 text-xl-end d-flex justify-content-xl-end justify-content-start mt-2 mt-xl-0 border-xl-start">
-                                <div class="view-toggle btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-primary active" id="btn-grid-view" onclick="setView('grid')"><i class="mdi mdi-view-grid"></i></button>
-                                    <button type="button" class="btn btn-outline-primary" id="btn-table-view" onclick="setView('table')"><i class="mdi mdi-table"></i></button>
+                                <!-- Right Side: View Toggle -->
+                                <div class="col-12 col-xl-3 text-xl-end d-flex justify-content-xl-end justify-content-start mt-2 mt-xl-0 border-xl-start">
+                                    <div class="view-toggle btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-primary active" id="btn-grid-view" onclick="setView('grid')"><i class="mdi mdi-view-grid"></i></button>
+                                        <button type="button" class="btn btn-outline-primary" id="btn-table-view" onclick="setView('table')"><i class="mdi mdi-table"></i></button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -215,17 +225,22 @@
         <div class="row">
             <div class="col-12">
                 <ul class="nav nav-tabs mb-4" id="userTabs" role="tablist">
-                    <li class="nav-item"><button class="nav-link active" id="fleet-owners-tab" data-bs-toggle="tab"
-                            data-bs-target="#fleet-owners" type="button">Fleet Owners <span
-                                class="badge bg-secondary ms-1" th:text="${#lists.size(fleetOwners)}">0</span></button>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${currentRole == 'OWNER' ? 'active' : ''}" 
+                           th:href="@{/admin/users(role='OWNER', search=${currentSearch}, status=${currentStatus})}">
+                            Fleet Owners <span class="badge bg-secondary ms-1" th:text="${#lists.size(allFleetOwners)}">0</span>
+                        </a>
                     </li>
-                    <li class="nav-item"><button class="nav-link" id="renters-tab" data-bs-toggle="tab"
-                            data-bs-target="#renters" type="button">Renters <span class="badge bg-secondary ms-1"
-                                th:text="${#lists.size(renters)}">0</span></button></li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${currentRole == 'RENTER' ? 'active' : ''}" 
+                           th:href="@{/admin/users(role='RENTER', search=${currentSearch}, status=${currentStatus})}">
+                            Renters <span class="badge bg-secondary ms-1" th:text="${#lists.size(allRenters)}">0</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="tab-content">
-                    <div class="tab-pane fade show active" id="fleet-owners">
+                    <div th:if="${currentRole == 'OWNER'}" class="tab-pane fade show active" id="fleet-owners">
                         <div th:if="${#lists.isEmpty(fleetOwners)}" class="card">
                             <div class="card-body text-center py-5"><i
                                     class="mdi mdi-account-off mdi-48px text-muted mb-3"></i>
@@ -296,7 +311,7 @@
                         </div>
                     </div>
 
-                    <div class="tab-pane fade" id="renters">
+                    <div th:if="${currentRole == 'RENTER'}" class="tab-pane fade show active" id="renters">
                         <div th:if="${#lists.isEmpty(renters)}" class="card">
                             <div class="card-body text-center py-5"><i
                                     class="mdi mdi-account-off mdi-48px text-muted mb-3"></i>
@@ -367,6 +382,14 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Pagination -->
+                <div th:if="${totalPages != null and totalPages > 1}" class="mt-4">
+                    <div th:replace="~{fragments/pagination :: pagination(
+                        ${currentPage}, ${totalPages}, ${totalItems},
+                        '/admin/users', ${pageParams}, ${defaultSize})}">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -374,11 +397,14 @@
     <th:block layout:fragment="extra-js">
         <script>
             let currentView = 'grid';
-            function setView(v) { currentView = v; document.getElementById('btn-grid-view').classList.toggle('active', v === 'grid'); document.getElementById('btn-table-view').classList.toggle('active', v === 'table');['owners-grid', 'renters-grid'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = v === 'grid' ? 'grid' : 'none'; });['owners-table', 'renters-table'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = v === 'table' ? 'block' : 'none'; }); localStorage.setItem('adminUserViewPref', v); }
-            function showTab(tab) { const btn = document.getElementById(tab === 'owners' ? 'fleet-owners-tab' : 'renters-tab'); if (btn) btn.click(); }
-            function filter() { const st = document.getElementById('user-search').value.toLowerCase(), sv = document.getElementById('status-filter').value; document.querySelectorAll('.user-item').forEach(i => { const m1 = !st || (i.dataset.search || '').toLowerCase().includes(st), m2 = !sv || i.dataset.status === sv; i.style.display = m1 && m2 ? '' : 'none'; }); }
-            document.getElementById('user-search').addEventListener('input', filter);
-            document.getElementById('status-filter').addEventListener('change', filter);
+            function setView(v) { 
+                currentView = v; 
+                document.getElementById('btn-grid-view').classList.toggle('active', v === 'grid'); 
+                document.getElementById('btn-table-view').classList.toggle('active', v === 'table');
+                ['owners-grid', 'renters-grid'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = v === 'grid' ? 'grid' : 'none'; });
+                ['owners-table', 'renters-table'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = v === 'table' ? 'block' : 'none'; }); 
+                localStorage.setItem('adminUserViewPref', v); 
+            }
             document.addEventListener('DOMContentLoaded', () => setView(localStorage.getItem('adminUserViewPref') || 'grid'));
         </script>
     </th:block>

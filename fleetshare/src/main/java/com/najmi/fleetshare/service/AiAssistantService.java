@@ -408,7 +408,7 @@ public class AiAssistantService {
 
         // --- Fleet Owners (admin only) ---
         if (isAdmin) {
-            List<FleetOwnerDTO> owners = userManagementService.getAllFleetOwners();
+            List<FleetOwnerDTO> owners = userManagementService.getAllFleetOwners(null, null);
             ctx.append("\nFLEET OWNERS (").append(owners.size()).append(" total):\n");
             for (FleetOwnerDTO owner : owners) {
                 ctx.append("  - ").append(owner.getBusinessName())
@@ -417,7 +417,7 @@ public class AiAssistantService {
                         .append("\n");
             }
 
-            List<RenterDTO> renters = userManagementService.getAllRenters();
+            List<RenterDTO> renters = userManagementService.getAllRenters(null, null);
             ctx.append("\nRENTERS (").append(renters.size()).append(" total):\n");
             for (RenterDTO renter : renters) {
                 ctx.append("  - ").append(renter.getFullName())

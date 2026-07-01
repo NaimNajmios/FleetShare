@@ -9,6 +9,8 @@ import com.najmi.fleetshare.dto.SessionUser;
 import com.najmi.fleetshare.dto.UserDetailDTO;
 import com.najmi.fleetshare.dto.VehicleDTO;
 import com.najmi.fleetshare.dto.PasswordChangeRequest;
+import com.najmi.fleetshare.dto.FleetOwnerDTO;
+import com.najmi.fleetshare.dto.RenterDTO;
 import com.najmi.fleetshare.entity.PlatformAdmin;
 import com.najmi.fleetshare.entity.VehicleMaintenance;
 import com.najmi.fleetshare.repository.PlatformAdminRepository;
@@ -221,9 +223,52 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public String users(Model model) {
-        model.addAttribute("fleetOwners", userManagementService.getAllFleetOwners());
-        model.addAttribute("renters", userManagementService.getAllRenters());
+    public String users(
+            @RequestParam(value = "role", defaultValue = "OWNER") String role,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            Model model) {
+        
+        size = Math.min(Math.max(size, 1), 48);
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+
+        // Fetch all for KPIs
+        List<FleetOwnerDTO> allOwners = userManagementService.getAllFleetOwners(null, null);
+        List<RenterDTO> allRenters = userManagementService.getAllRenters(null, null);
+
+        if ("RENTER".equalsIgnoreCase(role)) {
+            org.springframework.data.domain.Page<RenterDTO> renterPage = userManagementService.getAllRentersPaginated(search, status, pageable);
+            model.addAttribute("renters", renterPage.getContent());
+            model.addAttribute("fleetOwners", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", renterPage.getNumber());
+            model.addAttribute("totalPages", renterPage.getTotalPages());
+            model.addAttribute("totalItems", renterPage.getTotalElements());
+        } else {
+            org.springframework.data.domain.Page<FleetOwnerDTO> ownerPage = userManagementService.getAllFleetOwnersPaginated(search, status, pageable);
+            model.addAttribute("fleetOwners", ownerPage.getContent());
+            model.addAttribute("renters", java.util.Collections.emptyList());
+            model.addAttribute("currentPage", ownerPage.getNumber());
+            model.addAttribute("totalPages", ownerPage.getTotalPages());
+            model.addAttribute("totalItems", ownerPage.getTotalElements());
+        }
+
+        model.addAttribute("defaultSize", size);
+        model.addAttribute("currentSearch", search);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentRole", role);
+
+        java.util.Map<String, String> pageParams = new java.util.HashMap<>();
+        pageParams.put("role", role);
+        if (search != null && !search.isEmpty()) pageParams.put("search", search);
+        if (status != null && !status.isEmpty()) pageParams.put("status", status);
+        model.addAttribute("pageParams", pageParams);
+
+        // Add KPIs
+        model.addAttribute("allFleetOwners", allOwners);
+        model.addAttribute("allRenters", allRenters);
+
         return "admin/users";
     }
     @GetMapping("/vehicles/{vehicleId}/rate-history")
@@ -911,7 +956,7 @@ public class AdminController {
 
     @GetMapping("/reports")
     public String reports(Model model) {
-        model.addAttribute("fleetOwners", userManagementService.getAllFleetOwners());
+        model.addAttribute("fleetOwners", userManagementService.getAllFleetOwners(null, null));
         return "admin/reports";
     }
 

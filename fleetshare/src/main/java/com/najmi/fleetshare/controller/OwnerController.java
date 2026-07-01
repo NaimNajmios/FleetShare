@@ -233,6 +233,8 @@ public class OwnerController {
 
     @GetMapping("/customers")
     public String customers(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             HttpSession session, Model model) {
@@ -243,22 +245,28 @@ public class OwnerController {
             size = Math.min(Math.max(size, 1), 48);
             org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
             
-            List<RenterDTO> customers = userManagementService.getCustomersByOwnerId(ownerId); // For KPI
-            org.springframework.data.domain.Page<RenterDTO> customerPage = userManagementService.getCustomersByOwnerIdPaginated(ownerId, pageable);
+            List<RenterDTO> allCustomers = userManagementService.getCustomersByOwnerId(ownerId, null, null); // For KPI
+            org.springframework.data.domain.Page<RenterDTO> customerPage = userManagementService.getCustomersByOwnerIdPaginated(ownerId, search, status, pageable);
             
             model.addAttribute("customers", customerPage.getContent());
             model.addAttribute("currentPage", customerPage.getNumber());
             model.addAttribute("totalPages", customerPage.getTotalPages());
             model.addAttribute("totalItems", customerPage.getTotalElements());
             model.addAttribute("defaultSize", size);
-            model.addAttribute("pageParams", java.util.Collections.emptyMap());
+            model.addAttribute("currentSearch", search);
+            model.addAttribute("currentStatus", status);
+
+            java.util.Map<String, String> pageParams = new java.util.HashMap<>();
+            if (search != null && !search.isEmpty()) pageParams.put("search", search);
+            if (status != null && !status.isEmpty()) pageParams.put("status", status);
+            model.addAttribute("pageParams", pageParams);
 
             // KPI counts
-            if (customers != null) {
-                long totalCustomers = customers.size();
-                long activeCustomers = customers.stream().filter(c -> Boolean.TRUE.equals(c.getIsActive())).count();
+            if (allCustomers != null) {
+                long totalCustomers = allCustomers.size();
+                long activeCustomers = allCustomers.stream().filter(c -> Boolean.TRUE.equals(c.getIsActive())).count();
                 long inactiveCustomers = totalCustomers - activeCustomers;
-                long customersWithBookings = customers.stream()
+                long customersWithBookings = allCustomers.stream()
                         .filter(c -> c.getTotalBookings() != null && c.getTotalBookings() > 0)
                         .count();
                 model.addAttribute("totalCustomers", totalCustomers);
@@ -940,7 +948,7 @@ public class OwnerController {
             Long ownerId = user.getOwnerDetails().getFleetOwnerId();
 
             // Fetch all renters for the dropdown
-            List<RenterDTO> renters = userManagementService.getAllRenters();
+            List<RenterDTO> renters = userManagementService.getAllRenters(null, null);
             model.addAttribute("renters", renters);
 
             // Fetch owner's vehicles for the dropdown

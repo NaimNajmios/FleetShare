@@ -944,7 +944,7 @@ public class ReportService {
     }
 
     private ReportResponse<Map<String, Object>> generateUserDemographicsReport(ReportRequest request) {
-        List<RenterDTO> renters = userManagementService.getAllRenters();
+        List<RenterDTO> renters = userManagementService.getAllRenters(null, null);
 
         // Simple demographics - just count renters (could be expanded with address
         // data)

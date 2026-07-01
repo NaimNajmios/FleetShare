@@ -49,7 +49,7 @@ public class UserManagementService {
      * 
      * @return List of FleetOwnerDTO objects
      */
-    public List<FleetOwnerDTO> getAllFleetOwners() {
+    public List<FleetOwnerDTO> getAllFleetOwners(String search, String status) {
         List<FleetOwner> fleetOwners = fleetOwnerRepository.findAll();
 
         // Collect all user IDs to fetch in a single query
@@ -66,6 +66,23 @@ public class UserManagementService {
         for (FleetOwner owner : fleetOwners) {
             User user = userMap.get(owner.getUserId());
             if (user != null) {
+                // Apply search filter
+                if (search != null && !search.trim().isEmpty()) {
+                    String searchLower = search.trim().toLowerCase();
+                    boolean matchesName = owner.getBusinessName() != null && owner.getBusinessName().toLowerCase().contains(searchLower);
+                    boolean matchesEmail = user.getEmail() != null && user.getEmail().toLowerCase().contains(searchLower);
+                    boolean matchesPhone = owner.getContactPhone() != null && owner.getContactPhone().toLowerCase().contains(searchLower);
+                    if (!matchesName && !matchesEmail && !matchesPhone) {
+                        continue;
+                    }
+                }
+                
+                // Apply status filter
+                if (status != null && !status.trim().isEmpty() && !status.equals("all")) {
+                    if (status.equals("active") && !Boolean.TRUE.equals(user.getIsActive())) continue;
+                    if (status.equals("inactive") && Boolean.TRUE.equals(user.getIsActive())) continue;
+                }
+
                 FleetOwnerDTO dto = new FleetOwnerDTO(
                         user.getUserId(),
                         user.getEmail(),
@@ -82,12 +99,28 @@ public class UserManagementService {
         return fleetOwnerDTOs;
     }
 
+    public org.springframework.data.domain.Page<FleetOwnerDTO> getAllFleetOwnersPaginated(String search, String status, org.springframework.data.domain.Pageable pageable) {
+        List<FleetOwnerDTO> allOwners = getAllFleetOwners(search, status);
+        
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allOwners.size());
+        
+        List<FleetOwnerDTO> pageContent;
+        if (start > allOwners.size()) {
+            pageContent = new ArrayList<>();
+        } else {
+            pageContent = allOwners.subList(start, end);
+        }
+        
+        return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, allOwners.size());
+    }
+
     /**
      * Fetches all renters with their associated user details
      * 
      * @return List of RenterDTO objects
      */
-    public List<RenterDTO> getAllRenters() {
+    public List<RenterDTO> getAllRenters(String search, String status) {
         List<Renter> renters = renterRepository.findAll();
 
         // Collect all user IDs to fetch in a single query
@@ -104,6 +137,23 @@ public class UserManagementService {
         for (Renter renter : renters) {
             User user = userMap.get(renter.getUserId());
             if (user != null) {
+                // Apply search filter
+                if (search != null && !search.trim().isEmpty()) {
+                    String searchLower = search.trim().toLowerCase();
+                    boolean matchesName = renter.getFullName() != null && renter.getFullName().toLowerCase().contains(searchLower);
+                    boolean matchesEmail = user.getEmail() != null && user.getEmail().toLowerCase().contains(searchLower);
+                    boolean matchesPhone = renter.getPhoneNumber() != null && renter.getPhoneNumber().toLowerCase().contains(searchLower);
+                    if (!matchesName && !matchesEmail && !matchesPhone) {
+                        continue;
+                    }
+                }
+                
+                // Apply status filter
+                if (status != null && !status.trim().isEmpty() && !status.equals("all")) {
+                    if (status.equals("active") && !Boolean.TRUE.equals(user.getIsActive())) continue;
+                    if (status.equals("inactive") && Boolean.TRUE.equals(user.getIsActive())) continue;
+                }
+
                 RenterDTO dto = new RenterDTO(
                         renter.getRenterId(),
                         user.getUserId(),
@@ -118,6 +168,22 @@ public class UserManagementService {
         }
 
         return renterDTOs;
+    }
+
+    public org.springframework.data.domain.Page<RenterDTO> getAllRentersPaginated(String search, String status, org.springframework.data.domain.Pageable pageable) {
+        List<RenterDTO> allRenters = getAllRenters(search, status);
+        
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allRenters.size());
+        
+        List<RenterDTO> pageContent;
+        if (start > allRenters.size()) {
+            pageContent = new ArrayList<>();
+        } else {
+            pageContent = allRenters.subList(start, end);
+        }
+        
+        return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, allRenters.size());
     }
 
     /**
@@ -189,9 +255,10 @@ public class UserManagementService {
      * Fetches all customers (renters) who have booked with a specific fleet owner
      * 
      * @param ownerId Fleet owner ID
+     * @param search Optional search string
      * @return List of RenterDTO objects representing the owner's customers
      */
-    public List<RenterDTO> getCustomersByOwnerId(Long ownerId) {
+    public List<RenterDTO> getCustomersByOwnerId(Long ownerId, String search, String status) {
         // 1. Get distinct renter IDs directly from DB (Optimized)
         List<Long> renterIdsList = bookingRepository.findDistinctRenterIdsByFleetOwnerId(ownerId);
         Set<Long> renterIds = new java.util.HashSet<>(renterIdsList);
@@ -242,6 +309,21 @@ public class UserManagementService {
         for (Renter renter : renters) {
             User user = userMap.get(renter.getUserId());
             if (user != null) {
+                // Apply search filter
+                if (search != null && !search.trim().isEmpty()) {
+                    String searchLower = search.trim().toLowerCase();
+                    boolean matchesName = renter.getFullName() != null && renter.getFullName().toLowerCase().contains(searchLower);
+                    boolean matchesEmail = user.getEmail() != null && user.getEmail().toLowerCase().contains(searchLower);
+                    boolean matchesPhone = renter.getPhoneNumber() != null && renter.getPhoneNumber().toLowerCase().contains(searchLower);
+                    if (!matchesName && !matchesEmail && !matchesPhone) {
+                        continue;
+                    }
+                }
+                if (status != null && !status.trim().isEmpty() && !status.equals("all")) {
+                    if (status.equals("active") && !Boolean.TRUE.equals(user.getIsActive())) continue;
+                    if (status.equals("inactive") && Boolean.TRUE.equals(user.getIsActive())) continue;
+                }
+
                 RenterDTO dto = new RenterDTO(
                         renter.getRenterId(),
                         user.getUserId(),
@@ -251,8 +333,6 @@ public class UserManagementService {
                         user.getIsActive(),
                         user.getCreatedAt(),
                         user.getProfileImageUrl());
-
-                // Compute per-customer aggregates
                 List<Booking> renterBookings = bookingsByRenter.getOrDefault(renter.getRenterId(), Collections.emptyList());
                 dto.setTotalBookings((long) renterBookings.size());
 
@@ -283,8 +363,8 @@ public class UserManagementService {
         return customers;
     }
 
-    public org.springframework.data.domain.Page<RenterDTO> getCustomersByOwnerIdPaginated(Long ownerId, org.springframework.data.domain.Pageable pageable) {
-        List<RenterDTO> allCustomers = getCustomersByOwnerId(ownerId);
+    public org.springframework.data.domain.Page<RenterDTO> getCustomersByOwnerIdPaginated(Long ownerId, String search, String status, org.springframework.data.domain.Pageable pageable) {
+        List<RenterDTO> allCustomers = getCustomersByOwnerId(ownerId, search, status);
         
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), allCustomers.size());
