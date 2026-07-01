@@ -220,34 +220,40 @@
         <!-- KPI Cards Row -->
         <div class="row mb-4">
             <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
-                <div class="kpi-card kpi-pending" data-filter="PENDING" onclick="filterByStatus('PENDING', this)">
-                    <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
-                    <div class="kpi-label">Pending</div>
-                    <i class="mdi mdi-clock-outline kpi-icon"></i>
-                </div>
-            </div>
-            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
-                <div class="kpi-card kpi-verified" data-filter="VERIFIED" onclick="filterByStatus('VERIFIED', this)">
-                    <div class="kpi-value" th:text="${verifiedCount} ?: 0">0</div>
-                    <div class="kpi-label">Verified</div>
-                    <i class="mdi mdi-check-circle kpi-icon"></i>
-                </div>
-            </div>
-            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
-                <div class="kpi-card kpi-failed" data-filter="FAILED" onclick="filterByStatus('FAILED', this)">
-                    <div class="kpi-value" th:text="${failedCount} ?: 0">0</div>
-                    <div class="kpi-label">Failed</div>
-                    <i class="mdi mdi-close-circle kpi-icon"></i>
-                </div>
-            </div>
-            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
-                <div class="kpi-card kpi-amount" data-filter="all" onclick="filterByStatus('all', this)">
-                    <div class="kpi-value"
-                        th:text="'RM ' + ${#numbers.formatDecimal(verifiedAmount ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0
+                <a th:href="@{/owner/payments(status='PENDING', search=${currentSearch}, method=${currentMethod}, startDate=${currentStartDate}, endDate=${currentEndDate})}" class="text-decoration-none">
+                    <div class="kpi-card kpi-pending" th:classappend="${currentStatus == 'PENDING'} ? 'active' : ''">
+                        <div class="kpi-value" th:text="${pendingCount} ?: 0">0</div>
+                        <div class="kpi-label">Pending</div>
+                        <i class="mdi mdi-clock-outline kpi-icon"></i>
                     </div>
-                    <div class="kpi-label">Verified Amount</div>
-                    <i class="mdi mdi-currency-usd kpi-icon"></i>
-                </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
+                <a th:href="@{/owner/payments(status='VERIFIED', search=${currentSearch}, method=${currentMethod}, startDate=${currentStartDate}, endDate=${currentEndDate})}" class="text-decoration-none">
+                    <div class="kpi-card kpi-verified" th:classappend="${currentStatus == 'VERIFIED'} ? 'active' : ''">
+                        <div class="kpi-value" th:text="${verifiedCount} ?: 0">0</div>
+                        <div class="kpi-label">Verified</div>
+                        <i class="mdi mdi-check-circle kpi-icon"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
+                <a th:href="@{/owner/payments(status='FAILED', search=${currentSearch}, method=${currentMethod}, startDate=${currentStartDate}, endDate=${currentEndDate})}" class="text-decoration-none">
+                    <div class="kpi-card kpi-failed" th:classappend="${currentStatus == 'FAILED'} ? 'active' : ''">
+                        <div class="kpi-value" th:text="${failedCount} ?: 0">0</div>
+                        <div class="kpi-label">Failed</div>
+                        <i class="mdi mdi-close-circle kpi-icon"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-6 col-xl-3 mb-3 mb-xl-0">
+                <a th:href="@{/owner/payments(search=${currentSearch}, method=${currentMethod}, startDate=${currentStartDate}, endDate=${currentEndDate})}" class="text-decoration-none">
+                    <div class="kpi-card kpi-amount" th:classappend="${currentStatus == null or currentStatus == ''} ? 'active' : ''">
+                        <div class="kpi-value" th:text="'RM ' + ${#numbers.formatDecimal(totalRevenue ?: 0, 1, 'COMMA', 0, 'POINT')}">RM 0</div>
+                        <div class="kpi-label">Verified Amount</div>
+                        <i class="mdi mdi-currency-usd kpi-icon"></i>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -290,40 +296,50 @@
             <div class="col-12">
                 <div class="card filter-card">
                     <div class="card-body p-3">
-                        <div class="row align-items-center g-3">
-                            <!-- Left Side: Form -->
-                            <div class="col-12 col-xl-9">
-                                <div class="row g-2 align-items-center">
-                                    <div class="col-12 col-md-4">
-                                        <div class="search-input-wrapper">
-                                            <i class="mdi mdi-magnify"></i>
-                                            <input type="text" class="form-control" id="payment-search" placeholder="Search renter, invoice...">
+                        <form id="filterForm" th:action="@{/owner/payments}" method="get">
+                            <div class="row align-items-center g-3">
+                                <!-- Left Side: Form -->
+                                <div class="col-12 col-xl-9">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-12 col-md-3">
+                                            <div class="search-input-wrapper">
+                                                <i class="mdi mdi-magnify"></i>
+                                                <input type="text" class="form-control" name="search" th:value="${currentSearch}" placeholder="Search renter, invoice...">
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <select class="form-select" name="status" onchange="this.form.submit()">
+                                                <option value="">All Status</option>
+                                                <option value="PENDING" th:selected="${currentStatus == 'PENDING'}">Pending</option>
+                                                <option value="VERIFIED" th:selected="${currentStatus == 'VERIFIED'}">Verified</option>
+                                                <option value="FAILED" th:selected="${currentStatus == 'FAILED'}">Failed</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <select class="form-select" name="method" onchange="this.form.submit()">
+                                                <option value="">All Methods</option>
+                                                <option value="FPX" th:selected="${currentMethod == 'FPX'}">FPX</option>
+                                                <option value="BANK_TRANSFER" th:selected="${currentMethod == 'BANK_TRANSFER'}">Bank Transfer</option>
+                                                <option value="QR_PAYMENT" th:selected="${currentMethod == 'QR_PAYMENT'}">QR</option>
+                                                <option value="CASH" th:selected="${currentMethod == 'CASH'}">Cash</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <input type="date" class="form-control" name="startDate" th:value="${currentStartDate}" placeholder="Start Date" onchange="this.form.submit()">
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <input type="date" class="form-control" name="endDate" th:value="${currentEndDate}" placeholder="End Date" onchange="this.form.submit()">
+                                        </div>
+                                        <div class="col-12 col-md-1 d-flex gap-2 mt-2 mt-md-0">
+                                            <a th:href="@{/owner/payments}" class="btn btn-outline-secondary rounded-3 px-3 w-100" title="Clear Filters">
+                                                <i class="mdi mdi-refresh"></i>
+                                            </a>
+                                            <button type="submit" class="btn btn-primary d-md-none rounded-3 px-3 w-100">
+                                                Apply
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="col-6 col-md-3">
-                                        <select class="form-select" id="status-filter">
-                                            <option value="">All Status</option>
-                                            <option value="PENDING">Pending</option>
-                                            <option value="VERIFIED">Verified</option>
-                                            <option value="FAILED">Failed</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <select class="form-select" id="method-filter">
-                                            <option value="">All Methods</option>
-                                            <option value="FPX">Online Banking / FPX</option>
-                                            <option value="BANK_TRANSFER">Bank Transfer</option>
-                                            <option value="QR_PAYMENT">QR Payment</option>
-                                            <option value="CASH">Cash</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12 col-md-2 d-flex gap-2 mt-2 mt-md-0">
-                                        <button type="button" class="btn btn-outline-secondary rounded-3 px-3 w-100" onclick="clearFilters()" title="Clear Filters">
-                                            <i class="mdi mdi-refresh"></i> Clear
-                                        </button>
-                                    </div>
                                 </div>
-                            </div>
 
                             <!-- Right Side: View Toggle -->
                             <div class="col-12 col-xl-3 text-xl-end d-flex justify-content-xl-end justify-content-start mt-2 mt-xl-0 border-xl-start">
@@ -335,8 +351,9 @@
                                         <i class="mdi mdi-table"></i>
                                     </button>
                                 </div>
+                                </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -583,13 +600,8 @@
             }
 
             // DOM Elements
-            const searchInput = document.getElementById('payment-search');
-            const statusFilter = document.getElementById('status-filter');
-            const methodFilter = document.getElementById('method-filter');
             const gridContainer = document.getElementById('grid-view-container');
             const tableContainer = document.getElementById('table-view-container');
-            const noResults = document.getElementById('no-results');
-            const kpiCards = document.querySelectorAll('.kpi-card');
 
             // View Toggle
             function setView(view) {
@@ -601,15 +613,6 @@
                 localStorage.setItem('paymentViewPreference', view);
             }
 
-            // Filter by KPI Card Click
-            function filterByStatus(status, element) {
-                currentStatusFilter = status;
-                kpiCards.forEach(card => card.classList.remove('active'));
-                if (element) element.classList.add('active');
-                statusFilter.value = status === 'all' ? '' : status;
-                filterPayments();
-            }
-
             // Navigate to payment details
             function navigateToPayment(element) {
                 const paymentId = element.dataset.paymentId;
@@ -617,58 +620,6 @@
                     window.location.href = '/owner/payments/view/' + paymentId;
                 }
             }
-
-            // Main Filter Function
-            function filterPayments() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value || (currentStatusFilter !== 'all' ? currentStatusFilter : '');
-                const methodValue = methodFilter.value;
-
-                const allItems = document.querySelectorAll('.payment-item');
-                let visibleCount = 0;
-
-                allItems.forEach(item => {
-                    const searchText = (item.dataset.search || '').toLowerCase();
-                    const itemStatus = item.dataset.status || '';
-                    const itemMethod = item.dataset.method || '';
-
-                    const matchesSearch = !searchTerm || searchText.includes(searchTerm);
-                    const matchesStatus = !statusValue || itemStatus === statusValue ||
-                        (statusValue === 'VERIFIED' && ['VERIFIED', 'COMPLETED', 'PAID'].includes(itemStatus)) ||
-                        (statusValue === 'FAILED' && ['FAILED', 'REJECTED'].includes(itemStatus));
-                    const matchesMethod = !methodValue || itemMethod === methodValue;
-
-                    const isVisible = matchesSearch && matchesStatus && matchesMethod;
-                    item.style.display = isVisible ? '' : 'none';
-                    if (isVisible) visibleCount++;
-                });
-
-                const hasRecords = document.querySelectorAll('.payment-item').length > 0;
-                if (noResults) {
-                    noResults.style.display = (hasRecords && visibleCount === 0) ? 'block' : 'none';
-                }
-            }
-
-            // Clear All Filters
-            function clearFilters() {
-                searchInput.value = '';
-                statusFilter.value = '';
-                methodFilter.value = '';
-                currentStatusFilter = 'all';
-                kpiCards.forEach(card => card.classList.remove('active'));
-                filterPayments();
-            }
-
-            // Event Listeners
-            if (searchInput) searchInput.addEventListener('input', filterPayments);
-            if (methodFilter) methodFilter.addEventListener('change', filterPayments);
-            if (statusFilter) statusFilter.addEventListener('change', () => {
-                currentStatusFilter = statusFilter.value || 'all';
-                kpiCards.forEach(card => {
-                    card.classList.toggle('active', card.dataset.filter === currentStatusFilter);
-                });
-                filterPayments();
-            });
 
             // Countdown Timer Logic
             function updateCountdown(el) {

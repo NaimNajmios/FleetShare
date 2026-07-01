@@ -104,6 +104,46 @@ public class PaymentService {
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 
+    public Page<PaymentDTO> getFilteredPaymentsPaginated(Long ownerId, String search, String statusStr, String methodStr, java.time.LocalDate startDate, java.time.LocalDate endDate, Pageable pageable) {
+        Payment.PaymentStatus status = null;
+        if (statusStr != null && !statusStr.trim().isEmpty()) {
+            try {
+                status = Payment.PaymentStatus.valueOf(statusStr);
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid status
+            }
+        }
+
+        Payment.PaymentMethod method = null;
+        if (methodStr != null && !methodStr.trim().isEmpty()) {
+            try {
+                method = Payment.PaymentMethod.valueOf(methodStr);
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid method
+            }
+        }
+
+        java.time.LocalDateTime startDateTime = null;
+        if (startDate != null) {
+            startDateTime = startDate.atStartOfDay();
+        }
+
+        java.time.LocalDateTime endDateTime = null;
+        if (endDate != null) {
+            endDateTime = endDate.atTime(23, 59, 59, 999999999);
+        }
+
+        Page<Payment> page;
+        if (ownerId != null) {
+            page = paymentRepository.findFilteredPaymentsForOwner(ownerId, search, status, method, startDateTime, endDateTime, pageable);
+        } else {
+            page = paymentRepository.findFilteredPaymentsForAdmin(search, status, method, startDateTime, endDateTime, pageable);
+        }
+        
+        List<PaymentDTO> dtoList = mapPaymentsToDTOs(page.getContent());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
     private List<PaymentDTO> mapPaymentsToDTOs(List<Payment> payments) {
         List<PaymentDTO> paymentDTOs = new ArrayList<>();
         for (Payment payment : payments) {

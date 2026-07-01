@@ -556,6 +556,11 @@ public class AdminController {
 
     @GetMapping("/payment")
     public String payment(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "method", required = false) String method,
+            @RequestParam(value = "startDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             Model model) {
@@ -564,14 +569,27 @@ public class AdminController {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("paymentDate").descending());
 
         var allPayments = paymentService.getAllPayments(); // For stats
-        org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> paymentPage = paymentService.getAllPaymentsPaginated(pageable);
+        org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> paymentPage = paymentService.getFilteredPaymentsPaginated(null, search, status, method, startDate, endDate, pageable);
         
         model.addAttribute("payments", paymentPage.getContent());
         model.addAttribute("currentPage", paymentPage.getNumber());
         model.addAttribute("totalPages", paymentPage.getTotalPages());
         model.addAttribute("totalItems", paymentPage.getTotalElements());
         model.addAttribute("defaultSize", size);
-        model.addAttribute("pageParams", java.util.Collections.emptyMap());
+        
+        java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+        if (search != null && !search.isEmpty()) pageParams.put("search", search);
+        if (status != null && !status.isEmpty()) pageParams.put("status", status);
+        if (method != null && !method.isEmpty()) pageParams.put("method", method);
+        if (startDate != null) pageParams.put("startDate", startDate.toString());
+        if (endDate != null) pageParams.put("endDate", endDate.toString());
+        model.addAttribute("pageParams", pageParams);
+
+        model.addAttribute("currentSearch", search);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentMethod", method);
+        model.addAttribute("currentStartDate", startDate);
+        model.addAttribute("currentEndDate", endDate);
 
         // Calculate payment statistics by status
         long pendingCount = allPayments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();

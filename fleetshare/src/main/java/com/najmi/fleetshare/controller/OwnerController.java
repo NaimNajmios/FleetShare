@@ -1129,6 +1129,11 @@ public class OwnerController {
 
     @GetMapping("/payments")
     public String payments(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "method", required = false) String method,
+            @RequestParam(value = "startDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size,
             HttpSession session, Model model) {
@@ -1139,51 +1144,77 @@ public class OwnerController {
             size = Math.min(Math.max(size, 1), 48);
             org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("paymentDate").descending());
 
-            List<PaymentDTO> payments = paymentService.getPaymentsByOwnerId(ownerId); // For stats
-            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> paymentPage = paymentService.getPaymentsByOwnerIdPaginated(ownerId, pageable);
+            List<PaymentDTO> allOwnerPayments = paymentService.getPaymentsByOwnerId(ownerId); // For stats
+            org.springframework.data.domain.Page<com.najmi.fleetshare.dto.PaymentDTO> paymentPage = paymentService.getFilteredPaymentsPaginated(ownerId, search, status, method, startDate, endDate, pageable);
             
             model.addAttribute("payments", paymentPage.getContent());
             model.addAttribute("currentPage", paymentPage.getNumber());
             model.addAttribute("totalPages", paymentPage.getTotalPages());
             model.addAttribute("totalItems", paymentPage.getTotalElements());
             model.addAttribute("defaultSize", size);
-            model.addAttribute("pageParams", java.util.Collections.emptyMap());
+            
+            java.util.Map<String, Object> pageParams = new java.util.HashMap<>();
+            if (search != null && !search.isEmpty()) pageParams.put("search", search);
+            if (status != null && !status.isEmpty()) pageParams.put("status", status);
+            if (method != null && !method.isEmpty()) pageParams.put("method", method);
+            if (startDate != null) pageParams.put("startDate", startDate.toString());
+            if (endDate != null) pageParams.put("endDate", endDate.toString());
+            model.addAttribute("pageParams", pageParams);
 
-            // Calculate payment statistics by status
-            long pendingCount = payments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();
-            long verifiedCount = payments.stream().filter(p -> "VERIFIED".equals(p.getPaymentStatus())
-                    || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus())).count();
-            long failedCount = payments.stream()
-                    .filter(p -> "FAILED".equals(p.getPaymentStatus()) || "REJECTED".equals(p.getPaymentStatus()))
-                    .count();
+            model.addAttribute("currentSearch", search);
+            model.addAttribute("currentStatus", status);
+            model.addAttribute("currentMethod", method);
+            model.addAttribute("currentStartDate", startDate);
+            model.addAttribute("currentEndDate", endDate);
+
+            // Calculate stats using allOwnerPayments
+            long pendingCount = allOwnerPayments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();
+            long verifiedCount = allOwnerPayments.stream().filter(p -> "VERIFIED".equals(p.getPaymentStatus())).count();
+            long failedCount = allOwnerPayments.stream().filter(p -> "FAILED".equals(p.getPaymentStatus())).count();
+            java.math.BigDecimal totalRevenue = allOwnerPayments.stream()
+                .filter(p -> "VERIFIED".equals(p.getPaymentStatus()))
+                .map(p -> p.getAmount())
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
             model.addAttribute("pendingCount", pendingCount);
             model.addAttribute("verifiedCount", verifiedCount);
             model.addAttribute("failedCount", failedCount);
+            model.addAttribute("totalRevenue", totalRevenue);
+
+            // Calculate payment statistics by status
+            long pendingCountStatus = allOwnerPayments.stream().filter(p -> "PENDING".equals(p.getPaymentStatus())).count();
+            long verifiedCountStatus = allOwnerPayments.stream().filter(p -> "VERIFIED".equals(p.getPaymentStatus())
+                    || "COMPLETED".equals(p.getPaymentStatus()) || "PAID".equals(p.getPaymentStatus())).count();
+            long failedCountStatus = allOwnerPayments.stream()
+                    .filter(p -> "FAILED".equals(p.getPaymentStatus()) || "REJECTED".equals(p.getPaymentStatus()))
+                    .count();
+
+            model.addAttribute("pendingCount", pendingCountStatus);
+            model.addAttribute("verifiedCount", verifiedCountStatus);
+            model.addAttribute("failedCount", failedCountStatus);
 
             // Calculate statistics by payment method
-            long creditCardCount = payments.stream().filter(p -> "FPX".equals(p.getPaymentMethod())).count();
-            long bankTransferCount = payments.stream().filter(p -> "BANK_TRANSFER".equals(p.getPaymentMethod()))
+            long creditCardCount = allOwnerPayments.stream().filter(p -> "FPX".equals(p.getPaymentMethod())).count();
+            long bankTransferCount = allOwnerPayments.stream().filter(p -> "BANK_TRANSFER".equals(p.getPaymentMethod()))
                     .count();
-            long qrPaymentCount = payments.stream().filter(p -> "QR_PAYMENT".equals(p.getPaymentMethod())).count();
-            long cashCount = payments.stream().filter(p -> "CASH".equals(p.getPaymentMethod())).count();
+            long qrPaymentCount = allOwnerPayments.stream().filter(p -> "QR_PAYMENT".equals(p.getPaymentMethod())).count();
+            long cashCount = allOwnerPayments.stream().filter(p -> "CASH".equals(p.getPaymentMethod())).count();
 
             model.addAttribute("creditCardCount", creditCardCount);
             model.addAttribute("bankTransferCount", bankTransferCount);
             model.addAttribute("qrPaymentCount", qrPaymentCount);
             model.addAttribute("cashCount", cashCount);
 
-            // Calculate total amounts
-            BigDecimal totalAmount = payments.stream()
+            BigDecimal totalAmount = allOwnerPayments.stream()
                     .filter(p -> p.getAmount() != null)
                     .map(p -> p.getAmount())
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal verifiedAmount = payments.stream()
+            BigDecimal verifiedAmount = allOwnerPayments.stream()
                     .filter(p -> ("VERIFIED".equals(p.getPaymentStatus()) || "COMPLETED".equals(p.getPaymentStatus())
                             || "PAID".equals(p.getPaymentStatus())) && p.getAmount() != null)
                     .map(p -> p.getAmount())
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal pendingAmount = payments.stream()
+            BigDecimal pendingAmount = allOwnerPayments.stream()
                     .filter(p -> "PENDING".equals(p.getPaymentStatus()) && p.getAmount() != null)
                     .map(p -> p.getAmount())
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -1202,14 +1233,14 @@ public class OwnerController {
                 int year = monthDate.getYear();
                 int month = monthDate.getMonthValue();
 
-                long count = payments.stream()
+                long count = allOwnerPayments.stream()
                         .filter(p -> p.getPaymentDate() != null
                                 && p.getPaymentDate().getYear() == year
                                 && p.getPaymentDate().getMonthValue() == month)
                         .count();
                 monthlyPaymentCounts.put(monthKey, count);
 
-                BigDecimal amount = payments.stream()
+                BigDecimal amount = allOwnerPayments.stream()
                         .filter(p -> p.getPaymentDate() != null
                                 && p.getPaymentDate().getYear() == year
                                 && p.getPaymentDate().getMonthValue() == month

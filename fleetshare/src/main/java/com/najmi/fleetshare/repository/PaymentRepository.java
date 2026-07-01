@@ -40,4 +40,50 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @org.springframework.data.jpa.repository.Query("SELECT SUM(p.amount) FROM Payment p WHERE p.paymentStatus IN :statuses AND p.paymentDate >= :since")
     java.math.BigDecimal calculatePlatformRevenueSince(@org.springframework.data.repository.query.Param("statuses") java.util.Collection<Payment.PaymentStatus> statuses, @org.springframework.data.repository.query.Param("since") java.time.LocalDateTime since);
+
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Payment p " +
+            "LEFT JOIN Invoice i ON p.invoiceId = i.invoiceId " +
+            "LEFT JOIN Renter r ON i.renterId = r.renterId " +
+            "LEFT JOIN FleetOwner f ON i.fleetOwnerId = f.fleetOwnerId " +
+            "WHERE (i.fleetOwnerId = :ownerId) " +
+            "AND (:status IS NULL OR p.paymentStatus = :status) " +
+            "AND (:method IS NULL OR p.paymentMethod = :method) " +
+            "AND (CAST(:startDate AS timestamp) IS NULL OR p.paymentDate >= :startDate) " +
+            "AND (CAST(:endDate AS timestamp) IS NULL OR p.paymentDate <= :endDate) " +
+            "AND (:search IS NULL OR " +
+            "LOWER(i.invoiceNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(p.transactionReference) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(p.gatewayRefNo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(r.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(f.businessName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Payment> findFilteredPaymentsForOwner(
+            @org.springframework.data.repository.query.Param("ownerId") Long ownerId,
+            @org.springframework.data.repository.query.Param("search") String search,
+            @org.springframework.data.repository.query.Param("status") Payment.PaymentStatus status,
+            @org.springframework.data.repository.query.Param("method") Payment.PaymentMethod method,
+            @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate,
+            @org.springframework.data.repository.query.Param("endDate") java.time.LocalDateTime endDate,
+            Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Payment p " +
+            "LEFT JOIN Invoice i ON p.invoiceId = i.invoiceId " +
+            "LEFT JOIN Renter r ON i.renterId = r.renterId " +
+            "LEFT JOIN FleetOwner f ON i.fleetOwnerId = f.fleetOwnerId " +
+            "WHERE (:status IS NULL OR p.paymentStatus = :status) " +
+            "AND (:method IS NULL OR p.paymentMethod = :method) " +
+            "AND (CAST(:startDate AS timestamp) IS NULL OR p.paymentDate >= :startDate) " +
+            "AND (CAST(:endDate AS timestamp) IS NULL OR p.paymentDate <= :endDate) " +
+            "AND (:search IS NULL OR " +
+            "LOWER(i.invoiceNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(p.transactionReference) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(p.gatewayRefNo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(r.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(f.businessName) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Payment> findFilteredPaymentsForAdmin(
+            @org.springframework.data.repository.query.Param("search") String search,
+            @org.springframework.data.repository.query.Param("status") Payment.PaymentStatus status,
+            @org.springframework.data.repository.query.Param("method") Payment.PaymentMethod method,
+            @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate,
+            @org.springframework.data.repository.query.Param("endDate") java.time.LocalDateTime endDate,
+            Pageable pageable);
 }
